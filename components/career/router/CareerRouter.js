@@ -1,7 +1,10 @@
 import express from "express";
 
 // user controller
-import { listCareerController } from "../controller/ListCareerController.js";
+import {
+  listCareerController,
+  listSingleCareer,
+} from "../controller/ListCareerController.js";
 import { createCareer } from "../controller/CreateCareerController.js";
 import { deleteCareer } from "../controller/DeleteCareerController.js";
 import { updateCareer } from "../controller/UpdateCareerController.js";
@@ -14,8 +17,14 @@ const route = express.Router();
 
 route
   .get("/", listCareerController)
-  .post("/", createCareer)
-  .delete("/", deleteCareer)
-  .put("/", updateCareer);
+  .get("/careers/:slug", listSingleCareer)
+  .post(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    createCareer
+  )
+  .delete("/", authenticateUser, deleteCareer)
+  .put("/", authenticateUser, updateCareer);
 
 export default route;

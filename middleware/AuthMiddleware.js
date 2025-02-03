@@ -55,8 +55,8 @@ export const authenticateUser = async (req, res, next) => {
   res.cookie("token", newAccessToken, {
     httpOnly: true,
     secure: NODE_ENV === "production",
-    sameSite: "Strict",
-    maxAge: parseInt(ACCESS_TOKEN_EXPIRY),
+    sameSite: "lax",
+    maxAge: 60*60* 1000,
   });
 
   req.user = { id: user.id, email: user.email, role: user.roles };

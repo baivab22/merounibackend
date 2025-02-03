@@ -44,8 +44,10 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: parseInt(ACCESS_TOKEN_EXPIRY),
+      maxAge: 60*60* 1000,
     });
+
+    console.log(accessToken, refreshToken);
 
     return res
       .status(200)
