@@ -43,6 +43,12 @@ Course.init(
       type: DataTypes.JSON,
       allowNull: true,
     },
+    isFeatured: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0,
+      field: "is_featured"
+    },
     authorId: {
       type: DataTypes.INTEGER,
       allowNull: false,

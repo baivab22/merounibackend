@@ -7,9 +7,21 @@ College.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     name: { type: DataTypes.STRING, allowNull: false, unique: true },
+    slugs: { type: DataTypes.STRING, allowNull: false, unique: true },
     institute_type: {
       type: DataTypes.ENUM("Public", "Private", "Community", "Technical"),
       allowNull: false,
+    },
+    isFeatured: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0,
+      field: "is_featured"
+    },
+    pinned: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0,
     },
     author_id: { type: DataTypes.INTEGER, allowNull: false },
     university_id: { type: DataTypes.INTEGER, allowNull: false },

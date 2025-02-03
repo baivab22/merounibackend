@@ -42,6 +42,12 @@ const Event = sequelize.define(
         key: "id",
       },
     },
+    isFeatured: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0,
+      field: "is_featured",
+    },
     description: {
       type: DataTypes.STRING,
     },

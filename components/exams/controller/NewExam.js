@@ -89,10 +89,11 @@ export const createOrUpdateExam = async (req, res) => {
       message: examId
         ? "Exam updated successfully!"
         : "Exam created successfully!",
-      examId,
     });
   } catch (error) {
     await t.rollback();
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({
+      error: error.message,
+    });
   }
 };

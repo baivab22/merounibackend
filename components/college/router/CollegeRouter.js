@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/", createOrUpdateCollege);
 router.get("/", getColleges);
-router.get("/:id", getCollegeById);
+router.get("/:slugs", getCollegeById);
 router.delete("/:id", deleteCollege);
 
 export default router;

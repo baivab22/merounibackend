@@ -3,7 +3,7 @@ import express from "express";
 // user controller
 import {
   getAllCategories,
-  getCategoryById,
+  getCategory,
 } from "../controllers/ListCategory.js";
 import { createCategory } from "../controllers/CreateCategory.js";
 import { deleteCategory } from "../controllers/DeleteCategory.js";
@@ -13,7 +13,7 @@ const route = express.Router();
 
 route
   .get("/", getAllCategories)
-  .get("/", getCategoryById)
+  .get("/:slugs", getCategory)
   .post("/", createCategory)
   .delete("/", deleteCategory)
   .put("/", updateCategory);

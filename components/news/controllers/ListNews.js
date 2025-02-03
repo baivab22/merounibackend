@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import Blog from "../model/NewsModel.js";
 import Category from "../../category/model/CategoryModel.js";
 import User from "../../users/model/UserModel.js";
@@ -8,14 +10,32 @@ export const getAllBlogs = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
+    let search = req.query.q || "";
+    let categoryId = req.query.category_id;
+    let authorId = req.query.author_id;
+
+    let whereCondition = {};
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
+
+    if (categoryId) {
+      whereCondition.category = categoryId;
+    }
+
+    if (authorId) {
+      whereCondition.author_id = authorId;
+    }
+
     const { count: totalCount, rows: items } = await Blog.findAndCountAll({
+      where: whereCondition,
       limit,
       offset,
       order: [["createdAt", "DESC"]],
-      //   include: [
-      //     { model: Category, as: "blogCategory" },
-      //     { model: User, as: "blogAuthor" },
-      //   ],
+      // include: [
+      //   { model: Category, as: "blogCategory" },
+      //   { model: User, as: "blogAuthor" },
+      // ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);

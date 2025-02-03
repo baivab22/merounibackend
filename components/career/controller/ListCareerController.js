@@ -48,10 +48,10 @@ export const listCareerController = async (req, res) => {
 
 export const listSingleCareer = async (req, res) => {
   try {
-    const { slug } = req.params;
+    const { slugs } = req.params;
 
     // Find career post by slug
-    const careerPost = await CareerModel.findOne({ where: { slug } });
+    const careerPost = await CareerModel.findOne({ where: { slugs } });
 
     if (!careerPost) {
       return res.status(404).json({ message: "Career post not found" });

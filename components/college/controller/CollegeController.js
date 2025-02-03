@@ -11,10 +11,42 @@ import { University } from "../../university/model/UniversityModel.js";
 // Get All Colleges
 export const getColleges = async (req, res) => {
   try {
-    const items = await College.findAll();
-    return res.status(200).json({
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    let sort = req.query.sort || "asc";
+
+    let search = req.query.q || "";
+    let isFeatured = req.query.is_featured;
+    let pinned = req.query.pinned;
+
+    const offset = (page - 1) * limit;
+
+    let whereCondition = {};
+    if (search) {
+      whereCondition.name = { [Op.like]: `%${search}%` };
+    }
+
+    if (isFeatured !== undefined) {
+      whereCondition.isFeatured = isFeatured === "true" ? 1 : 0;
+    }
+
+    if (pinned !== undefined) {
+      whereCondition.pinned = pinned === "true" ? 1 : 0;
+    }
+
+    const { count: totalCount, rows: items } = await College.findAndCountAll({
+      where: whereCondition,
+      limit,
+      offset,
+      order: [["id", sort.toUpperCase()]],
+    });
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.status(200).json({
       message: "success",
-      items
+      items,
+      pagination: { currentPage: page, totalPages, limit, totalCount },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -23,10 +55,10 @@ export const getColleges = async (req, res) => {
 
 export const getCollegeById = async (req, res) => {
   try {
-    const { collegeId } = req.params;
+    const { slugs } = req.params;
 
     const college = await College.findOne({
-      where: { id: collegeId },
+      where: { slugs },
       include: [
         {
           model: CollegeAddress,
@@ -82,7 +114,7 @@ export const getCollegeById = async (req, res) => {
       return res.status(404).json({ error: "College not found!" });
     }
 
-    res.status(200).json({ college });
+    return res.status(200).json({ item: college });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

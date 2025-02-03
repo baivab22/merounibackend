@@ -17,7 +17,7 @@ const route = express.Router();
 
 route
   .get("/", listCareerController)
-  .get("/careers/:slug", listSingleCareer)
+  .get("/:slugs", listSingleCareer)
   .post(
     "/",
     authenticateUser,

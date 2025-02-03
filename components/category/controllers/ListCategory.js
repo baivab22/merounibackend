@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Category from "../model/CategoryModel.js";
 
 export const getAllCategories = async (req, res) => {
@@ -5,9 +6,17 @@ export const getAllCategories = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     let sort = req.query.sort || "asc";
+    let search = req.query.q || "";
+
     const offset = (page - 1) * limit;
 
+    let whereCondition = {};
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
+
     const { count: totalCount, rows: items } = await Category.findAndCountAll({
+      where: whereCondition,
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],
@@ -25,9 +34,10 @@ export const getAllCategories = async (req, res) => {
   }
 };
 
-export const getCategoryById = async (req, res) => {
+export const getCategory = async (req, res) => {
   try {
-    const category = await Category.findByPk(req.query.category_id);
+    let { slugs } = req.params;
+    const category = await Category.findOne({ where: { slugs } });
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
     }
