@@ -4,6 +4,9 @@ import express from "express";
 // instance for route of express
 const router = express.Router();
 
+import {searchController} from "../components/home/controller/SearchController.js";
+router.get("/search", searchController);
+
 // import user-defined components
 import userRoute from "../components/users/router/UserRoutes.js";
 router.use("/users", userRoute);
