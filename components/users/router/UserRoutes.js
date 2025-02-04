@@ -26,7 +26,7 @@ route
   )
   .get("/profile", authenticateUser, UserProfile)
   .delete("/", authenticateUser, deleteUser)
-  .put("/edit-profile", authenticateUser, updateUserProfile)
+  .put("/edit-profile", updateUserProfile)
   .put("/apply-agent", authenticateUser, applyForAgentRole)
   .put(
     "/review-agent",

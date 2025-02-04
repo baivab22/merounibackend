@@ -10,18 +10,18 @@ export const updateUserProfile = async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const loggedInUser = req.user;
+    // const loggedInUser = req.user;
 
-    if (!loggedInUser) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    // if (!loggedInUser) {
+    //   return res.status(401).json({ message: "Unauthorized" });
+    // }
 
-    // Ensure users can only update their own profile
-    if (loggedInUser.id !== parseInt(user_id)) {
-      return res
-        .status(403)
-        .json({ message: "You can only update your own profile!" });
-    }
+    // // Ensure users can only update their own profile
+    // if (loggedInUser.id !== parseInt(user_id)) {
+    //   return res
+    //     .status(403)
+    //     .json({ message: "You can only update your own profile!" });
+    // }
 
     const user = await UserModel.findByPk(user_id);
 
