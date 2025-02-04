@@ -11,16 +11,32 @@ export const getAllBlogs = async (req, res) => {
     const offset = (page - 1) * limit;
 
     let search = req.query.q || "";
-    let categoryId = req.query.category_id;
+    let categoryTitle = req.query.category_title;
     let authorId = req.query.author_id;
+
+    let categoryItem;
+    if (categoryTitle) {
+      categoryItem = await Category.findOne({
+        where: {
+          title: categoryTitle, // Use category title for lookup
+        },
+      });
+
+      if (!categoryItem) {
+        return res.status(200).json({
+          status: 200,
+          message: "Category Not Found",
+        });
+      }
+    }
 
     let whereCondition = {};
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
-    if (categoryId) {
-      whereCondition.category = categoryId;
+    if (categoryItem) {
+      whereCondition.category = categoryItem.id; // Use found category's ID
     }
 
     if (authorId) {
@@ -32,10 +48,6 @@ export const getAllBlogs = async (req, res) => {
       limit,
       offset,
       order: [["createdAt", "DESC"]],
-      // include: [
-      //   { model: Category, as: "blogCategory" },
-      //   { model: User, as: "blogAuthor" },
-      // ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);
