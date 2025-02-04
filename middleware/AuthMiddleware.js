@@ -5,7 +5,8 @@ export const authenticateUser = async (req, res, next) => {
   const accessToken =
     req.cookies.token || req.headers["authorization"]?.split(" ")[1];
   const refreshToken = req.headers["x-refresh-token"];
-  const { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV, ACCESS_TOKEN_EXPIRY } = process.env;
+  const { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV, ACCESS_TOKEN_EXPIRY } =
+    process.env;
 
   // 1. Validate Access Token
   if (accessToken) {
@@ -43,7 +44,15 @@ export const authenticateUser = async (req, res, next) => {
   // 5. Generate New Access Token
   const newAccessToken = jwt.sign(
     {
-      data: { id: user.id, email: user.email, role: user.roles },
+      data: {
+        id: user.id,
+        firstName: user.first_name,
+        middleName: user.last_name,
+        lastName: user.last_name,
+        email: user.email,
+        phoneNo: user.phone_no,
+        role: user.roles,
+      },
     },
     ACCESS_TOKEN,
     {
@@ -56,7 +65,7 @@ export const authenticateUser = async (req, res, next) => {
     httpOnly: true,
     secure: NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60*60* 1000,
+    maxAge: 60 * 60 * 1000,
   });
 
   req.user = { id: user.id, email: user.email, role: user.roles };

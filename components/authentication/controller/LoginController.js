@@ -11,7 +11,9 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     // 1. Find the user by email
-    const user = await UserModel.findOne({ where: { email } });
+    const user = await UserModel.findOne({
+      where: { email },
+    });
     if (!user) {
       return res.status(401).json({ message: `User not found of ${email}` }); // 401 Unauthorized
     }
@@ -21,17 +23,16 @@ export const loginUser = async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ message: "Password didn't matched" });
     }
-
     // 3. Generate access and refresh token
     const accessToken = jwt.sign(
       {
         data: {
           id: user.id,
-          firstName: user.first_name,
-          middleName: user.last_name,
-          lastName: user.last_name,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
           email: user.email,
-          phoneNo: user.phone_no,
+          phoneNo: user.phoneNo,
           role: user.roles,
         },
       },
@@ -45,11 +46,11 @@ export const loginUser = async (req, res) => {
       {
         data: {
           id: user.id,
-          firstName: user.first_name,
-          middleName: user.last_name,
-          lastName: user.last_name,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
           email: user.email,
-          phoneNo: user.phone_no,
+          phoneNo: user.phoneNo,
           role: user.roles,
         },
       },
@@ -66,8 +67,6 @@ export const loginUser = async (req, res) => {
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,
     });
-
-    console.log(accessToken, refreshToken);
 
     return res
       .status(200)
