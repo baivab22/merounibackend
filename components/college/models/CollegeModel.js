@@ -16,7 +16,7 @@ College.init(
       type: DataTypes.TINYINT,
       allowNull: true,
       defaultValue: 0,
-      field: "is_featured"
+      field: "is_featured",
     },
     pinned: {
       type: DataTypes.TINYINT,
@@ -26,6 +26,14 @@ College.init(
     author_id: { type: DataTypes.INTEGER, allowNull: false },
     university_id: { type: DataTypes.INTEGER, allowNull: false },
     google_map_url: { type: DataTypes.STRING },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
   { sequelize, modelName: "college", timestamps: true }
 );

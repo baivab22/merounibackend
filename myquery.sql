@@ -277,6 +277,8 @@ CREATE TABLE colleges (
     google_map_url VARCHAR(500),
     is_featured TINYINT DEFAULT 0,
     pinned TINYINT DEFAULT 0,
+    description varchar(255) null,
+    content text not null,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES mu_users(id) ON DELETE CASCADE,
