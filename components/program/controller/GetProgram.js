@@ -13,28 +13,28 @@ export const getAllPrograms = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    // const { facultyId, levelId, examId, q } = req.query;
+    const { facultyId, levelId, examId, q } = req.query;
 
-    // const whereConditions = {};
-    // if (facultyId) whereConditions.facultyId = facultyId;
-    // if (levelId) whereConditions.levelId = levelId;
-    // if (examId) whereConditions.examId = examId;
+    const whereConditions = {};
+    if (facultyId) whereConditions.facultyId = facultyId;
+    if (levelId) whereConditions.levelId = levelId;
+    if (examId) whereConditions.examId = examId;
 
-    // if (q) {
-    //   whereConditions.title = { [Op.like]: `%${q}%` };
-    // }
+    if (q) {
+      whereConditions.title = { [Op.like]: `%${q}%` };
+    }
 
-    const { count: totalCount, rows: items } = await Program.findAll({
-      // where: whereConditions,
+    const { count: totalCount, rows: items } = await Program.findAndCountAll({
+      where: whereConditions,
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
-      include: [
-        { model: Faculty, attributes: ["title"] },
-        { model: Level, attributes: ["title"] },
-        { model: Scholarship, attributes: ["name", "amount"] },
-        { model: Exam, attributes: ["title"] },
-      ],
+      // order: [["createdAt", "DESC"]],
+      // include: [
+      //   { model: Faculty, attributes: ["title"] },
+      //   { model: Level, attributes: ["title"] },
+      //   { model: Scholarship, attributes: ["name", "amount"] },
+      //   { model: Exam, attributes: ["title"] },
+      // ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);

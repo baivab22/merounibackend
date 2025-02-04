@@ -12,11 +12,11 @@ export const searchController = async (req, res) => {
     // Raw SQL query using UNION to combine results from both tables
     const searchResults = await sequelize.query(
       `
-      (SELECT id, name, 'colleges' AS type, createdAt FROM colleges WHERE name LIKE :search)
+      (SELECT id, name, slugs, 'colleges' AS type, createdAt FROM colleges WHERE name LIKE :search)
       UNION
-      (SELECT id, title, 'blog' AS type, createdAt FROM blogs WHERE title LIKE :search)
+      (SELECT id, title, slug, 'blog' AS type, createdAt FROM blogs WHERE title LIKE :search)
       UNION
-      (SELECT id, title, 'event' AS type, createdAt FROM events WHERE title LIKE :search)
+      (SELECT id, title, slugs, 'event' AS type, createdAt FROM events WHERE title LIKE :search)
       ORDER BY createdAt DESC;
       `,
       {

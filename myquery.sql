@@ -419,7 +419,18 @@ CREATE TABLE career(
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 );
 
--- TODO: need to create this indexing and also need to add other
-ALTER TABLE blogs ADD FULLTEXT INDEX ft_index_blogs (title, description, content);
-ALTER TABLE university ADD FULLTEXT INDEX ft_index_university (fullname, description);
-ALTER TABLE faculty ADD FULLTEXT INDEX ft_index_faculty (title, description);
+create table consultancies(
+    id int PRIMARY KEY AUTO_INCREMENT not null,
+    title varchar(255) not null,
+    slugs varchar(255) not null,
+    destination JSON NOT NULL DEFAULT ('[]'),
+    address JSON NOT NULL DEFAULT ('[]'),
+    featured_image VARCHAR(255) not null,
+    pinned tinyint default 0,
+    courses JSON NOT NULL DEFAULT ('[]'),
+    status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
+    visibility ENUM('public', 'private') NOT NULL DEFAULT 'public',
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    
+ );

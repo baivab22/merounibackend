@@ -59,7 +59,7 @@ export const createOrUpdateProgram = async (req, res) => {
       await Program.update(
         {
           title,
-          slugs,
+          slugs:slug(title),
           author,
           faculty_id,
           duration,

@@ -14,11 +14,11 @@ const route = express.Router();
 
 route
   .get("/", getAllBlogs)
-  .get("/", getBlogById)
+  .get("/:slugs", getBlogById)
   .post(
     "/",
-    authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    // authenticateUser,
+    // authorizeRole(["super-admin", "admin", "editor"]),
     createBlog
   )
   .delete(
@@ -29,8 +29,8 @@ route
   )
   .put(
     "/",
-    authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    // authenticateUser,
+    // authorizeRole(["super-admin", "admin", "editor"]),
     updateBlog
   );
 

@@ -7,7 +7,7 @@ export const createOrUpdateExam = async (req, res) => {
   const t = await sequelize.transaction(); // Start transaction
   try {
     const {
-      id, // If present, update; otherwise, create new
+      id,
       title,
       description,
       author,
@@ -15,8 +15,8 @@ export const createOrUpdateExam = async (req, res) => {
       affiliation,
       syllabus,
       pastQuestion,
-      examDetails, // [{ exam_type, full_marks, pass_marks, ... }]
-      applicationDetails, // { normal_fee, late_fee, exam_date, ... }
+      examDetails, 
+      applicationDetails,
     } = req.body;
 
     let examId = id;

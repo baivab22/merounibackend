@@ -13,8 +13,8 @@ router.get("/", getAllPrograms);
 router.get("/:slugs", getProgramById);
 router.post(
   "/",
-  authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor"]),
+  // authenticateUser,
+  // authorizeRole(["super-admin", "admin", "editor"]),
   createOrUpdateProgram
 );
 router.delete(

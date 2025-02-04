@@ -11,6 +11,9 @@ router.get("/search", searchController);
 import userRoute from "../components/users/router/UserRoutes.js";
 router.use("/users", userRoute);
 
+import consultancyRoute from "../components/consultancy/router/ConsultancyRoute.js";
+router.use("/consultancy", consultancyRoute);
+
 import categoryRoute from "../components/category/router/CategoryRoute.js";
 router.use("/category", categoryRoute);
 

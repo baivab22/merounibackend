@@ -1,14 +1,14 @@
-import slug from "slug";
-import { DataTypes } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 
 import { sequelize } from "../../../config/database.js";
 import Faculty from "../../faculty/model/FacultyModel.js";
 import Scholarship from "../../scholarship/model/ScholarshipModel.js";
 import Level from "../../level/model/LevelModel.js";
-import {Exam} from "../../exams/model/ExamModel.js";
+import { Exam } from "../../exams/model/ExamModel.js";
 
-const Program = sequelize.define(
-  "Program",
+class Program extends Model {}
+
+Program.init(
   {
     title: {
       type: DataTypes.STRING,
@@ -71,7 +71,11 @@ const Program = sequelize.define(
     },
   },
   {
+    sequelize,
     timestamps: true,
+    modelName: "programs",
+    tableName: "programs",
+    freezeTableName: true,
   }
 );
 

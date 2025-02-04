@@ -21,6 +21,7 @@ export const getAllExams = async (req, res) => {
     const { count: totalCount, rows: items } = await Exam.findAndCountAll({
       where: whereCondition,
       order: [["id", sort.toUpperCase()]],
+      limit,
       offset,
       // include: [
       //   { model: Level, attributes: ["id", "title"], as: "level" },
