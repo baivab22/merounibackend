@@ -24,7 +24,17 @@ export const loginUser = async (req, res) => {
 
     // 3. Generate access and refresh token
     const accessToken = jwt.sign(
-      { data: { id: user.id, email: user.email, role: user.roles } },
+      {
+        data: {
+          id: user.id,
+          firstName: user.first_name,
+          middleName: user.last_name,
+          lastName: user.last_name,
+          email: user.email,
+          phoneNo: user.phone_no,
+          role: user.roles,
+        },
+      },
       ACCESS_TOKEN,
       {
         expiresIn: ACCESS_TOKEN_EXPIRY,
@@ -32,7 +42,17 @@ export const loginUser = async (req, res) => {
     );
 
     const refreshToken = jwt.sign(
-      { data: { id: user.id, email: user.email, role: user.roles } },
+      {
+        data: {
+          id: user.id,
+          firstName: user.first_name,
+          middleName: user.last_name,
+          lastName: user.last_name,
+          email: user.email,
+          phoneNo: user.phone_no,
+          role: user.roles,
+        },
+      },
       REFRESH_TOKEN,
       {
         expiresIn: REFRESH_TOKEN_EXPIRY,
@@ -44,7 +64,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60*60* 1000,
+      maxAge: 60 * 60 * 1000,
     });
 
     console.log(accessToken, refreshToken);

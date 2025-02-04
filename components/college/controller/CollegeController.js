@@ -39,6 +39,13 @@ export const getColleges = async (req, res) => {
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],
+      include: [
+        {
+          model: CollegeAddress,
+          as: "address",
+          attributes: ["country", "state", "city"],
+        },
+      ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);

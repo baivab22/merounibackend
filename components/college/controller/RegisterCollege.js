@@ -13,25 +13,25 @@ export const createOrUpdateCollege = async (req, res) => {
 
   try {
     const {
-      id, // If present, update the college; otherwise, create a new one
+      id,
       name,
       institute_type,
       author_id,
       university_id,
       google_map_url,
-      address, // { country, state, city, street, postal_code }
-      contacts, // Array of contact numbers
-      courses, // Array of course IDs
-      members, // Array of members [{name, contact_number, role, description}]
-      admissions, // Array of admissions [{course_id, eligibility_criteria, admission_process, fee_details}]
+      address,
+      contacts,
+      courses,
+      members,
+      is_featured,
+      pinned,
+      admissions,
     } = req.body;
-
-    console.log(req.body);
 
     let collegeId = id;
     let slugs = slug(name);
 
-    console.log(`Slug is: ${slugs}`)
+    console.log(`Slug is: ${slugs}`);
 
     if (!collegeId) {
       // CREATE NEW COLLEGE
@@ -41,6 +41,8 @@ export const createOrUpdateCollege = async (req, res) => {
           slugs,
           institute_type,
           author_id,
+          is_featured,
+          pinned,
           university_id,
           google_map_url,
         },
@@ -55,6 +57,8 @@ export const createOrUpdateCollege = async (req, res) => {
           slugs,
           institute_type,
           author_id,
+          is_featured,
+          pinned,
           university_id,
           google_map_url,
         },
