@@ -14,7 +14,7 @@ const route = express.Router();
 
 route
   .get("/", getAllBlogs)
-  .get("/:slugs", getBlogById)
+  .get("/:slug", getBlogById)
   .post(
     "/",
     // authenticateUser,

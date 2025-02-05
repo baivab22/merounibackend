@@ -1,9 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../../config/database.js";
 
-import Event from "../../events/model/EventModel.js";
-import News from "../../news/model/NewsModel.js";
-
 class Category extends Model {}
 
 Category.init(
@@ -45,7 +42,5 @@ Category.init(
     timestamps: true,
   }
 );
-
-Category.hasMany(News, { foreignKey: "category_id", as: "blogCategory" });
 
 export default Category;

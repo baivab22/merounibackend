@@ -1,6 +1,41 @@
 import { Op } from "sequelize";
 import Event from "../model/EventModel.js";
+import Category from "../../category/model/CategoryModel.js";
+import User from "../../users/model/UserModel.js";
+import College from "../../college/models/CollegeModel.js";
 import moment from "moment";
+
+export const getEvent = async (req, res) => {
+  try {
+    let { slugs } = req.params;
+    const item = await Event.findOne({
+      where: { slugs },
+      attributes: {
+        exclude: ["category_id", "college_id", "author_id"],
+      },
+      include: [
+        { model: Category, as: "category", attributes: ["title", "slugs"] },
+        {
+          model: User,
+          as: "author",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: College,
+          as: "college",
+          attributes: ["name", "slugs"],
+        },
+      ],
+    });
+    if (!item) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+    return res.status(200).json({ message: "Event retrieved", item });
+  } catch (error) {
+    console.error("Error getting event by ID:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 export const getEvents = async (req, res) => {
   try {
@@ -62,19 +97,5 @@ export const getEventsThisWeek = async (req, res) => {
     return res.status(500).json({
       message: `Server Error: ${error.message}`,
     });
-  }
-};
-
-export const getEvent = async (req, res) => {
-  try {
-    let { slugs } = req.params;
-    const item = await Event.findOne({ where: { slugs } });
-    if (!item) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-    return res.status(200).json({ message: "Event retrieved", item });
-  } catch (error) {
-    console.error("Error getting event by ID:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

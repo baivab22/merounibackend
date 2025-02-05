@@ -91,9 +91,4 @@ Blog.init(
   }
 );
 
-// Blog.associate = (models) => {
-//   Blog.belongsTo(models.Category, { foreignKey: 'category', as: 'blogCategory' });
-//   Blog.belongsTo(models.User, { foreignKey: 'author', as: 'blogAuthor' });
-// };
-
 export default Blog;

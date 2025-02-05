@@ -9,6 +9,9 @@ import cors from "cors";
 import {authenticate} from "./config/database.js";
 authenticate();
 
+import "./components/events/model/associations.js";
+import "./components/news/model/associations.js";
+
 const app = express();
 
 // secret file

@@ -64,14 +64,21 @@ export const getAllBlogs = async (req, res) => {
 
 export const getBlogById = async (req, res) => {
   try {
-    let { slugs } = req.params;
+    let { slug } = req.params;
     const blog = await Blog.findOne({
+      attributes: {
+        exclude: ["category", "author"],
+      },
       where: {
-        slugs,
+        slug,
       },
       include: [
-        { model: Category, as: "blogCategory" },
-        { model: User, as: "blogAuthor" },
+        { model: Category, as: "newsCategory", attributes: ["title", "slugs"] },
+        {
+          model: User,
+          as: "newsAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
       ],
     });
     if (!blog) {

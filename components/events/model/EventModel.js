@@ -67,8 +67,4 @@ const Event = sequelize.define(
   }
 );
 
-// Event.belongsTo(Category, { foreignKey: "category_id", as: "category" });
-// Event.belongsTo(College, { foreignKey: "college_id", as: "college" });
-// Event.belongsTo(User, { foreignKey: "author_id", as: "author" });
-
 export default Event;
