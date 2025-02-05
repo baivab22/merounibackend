@@ -5,6 +5,7 @@ import Faculty from "../../faculty/model/FacultyModel.js";
 import Scholarship from "../../scholarship/model/ScholarshipModel.js";
 import Level from "../../level/model/LevelModel.js";
 import { Exam } from "../../exams/model/ExamModel.js";
+import User from "../../users/model/UserModel.js";
 
 // Get All Programs
 export const getAllPrograms = async (req, res) => {
@@ -28,13 +29,7 @@ export const getAllPrograms = async (req, res) => {
       where: whereConditions,
       limit,
       offset,
-      // order: [["createdAt", "DESC"]],
-      // include: [
-      //   { model: Faculty, attributes: ["title"] },
-      //   { model: Level, attributes: ["title"] },
-      //   { model: Scholarship, attributes: ["name", "amount"] },
-      //   { model: Exam, attributes: ["title"] },
-      // ],
+      order: [["createdAt", "DESC"]],
     });
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -55,11 +50,27 @@ export const getProgramById = async (req, res) => {
     const { slugs } = req.params;
     const program = await Program.findOne({
       where: { slugs },
+      attributes: {
+        exclude: ['author','faculty_id', 'level_id','scholarship_id','exam_id']
+      },
       include: [
-        { model: Faculty, attributes: ["name"] },
-        { model: Level, attributes: ["title"] },
-        { model: Scholarship, attributes: ["title", "amount"] },
-        { model: Exam, attributes: ["title"] },
+        {
+          model: Faculty,
+          as: "programfaculty",
+          attributes: ["title", "slugs"],
+        },
+        { model: Level, as: "programlevel", attributes: ["title", "slugs"] },
+        {
+          model: Scholarship,
+          as: "programscholarship",
+          attributes: ["name"],
+        },
+        { model: Exam, as: "programexam", attributes: ["title"] },
+        {
+          model: User,
+          as: "programauthorDetails",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
       ],
     });
 

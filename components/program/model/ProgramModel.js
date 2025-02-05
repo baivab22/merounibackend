@@ -79,9 +79,4 @@ Program.init(
   }
 );
 
-Program.belongsTo(Faculty, { foreignKey: "faculty_id" });
-Program.belongsTo(Level, { foreignKey: "level_id" });
-Program.belongsTo(Scholarship, { foreignKey: "scholarship_id" });
-Program.belongsTo(Exam, { foreignKey: "exam_id" });
-
 export default Program;
