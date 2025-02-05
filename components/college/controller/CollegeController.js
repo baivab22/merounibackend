@@ -6,6 +6,7 @@ import CollegeMember from "../models/CollegeMember.js";
 import CollegeAdmission from "../models/CollegeAdmission.js";
 import Program from "../../program/model/ProgramModel.js";
 import User from "../../users/model/UserModel.js";
+import Course from "../../courses/model/CourseModel.js";
 import { University } from "../../university/model/UniversityModel.js";
 
 // Get All Colleges
@@ -66,54 +67,63 @@ export const getCollegeById = async (req, res) => {
 
     const college = await College.findOne({
       where: { slugs },
+      attributes: {
+        exclude: ["author_id", "university_id"],
+      },
       include: [
         {
           model: CollegeAddress,
-          as: "address",
+          as: "collegeAddress",
           attributes: ["country", "state", "city", "street", "postal_code"],
         },
         {
           model: CollegeContact,
-          as: "contacts",
+          as: "collegeContacts",
           attributes: ["contact_number"],
         },
-        // {
-        //   model: CollegeCourse,
-        //   as: "courses",
-        //   include: [
-        //     {
-        //       model: Program,
-        //       as: "programDetails",
-        //       attributes: ["id", "title", "slug", "duration", "credits"],
-        //     },
-        //   ],
-        // },
+        {
+          model: CollegeCourse,
+          as: "collegeCourses",
+          attributes: {
+            exclude: ["id", "college_id", "course_id"],
+          },
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["title", "slugs"],
+            },
+          ],
+        },
         {
           model: CollegeMember,
-          as: "members",
+          as: "collegeMembers",
           attributes: ["name", "contact_number", "role", "description"],
         },
-        // {
-        //   model: CollegeAdmission,
-        //   as: "admissions",
-        //   include: [
-        //     {
-        //       model: Program,
-        //       as: "admissionProgram",
-        //       attributes: ["id", "title"],
-        //     },
-        //   ],
-        // },
-        // {
-        //   model: University,
-        //   as: "university",
-        //   attributes: ["id", "name"],
-        // },
-        // {
-        //   model: User,
-        //   as: "authorDetails",
-        //   attributes: ["id", "first_name", "email"],
-        // },
+        {
+          model: CollegeAdmission,
+          as: "collegeAdmissions",
+          attributes: {
+            exclude: ["id", "college_id", "course_id"],
+          },
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["title", "slugs"],
+            },
+          ],
+        },
+        {
+          model: University,
+          as: "university",
+          attributes: ["fullname", "slugs"],
+        },
+        {
+          model: User,
+          as: "authorDetails",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
       ],
     });
 
