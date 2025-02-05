@@ -1,8 +1,9 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from ".././../../config/database.js";
 
-const Event = sequelize.define(
-  "Event",
+class Event extends Model {}
+
+Event.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -59,10 +60,17 @@ const Event = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    event_host: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      field: "event_host",
+    },
   },
   {
+    sequelize,
     tableName: "events",
     freezeTableName: true,
+    modelName: "events",
     timestamps: true,
   }
 );

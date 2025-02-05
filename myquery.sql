@@ -347,8 +347,9 @@ CREATE TABLE events(
     author_id INT NOT NULL,
     is_featured TINYINT DEFAULT 0,
     description VARCHAR(255),
-    content VARCHAR(255) not null,
-    image VARCHAR(255) not null,
+    content TEXT NOT NULL,  
+    image VARCHAR(255) NOT NULL,
+    event_host JSON NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -356,6 +357,7 @@ CREATE TABLE events(
     FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE,
     FOREIGN KEY (author_id) REFERENCES mu_users(id) ON DELETE CASCADE
 );
+
 
 CREATE TABLE banners (
     id INT PRIMARY KEY AUTO_INCREMENT,

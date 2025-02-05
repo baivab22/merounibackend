@@ -9,11 +9,12 @@ export const createOrUpdateEvent = async (req, res) => {
       id,
       title,
       description,
-      content,  // Added content
-      image, // Added image
-      category_id, // Make sure you have category model and table
-      college_id, // Make sure you have college model and table
-      author_id, // Make sure you have user model and table
+      content,  
+      image,
+      category_id, 
+      college_id, 
+      author_id,
+      event_host,
     } = req.body;
 
     console.log(req.body);
@@ -33,6 +34,7 @@ export const createOrUpdateEvent = async (req, res) => {
           category_id,
           college_id,
           author_id,
+          event_host,
         },
         { transaction: t }
       );
@@ -49,6 +51,7 @@ export const createOrUpdateEvent = async (req, res) => {
           category_id,
           college_id,
           author_id,
+          event_host
         },
         { where: { id: eventId }, transaction: t }
       );

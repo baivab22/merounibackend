@@ -12,6 +12,7 @@ authenticate();
 import "./components/events/model/associations.js";
 import "./components/news/model/associations.js";
 import "./components/college/models/associations.js";
+import "./components/career/model/associations.js";
 
 const app = express();
 

@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 
 import CareerModel from "../model/CareerModel.js";
+import User from "../../users/model/UserModel.js";
 
 export const listCareerController = async (req, res) => {
   try {
@@ -51,7 +52,19 @@ export const listSingleCareer = async (req, res) => {
     const { slugs } = req.params;
 
     // Find career post by slug
-    const careerPost = await CareerModel.findOne({ where: { slugs } });
+    const careerPost = await CareerModel.findOne({
+      where: { slugs },
+      attributes: {
+        exclude: ["author_id"],
+      },
+      include: [
+        {
+          model: User,
+          as: "careerAuthor",
+          attributes: ["firstName", "middleName" ,"lastName"],
+        },
+      ],
+    });
 
     if (!careerPost) {
       return res.status(404).json({ message: "Career post not found" });

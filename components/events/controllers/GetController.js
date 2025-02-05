@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, fn, col, literal } from "sequelize";
 import Event from "../model/EventModel.js";
 import Category from "../../category/model/CategoryModel.js";
 import User from "../../users/model/UserModel.js";
@@ -27,9 +27,16 @@ export const getEvent = async (req, res) => {
         },
       ],
     });
+
     if (!item) {
       return res.status(404).json({ message: "Event not found" });
     }
+
+    // Parse event_host if it exists
+    if (item.event_host) {
+      item.event_host = JSON.parse(item.event_host);
+    }
+
     return res.status(200).json({ message: "Event retrieved", item });
   } catch (error) {
     console.error("Error getting event by ID:", error);
@@ -80,12 +87,11 @@ export const getEventsThisWeek = async (req, res) => {
     const endOfWeek = moment().endOf("isoWeek").format("YYYY-MM-DD");
 
     const events = await Event.findAll({
-      where: {
-        event_date: {
-          [Op.between]: [startOfWeek, endOfWeek],
-        },
-      },
-      order: [["event_date", "ASC"]],
+      where: literal(`
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        BETWEEN '${startOfWeek}' AND '${endOfWeek}'
+      `),
+      order: [literal(`STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`)],
     });
 
     return res.status(200).json({
@@ -94,6 +100,31 @@ export const getEventsThisWeek = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getEventsThisWeek:", error);
+    return res.status(500).json({
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const getEventsNextMonth = async (req, res) => {
+  try {
+    const startOfNextMonth = moment().add(1, "months").startOf("month").format("YYYY-MM-DD");
+    const endOfNextMonth = moment().add(1, "months").endOf("month").format("YYYY-MM-DD");
+
+    const events = await Event.findAll({
+      where: literal(`
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        BETWEEN '${startOfNextMonth}' AND '${endOfNextMonth}'
+      `),
+      order: [literal(`STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`)],
+    });
+
+    return res.status(200).json({
+      message: "success",
+      events,
+    });
+  } catch (error) {
+    console.error("Error in getEventsNextMonth:", error);
     return res.status(500).json({
       message: `Server Error: ${error.message}`,
     });

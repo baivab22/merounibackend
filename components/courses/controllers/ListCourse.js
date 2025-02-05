@@ -26,14 +26,6 @@ export const getAllCourses = async (req, res) => {
       limit,
       offset,
       order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: User,
-          as: "author",
-          //attributes: ["firstName, middleName, lastName"],
-        },
-        { model: Faculty, as: "faculty" },
-      ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -52,17 +44,24 @@ export const getAllCourses = async (req, res) => {
 export const getCourse = async (req, res) => {
   try {
     let { slugs } = req.params;
-    const course = await Course.findOne(
-      {
-        where: { slugs },
+    const course = await Course.findOne({
+      where: { slugs },
+      attributes: {
+        exclude: ['authorId', 'facultyId']
       },
-      {
-        include: [
-          { model: User, as: "author" },
-          { model: Faculty, as: "faculty" },
-        ],
-      }
-    );
+      include: [
+        {
+          model: User,
+          as: "courseauthor",
+         attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: Faculty,
+          as: "coursefaculty",
+          attributes: ["title", "slugs"],
+        },
+      ],
+    });
     if (!course) {
       return res.status(404).json({ error: "Course not found" });
     }

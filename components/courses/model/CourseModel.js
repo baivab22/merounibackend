@@ -76,7 +76,7 @@ Course.init(
   }
 );
 
-Course.belongsTo(User, { foreignKey: "authorId", as: "author" });
-Course.belongsTo(Faculty, { foreignKey: "facultyId", as: "faculty" });
+Course.belongsTo(User, { foreignKey: "authorId", as: "courseauthor" });
+Course.belongsTo(Faculty, { foreignKey: "facultyId", as: "coursefaculty" });
 
 export default Course;
