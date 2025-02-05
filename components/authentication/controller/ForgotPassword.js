@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import UserModel from "../../users/model/UserModel";
+import UserModel from "../../users/model/UserModel.js";
 import { sendMail } from "../../../middleware/MainHelper.js";
 import crypto from "crypto";
 

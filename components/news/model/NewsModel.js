@@ -1,6 +1,9 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../../config/database.js';
 
+import Category from '../../category/model/CategoryModel.js';
+import User from '../../users/model/UserModel.js';
+
 class Blog extends Model {}
 
 Blog.init(
@@ -88,9 +91,9 @@ Blog.init(
   }
 );
 
-Blog.associate = (models) => {
-  Blog.belongsTo(models.Category, { foreignKey: 'category', as: 'blogCategory' });
-  Blog.belongsTo(models.User, { foreignKey: 'author', as: 'blogAuthor' });
-};
+// Blog.associate = (models) => {
+//   Blog.belongsTo(models.Category, { foreignKey: 'category', as: 'blogCategory' });
+//   Blog.belongsTo(models.User, { foreignKey: 'author', as: 'blogAuthor' });
+// };
 
 export default Blog;

@@ -271,6 +271,7 @@ CREATE TABLE programs (
 CREATE TABLE colleges (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
+    slugs VARCHAR(255) NOT NULL UNIQUE,
     institute_type ENUM('Public', 'Private', 'Community', 'Technical') NOT NULL,
     author_id INT NOT NULL,
     university_id INT NOT NULL,
