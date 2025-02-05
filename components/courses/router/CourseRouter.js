@@ -8,7 +8,7 @@ import { createCourse } from "../controllers/NewCourse.js";
 
 const route = express.Router();
 
-route.get("/", getAllCourses).get("/", getCourse).post("/", createCourse);
+route.get("/", getAllCourses).get("/:slugs", getCourse).post("/", createCourse);
 //   .delete("/", deleteBlog)
 //   .put("/", updateBlog);
 

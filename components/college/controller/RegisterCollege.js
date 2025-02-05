@@ -25,6 +25,8 @@ export const createOrUpdateCollege = async (req, res) => {
       members,
       is_featured,
       pinned,
+      description,
+      content,
       admissions,
     } = req.body;
 
@@ -43,6 +45,8 @@ export const createOrUpdateCollege = async (req, res) => {
           author_id,
           is_featured,
           pinned,
+          description,
+          content,
           university_id,
           google_map_url,
         },
@@ -59,6 +63,8 @@ export const createOrUpdateCollege = async (req, res) => {
           author_id,
           is_featured,
           pinned,
+          description,
+          content,
           university_id,
           google_map_url,
         },

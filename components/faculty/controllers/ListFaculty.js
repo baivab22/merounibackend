@@ -27,7 +27,12 @@ export const getAllFaculty = async (req, res) => {
 
 export const getFacultyById = async (req, res) => {
   try {
-    const faculty = await Faculty.findByPk(req.query.faculty_id);
+    let { slugs } = req.params;
+    const faculty = await Faculty.findOne({
+      where: {
+        slugs,
+      },
+    });
     if (!faculty) {
       return res.status(404).json({ message: "Faculty not found" });
     }

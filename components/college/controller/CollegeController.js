@@ -77,43 +77,43 @@ export const getCollegeById = async (req, res) => {
           as: "contacts",
           attributes: ["contact_number"],
         },
-        {
-          model: CollegeCourse,
-          as: "courses",
-          include: [
-            {
-              model: Program,
-              as: "programDetails",
-              attributes: ["id", "title", "slug", "duration", "credits"],
-            },
-          ],
-        },
+        // {
+        //   model: CollegeCourse,
+        //   as: "courses",
+        //   include: [
+        //     {
+        //       model: Program,
+        //       as: "programDetails",
+        //       attributes: ["id", "title", "slug", "duration", "credits"],
+        //     },
+        //   ],
+        // },
         {
           model: CollegeMember,
           as: "members",
           attributes: ["name", "contact_number", "role", "description"],
         },
-        {
-          model: CollegeAdmission,
-          as: "admissions",
-          include: [
-            {
-              model: Program,
-              as: "admissionProgram",
-              attributes: ["id", "title"],
-            },
-          ],
-        },
-        {
-          model: University,
-          as: "university",
-          attributes: ["id", "name"],
-        },
-        {
-          model: User,
-          as: "authorDetails",
-          attributes: ["id", "first_name", "email"],
-        },
+        // {
+        //   model: CollegeAdmission,
+        //   as: "admissions",
+        //   include: [
+        //     {
+        //       model: Program,
+        //       as: "admissionProgram",
+        //       attributes: ["id", "title"],
+        //     },
+        //   ],
+        // },
+        // {
+        //   model: University,
+        //   as: "university",
+        //   attributes: ["id", "name"],
+        // },
+        // {
+        //   model: User,
+        //   as: "authorDetails",
+        //   attributes: ["id", "first_name", "email"],
+        // },
       ],
     });
 

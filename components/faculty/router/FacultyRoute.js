@@ -10,7 +10,7 @@ const route = express.Router();
 
 route
   .get("/", getAllFaculty)
-  .get("/", getFacultyById)
+  .get("/:slugs", getFacultyById)
   .post("/", createFaculty)
   .delete("/", deleteFaculty)
   .put("/", updateFaculty);

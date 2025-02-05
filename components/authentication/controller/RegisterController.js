@@ -38,10 +38,8 @@ export const RegisterUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate OTP
-    // Generate OTP
-    const n = crypto.randomInt(0, 1000000);
-    const otp = n.toString().padStart(6, "0");
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // Expiry time: 10 min
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // Create user
     await UserModel.create({

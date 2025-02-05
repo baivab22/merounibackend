@@ -26,7 +26,12 @@ export const getAllLevels = async (req, res) => {
 
 export const getLevellById = async (req, res) => {
   try {
-    const item = await Level.findByPk(req.query.level_id);
+    let { slugs } = req.params;
+    const item = await Level.findOne({
+      where: {
+        slugs,
+      },
+    });
     if (!item) {
       return res.status(404).json({ message: "Level not found" });
     }
