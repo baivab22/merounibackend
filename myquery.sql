@@ -280,6 +280,14 @@ CREATE TABLE program_syllabus(
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
+CREATE TABLE program_college(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    program_id INT,
+    college_id INT,
+    FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE,
+    FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE
+);
+
 CREATE TABLE colleges (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,

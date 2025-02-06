@@ -5,6 +5,7 @@ import ProgramSyllabus from "../model/ProgramSyllabusModel.js";
 import Course from "../../courses/model/CourseModel.js";
 import Faculty from "../../faculty/model/FacultyModel.js";
 import Scholarship from "../../scholarship/model/ScholarshipModel.js";
+import College from "../../college/models/CollegeModel.js";
 import Level from "../../level/model/LevelModel.js";
 import { Exam } from "../../exams/model/ExamModel.js";
 import User from "../../users/model/UserModel.js";
@@ -83,6 +84,11 @@ export const getProgramById = async (req, res) => {
           model: User,
           as: "programauthorDetails",
           attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: College,
+          as: "colleges", 
+          attributes: ["name", "slugs"], 
         },
       ],
     });

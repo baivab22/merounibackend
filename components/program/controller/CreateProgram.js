@@ -8,6 +8,8 @@ import Level from "../../level/model/LevelModel.js";
 import { Exam } from "../../exams/model/ExamModel.js";
 import Course from "../../courses/model/CourseModel.js";
 import User from "../../users/model/UserModel.js";
+import ProgramCollege from "../model/ProgramCollege.js";
+import College from "../../college/models/CollegeModel.js"; // Import College model
 
 export const createOrUpdateProgram = async (req, res) => {
   const t = await sequelize.transaction(); // Start transaction
@@ -31,12 +33,12 @@ export const createOrUpdateProgram = async (req, res) => {
       delivery_mode,
       careers,
       exam_id,
-      syllabus // Array of syllabus data with year, semester, elective, and course_id
+      syllabus,
+      colleges
     } = req.body;
 
     let programId = id;
 
-    // 1️⃣ Validate Foreign Keys Exist
     const facultyExists = await Faculty.findByPk(faculty_id);
     if (!facultyExists) {
       return res.status(400).json({ error: "Invalid faculty_id" });
@@ -68,13 +70,11 @@ export const createOrUpdateProgram = async (req, res) => {
     }
 
     if (!programId) {
-      // 2️⃣ Check for Duplicate Title
       const existingProgram = await Program.findOne({ where: { title } });
       if (existingProgram) {
         return res.status(400).json({ error: "Program title already exists" });
       }
 
-      // 3️⃣ CREATE PROGRAM
       const newProgram = await Program.create(
         {
           title,
@@ -100,7 +100,6 @@ export const createOrUpdateProgram = async (req, res) => {
 
       programId = newProgram.id;
     } else {
-      // 4️⃣ UPDATE PROGRAM
       const existingProgram = await Program.findByPk(programId);
       if (!existingProgram) {
         return res.status(404).json({ error: "Program not found" });
@@ -130,7 +129,6 @@ export const createOrUpdateProgram = async (req, res) => {
       );
     }
 
-    // 5️⃣ Handling Syllabus Data
     if (syllabus && Array.isArray(syllabus)) {
       // Remove existing syllabus if updating
       await ProgramSyllabus.destroy({ where: { program_id: programId }, transaction: t });
@@ -145,6 +143,19 @@ export const createOrUpdateProgram = async (req, res) => {
 
       // Create or update syllabus entries
       await ProgramSyllabus.bulkCreate(syllabusData, { transaction: t });
+    }
+
+    if (colleges && Array.isArray(colleges)) {
+      // Remove existing Program-College associations if updating
+      await ProgramCollege.destroy({ where: { program_id: programId }, transaction: t });
+
+      const programCollegeData = colleges.map((collegeId) => ({
+        program_id: programId,
+        college_id: collegeId,
+      }));
+
+      // Create new associations
+      await ProgramCollege.bulkCreate(programCollegeData, { transaction: t });
     }
 
     await t.commit(); // Commit transaction

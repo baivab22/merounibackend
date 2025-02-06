@@ -1,7 +1,9 @@
 import Program from "./ProgramModel.js";
 import ProgramSyllabus from "./ProgramSyllabusModel.js";
+import ProgramCollege from "./ProgramCollege.js";
 import Faculty from "../../faculty/model/FacultyModel.js";
 import Scholarship from "../../scholarship/model/ScholarshipModel.js";
+import College from "../../college/models/CollegeModel.js";
 import Level from "../../level/model/LevelModel.js";
 import Course from "../../courses/model/CourseModel.js";
 import { Exam } from "../../exams/model/ExamModel.js";
@@ -48,5 +50,18 @@ Course.hasMany(ProgramSyllabus, {
   foreignKey: "course_id",
   as: "syllabusEntries",
 });
+
+// Associations for Program
+Program.belongsToMany(College, { 
+  through: ProgramCollege, 
+  foreignKey: "program_id", 
+  as: "colleges" // Alias for the association
+});
+College.belongsToMany(Program, { 
+  through: ProgramCollege, 
+  foreignKey: "college_id", 
+  as: "programs" 
+});
+
 
 export { Program, Faculty, Scholarship, Level, Exam, User };
