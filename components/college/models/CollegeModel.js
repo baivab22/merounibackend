@@ -12,11 +12,12 @@ College.init(
       type: DataTypes.ENUM("Public", "Private", "Community", "Technical"),
       allowNull: false,
     },
-    // institue_level: {
-    //   type: DataTypes.JSON,
-    //   allowNull: false,
-    //   defaultValue: [],
-    // },
+    institute_level: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+      field: "institute_level",
+    },
     isFeatured: {
       type: DataTypes.TINYINT,
       allowNull: true,
@@ -52,7 +53,13 @@ College.init(
       allowNull: false,
     },
   },
-  { sequelize, modelName: "college", timestamps: true }
+  {
+    sequelize,
+    modelName: "colleges",
+    tableName: "colleges",
+    timestamps: true,
+    freezeTableName: true,
+  }
 );
 
 export default College;

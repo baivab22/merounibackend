@@ -294,6 +294,7 @@ CREATE TABLE colleges (
     name VARCHAR(255) NOT NULL UNIQUE,
     slugs VARCHAR(255) NOT NULL UNIQUE,
     institute_type ENUM('Public', 'Private', 'Community', 'Technical') NOT NULL,
+    institute_level JSON default ('[]'),
     author_id INT NOT NULL,
     university_id INT NOT NULL,
     google_map_url VARCHAR(500),
