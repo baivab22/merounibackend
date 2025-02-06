@@ -19,8 +19,8 @@ route
   .get("/:slug", universityProfile)
   .post(
     "/",
-    authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    // authenticateUser,
+    // authorizeRole(["super-admin", "admin", "editor"]),
     createOrUpdateUniversity
   )
   .delete(

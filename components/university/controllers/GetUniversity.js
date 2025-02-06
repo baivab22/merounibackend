@@ -6,6 +6,8 @@ export const listAllUniversities = async (req, res) => {
       type: sequelize.QueryTypes.SELECT,
     });
 
+    // let items = await University.findAll();
+
     res.status(200).json({
       message : "success",
       items

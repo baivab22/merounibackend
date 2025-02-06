@@ -7,6 +7,9 @@ const router = express.Router();
 import contactRoute from "../components/contactUs/router/ContactRouter.js";
 router.use("/contact-us", contactRoute);
 
+import newsletterRoute from "../components/newsletter/router/NeweletterRouter.js";
+router.use("/newsletter", newsletterRoute);
+
 import {searchController} from "../components/home/controller/SearchController.js";
 router.get("/search", searchController);
 

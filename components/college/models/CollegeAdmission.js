@@ -23,11 +23,17 @@ CollegeAdmission.init(
     eligibility_criteria: { type: DataTypes.TEXT },
     admission_process: { type: DataTypes.TEXT },
     fee_details: { type: DataTypes.TEXT },
+    description: {
+      type: DataTypes.TEXT,
+    },
   },
   { sequelize, modelName: "college_admission", timestamps: false }
 );
 
-College.hasMany(CollegeAdmission, { foreignKey: "college_id", as: "admissions" });
+College.hasMany(CollegeAdmission, {
+  foreignKey: "college_id",
+  as: "admissions",
+});
 CollegeAdmission.belongsTo(College, { foreignKey: "college_id" });
 
 export default CollegeAdmission;
