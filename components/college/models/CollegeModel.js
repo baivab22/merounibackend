@@ -12,6 +12,11 @@ College.init(
       type: DataTypes.ENUM("Public", "Private", "Community", "Technical"),
       allowNull: false,
     },
+    // institue_level: {
+    //   type: DataTypes.JSON,
+    //   allowNull: false,
+    //   defaultValue: [],
+    // },
     isFeatured: {
       type: DataTypes.TINYINT,
       allowNull: true,

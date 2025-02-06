@@ -6,6 +6,7 @@ import cors from "cors";
 /**
  * import user defined components
  */
+import { logger } from "./logger.js";
 import {authenticate} from "./config/database.js";
 authenticate();
 
@@ -16,6 +17,11 @@ import "./components/career/model/associations.js";
 import "./components/program/model/associations.js";
 
 const app = express();
+
+// Replacing console.log with winston
+console.log = (message) => {
+  logger.info(message);
+};
 
 // secret file
 const PORT = process.env.PORT || 8888;
