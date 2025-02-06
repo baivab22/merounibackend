@@ -85,7 +85,7 @@ export const getCollegeById = async (req, res) => {
           model: CollegeCourse,
           as: "collegeCourses",
           attributes: {
-            exclude: ["id", "college_id", "course_id"],
+            exclude: [ "college_id", "course_id"],
           },
           include: [
             {
