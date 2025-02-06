@@ -93,7 +93,7 @@ export const getEventsThisWeek = async (req, res) => {
     // Get total count for pagination
     const totalCount = await Event.count({
       where: literal(`
-        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
         BETWEEN '${startOfWeek}' AND '${endOfWeek}'
       `),
     });
@@ -101,14 +101,14 @@ export const getEventsThisWeek = async (req, res) => {
     // Fetch paginated results
     const events = await Event.findAll({
       where: literal(`
-        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
         BETWEEN '${startOfWeek}' AND '${endOfWeek}'
       `),
       limit,
       offset,
       order: [
         literal(
-          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
         ),
       ],
       subQuery: false, // Ensures pagination is applied correctly
@@ -144,7 +144,7 @@ export const getEventsNextMonth = async (req, res) => {
     // Get total count for pagination
     const totalCount = await Event.count({
       where: literal(`
-        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
         BETWEEN '${startOfNextMonth}' AND '${endOfNextMonth}'
       `),
     });
@@ -152,14 +152,14 @@ export const getEventsNextMonth = async (req, res) => {
     // Fetch paginated results
     const events = await Event.findAll({
       where: literal(`
-        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
         BETWEEN '${startOfNextMonth}' AND '${endOfNextMonth}'
       `),
       limit,
       offset,
       order: [
         literal(
-          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
         ),
       ],
       subQuery: false, // Ensures pagination is correctly applied

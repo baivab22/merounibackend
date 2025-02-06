@@ -143,6 +143,7 @@ CREATE TABLE university (
     street VARCHAR(255),
     postal_code VARCHAR(20),
     date_of_establish DATE,
+    featured_image VARCHAR(255) not null,
     type_of_institute ENUM('Public', 'Private'),
     description TEXT
 );
