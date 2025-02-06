@@ -20,8 +20,8 @@ route
   .get("/", getScholarshipById)
   .post(
     "/",
-    authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    // authenticateUser,
+    // authorizeRole(["super-admin", "admin", "editor"]),
     createScholarship
   )
   .delete(

@@ -1,8 +1,29 @@
+import slug from "slug";
 import Scholarship from "../model/ScholarshipModel.js";
 
 export const createScholarship = async (req, res) => {
   try {
-    const newScholarship = await Scholarship.create(req.body);
+    let {
+      name,
+      description,
+      eligibilityCriteria,
+      amount,
+      applicationDeadline,
+      renewalCriteria,
+      contactInfo,
+      author,
+    } = req.body;
+    const newScholarship = await Scholarship.create({
+      name,
+      slugs: slug(name),
+      description,
+      eligibilityCriteria,
+      amount,
+      applicationDeadline,
+      renewalCriteria,
+      contactInfo,
+      author,
+    });
     res
       .status(201)
       .json({ message: "Scholarship created", scholarship: newScholarship });

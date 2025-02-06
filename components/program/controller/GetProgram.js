@@ -69,7 +69,7 @@ export const getProgramById = async (req, res) => {
             {
               model: Course,
               as: "programCourse", 
-              attributes: ["id", "title", "description", "credits"] 
+              attributes: ["id", "title", "slugs", "description", "credits"] 
             }
           ]
         },
@@ -77,9 +77,9 @@ export const getProgramById = async (req, res) => {
         {
           model: Scholarship,
           as: "programscholarship",
-          attributes: ["name"],
+          attributes: ["name", "slugs"],
         },
-        { model: Exam, as: "programexam", attributes: ["title"] },
+        { model: Exam, as: "programexam", attributes: ["title", "slugs"] },
         {
           model: User,
           as: "programauthorDetails",

@@ -1,5 +1,5 @@
-import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../../../config/database.js';
+import { DataTypes, Model } from "sequelize";
+import { sequelize } from "../../../config/database.js";
 
 class Scholarship extends Model {}
 
@@ -12,6 +12,10 @@ Scholarship.init(
       allowNull: false,
     },
     name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    slugs: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -36,10 +40,10 @@ Scholarship.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'mu_users',
-        key: 'id',
+        model: "mu_users",
+        key: "id",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     renewalCriteria: {
       type: DataTypes.JSON,
@@ -62,7 +66,7 @@ Scholarship.init(
   },
   {
     sequelize,
-    modelName: 'scholarships',
+    modelName: "scholarships",
     freezeTableName: true,
     timestamps: true,
   }
