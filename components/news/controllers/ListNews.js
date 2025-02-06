@@ -73,7 +73,7 @@ export const getBlogById = async (req, res) => {
         slug,
       },
       include: [
-        { model: Category, as: "newsCategory", attributes: ["title", "slugs"] },
+        { model: Category, as: "newsCategory", attributes: ["id","title", "slugs"] },
         {
           model: User,
           as: "newsAuthor",
@@ -81,10 +81,35 @@ export const getBlogById = async (req, res) => {
         },
       ],
     });
+
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
-    res.status(200).json({ message: "Blog retrieved", blog });
+
+    const similarBlogs = await Blog.findAll({
+      attributes: {
+        exclude: ["category", "author"],
+      },
+      where: {
+        category: blog.newsCategory.id,
+        slug: { [Op.ne]: slug },  
+      },
+      include: [
+        { model: Category, as: "newsCategory", attributes: ["id","title", "slugs"] },
+        {
+          model: User,
+          as: "newsAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+      ],
+      limit: 5,
+    });
+
+    res.status(200).json({
+      message: "Blog retrieved",
+      blog,
+     similarBlogs,
+    });
   } catch (error) {
     console.error("Error getting blog by ID:", error);
     res.status(500).json({ message: "Server error", error: error.message });

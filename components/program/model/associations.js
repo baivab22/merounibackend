@@ -8,6 +8,7 @@ import Level from "../../level/model/LevelModel.js";
 import Course from "../../courses/model/CourseModel.js";
 import { Exam } from "../../exams/model/ExamModel.js";
 import User from "../../users/model/UserModel.js";
+import CollegeAddress from "../../college/models/CollegeAddress.js";
 
 // Program belongs to Faculty
 Program.belongsTo(Faculty, { foreignKey: "faculty_id", as: "programfaculty" });
@@ -58,6 +59,18 @@ Program.belongsToMany(College, {
   as: "colleges" // Alias for the association
 });
 College.belongsToMany(Program, { 
+  through: ProgramCollege, 
+  foreignKey: "college_id", 
+  as: "programs" 
+});
+
+// Assoociations for College Address
+Program.belongsToMany(CollegeAddress, { 
+  through: ProgramCollege, 
+  foreignKey: "program_id", 
+  as: "collegesAddress" // Alias for the association
+});
+CollegeAddress.belongsToMany(Program, { 
   through: ProgramCollege, 
   foreignKey: "college_id", 
   as: "programs" 
