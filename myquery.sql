@@ -298,6 +298,8 @@ CREATE TABLE colleges (
     google_map_url VARCHAR(500),
     website_url VARCHAR(255) NULL,
     is_featured TINYINT DEFAULT 0,
+    featured_img VARCHAR(255) NOT NULL,
+    college_logo VARCHAR(255) NOT NULL,
     pinned TINYINT DEFAULT 0,
     description varchar(255) null,
     content text not null,
@@ -357,6 +359,14 @@ CREATE TABLE college_admissions (
 
     FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES programs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE college_gallery(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    images JSON NOT NULL default ('[]'),
+    college_id INT,
+
+    FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE
 );
 
 CREATE TABLE events(
@@ -469,6 +479,14 @@ create table consultancies(
     message text,
     status ENUM('unread', 'pending', 'read') NOT NULL DEFAULT 'unread',
 
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ );
+
+ CREATE TABLE newsletter(
+    id int PRIMARY KEY AUTO_INCREMENT not null,
+    email VARCHAR(255) NOT NULL unique,
+    status ENUM('unread', 'pending', 'read', 'sent') NOT NULL DEFAULT 'unread', 
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
  );

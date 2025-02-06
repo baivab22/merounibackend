@@ -4,9 +4,9 @@ import CollegeContact from "../models/CollegeContact.js";
 import CollegeCourse from "../models/CollegeCourse.js";
 import CollegeMember from "../models/CollegeMember.js";
 import CollegeAdmission from "../models/CollegeAdmission.js";
+import CollegeGallery from "../models/CollegeGallery.js";
 import Program from "../../program/model/ProgramModel.js";
 import User from "../../users/model/UserModel.js";
-import Course from "../../courses/model/CourseModel.js";
 import { University } from "../../university/model/UniversityModel.js";
 
 // Get All Colleges
@@ -80,6 +80,11 @@ export const getCollegeById = async (req, res) => {
           model: CollegeContact,
           as: "collegeContacts",
           attributes: ["contact_number"],
+        },
+        {
+          model: CollegeGallery,
+          as: "collegeGallery",
+          // attributes: ["contact_number"],
         },
         {
           model: CollegeCourse,

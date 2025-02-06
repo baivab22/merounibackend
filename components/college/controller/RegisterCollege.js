@@ -7,6 +7,7 @@ import CollegeContact from "../models/CollegeContact.js";
 import CollegeCourse from "../models/CollegeCourse.js";
 import CollegeMember from "../models/CollegeMember.js";
 import CollegeAdmission from "../models/CollegeAdmission.js";
+import CollegeGallery from "../models/CollegeGallery.js";
 
 export const createOrUpdateCollege = async (req, res) => {
   const t = await sequelize.transaction(); // Start transaction
@@ -20,6 +21,8 @@ export const createOrUpdateCollege = async (req, res) => {
       university_id,
       google_map_url,
       website_url,
+      featured_img,
+      college_logo,
       address,
       contacts,
       courses,
@@ -29,6 +32,7 @@ export const createOrUpdateCollege = async (req, res) => {
       description,
       content,
       admissions,
+      images,
     } = req.body;
 
     let collegeId = id;
@@ -46,6 +50,8 @@ export const createOrUpdateCollege = async (req, res) => {
           author_id,
           is_featured,
           pinned,
+          featured_img,
+          college_logo,
           description,
           content,
           university_id,
@@ -67,6 +73,8 @@ export const createOrUpdateCollege = async (req, res) => {
           pinned,
           description,
           content,
+          featured_img,
+          college_logo,
           university_id,
           google_map_url,
           website_url,
@@ -111,6 +119,20 @@ export const createOrUpdateCollege = async (req, res) => {
         course_id: courseId,
       }));
       await CollegeCourse.bulkCreate(courseRecords, { transaction: t });
+    }
+
+    // **UPDATE OR CREATE GALLERY**
+    if (images && images.length > 0) {
+      await CollegeGallery.destroy({
+        where: { college_id: collegeId },
+        transaction: t,
+      });
+
+      const galleryRecords = images.map((url) => ({
+        college_id: collegeId,
+        img_url: url,
+      }));
+      await CollegeGallery.bulkCreate(galleryRecords, { transaction: t });
     }
 
     // **UPDATE OR CREATE MEMBERS**

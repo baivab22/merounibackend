@@ -4,6 +4,7 @@ import CollegeContact from "./CollegeContact.js";
 import CollegeCourse from "./CollegeCourse.js";
 import CollegeMember from "./CollegeMember.js";
 import CollegeAdmission from "./CollegeAdmission.js";
+import CollegeGallery from "./CollegeGallery.js";
 import { University } from "../../university/model/UniversityModel.js";
 import Program from "../../program/model/ProgramModel.js";
 import User from "../../users/model/UserModel.js";
@@ -15,6 +16,7 @@ College.hasOne(CollegeAddress, { foreignKey: "college_id", as: "collegeAddress" 
 College.hasMany(CollegeContact, { foreignKey: "college_id", as: "collegeContacts" });
 College.hasMany(CollegeCourse, { foreignKey: "college_id", as: "collegeCourses" });
 College.hasMany(CollegeMember, { foreignKey: "college_id", as: "collegeMembers" });
+College.hasMany(CollegeGallery, { foreignKey: "college_id", as: "collegeGallery" });
 College.hasMany(CollegeAdmission, { foreignKey: "college_id", as: "collegeAdmissions" });
 
 // CollegeAddress Associations
@@ -22,6 +24,10 @@ CollegeAddress.belongsTo(College, { foreignKey: "college_id", as: "collegeAddres
 
 // CollegeContact Associations
 CollegeContact.belongsTo(College, { foreignKey: "college_id", as: "collegeContactCollege" });
+
+// CollegeGallery Associations
+CollegeGallery.belongsTo(College, { foreignKey: "college_id", as: "collegeGalleryCollege" });
+
 
 // CollegeCourse Associations
 CollegeCourse.belongsTo(College, { foreignKey: "college_id", as: "collegeCourseCollege" });
