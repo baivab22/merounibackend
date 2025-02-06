@@ -23,6 +23,10 @@ College.init(
       allowNull: true,
       defaultValue: 0,
     },
+    website_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     author_id: { type: DataTypes.INTEGER, allowNull: false },
     university_id: { type: DataTypes.INTEGER, allowNull: false },
     google_map_url: { type: DataTypes.STRING },

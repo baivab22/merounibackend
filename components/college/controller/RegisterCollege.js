@@ -19,6 +19,7 @@ export const createOrUpdateCollege = async (req, res) => {
       author_id,
       university_id,
       google_map_url,
+      website_url,
       address,
       contacts,
       courses,
@@ -49,6 +50,7 @@ export const createOrUpdateCollege = async (req, res) => {
           content,
           university_id,
           google_map_url,
+          website_url,
         },
         { transaction: t }
       );
@@ -67,6 +69,7 @@ export const createOrUpdateCollege = async (req, res) => {
           content,
           university_id,
           google_map_url,
+          website_url,
         },
         { where: { id: collegeId }, transaction: t }
       );

@@ -296,6 +296,7 @@ CREATE TABLE colleges (
     author_id INT NOT NULL,
     university_id INT NOT NULL,
     google_map_url VARCHAR(500),
+    website_url VARCHAR(255) NULL,
     is_featured TINYINT DEFAULT 0,
     pinned TINYINT DEFAULT 0,
     description varchar(255) null,
