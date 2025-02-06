@@ -44,7 +44,7 @@ export const University = sequelize.define('University', {
   },
 }, {
   tableName: 'university', 
-  timestamps: false,      
+  timestamps: true,      
 });
 
 export const UniversityContact = sequelize.define('UniversityContact', {

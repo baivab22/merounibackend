@@ -8,28 +8,24 @@ export const searchController = async (req, res) => {
     if (!searchQuery) {
       return res.status(400).json({ message: "Search query is required." });
     }
-
-    // Raw SQL query using UNION to combine results from both tables
+    
     const searchResults = await sequelize.query(
       `
       (SELECT id, name, slugs, 'colleges' AS type, createdAt FROM colleges WHERE name LIKE :search)
       UNION
       (SELECT id, title, slugs, 'faculty' AS type, createdAt FROM faculty WHERE title LIKE :search)
       UNION
-      (SELECT id, title, slug, 'materials' AS type, createdAt FROM materials WHERE title LIKE :search)
-      UNION
-      (SELECT id, name, slug, 'scholarships' AS type, createdAt FROM scholarships WHERE name LIKE :search)
-      UNION
-      (SELECT id, name, slugs, 'university' AS type, createdAt FROM university WHERE name LIKE :search)
-      UNION
-      (SELECT id, title, slugs, 'exams' AS type, createdAt FROM exams WHERE title LIKE :search)
+      (SELECT id, title, slugs, 'event' AS type, createdAt FROM events WHERE title LIKE :search)
       UNION
       (SELECT id, title, slug, 'blog' AS type, createdAt FROM blogs WHERE title LIKE :search)
       UNION
-      (SELECT id, name, slugs, 'colleges' AS type, createdAt FROM colleges WHERE name LIKE :search)
+      (SELECT id, title, slugs, 'exams' AS type, createdAt FROM exams WHERE title LIKE :search)
       UNION
-      (SELECT id, title, slugs, 'event' AS type, createdAt FROM events WHERE title LIKE :search)
+      (SELECT id, title, slug, 'materials' AS type, createdAt FROM materials WHERE title LIKE :search)
+      UNION
+      (SELECT id, fullname, slugs, 'university' AS type, createdAt  FROM university WHERE fullname LIKE :search)
       ORDER BY createdAt DESC;
+      
       `,
       {
         replacements: { search: `%${searchQuery}%` },
@@ -39,14 +35,25 @@ export const searchController = async (req, res) => {
 
     // Separate blogs and events
     const colleges = searchResults.filter((item) => item.type === "colleges");
-    const blogs = searchResults.filter((item) => item.type === "blog");
+    const faculty = searchResults.filter((item) => item.type === "faculty");
     const events = searchResults.filter((item) => item.type === "event");
+    const blogs = searchResults.filter((item) => item.type === "blog");
+    const exams = searchResults.filter((item) => item.type === "exams");
+    const materials = searchResults.filter((item) => item.type === "materials");
+    const university = searchResults.filter(
+      (item) => item.type === "university"
+    );
+    // const scholarships = searchResults.filter((item) => item.type === "scholarships");
 
     return res.status(200).json({
       message: "Search results retrieved",
-      blogs,
-      events,
       colleges,
+      faculty,
+      events,
+      blogs,
+      exams,
+      materials,
+      university,
     });
   } catch (error) {
     console.error("Error searching Blogs and Events:", error);
