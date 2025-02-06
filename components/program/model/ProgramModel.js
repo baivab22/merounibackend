@@ -1,10 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-
 import { sequelize } from "../../../config/database.js";
-import Faculty from "../../faculty/model/FacultyModel.js";
-import Scholarship from "../../scholarship/model/ScholarshipModel.js";
-import Level from "../../level/model/LevelModel.js";
-import { Exam } from "../../exams/model/ExamModel.js";
 
 class Program extends Model {}
 

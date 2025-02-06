@@ -1,7 +1,9 @@
 import Program from "./ProgramModel.js";
+import ProgramSyllabus from "./ProgramSyllabusModel.js";
 import Faculty from "../../faculty/model/FacultyModel.js";
 import Scholarship from "../../scholarship/model/ScholarshipModel.js";
 import Level from "../../level/model/LevelModel.js";
+import Course from "../../courses/model/CourseModel.js";
 import { Exam } from "../../exams/model/ExamModel.js";
 import User from "../../users/model/UserModel.js";
 
@@ -27,5 +29,24 @@ Exam.hasMany(Program, { foreignKey: "exam_id", as: "programs" });
 // Program belongs to an Author (User)
 Program.belongsTo(User, { foreignKey: "author", as: "programauthorDetails" });
 User.hasMany(Program, { foreignKey: "author", as: "programs" });
+
+Program.hasMany(ProgramSyllabus, {
+  foreignKey: "program_id",
+  as: "syllabus",
+});
+ProgramSyllabus.belongsTo(Program, {
+  foreignKey: "program_id",
+  as: "program",
+});
+
+// Syllabus belongs to a Course
+ProgramSyllabus.belongsTo(Course, {
+  foreignKey: "course_id",
+  as: "programCourse",
+});
+Course.hasMany(ProgramSyllabus, {
+  foreignKey: "course_id",
+  as: "syllabusEntries",
+});
 
 export { Program, Faculty, Scholarship, Level, Exam, User };

@@ -1,6 +1,8 @@
 import { Op } from "sequelize";
 
 import Program from "../model/ProgramModel.js";
+import ProgramSyllabus from "../model/ProgramSyllabusModel.js";
+import Course from "../../courses/model/CourseModel.js";
 import Faculty from "../../faculty/model/FacultyModel.js";
 import Scholarship from "../../scholarship/model/ScholarshipModel.js";
 import Level from "../../level/model/LevelModel.js";
@@ -58,6 +60,17 @@ export const getProgramById = async (req, res) => {
           model: Faculty,
           as: "programfaculty",
           attributes: ["title", "slugs"],
+        },
+        {
+          model: ProgramSyllabus,
+          as: "syllabus",
+          include: [
+            {
+              model: Course,
+              as: "programCourse", 
+              attributes: ["id", "title", "description", "credits"] 
+            }
+          ]
         },
         { model: Level, as: "programlevel", attributes: ["title", "slugs"] },
         {

@@ -83,20 +83,46 @@ export const getEvents = async (req, res) => {
 
 export const getEventsThisWeek = async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
     const startOfWeek = moment().startOf("isoWeek").format("YYYY-MM-DD");
     const endOfWeek = moment().endOf("isoWeek").format("YYYY-MM-DD");
 
+    // Get total count for pagination
+    const totalCount = await Event.count({
+      where: literal(`
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        BETWEEN '${startOfWeek}' AND '${endOfWeek}'
+      `),
+    });
+
+    // Fetch paginated results
     const events = await Event.findAll({
       where: literal(`
         STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
         BETWEEN '${startOfWeek}' AND '${endOfWeek}'
       `),
-      order: [literal(`STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`)],
+      limit,
+      offset,
+      order: [
+        literal(
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`
+        ),
+      ],
+      subQuery: false, // Ensures pagination is applied correctly
     });
 
     return res.status(200).json({
       message: "success",
       events,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (error) {
     console.error("Error in getEventsThisWeek:", error);
@@ -108,20 +134,46 @@ export const getEventsThisWeek = async (req, res) => {
 
 export const getEventsNextMonth = async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
     const startOfNextMonth = moment().add(1, "months").startOf("month").format("YYYY-MM-DD");
     const endOfNextMonth = moment().add(1, "months").endOf("month").format("YYYY-MM-DD");
 
+    // Get total count for pagination
+    const totalCount = await Event.count({
+      where: literal(`
+        STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
+        BETWEEN '${startOfNextMonth}' AND '${endOfNextMonth}'
+      `),
+    });
+
+    // Fetch paginated results
     const events = await Event.findAll({
       where: literal(`
         STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') 
         BETWEEN '${startOfNextMonth}' AND '${endOfNextMonth}'
       `),
-      order: [literal(`STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`)],
+      limit,
+      offset,
+      order: [
+        literal(
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y/%m/%d') ASC`
+        ),
+      ],
+      subQuery: false, // Ensures pagination is correctly applied
     });
 
     return res.status(200).json({
       message: "success",
       events,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (error) {
     console.error("Error in getEventsNextMonth:", error);

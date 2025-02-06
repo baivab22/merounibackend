@@ -20,8 +20,8 @@ route
   .get("/", getMaterialById)
   .post(
     "/",
-    authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    // authenticateUser,
+    // authorizeRole(["super-admin", "admin", "editor"]),
     createMaterial
   )
   .delete(
