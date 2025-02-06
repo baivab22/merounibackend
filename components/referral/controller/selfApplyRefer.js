@@ -8,8 +8,21 @@ export const createSelfApplication = async (req, res) => {
       student_name,
       student_phone_no,
       student_email,
-      student_document,
+      student_description,
     } = req.body;
+
+    // search email exists or not
+    let item = await Referral.findOne({
+      where: {
+        student_email,
+      },
+    });
+
+    if(item){
+      return status(400).json({
+        message: "Already received you mail"
+      })
+    }
 
     // Create application (without teacher_id)
     const application = await Referral.create({

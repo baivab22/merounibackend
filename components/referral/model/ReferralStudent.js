@@ -34,7 +34,7 @@ const ReferralStudent = sequelize.define(
         isEmail: true,
       },
     },
-    student_document: {
+    student_description: {
       type: DataTypes.STRING,
       allowNull: false,
     },
