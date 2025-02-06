@@ -105,7 +105,6 @@ CREATE TABLE scholarships (
     FOREIGN KEY (author) REFERENCES mu_users(id) ON DELETE CASCADE
 );
 
--- TODO: need to create table
 CREATE TABLE banners (
     id INT AUTO_INCREMENT PRIMARY KEY,
     collegeId INT NOT NULL,  
@@ -204,14 +203,14 @@ CREATE TABLE exams (
     author INT NOT NULL,
     description TEXT,
     level_id INT NOT NULL,
-    affiliation INT NOT NULL,  -- Corrected spelling
-    syllabus TEXT,  -- Added syllabus
-    pastQuestion VARCHAR(255), -- Added pastQuestion
+    affiliation INT NOT NULL, 
+    syllabus TEXT,  
+    pastQuestion VARCHAR(255), 
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (author) REFERENCES mu_users(id) ON DELETE CASCADE,
     FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE CASCADE,
-    FOREIGN KEY (affiliation) REFERENCES university(id) ON DELETE CASCADE  -- Corrected spelling
+    FOREIGN KEY (affiliation) REFERENCES university(id) ON DELETE CASCADE 
 );
 
 -- Exam Details
@@ -438,4 +437,16 @@ create table consultancies(
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     
+ );
+
+ create table contact_us(
+    id int PRIMARY KEY AUTO_INCREMENT not null,
+    fullname varchar(100) not null,
+    email varchar(100) not null unique,
+    subject varchar(100) not null,
+    message text,
+    status ENUM('unread', 'pending', 'read') NOT NULL DEFAULT 'unread',
+
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
  );
