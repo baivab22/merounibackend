@@ -4,7 +4,7 @@ import { sequelize } from "../../../config/database.js";
 import Banner from "../model/BannerModel.js";
 
 const BannerGallery = sequelize.define(
-  "Banner_Gallery",
+  "banner_gallery",
   {
     id: {
       type: DataTypes.INTEGER,

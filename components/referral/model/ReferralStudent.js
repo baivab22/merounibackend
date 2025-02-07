@@ -1,17 +1,17 @@
-import { DataTypes } from "sequelize";
-
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../../config/database.js";
 import Referral from "./ReferralModel.js";
 
-const ReferralStudent = sequelize.define(
-  "refer_student",
+class ReferralStudent extends Model {}
+
+ReferralStudent.init(
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    application_id: {
+    referral_id: { // Fixed foreign key name
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -40,10 +40,14 @@ const ReferralStudent = sequelize.define(
     },
   },
   {
+    sequelize,
     timestamps: true,
+    freezeTableName: true,
+    tableName: "refer_student", // Fixed table name
   }
 );
 
+// Correct associations
 Referral.hasMany(ReferralStudent, { foreignKey: "referral_id" });
 ReferralStudent.belongsTo(Referral, { foreignKey: "referral_id" });
 

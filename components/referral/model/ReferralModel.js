@@ -1,11 +1,11 @@
-import { DataTypes } from "sequelize";
-
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../../config/database.js";
 import College from "../../college/models/CollegeModel.js";
 import User from "../../users/model/UserModel.js";
 
-const Referral = sequelize.define(
-  "Referral",
+class Referral extends Model {}
+
+Referral.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -36,7 +36,7 @@ const Referral = sequelize.define(
   {
     sequelize,
     timestamps: true,
-    freezedTableName: true,
+    freezeTableName: true,
     modelName: "referral",
   }
 );

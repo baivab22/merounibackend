@@ -440,8 +440,9 @@ CREATE TABLE refer_student (
     student_email VARCHAR(255) NOT NULL,
     student_description VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (application_id) REFERENCES referral(id) ON DELETE CASCADE
+    FOREIGN KEY (referral_id) REFERENCES referral(id) ON DELETE CASCADE
 );
+
 
 CREATE TABLE career(
     id INT AUTO_INCREMENT PRIMARY KEY,
