@@ -9,10 +9,31 @@ export const getBanners = async (req, res) => {
     let sort = req.query.sort || "asc";
     const offset = (page - 1) * limit;
 
-    const { count: totalCount, rows: items } = await Banner.findAndCountAll({
+    const { count: totalCount, rows: items } = await College.findAndCountAll({
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],
+      attributes: {
+        exclude: [
+          "name",
+          "slugs",
+          "institute_type",
+          "institute_level",
+          "website_url",
+          "featured_img",
+          "university_id",
+          "author_id",
+          "google_map_url",
+          "description",
+          "content",
+          "createdAt",
+          "updatedAt"
+        ],
+      },
+      include: {
+        model: Banner,
+        include: [BannerGallery],
+      },
     });
 
     const totalPages = Math.ceil(totalCount / limit);
