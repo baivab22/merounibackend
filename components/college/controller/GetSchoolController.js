@@ -1,5 +1,6 @@
 import { Op, Sequelize } from "sequelize";
 import College from "../models/CollegeModel.js";
+import CollegeAddress from "../models/CollegeAddress.js";
 
 export const listSchoolController = async (req, res) => {
   try {
@@ -11,11 +12,15 @@ export const listSchoolController = async (req, res) => {
     let isFeatured = req.query.is_featured;
     let pinned = req.query.pinned;
 
+    let country = req.query.country || "";
+    let state = req.query.state || "";
+    let city = req.query.city || "";
+
     const offset = (page - 1) * limit;
 
     let whereCondition = {
       [Op.and]: [
-        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`)
+        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
       ],
     };
 
@@ -31,11 +36,31 @@ export const listSchoolController = async (req, res) => {
       whereCondition.pinned = pinned === "true" ? 1 : 0;
     }
 
+    // Address filtering conditions
+    let addressCondition = {};
+    if (country) {
+      addressCondition.country = { [Op.like]: `%${country}%` };
+    }
+    if (state) {
+      addressCondition.state = { [Op.like]: `%${state}%` };
+    }
+    if (city) {
+      addressCondition.city = { [Op.like]: `%${city}%` };
+    }
+
     const { count: totalCount, rows: items } = await College.findAndCountAll({
       where: whereCondition,
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],
+      include: [
+        {
+          model: CollegeAddress,
+          as: "address",
+          attributes: ["country", "state", "city"],
+          where: Object.keys(addressCondition).length ? addressCondition : undefined, // Apply only if filters exist
+        },
+      ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);
