@@ -8,12 +8,14 @@ export const authenticateUser = async (req, res, next) => {
   const { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV, ACCESS_TOKEN_EXPIRY } =
     process.env;
 
+    console.log(accessToken);
+
   // 1. Validate Access Token
   if (accessToken) {
     try {
-      const decoded = jwt.verify(accessToken, JWT_TOKEN);
+      const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
       req.user = decoded.data;
-      return next(); // Token is valid, proceed
+      return next();
     } catch (error) {
       if (!(error instanceof jwt.TokenExpiredError)) {
         return res

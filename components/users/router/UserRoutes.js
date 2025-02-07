@@ -20,7 +20,7 @@ const route = express.Router();
 route
   .get(
     "/",
-    // authenticateUser,
+    authenticateUser,
     // authorizeRole(["super-admin", "admin"]),
     ListUsers
   )

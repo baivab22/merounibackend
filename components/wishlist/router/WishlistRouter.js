@@ -5,9 +5,11 @@ import {
   removeFromWishlist,
 } from "../controller/AddOrRemoveWishlist.js";
 
+import { authenticateUser } from "../../../middleware/AuthMiddleware.js";
+
 const router = express.Router();
 
-router.get("/", getUserWishlist);
+router.get("/", authenticateUser, getUserWishlist);
 router.post("/", addToWishlist);
 router.delete("/", removeFromWishlist);
 

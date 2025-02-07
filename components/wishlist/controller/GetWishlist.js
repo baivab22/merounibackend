@@ -5,11 +5,17 @@ export const getUserWishlist = async (req, res) => {
   try {
     const { user_id } = req.query;
 
+    if (!user_id) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
     const items = await Wishlist.findAll({
       where: {
         user_id,
       },
-      include: [{ model: College, attributes: ["id", "name", "slugs", "description"] }],
+      include: [
+        { model: College, attributes: ["id", "name", "slugs", "description"] },
+      ],
     });
 
     return res.status(200).json({
