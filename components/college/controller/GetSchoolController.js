@@ -15,7 +15,7 @@ export const listSchoolController = async (req, res) => {
 
     let whereCondition = {
       [Op.and]: [
-        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`) // Filters only schools
+        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`)
       ],
     };
 

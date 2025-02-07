@@ -22,18 +22,23 @@ export const getColleges = async (req, res) => {
     let isFeatured = req.query.is_featured;
     let pinned = req.query.pinned;
 
+    let country = req.query.country || "";
+    let state = req.query.state || "";
+    let city = req.query.city || "";
+    let degree = req.query.degree || ""; // Degree filter
+
     const offset = (page - 1) * limit;
 
     let whereCondition = {};
+
+    // Filtering by name
     if (search) {
-      whereCondition = {
-        ...whereCondition,
-        name: {
-          [Op.like]: `%${search}%`,
-        },
+      whereCondition.name = {
+        [Op.like]: `%${search}%`,
       };
     }
 
+    // Filtering by isFeatured and pinned
     if (isFeatured !== undefined) {
       whereCondition.isFeatured = isFeatured === "true" ? 1 : 0;
     }
@@ -42,8 +47,23 @@ export const getColleges = async (req, res) => {
       whereCondition.pinned = pinned === "true" ? 1 : 0;
     }
 
-    console.log("Search Query:", search);
-    console.log("Where Condition:", whereCondition); 
+    // Address filtering conditions
+    let addressCondition = {};
+    if (country) {
+      addressCondition.country = { [Op.like]: `%${country}%` };
+    }
+    if (state) {
+      addressCondition.state = { [Op.like]: `%${state}%` };
+    }
+    if (city) {
+      addressCondition.city = { [Op.like]: `%${city}%` };
+    }
+
+    // Degree filtering condition
+    let degreeCondition = {};
+    if (degree) {
+      degreeCondition.title = { [Op.like]: `%${degree}%` }; // Filtering by program title
+    }
 
     const { count: totalCount, rows: items } = await College.findAndCountAll({
       where: whereCondition,
@@ -55,6 +75,24 @@ export const getColleges = async (req, res) => {
           model: CollegeAddress,
           as: "address",
           attributes: ["country", "state", "city"],
+          where: Object.keys(addressCondition).length
+            ? addressCondition
+            : undefined,
+        },
+        {
+          model: CollegeCourse,
+          as: "collegeCourses",
+          attributes: { exclude: ["college_id", "course_id"] },
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["title", "slugs"],
+              where: Object.keys(degreeCondition).length
+                ? degreeCondition
+                : undefined,
+            },
+          ],
         },
       ],
     });
