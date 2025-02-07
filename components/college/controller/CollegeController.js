@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import College from "../models/CollegeModel.js";
 import CollegeAddress from "../models/CollegeAddress.js";
 import CollegeContact from "../models/CollegeContact.js";
@@ -24,7 +26,12 @@ export const getColleges = async (req, res) => {
 
     let whereCondition = {};
     if (search) {
-      whereCondition.name = { [Op.like]: `%${search}%` };
+      whereCondition = {
+        ...whereCondition,
+        name: {
+          [Op.like]: `%${search}%`,
+        },
+      };
     }
 
     if (isFeatured !== undefined) {
@@ -34,6 +41,9 @@ export const getColleges = async (req, res) => {
     if (pinned !== undefined) {
       whereCondition.pinned = pinned === "true" ? 1 : 0;
     }
+
+    console.log("Search Query:", search);
+    console.log("Where Condition:", whereCondition); 
 
     const { count: totalCount, rows: items } = await College.findAndCountAll({
       where: whereCondition,
@@ -90,7 +100,7 @@ export const getCollegeById = async (req, res) => {
           model: CollegeCourse,
           as: "collegeCourses",
           attributes: {
-            exclude: [ "college_id", "course_id"],
+            exclude: ["college_id", "course_id"],
           },
           include: [
             {
