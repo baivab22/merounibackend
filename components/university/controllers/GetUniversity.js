@@ -2,20 +2,46 @@ import { sequelize } from "../../../config/database.js";
 
 export const listAllUniversities = async (req, res) => {
   try {
-    const items = await sequelize.query(`SELECT * FROM university`, {
-      type: sequelize.QueryTypes.SELECT,
-    });
+    let { page, limit } = req.query;
 
-    // let items = await University.findAll();
+    // Default values if not provided
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+
+    const offset = (page - 1) * limit;
+
+    // Fetch paginated results
+    const items = await sequelize.query(
+      `SELECT * FROM university LIMIT :limit OFFSET :offset`,
+      {
+        replacements: { limit, offset },
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    // Fetch total count for pagination info
+    const totalCountResult = await sequelize.query(
+      `SELECT COUNT(*) as total FROM university`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    const totalCount = totalCountResult[0].total;
+    const totalPages = Math.ceil(totalCount / limit);
 
     res.status(200).json({
-      message : "success",
-      items
+      message: "success",
+      currentPage: page,
+      totalPages,
+      totalItems: totalCount,
+      items,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 export const universityProfile = async (req, res) => {
   const { slug } = req.params;
