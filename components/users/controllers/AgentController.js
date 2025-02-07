@@ -2,13 +2,13 @@ import UserModel from "../model/UserModel.js";
 
 export const applyForAgentRole = async (req, res) => {
   try {
-    const loggedInUser = req.user;
+    // const loggedInUser = req.user;
 
-    if (!loggedInUser) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    // if (!loggedInUser) {
+    //   return res.status(401).json({ message: "Unauthorized" });
+    // }
 
-    const user = await UserModel.findByPk(loggedInUser.id);
+    const user = await UserModel.findByPk(req.body.user_id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
