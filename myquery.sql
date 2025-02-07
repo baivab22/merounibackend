@@ -438,7 +438,7 @@ CREATE TABLE refer_student (
     student_name VARCHAR(100) NOT NULL,
     student_phone_no VARCHAR(15) NOT NULL,
     student_email VARCHAR(255) NOT NULL,
-    student_document VARCHAR(255) NOT NULL,
+    student_description VARCHAR(255) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (application_id) REFERENCES referral(id) ON DELETE CASCADE
 );
@@ -491,4 +491,17 @@ create table consultancies(
     status ENUM('unread', 'pending', 'read', 'sent') NOT NULL DEFAULT 'unread', 
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ );
+
+ CREATE TABLE media(
+    id int PRIMARY KEY AUTO_INCREMENT not null,
+    title VARCHAR(255) null,
+    altText VARCHAR(255) null,
+    description VARCHAR(255) null,
+    url VARCHAR(255) null,
+    authorId int,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (authorId) REFERENCES mu_users(id) ON DELETE CASCADE
  );
