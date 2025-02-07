@@ -6,8 +6,10 @@ export const getUserWishlist = async (req, res) => {
     const { user_id } = req.query;
 
     const items = await Wishlist.findAll({
-      where: { user_id },
-      include: [{ model: College, attributes: ["id", "name"] }],
+      where: {
+        user_id,
+      },
+      include: [{ model: College, attributes: ["id", "name", "slugs", "description"] }],
     });
 
     return res.status(200).json({
