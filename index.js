@@ -15,6 +15,7 @@ import "./components/news/model/associations.js";
 import "./components/college/models/associations.js";
 import "./components/career/model/associations.js";
 import "./components/program/model/associations.js";
+import "./components/referral/model/associations.js";
 
 const app = express();
 

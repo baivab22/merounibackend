@@ -443,7 +443,6 @@ CREATE TABLE refer_student (
     FOREIGN KEY (referral_id) REFERENCES referral(id) ON DELETE CASCADE
 );
 
-
 CREATE TABLE career(
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(225) NOT NULL,

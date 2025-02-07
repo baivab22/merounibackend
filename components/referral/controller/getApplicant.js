@@ -1,11 +1,27 @@
 import Referral from "../model/ReferralModel.js";
 import ReferralStudent from "../model/ReferralStudent.js";
 import College from "../../college/models/CollegeModel.js";
+import UserModel from "../../users/model/UserModel.js";
 
 export const getApplications = async (req, res) => {
   try {
     const applications = await Referral.findAll({
-      include: [ReferralStudent],
+      include: [
+        {
+          model: ReferralStudent,
+          as: "referralStudents",
+        },
+        {
+          model: UserModel,
+          as: "referralTeacher",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: College,
+          as: "referralCollege",
+          attributes: ["name", "slugs"],
+        },
+      ],
     });
 
     return res.status(200).json(applications);
