@@ -3,8 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 let { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV } = process.env;
-let REFRESH_TOKEN_EXPIRY = "7d";
-let ACCESS_TOKEN_EXPIRY = "15m";
+let REFRESH_TOKEN_EXPIRY = "14d";
+let ACCESS_TOKEN_EXPIRY = "15s";
 
 export const loginUser = async (req, res) => {
   try {
@@ -65,7 +65,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 1000,
+      maxAge:  15 * 1000,
     });
 
     return res

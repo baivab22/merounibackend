@@ -10,7 +10,7 @@ import { authenticateUser } from "../../../middleware/AuthMiddleware.js";
 const router = express.Router();
 
 router.get("/", authenticateUser, getUserWishlist);
-router.post("/",authenticateUser, addToWishlist);
-router.delete("/",authenticateUser, removeFromWishlist);
+router.post("/", authenticateUser,addToWishlist);
+router.delete("/", authenticateUser,removeFromWishlist);
 
 export default router;
