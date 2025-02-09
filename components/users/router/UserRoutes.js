@@ -9,6 +9,7 @@ import { updateUserProfile } from "../controllers/EditProfile.js";
 import {
   applyForAgentRole,
   reviewAgentRequest,
+  listPendingAgentRole
 } from "../controllers/AgentController.js";
 
 // authorized middleware
@@ -21,12 +22,13 @@ route
   .get(
     "/",
     authenticateUser,
-    // authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["super-admin", "admin"]),
     ListUsers
   )
   .get("/profile", authenticateUser, UserProfile)
   .delete("/", authenticateUser, deleteUser)
   .put("/edit-profile", updateUserProfile)
+  .get("/pending-role", listPendingAgentRole)
   .put("/apply-agent", authenticateUser, applyForAgentRole)
   .put(
     "/review-agent",

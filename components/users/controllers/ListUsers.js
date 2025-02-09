@@ -10,10 +10,10 @@ export const ListUsers = async (req, res) => {
 
     // Use findAndCountAll for efficiency
     const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
-      order: [["id", sort.toUpperCase()]], 
+      order: [["id", sort.toUpperCase()]],
       limit: limit,
       offset: offset,
-      attributes: { exclude: ["password"] }, // Exclude password field for security
+      attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
     });
 
     let totalPages = Math.ceil(totalCount / limit);
@@ -42,7 +42,7 @@ export const UserProfile = async (req, res) => {
     const userId = req.query.id;
 
     const user = await UserModel.findByPk(userId, {
-      attributes: { exclude: ["password"] }
+      attributes: { exclude: ["password"] },
     });
 
     if (!user) {

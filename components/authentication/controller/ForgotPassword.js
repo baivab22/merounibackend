@@ -1,7 +1,12 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+
 import UserModel from "../../users/model/UserModel.js";
 import { sendMail } from "../../../middleware/MainHelper.js";
-import crypto from "crypto";
+import {
+  forgotPasswordHelper,
+  resetPasswordHelper,
+} from "../helper/AuthHelper.js";
 
 const otpStore = new Map();
 
@@ -9,8 +14,12 @@ export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: "Email is required" });
+    let response = forgotPasswordHelper(req.body);
+
+    if (response.error) {
+      return res.status(400).json({
+        message: response.error.details[0].message,
+      });
     }
 
     const user = await UserModel.findOne({ where: { email } });
@@ -47,6 +56,14 @@ export const resetPassword = async (req, res) => {
   try {
     const { email, otp, new_password: newPassword } = req.body;
 
+    let response = resetPasswordHelper(req.body);
+
+    if (response.error) {
+      return res.status(400).json({
+        message: response.error.details[0].message,
+      });
+    }
+
     if (!email || !otp || !newPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -67,7 +84,9 @@ export const resetPassword = async (req, res) => {
     // Update password in database
     await UserModel.update({ password: hashedPassword }, { where: { email } });
 
-    return res.status(200).json({ message: "Password has been reset successfully" });
+    return res
+      .status(200)
+      .json({ message: "Password has been reset successfully" });
   } catch (error) {
     console.error("Error:", error);
     return res.status(500).json({ message: `Server Error: ${error.message}` });

@@ -1,6 +1,8 @@
-import UserModel from "../../users/model/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+import UserModel from "../../users/model/UserModel.js";
+import { loginHelper } from "../helper/AuthHelper.js";
 
 let { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV } = process.env;
 let REFRESH_TOKEN_EXPIRY = "14d";
@@ -9,6 +11,14 @@ let ACCESS_TOKEN_EXPIRY = "15s";
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    let response = loginHelper({ email, password });
+
+    if (response.error) {
+      return res.status(400).json({
+        message: response.error.details[0].message,
+      });
+    }
 
     // 1. Find the user by email
     const user = await UserModel.findOne({
@@ -65,7 +75,7 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: "lax",
-      maxAge:  15 * 1000,
+      maxAge: 15 * 1000,
     });
 
     return res

@@ -3,25 +3,13 @@ import bcrypt from "bcrypt";
 
 export const updateUserProfile = async (req, res) => {
   try {
+    let { id: loggedin_id } = req.user;
     let { user_id } = req.query;
     let updates = req.body;
 
-    if (!user_id) {
+    if (!user_id || user_id !== loggedin_id) {
       return res.status(400).json({ message: "User ID is required" });
     }
-
-    // const loggedInUser = req.user;
-
-    // if (!loggedInUser) {
-    //   return res.status(401).json({ message: "Unauthorized" });
-    // }
-
-    // // Ensure users can only update their own profile
-    // if (loggedInUser.id !== parseInt(user_id)) {
-    //   return res
-    //     .status(403)
-    //     .json({ message: "You can only update your own profile!" });
-    // }
 
     const user = await UserModel.findByPk(user_id);
 

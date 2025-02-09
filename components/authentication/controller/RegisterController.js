@@ -1,29 +1,18 @@
-import Joi from "joi";
 import UserModel from "../../users/model/UserModel.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+
+import { registerHelper } from "../helper/AuthHelper.js";
 import { sendMail } from "../../../middleware/MainHelper.js";
 
 export const RegisterUser = async (req, res) => {
   try {
-    //Validate request data
-    const schema = Joi.object({
-      firstName: Joi.string().min(2).max(30).required(),
-      middleName: Joi.string().allow(""),
-      lastName: Joi.string().min(2).max(30).required(),
-      email: Joi.string().email().required(),
-      phoneNo: Joi.string()
-        .pattern(/^\d{7,15}$/)
-        .required(),
-      password: Joi.string().min(6).required(),
-      roles: Joi.string()
-        .valid("super-admin", "admin", "editor", "teacher", "student")
-        .optional(),
-    });
-
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+    const response = registerHelper(req.body);
+    console.log(response);
+    if (response.error) {
+      return res
+        .status(400)
+        .json({ message: response.error.details[0].message });
     }
 
     const { firstName, lastName, email, phoneNo, password, roles } = req.body;

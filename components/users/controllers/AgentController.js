@@ -1,4 +1,46 @@
+import { Op } from "sequelize";
 import UserModel from "../model/UserModel.js";
+
+export const listPendingAgentRole = async (req, res) => {
+  try {
+    let { q } = req.body;
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    let sort = req.query.sort || "asc";
+
+    let offset = (page - 1) * limit;
+
+    // Use findAndCountAll for efficiency
+    const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
+      order: [["id", sort.toUpperCase()]],
+      limit: limit,
+      offset: offset,
+      where: {
+        pendingRoles: { [Op.like]: [q] },
+      },
+      attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
+    });
+
+    let totalPages = Math.ceil(totalCount / limit);
+    const pagination = {
+      currentPage: page,
+      totalPages: totalPages,
+      limit,
+      totalCount,
+    };
+
+    return res.status(200).json({
+      message: "success",
+      items,
+      pagination,
+    });
+  } catch (error) {
+    console.error("Error fetching for agent role:", error);
+    return res.status(500).json({
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
 
 export const applyForAgentRole = async (req, res) => {
   try {
@@ -62,11 +104,9 @@ export const reviewAgentRequest = async (req, res) => {
         : loggedInUser.role;
 
     if (!loggedInUserRoles?.admin && !loggedInUserRoles?.["super-admin"]) {
-      return res
-        .status(403)
-        .json({
-          message: "Access denied. Only admins can review role requests.",
-        });
+      return res.status(403).json({
+        message: "Access denied. Only admins can review role requests.",
+      });
     }
 
     const user = await UserModel.findByPk(user_id);
