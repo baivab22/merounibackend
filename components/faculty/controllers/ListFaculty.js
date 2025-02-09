@@ -1,4 +1,5 @@
 import Faculty from "../model/FacultyModel.js";
+import UserModel from "../../users/model/UserModel.js";
 
 export const getAllFaculty = async (req, res) => {
   try {
@@ -10,6 +11,16 @@ export const getAllFaculty = async (req, res) => {
     const { count: totalCount, rows: items } = await Faculty.findAndCountAll({
       limit,
       offset,
+      attributes: {
+        exclude: ['author']
+      },
+      include: [
+        {
+          model: UserModel,
+          as: "authorDetails",
+         attributes: ["firstName", "middleName", "lastName"],
+        },
+      ],
       order: [["id", sort.toUpperCase()]],
     });
 
