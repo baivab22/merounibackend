@@ -1,41 +1,88 @@
 import { Op } from "sequelize";
 import UserModel from "../model/UserModel.js";
 
+// export const listPendingAgentRole = async (req, res) => {
+//   try {
+//     let { q } = req.body;
+//     let page = parseInt(req.query.page) || 1;
+//     let limit = parseInt(req.query.limit) || 10;
+//     let sort = req.query.sort || "asc";
+
+//     let offset = (page - 1) * limit;
+
+//     // Use findAndCountAll for efficiency
+//     const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
+//       order: [["id", sort.toUpperCase()]],
+//       limit: limit,
+//       offset: offset,
+//       where: {
+//         pendingRoles: {
+//           [Op.regexp]: `\\"${q}\\"`, // Matches "agent" inside JSON array string
+//         },
+//       },
+//       attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
+//     });
+
+//     let totalPages = Math.ceil(totalCount / limit);
+//     const pagination = {
+//       currentPage: page,
+//       totalPages: totalPages,
+//       limit,
+//       totalCount,
+//     };
+
+//     return res.status(200).json({
+//       message: "success",
+//       items,
+//       pagination,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching for agent role:", error);
+//     return res.status(500).json({
+//       message: `Server Error: ${error.message}`,
+//     });
+//   }
+// };
+
+
+
+import { Sequelize } from "sequelize"; // Import Sequelize in the controller/service file
+// import UserModel from "../models/UserModel.js";
+
 export const listPendingAgentRole = async (req, res) => {
   try {
-    let { q } = req.body;
-    let page = parseInt(req.query.page) || 1;
-    let limit = parseInt(req.query.limit) || 10;
-    let sort = req.query.sort || "asc";
+    let role = req.query.role || "agent";
+    let page = parseInt(req.query.page, 10) || 1;
+    let limit = parseInt(req.query.limit, 10) || 10;
+    let sort = req.query.sort?.toLowerCase() === "desc" ? "DESC" : "ASC";
+
+    if (page < 1) page = 1;
+    if (limit < 1 || limit > 100) limit = 10;
 
     let offset = (page - 1) * limit;
 
-    // Use findAndCountAll for efficiency
     const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
-      order: [["id", sort.toUpperCase()]],
-      limit: limit,
-      offset: offset,
-      where: {
-        pendingRoles: { [Op.like]: [q] },
-      },
+      order: [["id", sort]],
+      limit,
+      offset,
+      where: Sequelize.literal(`JSON_CONTAINS(pending_roles, '"${role}"')`), // Use Sequelize.literal
       attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
     });
 
     let totalPages = Math.ceil(totalCount / limit);
-    const pagination = {
-      currentPage: page,
-      totalPages: totalPages,
-      limit,
-      totalCount,
-    };
 
     return res.status(200).json({
       message: "success",
       items,
-      pagination,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        limit,
+        totalCount,
+      },
     });
   } catch (error) {
-    console.error("Error fetching for agent role:", error);
+    console.error("Error fetching pending agent roles:", error);
     return res.status(500).json({
       message: `Server Error: ${error.message}`,
     });
