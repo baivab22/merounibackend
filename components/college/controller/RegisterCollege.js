@@ -17,6 +17,7 @@ export const createOrUpdateCollege = async (req, res) => {
       id,
       name,
       institute_type,
+      institute_level,
       author_id,
       university_id,
       google_map_url,
@@ -47,6 +48,7 @@ export const createOrUpdateCollege = async (req, res) => {
           name,
           slugs,
           institute_type,
+          institute_level,
           author_id,
           is_featured,
           pinned,
@@ -68,6 +70,7 @@ export const createOrUpdateCollege = async (req, res) => {
           name,
           slugs,
           institute_type,
+          institute_level,
           author_id,
           is_featured,
           pinned,
@@ -165,6 +168,7 @@ export const createOrUpdateCollege = async (req, res) => {
         eligibility_criteria: admission.eligibility_criteria,
         admission_process: admission.admission_process,
         fee_details: admission.fee_details,
+        description: admission.description,
       }));
       await CollegeAdmission.bulkCreate(admissionRecords, { transaction: t });
     }

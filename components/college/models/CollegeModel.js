@@ -21,7 +21,6 @@ College.init(
     isFeatured: {
       type: DataTypes.TINYINT,
       allowNull: true,
-      defaultValue: 0,
       field: "is_featured",
     },
     pinned: {
