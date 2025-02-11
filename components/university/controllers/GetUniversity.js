@@ -2,30 +2,40 @@ import { sequelize } from "../../../config/database.js";
 
 export const listAllUniversities = async (req, res) => {
   try {
-    let { page, limit } = req.query;
+    let { page, limit, q } = req.query; // Add 'q' for the search query
 
     // Default values if not provided
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
+    const searchQuery = q || ""; // Get the search query
 
     const offset = (page - 1) * limit;
 
+    // Base SQL query
+    let sqlQuery = `SELECT * FROM university`;
+    let countQuery = `SELECT COUNT(*) as total FROM university`;
+
+    // Add search condition if a search query is provided
+    if (searchQuery) {
+      const searchCondition = ` WHERE fullname LIKE :searchQuery`;
+      sqlQuery += searchCondition;
+      countQuery += searchCondition;
+    }
+
+    // Add pagination to the main query
+    sqlQuery += ` LIMIT :limit OFFSET :offset`;
+
     // Fetch paginated results
-    const items = await sequelize.query(
-      `SELECT * FROM university LIMIT :limit OFFSET :offset`,
-      {
-        replacements: { limit, offset },
-        type: sequelize.QueryTypes.SELECT,
-      }
-    );
+    const items = await sequelize.query(sqlQuery, {
+      replacements: { limit, offset, searchQuery: `%${searchQuery}%` }, // Add searchQuery to replacements
+      type: sequelize.QueryTypes.SELECT,
+    });
 
     // Fetch total count for pagination info
-    const totalCountResult = await sequelize.query(
-      `SELECT COUNT(*) as total FROM university`,
-      {
-        type: sequelize.QueryTypes.SELECT,
-      }
-    );
+    const totalCountResult = await sequelize.query(countQuery, {
+      replacements: { searchQuery: `%${searchQuery}%` }, // Add searchQuery to replacements
+      type: sequelize.QueryTypes.SELECT,
+    });
 
     const totalCount = totalCountResult[0].total;
     const totalPages = Math.ceil(totalCount / limit);

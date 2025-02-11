@@ -6,8 +6,18 @@ export const getAllScholarships = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
+    const searchQuery = req.query.q || "";
+
+    let whereCondition = {};
+    if (searchQuery) {
+      whereCondition = {
+        name: { [Op.like]: `%${searchQuery}%` },
+      };
+    }
+
     const { count: totalCount, rows: scholarships } =
       await Scholarship.findAndCountAll({
+        where: whereCondition,
         limit,
         offset,
         order: [["applicationDeadline", "ASC"]],

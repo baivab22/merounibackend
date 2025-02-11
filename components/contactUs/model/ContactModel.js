@@ -32,7 +32,7 @@ ContactUs.init(
     status: {
       type: DataTypes.JSON,
       allowNull: false,
-      
+      defaultValue: "unread",
     }
   },
   {
