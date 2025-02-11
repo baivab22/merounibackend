@@ -60,7 +60,7 @@ export const authenticateUser = async (req, res, next) => {
         httpOnly: true,
         secure: NODE_ENV === "production",
         sameSite: "lax",
-        maxAge: 15 * 1000, // 15 seconds
+        maxAge: 24 * 60 * 1000, // 15 seconds
       });
 
       req.user = decodedRefresh.data;
