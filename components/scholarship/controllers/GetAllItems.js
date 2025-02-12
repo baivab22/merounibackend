@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Scholarship from "../model/ScholarshipModel.js";
 
 export const getAllScholarships = async (req, res) => {

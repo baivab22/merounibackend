@@ -37,6 +37,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5000",
   "http://localhost:8888",
+  "https://merouni.com",
 ];
 
 const corsOptions = {

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Material from "../models/MaterialModel.js";
 
 export const getAllMaterials = async (req, res) => {

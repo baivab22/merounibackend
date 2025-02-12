@@ -1,3 +1,4 @@
+import {Op} from "sequelize";
 import Consultancy from "../model/ConsultancyModel.js";
 
 export const listConsultancy = async (req, res) => {
