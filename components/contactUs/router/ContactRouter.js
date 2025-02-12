@@ -20,14 +20,14 @@ route
   .get("/:slugs", listContact)
   .post(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin", "editor"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
     addContactController
   )
   .delete(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin"]),
     deleteContact
   );
 

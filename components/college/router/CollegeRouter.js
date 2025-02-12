@@ -11,14 +11,28 @@ import { listAdmission } from "../controller/GetAdmission.js";
 import { createOrUpdateCollege } from "../controller/RegisterCollege.js";
 import { deleteCollege } from "../controller/DeleteCollege.js";
 
+// authorized middleware
+import { authenticateUser } from "../../../middleware/AuthMiddleware.js";
+import { authorizeRole } from "../../../middleware/AuthorizeRole.js";
+
 const router = express.Router();
 
 router
-  .post("/", createOrUpdateCollege)
+  .post(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor", "agent"]),
+    createOrUpdateCollege
+  )
   .get("/admission", listAdmission)
   .get("/list-school", listSchoolController)
   .get("/", getColleges)
   .get("/:slugs", getCollegeById)
-  .delete("/:id", deleteCollege);
+  .delete(
+    "/:id",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    deleteCollege
+  );
 
 export default router;
