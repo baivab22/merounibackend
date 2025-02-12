@@ -72,7 +72,7 @@ export const createOrUpdateCollege = async (req, res) => {
           author_id,
           is_featured,
           pinned,
-          description: description || '',
+          description: description || "",
           content,
           featured_img,
           college_logo,
@@ -174,9 +174,10 @@ export const createOrUpdateCollege = async (req, res) => {
     await t.commit(); // Commit transaction
 
     return res.status(200).json({
-      message: collegeId
-        ? "College updated successfully!"
-        : "College created successfully!",
+      message:
+        !id || id === "null" || id === "undefined" || id === ""
+          ? "College created successfully!"
+          : "College updated successfully!",
       collegeId,
     });
   } catch (error) {
