@@ -13,11 +13,10 @@ import { authorizeRole } from "../../../middleware/AuthorizeRole.js";
 const route = express.Router();
 
 route.get("/", listNewsletter)
-//   .get("/", getMaterialById)
   .post(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin", "editor"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
     createNewsletter
   )
 //   .delete(

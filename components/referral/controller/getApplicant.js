@@ -5,6 +5,9 @@ import UserModel from "../../users/model/UserModel.js";
 
 export const getApplications = async (req, res) => {
   try {
+    if (req.user.role === "agent") {
+      whereCondition.referral_teacher_id = req.body.user_id; 
+    }
     const applications = await Referral.findAll({
       include: [
         {
@@ -30,6 +33,40 @@ export const getApplications = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getUserReferrals = async (req, res) => {
+  try {
+    let whereCondition = {}; 
+
+    if (req.user.role === "agent") {
+      whereCondition.teacher_id = req.user.id;
+    } else if (req.user.role === "student") {
+      whereCondition.application_type = "self"; 
+    }
+
+    const referrals = await Referral.findAll({
+      where: whereCondition,
+      include: [
+        {
+          model: ReferralStudent,
+          as: "referralStudents",
+          attributes: ["student_name", "student_phone_no", "student_email"],
+        },
+        {
+          model: College,
+          as: "referralCollege",
+          attributes: ["name", "slugs"],
+        },
+      ],
+    });
+
+    return res.status(200).json(referrals);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 
 export const getApplicationsByType = async (req, res) => {
   try {

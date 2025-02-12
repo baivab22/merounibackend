@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getApplications,
+  getUserReferrals,
   getApplicationsByType,
 } from "../controller/getApplicant.js";
 import { createReferredApplication } from "../controller/createReferredApplication.js";
@@ -22,7 +23,6 @@ router.post(
 router.get(
   "/",
   authenticateUser,
-  authenticateUser,
   authorizeRole(["super-admin", "admin", "editor", "agent"]),
   getApplications
 );
@@ -31,6 +31,11 @@ router.get(
   authenticateUser,
   authorizeRole(["super-admin", "admin", "editor", "agent"]),
   getApplicationsByType
+);
+router.get(
+  "/",
+  authenticateUser,
+  getUserReferrals
 );
 
 export default router;

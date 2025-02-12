@@ -17,11 +17,11 @@ const route = express.Router();
 
 route
   .get("/", getAllMaterials)
-  .get("/", getMaterialById)
+  .get("/:id", getMaterialById)
   .post(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin", "editor"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
     createMaterial
   )
   .delete(
