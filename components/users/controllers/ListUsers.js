@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import UserModel from "../model/UserModel.js";
 
 export const ListUsers = async (req, res) => {
@@ -5,11 +6,22 @@ export const ListUsers = async (req, res) => {
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let sort = req.query.sort || "asc";
+    let search = req.query.q;
 
+    let whereCondition = {};
+    if (search) {
+      whereCondition = {
+        [Op.or]: [
+          { email: { [Op.like]: `%${search}%` } },
+          { firstName: { [Op.like]: `%${search}% ` } },
+        ],
+      };
+    }
     let offset = (page - 1) * limit;
 
     // Use findAndCountAll for efficiency
     const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
+      where: whereCondition,
       order: [["id", sort.toUpperCase()]],
       limit: limit,
       offset: offset,

@@ -39,6 +39,11 @@ export const University = sequelize.define('University', {
   type_of_institute: {
     type: DataTypes.ENUM('Public', 'Private'),
   },
+  author_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: "mu_users"
+  },
   description: {
     type: DataTypes.TEXT,
   },

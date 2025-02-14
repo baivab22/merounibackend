@@ -26,6 +26,7 @@ export const createOrUpdateUniversity = async (req, res) => {
       description,
       contact,
       levels,
+      author_id,
       members,
       assets,
       gallery,
@@ -46,6 +47,7 @@ export const createOrUpdateUniversity = async (req, res) => {
           city,
           street,
           postal_code,
+          author_id,
           date_of_establish,
           type_of_institute,
           description,
@@ -64,6 +66,7 @@ export const createOrUpdateUniversity = async (req, res) => {
           city,
           street,
           postal_code,
+          author_id,
           date_of_establish,
           type_of_institute,
           description,
@@ -137,7 +140,7 @@ export const createOrUpdateUniversity = async (req, res) => {
 
     await t.commit();
     res.status(200).json({
-      message: id
+      message:         !id || id === "null" || id === "undefined" || id === ""
         ? "University updated successfully!"
         : "University created successfully!",
       universityId: university.id, // Access the ID from the university instance

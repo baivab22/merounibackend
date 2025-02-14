@@ -47,22 +47,34 @@ export const getColleges = async (req, res) => {
       whereCondition.pinned = pinned === "true" ? 1 : 0;
     }
 
-    // Address filtering conditions
+    // Address filtering conditions (supports multiple values)
     let addressCondition = {};
     if (country) {
-      addressCondition.country = { [Op.like]: `%${country}%` };
+      const countries = country.split(",").map((c) => c.trim());
+      addressCondition.country = {
+        [Op.or]: countries.map((c) => ({ [Op.like]: `%${c}%` })),
+      };
     }
     if (state) {
-      addressCondition.state = { [Op.like]: `%${state}%` };
+      const states = state.split(",").map((s) => s.trim());
+      addressCondition.state = {
+        [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
+      };
     }
     if (city) {
-      addressCondition.city = { [Op.like]: `%${city}%` };
+      const cities = city.split(",").map((c) => c.trim());
+      addressCondition.city = {
+        [Op.or]: cities.map((c) => ({ [Op.like]: `%${c}%` })),
+      };
     }
 
-    // Degree filtering condition
+    // Degree filtering condition (supports multiple values)
     let degreeCondition = {};
     if (degree) {
-      degreeCondition.title = { [Op.like]: `%${degree}%` }; // Filtering by program title
+      const degrees = degree.split(",").map((d) => d.trim());
+      degreeCondition.title = {
+        [Op.or]: degrees.map((d) => ({ [Op.like]: `%${d}%` })),
+      };
     }
 
     const { count: totalCount, rows: items } = await College.findAndCountAll({
