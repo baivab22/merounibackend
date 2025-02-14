@@ -43,7 +43,7 @@ Event.init(
         key: "id",
       },
     },
-    isFeatured: {
+    is_featured: {
       type: DataTypes.TINYINT,
       allowNull: true,
       defaultValue: 0,
