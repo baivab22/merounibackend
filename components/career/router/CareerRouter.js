@@ -25,6 +25,11 @@ route
     createCareer
   )
   .delete("/", authenticateUser, deleteCareer)
-  .put("/", authenticateUser, updateCareer);
+  .put(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    updateCareer
+  );
 
 export default route;

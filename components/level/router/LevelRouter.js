@@ -6,13 +6,32 @@ import { createLevel } from "../controllers/CreateLevel.js";
 import { deleteLevel } from "../controllers/DeleteLevel.js";
 import { updateTag } from "../controllers/UpdateLevel.js";
 
+// authorized middleware
+import { authenticateUser } from "../../../middleware/AuthMiddleware.js";
+import { authorizeRole } from "../../../middleware/AuthorizeRole.js";
+
 const route = express.Router();
 
 route
   .get("/", getAllLevels)
   .get("/", getLevellById)
-  .post("/", createLevel)
-  .delete("/", deleteLevel)
-  .put("/", updateTag);
+  .post(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    createLevel
+  )
+  .delete(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    deleteLevel
+  )
+  .put(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    updateTag
+  );
 
 export default route;

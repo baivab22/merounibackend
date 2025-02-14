@@ -20,14 +20,14 @@ route
   .get("/:slugs", listSingleConsultancy)
   .post(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin", "editor"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
     createOrUpdateConsultancy
   )
   .delete(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin"]),
     deleteConsultancy
   );
 
