@@ -8,7 +8,7 @@ export const deleteCareer = async (req, res) => {
     if (deletedRows === 0) {
       return res.status(404).json({ message: "Career not found" });
     }
-    res.status(204).json({ message: "Career deleted" });
+    res.status(200).json({ message: "Career deleted" });
   } catch (error) {
     console.error("Error deleting Career:", error);
     res.status(500).json({ message: "Server error", error: error.message });

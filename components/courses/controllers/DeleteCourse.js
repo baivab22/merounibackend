@@ -8,7 +8,7 @@ export const deleteCourses = async (req, res) => {
     if (deletedRows === 0) {
       return res.status(404).json({ message: "Courses not found" });
     }
-    res.status(204).json({ message: "Courses deleted" });
+    res.status(200).json({ message: "Courses deleted" });
   } catch (error) {
     console.error("Error deleting Courses:", error);
     res.status(500).json({ message: "Server error", error: error.message });

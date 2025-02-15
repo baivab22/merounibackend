@@ -23,17 +23,17 @@ export const getAllExams = async (req, res) => {
       order: [["id", sort.toUpperCase()]],
       limit,
       offset,
-      // include: [
-      //   { model: Level, attributes: ["id", "title"], as: "level" },
-      //   { model: University, attributes: ["id", "fullname"], as: "university" },
-      //   {
-      //     model: UserModel,
-      //     attributes: ["id", "firstName"],
-      //     as: "authorDetails",
-      //   },
-      //   { model: ExamDetail, as: "exam_details" },
-      //   { model: ApplicationDetail, as: "application_details" },
-      // ],
+      include: [
+        { model: Level, attributes: ["id", "title"], as: "level" },
+        { model: University, attributes: ["id", "fullname"], as: "university" },
+        {
+          model: UserModel,
+          attributes: ["id", "firstName"],
+          as: "authorDetails",
+        },
+        { model: ExamDetail, as: "exam_details" },
+        { model: ApplicationDetail, as: "application_details" },
+      ],
     });
 
     const totalPages = Math.ceil(totalCount / limit);
