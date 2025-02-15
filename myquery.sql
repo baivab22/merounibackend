@@ -457,21 +457,39 @@ CREATE TABLE career(
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 );
 
-create table consultancies(
-    id int PRIMARY KEY AUTO_INCREMENT not null,
-    title varchar(255) not null,
-    slugs varchar(255) not null,
+CREATE TABLE consultancies (
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    slugs VARCHAR(255) NOT NULL unique,
     destination JSON NOT NULL DEFAULT ('[]'),
     address JSON NOT NULL DEFAULT ('[]'),
-    featured_image VARCHAR(255) not null,
-    pinned tinyint default 0,
-    courses JSON NOT NULL DEFAULT ('[]'),
+    featured_image VARCHAR(255) NOT NULL,
+    pinned TINYINT DEFAULT 0,
     status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
     visibility ENUM('public', 'private') NOT NULL DEFAULT 'public',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    
- );
+);
+
+CREATE TABLE consultancy_courses (
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    consultancy_id INT NOT NULL,
+    course_id INT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (consultancy_id) REFERENCES consultancies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE ConsultancyCourses (
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    consultancy_id INT NOT NULL,
+    course_id INT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (consultancy_id) REFERENCES consultancies(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
  create table contact_us(
     id int PRIMARY KEY AUTO_INCREMENT not null,

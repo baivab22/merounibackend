@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import Level from "../model/LevelModel.js";
 
 export const getAllLevels = async (req, res) => {
@@ -6,7 +8,16 @@ export const getAllLevels = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
+    let search = req.query.q || "";
+
+    let whereCondition = {};
+
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
+
     const { count: totalCount, rows: items } = await Level.findAndCountAll({
+      where: whereCondition,
       limit,
       offset,
       order: [["createdAt", "DESC"]],

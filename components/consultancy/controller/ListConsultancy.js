@@ -1,4 +1,5 @@
-import {Op} from "sequelize";
+import { Op } from "sequelize";
+import Course from "../../courses/model/CourseModel.js";
 import Consultancy from "../model/ConsultancyModel.js";
 
 export const listConsultancy = async (req, res) => {
@@ -18,6 +19,14 @@ export const listConsultancy = async (req, res) => {
     const { count: totalCount, rows: items } =
       await Consultancy.findAndCountAll({
         where: whereCondition,
+        include: [
+          {
+            model: Course,
+            as: "consultancyCourses",
+            attributes: ["title"],
+            through: { attributes: [] }, 
+          },
+        ],
         limit,
         offset,
         order: [["id", sort.toUpperCase()]],
