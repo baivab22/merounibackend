@@ -59,8 +59,9 @@ export const authenticateUser = async (req, res, next) => {
       res.cookie("token", newAccessToken, {
         httpOnly: true,
         secure: NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 24 * 60 * 1000, // 15 seconds
+        sameSite: NODE_ENV === "production" ? "none" : "lax",
+        domain: NODE_ENV === "production" ? ".merouni.com" : undefined,
+        maxAge: 24 * 60 * 60 * 1000,
       });
 
       req.user = decodedRefresh.data;

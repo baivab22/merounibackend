@@ -74,8 +74,9 @@ export const loginUser = async (req, res) => {
     res.cookie("token", accessToken, {
       httpOnly: true,
       secure: NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60* 60 * 1000,
+      sameSite: NODE_ENV === "production" ? "none" : "lax", 
+      domain: NODE_ENV === "production" ? ".merouni.com" : undefined,
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     return res

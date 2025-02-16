@@ -7,7 +7,7 @@ import cors from "cors";
  * import user defined components
  */
 import { logger } from "./logger.js";
-import {authenticate} from "./config/database.js";
+import { authenticate } from "./config/database.js";
 authenticate();
 
 import "./components/events/model/associations.js";
@@ -38,17 +38,12 @@ const allowedOrigins = [
   "http://localhost:5000",
   "http://localhost:8888",
   "https://merouni.com",
+  "https://www.merouni.com",
 ];
 
 const corsOptions = {
   credentials: true,
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: allowedOrigins,
   allowedHeader: [
     "Content-Type",
     "Authorization",
