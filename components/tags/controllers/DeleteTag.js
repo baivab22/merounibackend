@@ -6,7 +6,7 @@ export const deleteTag = async (req, res) => {
     if (deletedRows === 0) {
       return res.status(404).json({ message: "Tag not found" });
     }
-    res.status(204).json({ message: "Tag deleted" });
+    res.status(200).json({ message: "Tag deleted" });
   } catch (error) {
     console.error("Error deleting tag:", error);
     res.status(500).json({ message: "Server error", error: error.message });

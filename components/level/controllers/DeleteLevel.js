@@ -6,7 +6,7 @@ export const deleteLevel = async (req, res) => {
     if (deletedRows === 0) {
       return res.status(404).json({ message: "Level not found" });
     }
-    res.status(204).json({ message: "Level deleted" });
+    res.status(200).json({ message: "Level deleted" });
   } catch (error) {
     console.error("Error deleting level:", error);
     res.status(500).json({ message: "Server error", error: error.message });
