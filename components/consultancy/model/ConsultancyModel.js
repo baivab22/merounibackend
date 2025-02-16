@@ -1,6 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../../config/database.js";
-
 import Course from "../../courses/model/CourseModel.js";
 
 class Consultancy extends Model {}
@@ -16,6 +15,7 @@ Consultancy.init(
     title: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     slugs: {
       type: DataTypes.STRING,
@@ -24,10 +24,12 @@ Consultancy.init(
     destination: {
       type: DataTypes.JSON,
       allowNull: true,
+      defaultValue: [],
     },
     address: {
       type: DataTypes.JSON,
       allowNull: false,
+      defaultValue: [],
     },
     featured_image: {
       type: DataTypes.STRING,
@@ -37,25 +39,35 @@ Consultancy.init(
       type: DataTypes.TINYINT,
       defaultValue: 0,
     },
-    courses: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      references: {
-        model: "courses",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      defaultValue: "draft",
+    },
+    visibility: {
+      type: DataTypes.ENUM("public", "private"),
+      defaultValue: "public",
     },
   },
   {
     sequelize,
-    modelName: "consultancy",
+    modelName: "consultancies",
     tableName: "consultancies",
     timestamps: true,
   }
 );
 
-Consultancy.belongsTo(Course, { foreignKey: "courses" });
+Consultancy.belongsToMany(Course, {
+  through: "consultancy_courses",
+  foreignKey: "consultancy_id",
+  otherKey: "course_id",
+  as: "consultancyCourses",
+});
+
+Course.belongsToMany(Consultancy, {
+  through: "consultancy_courses",
+  foreignKey: "course_id",
+  otherKey: "consultancy_id",
+  as: "coursesConsultancy",
+});
 
 export default Consultancy;

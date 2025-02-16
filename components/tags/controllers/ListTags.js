@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import Tag from "../model/TagModel.js";
 
 export const getAllTags = async (req, res) => {
@@ -5,8 +7,16 @@ export const getAllTags = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
+    let search = req.query.q || '';
+
+    let whereCondition = {}
+
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
 
     const { count: totalCount, rows: items } = await Tag.findAndCountAll({
+      where: whereCondition,
       limit,
       offset,
       order: [["createdAt", "DESC"]],
