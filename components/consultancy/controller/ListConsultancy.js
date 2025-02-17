@@ -24,7 +24,7 @@ export const listConsultancy = async (req, res) => {
             model: Course,
             as: "consultancyCourses",
             attributes: ["title"],
-            through: { attributes: [] }, 
+            through: { attributes: [] },
           },
         ],
         limit,
@@ -49,7 +49,17 @@ export const listSingleConsultancy = async (req, res) => {
   try {
     try {
       let { slugs } = req.params;
-      const category = await Consultancy.findOne({ where: { slugs } });
+      const category = await Consultancy.findOne({
+        where: { slugs },
+        include: [
+          {
+            model: Course,
+            as: "consultancyCourses",
+            attributes: ["title"],
+            through: { attributes: [] },
+          },
+        ],
+      });
       if (!category) {
         return res.status(404).json({ message: "Consultancy not found" });
       }

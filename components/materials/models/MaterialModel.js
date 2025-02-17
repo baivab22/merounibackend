@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../../config/database.js';
+import Tag from "../../tags/model/TagModel.js";
 
 class Material extends Model {}
 

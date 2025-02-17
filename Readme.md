@@ -60,6 +60,7 @@ Start the server
 To run this project, you will need to add the following environment variables to your .env file
 
 `PORT`=5000
+
 `VERSION`="/api/v1"
 
 `process.env.NODE_ENV` === "production"

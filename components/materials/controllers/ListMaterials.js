@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import Tag from "../../tags/model/TagModel.js";
 import Material from "../models/MaterialModel.js";
 
 export const getAllMaterials = async (req, res) => {
@@ -35,14 +36,30 @@ export const getAllMaterials = async (req, res) => {
   }
 };
 
-// Get One by ID
 export const getMaterialById = async (req, res) => {
   try {
     const material = await Material.findByPk(req.params.id);
+
     if (!material) {
       return res.status(404).json({ message: "Material not found" });
     }
-    res.status(200).json({ message: "Material retrieved", material });
+
+    // Parse the tags JSON string into an array
+    const tagIds = JSON.parse(material.tags);
+
+    // Fetch tags from the database
+    const tags = await Tag.findAll({
+      where: { id: tagIds },
+      attributes: ['title'], 
+    });
+
+    res.status(200).json({
+      message: "Material retrieved",
+      material: {
+        ...material.toJSON(),
+        tags,
+      },
+    });
   } catch (error) {
     console.error("Error getting material by ID:", error);
     res.status(500).json({ message: "Server error", error: error.message });
