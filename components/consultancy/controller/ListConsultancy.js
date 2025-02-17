@@ -23,7 +23,7 @@ export const listConsultancy = async (req, res) => {
           {
             model: Course,
             as: "consultancyCourses",
-            attributes: ["title"],
+            attributes: ["id", "title"], // Include both id and title
             through: { attributes: [] },
           },
         ],
@@ -31,7 +31,6 @@ export const listConsultancy = async (req, res) => {
         offset,
         order: [["id", sort.toUpperCase()]],
       });
-
     const totalPages = Math.ceil(totalCount / limit);
     return res.status(200).json({
       message: "success",
