@@ -46,6 +46,7 @@ UserModel.init(
       type: DataTypes.JSON,
       allowNull: false,
       defaultValue: { student: false },
+      // roles: super-admin, admin, agent, editor, and student
     },
     pendingRoles: {
       type: DataTypes.JSON,

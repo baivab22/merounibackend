@@ -24,7 +24,12 @@ route
     authorizeRole(["super-admin", "admin", "editor"]),
     createCareer
   )
-  .delete("/", authenticateUser, deleteCareer)
+  .delete(
+    "/",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin"]),
+    deleteCareer
+  )
   .put(
     "/",
     authenticateUser,

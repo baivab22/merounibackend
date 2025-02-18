@@ -18,12 +18,7 @@ const route = express.Router();
 route
   .get("/", listContacts)
   .get("/:slugs", listContact)
-  .post(
-    "/",
-    authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
-    addContactController
-  )
+  .post("/")
   .delete(
     "/",
     authenticateUser,

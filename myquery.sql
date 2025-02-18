@@ -16,7 +16,7 @@ CREATE TABLE mu_users (
 
 CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,    
+    title VARCHAR(255) NOT NULL UNIQUE,    
     slugs VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     author INT NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE tags (
 
 CREATE TABLE blogs (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL UNIQUE,
     slug VARCHAR(255) UNIQUE NOT NULL,
     category INT NOT NULL,
     tags JSON NOT NULL DEFAULT ('[]'),
@@ -77,7 +77,7 @@ CREATE TABLE faculty (
 
 CREATE TABLE materials (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL UNIQUE,
     slug VARCHAR(255) UNIQUE NOT NULL,
     tags JSON NOT NULL DEFAULT ('[]'),
     image VARCHAR(255),
@@ -92,7 +92,8 @@ CREATE TABLE materials (
 
 CREATE TABLE scholarships (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    slugs VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     eligibilityCriteria JSON NOT NULL DEFAULT ('[]'), 
     amount DECIMAL(10,2) NOT NULL,
@@ -103,17 +104,6 @@ CREATE TABLE scholarships (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (author) REFERENCES mu_users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE banners (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    collegeId INT NOT NULL,  
-    author INT NOT NULL,     
-    bannerImage JSON,        
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (collegeId) REFERENCES colleges(id),  
-    FOREIGN KEY (author) REFERENCES mu_users(id)      
 );
 
 CREATE TABLE IF NOT EXISTS courses (
@@ -135,8 +125,8 @@ CREATE TABLE IF NOT EXISTS courses (
 
 CREATE TABLE university (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    fullname VARCHAR(255) NOT NULL,
-    slugs VARCHAR(255) NOT NULL,
+    fullname VARCHAR(255) NOT NULL UNIQUE,
+    slugs VARCHAR(255) NOT NULL UNIQUE,
     country VARCHAR(100),
     state VARCHAR(100),
     city VARCHAR(100),
@@ -472,16 +462,6 @@ CREATE TABLE consultancies (
 );
 
 CREATE TABLE consultancy_courses (
-    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    consultancy_id INT NOT NULL,
-    course_id INT NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (consultancy_id) REFERENCES consultancies(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE ConsultancyCourses (
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     consultancy_id INT NOT NULL,
     course_id INT NOT NULL,

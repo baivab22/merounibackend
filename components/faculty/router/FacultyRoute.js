@@ -24,7 +24,7 @@ route
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["super-admin", "admin"]),
     deleteFaculty
   )
   .put(

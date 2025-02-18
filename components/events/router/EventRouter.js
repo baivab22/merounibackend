@@ -28,7 +28,7 @@ router
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["super-admin", "admin"]),
     deleteEvent
   );
 

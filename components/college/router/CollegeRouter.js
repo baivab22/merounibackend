@@ -31,7 +31,7 @@ router
   .delete(
     "/:id",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["super-admin", "admin"]),
     deleteCollege
   );
 
