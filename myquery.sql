@@ -396,6 +396,7 @@ CREATE TABLE banner_gallery (
     id INT PRIMARY KEY AUTO_INCREMENT,
     banner_id INT,
     size ENUM('small', 'medium', 'large'),
+    is_featured TINYINT default 0,
     url VARCHAR(500),
     FOREIGN KEY (banner_id) REFERENCES banners(id) ON DELETE CASCADE
 );

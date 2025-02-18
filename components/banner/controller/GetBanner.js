@@ -13,26 +13,8 @@ export const getBanners = async (req, res) => {
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],
-      // attributes: {
-      //   exclude: [
-      //     "name",
-      //     "slugs",
-      //     "institute_type",
-      //     "institute_level",
-      //     "website_url",
-      //     "featured_img",
-      //     "university_id",
-      //     "author_id",
-      //     "google_map_url",
-      //     "description",
-      //     "content",
-      //     "createdAt",
-      //     "updatedAt"
-      //   ],
-      // },
       include: {
         model: BannerGallery,
-        //include: [BannerGallery],
       },
     });
 

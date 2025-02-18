@@ -23,6 +23,11 @@ const BannerGallery = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    is_featured: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
+      defaultValue: 0,
+    },
   },
   {
     sequelize,

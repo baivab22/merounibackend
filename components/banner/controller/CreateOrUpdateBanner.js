@@ -23,6 +23,7 @@ export const createBanner = async (req, res) => {
           banner_id: newBanner.id,
           size,
           url,
+          is_featured: banner.is_featured,
         });
       }
     }
