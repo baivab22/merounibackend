@@ -14,7 +14,7 @@ const route = express.Router();
 
 route
   .get("/", getAllTags)
-  .get("/", getTagById)
+  .get("/:id", getTagById)
   .post(
     "/",
     authenticateUser,
