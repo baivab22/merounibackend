@@ -7,9 +7,9 @@ export const getAllTags = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-    let search = req.query.q || '';
+    let search = req.query.q || "";
 
-    let whereCondition = {}
+    let whereCondition = {};
 
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
@@ -36,10 +36,15 @@ export const getAllTags = async (req, res) => {
 
 export const getTagById = async (req, res) => {
   try {
-    const item = await Tag.findByPk(req.query.tag_id);
+    if (!req.params.tag_id) {
+      return res.status(400).json({ message: "Missing tag_id parameter" });
+    }
+
+    const item = await Tag.findByPk(req.params.tag_id);
     if (!item) {
       return res.status(404).json({ message: "Tag not found" });
     }
+
     res.status(200).json({ message: "Tag retrieved", item });
   } catch (error) {
     console.error("Error getting tag by ID:", error);
