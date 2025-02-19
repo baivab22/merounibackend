@@ -3,11 +3,10 @@ import bcrypt from "bcrypt";
 
 export const updateUserProfile = async (req, res) => {
   try {
-    let { id: loggedin_id } = req.user;
     let { user_id } = req.query;
     let updates = req.body;
 
-    if (!user_id || user_id !== loggedin_id) {
+    if (!user_id) {
       return res.status(400).json({ message: "User ID is required" });
     }
 

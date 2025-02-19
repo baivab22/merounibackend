@@ -4,8 +4,17 @@ import Course from "../../courses/model/CourseModel.js";
 
 export const createOrUpdateConsultancy = async (req, res) => {
   try {
-    const { id, title, destination, address, featured_image, pinned, courses } =
-      req.body;
+    const {
+      id,
+      title,
+      destination,
+      address,
+      featured_image,
+      pinned,
+      courses,
+      status,
+      visibility,
+    } = req.body;
 
     let slugs = slug(title);
     const parsedCourses =
@@ -38,6 +47,8 @@ export const createOrUpdateConsultancy = async (req, res) => {
         address,
         featured_image,
         pinned,
+        status,
+        visibility,
       });
     } else {
       consultancy = await Consultancy.create({
@@ -47,6 +58,8 @@ export const createOrUpdateConsultancy = async (req, res) => {
         address,
         featured_image,
         pinned,
+        status,
+        visibility,
       });
     }
 

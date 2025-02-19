@@ -41,7 +41,7 @@ Consultancy.init(
     },
     status: {
       type: DataTypes.ENUM("draft", "published", "archived"),
-      defaultValue: "draft",
+      defaultValue: "published",
     },
     visibility: {
       type: DataTypes.ENUM("public", "private"),

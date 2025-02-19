@@ -1,3 +1,5 @@
+import {Op} from "sequelize";
+
 import { Exam, ExamDetail, ApplicationDetail } from "../model/ExamModel.js";
 import Level from "../../level/model/LevelModel.js";
 import { University } from "../../university/model/UniversityModel.js";

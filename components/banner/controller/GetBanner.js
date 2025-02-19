@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import Banner from "../model/BannerModel.js";
 import BannerGallery from "../model/BannerGallery.js";
 import College from "../../college/models/CollegeModel.js";
@@ -7,9 +9,18 @@ export const getBanners = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     let sort = req.query.sort || "asc";
+    let search = req.query.q || "";
+
     const offset = (page - 1) * limit;
 
+    let whereCondition = {};
+
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
+
     const { count: totalCount, rows: items } = await Banner.findAndCountAll({
+      where: whereCondition,
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],

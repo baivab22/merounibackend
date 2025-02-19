@@ -28,7 +28,7 @@ export const createBanner = async (req, res) => {
       }
     }
 
-    res.status(201).json({ message: "Banners added successfully" });
+    return res.status(201).json({ message: "Banners added successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

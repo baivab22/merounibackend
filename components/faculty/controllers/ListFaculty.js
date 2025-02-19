@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import Faculty from "../model/FacultyModel.js";
 import UserModel from "../../users/model/UserModel.js";
 
@@ -6,19 +8,28 @@ export const getAllFaculty = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     let sort = req.query.sort || "asc";
+    let search = req.query.q || "";
+
     const offset = (page - 1) * limit;
 
+    let whereCondition = {};
+
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
+
     const { count: totalCount, rows: items } = await Faculty.findAndCountAll({
+      where: whereCondition,
       limit,
       offset,
       attributes: {
-        exclude: ['author']
+        exclude: ["author"],
       },
       include: [
         {
           model: UserModel,
           as: "authorDetails",
-         attributes: ["firstName", "middleName", "lastName"],
+          attributes: ["firstName", "middleName", "lastName"],
         },
       ],
       order: [["id", sort.toUpperCase()]],
