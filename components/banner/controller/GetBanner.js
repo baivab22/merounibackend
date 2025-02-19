@@ -23,6 +23,7 @@ export const getBanners = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      distinct: true,
       order: [["id", sort.toUpperCase()]],
       include: {
         model: BannerGallery,

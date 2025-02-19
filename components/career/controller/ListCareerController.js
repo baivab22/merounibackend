@@ -21,6 +21,7 @@ export const listCareerController = async (req, res) => {
     const { count: totalCount, rows: items } =
       await CareerModel.findAndCountAll({
         where: whereCondition,
+        distinct: true,
         order: [["id", sort.toUpperCase()]],
         limit: limit,
         offset: offset,

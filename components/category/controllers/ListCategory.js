@@ -17,6 +17,7 @@ export const getAllCategories = async (req, res) => {
 
     const { count: totalCount, rows: items } = await Category.findAndCountAll({
       where: whereCondition,
+      distinct: true,
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],

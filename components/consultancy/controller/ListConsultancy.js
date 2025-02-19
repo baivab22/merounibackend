@@ -19,11 +19,12 @@ export const listConsultancy = async (req, res) => {
     const { count: totalCount, rows: items } =
       await Consultancy.findAndCountAll({
         where: whereCondition,
+        distinct: true,
         include: [
           {
             model: Course,
             as: "consultancyCourses",
-            attributes: ["id", "title"], // Include both id and title
+            attributes: ["id", "title"], 
             through: { attributes: [] },
           },
         ],
