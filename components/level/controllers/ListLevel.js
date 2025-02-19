@@ -18,6 +18,7 @@ export const getAllLevels = async (req, res) => {
 
     const { count: totalCount, rows: items } = await Level.findAndCountAll({
       where: whereCondition,
+      distinct: true,
       limit,
       offset,
       order: [["createdAt", "DESC"]],

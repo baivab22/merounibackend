@@ -23,6 +23,7 @@ export const ListUsers = async (req, res) => {
     const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
       where: whereCondition,
       order: [["id", sort.toUpperCase()]],
+      distinct: true,
       limit: limit,
       offset: offset,
       attributes: { exclude: ["password", "otp", "otpExpiresAt"] },

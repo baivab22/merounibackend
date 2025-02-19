@@ -21,6 +21,7 @@ export const getAllScholarships = async (req, res) => {
         where: whereCondition,
         limit,
         offset,
+        distinct: true,
         order: [["applicationDeadline", "ASC"]],
       });
 

@@ -18,7 +18,7 @@ export const getAllBlogs = async (req, res) => {
     if (categoryTitle) {
       categoryItem = await Category.findOne({
         where: {
-          title: categoryTitle, // Use category title for lookup
+          title: categoryTitle,
         },
       });
 
@@ -47,6 +47,7 @@ export const getAllBlogs = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      distinct: true,
       order: [["createdAt", "DESC"]],
     });
 

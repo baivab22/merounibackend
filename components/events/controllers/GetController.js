@@ -65,6 +65,7 @@ export const getEvents = async (req, res) => {
 
     const { count: totalCount, rows: items } = await Event.findAndCountAll({
       where: whereCondition,
+      distinct: true,
       limit,
       offset,
       order: [["id", sort.toUpperCase()]],

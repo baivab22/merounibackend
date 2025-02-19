@@ -24,6 +24,7 @@ export const listAdmission = async (req, res) => {
         where: whereCondition,
         limit,
         offset,
+        distinct: true,
         order: [["id", sort]], // Use validated sort
         attributes: {
           exclude: ["college_id", "course_id"],

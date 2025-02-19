@@ -23,6 +23,7 @@ export const getAllCourses = async (req, res) => {
 
     const { count: totalCount, rows: items } = await Course.findAndCountAll({
       where: whereCondition,
+      distinct: true,
       limit,
       offset,
       order: [["createdAt", "DESC"]],

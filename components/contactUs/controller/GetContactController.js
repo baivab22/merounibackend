@@ -9,6 +9,7 @@ export const listContacts = async (req, res) => {
     const { count: totalCount, rows: items } = await ContactUs.findAndCountAll({
       limit,
       offset,
+      distinct: true,
       order: [["createdAt", "DESC"]],
     });
 

@@ -19,6 +19,7 @@ export const getAllTags = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      distinct: true,
       order: [["createdAt", "DESC"]],
     });
 

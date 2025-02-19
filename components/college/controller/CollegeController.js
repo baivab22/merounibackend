@@ -81,6 +81,7 @@ export const getColleges = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      distinct: true,
       order: [["id", sort.toUpperCase()]],
       include: [
         {

@@ -52,6 +52,7 @@ export const listSchoolController = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      distinct: true,
       order: [["id", sort.toUpperCase()]],
       include: [
         {

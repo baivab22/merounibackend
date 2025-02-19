@@ -22,6 +22,7 @@ export const getAllFaculty = async (req, res) => {
       where: whereCondition,
       limit,
       offset,
+      distinct: true,
       attributes: {
         exclude: ["author"],
       },

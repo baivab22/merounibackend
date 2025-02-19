@@ -35,6 +35,7 @@ export const listAllUniversities = async (req, res) => {
     const totalCountResult = await sequelize.query(countQuery, {
       replacements: { searchQuery: `%${searchQuery}%` }, // Add searchQuery to replacements
       type: sequelize.QueryTypes.SELECT,
+
     });
 
     const totalCount = totalCountResult[0].total;

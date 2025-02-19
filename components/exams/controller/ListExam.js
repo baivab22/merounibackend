@@ -25,6 +25,7 @@ export const getAllExams = async (req, res) => {
       order: [["id", sort.toUpperCase()]],
       limit,
       offset,
+      distinct: true,
       include: [
         { model: Level, attributes: ["id", "title"], as: "level" },
         { model: University, attributes: ["id", "fullname"], as: "university" },

@@ -19,6 +19,7 @@ export const getAllMaterials = async (req, res) => {
     const { count: totalCount, rows: materials } =
       await Material.findAndCountAll({
         where: whereCondition,
+        distinct: true,
         limit,
         offset,
         order: [["createdAt", "DESC"]],

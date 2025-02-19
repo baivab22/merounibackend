@@ -33,6 +33,7 @@ export const getAllPrograms = async (req, res) => {
       where: whereConditions,
       limit,
       offset,
+      distinct: true,
       order: [["createdAt", "DESC"]],
     });
 
