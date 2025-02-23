@@ -2,6 +2,7 @@ import express from "express";
 
 // user controller
 import { ListUsers, UserProfile } from "../controllers/ListUsers.js";
+import { ExportUsers } from "../controllers/ExportUserController.js";
 import { deleteUser } from "../controllers/DeleteUser.js";
 import { updateUserProfile } from "../controllers/EditProfile.js";
 
@@ -24,6 +25,12 @@ route
     authenticateUser,
     authorizeRole(["super-admin", "admin"]),
     ListUsers
+  )
+  .get(
+    "/export",
+    // authenticateUser,
+    //authorizeRole(["super-admin", "admin"]),
+    ExportUsers
   )
   .get("/profile", authenticateUser, UserProfile)
   .delete(

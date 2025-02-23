@@ -1,4 +1,6 @@
 import { Op } from "sequelize";
+import { Parser } from "json2csv";
+
 import UserModel from "../model/UserModel.js";
 
 export const ListUsers = async (req, res) => {
