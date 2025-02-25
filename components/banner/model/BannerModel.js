@@ -19,6 +19,11 @@ const Banner = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    website_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "https://merouni.com"
+    },
   },
   {
     tableName: "banners",
