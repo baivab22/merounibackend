@@ -10,15 +10,53 @@ export const getAllCourses = async (req, res) => {
     const offset = (page - 1) * limit;
 
     let search = req.query.q || "";
+    let credits = req.query.credits || "";
+    let duration = req.query.duration || "";
+    let faculty = req.query.faculty || "";
     let isFeatured = req.query.is_featured;
 
     let whereCondition = {};
+
+    // Search filter
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
-    if (isFeatured !== undefined) {
-      whereCondition.isFeatured = isFeatured === "true" ? 1 : 0;
+    // faculty filter
+    if (faculty) {
+      const facultyItem = await Faculty.findOne({
+        where: {
+          title: faculty,
+        },
+      });
+
+      if (facultyItem) {
+        whereCondition.facultyId = facultyItem.id; 
+      } else {
+        console.log("No faculty found with the title:", faculty); 
+      }
+    }
+
+    // Credits filter
+    if (credits) {
+      // Assuming credits is a single value or a range (e.g., "3" or "3-5")
+      if (credits.includes("-")) {
+        const [minCredits, maxCredits] = credits.split("-").map(Number);
+        whereCondition.credits = { [Op.between]: [minCredits, maxCredits] };
+      } else {
+        whereCondition.credits = parseInt(credits);
+      }
+    }
+
+    // Duration filter
+    if (duration) {
+      // Assuming duration is a single value or a range (e.g., "6" or "6-12")
+      if (duration.includes("-")) {
+        const [minDuration, maxDuration] = duration.split("-").map(Number);
+        whereCondition.duration = { [Op.between]: [minDuration, maxDuration] };
+      } else {
+        whereCondition.duration = parseInt(duration);
+      }
     }
 
     const { count: totalCount, rows: items } = await Course.findAndCountAll({
@@ -48,13 +86,13 @@ export const getCourse = async (req, res) => {
     const course = await Course.findOne({
       where: { slugs },
       attributes: {
-        exclude: ['authorId', 'facultyId']
+        exclude: ["authorId", "facultyId"],
       },
       include: [
         {
           model: User,
           as: "courseauthor",
-         attributes: ["firstName", "middleName", "lastName"],
+          attributes: ["firstName", "middleName", "lastName"],
         },
         {
           model: Faculty,

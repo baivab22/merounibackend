@@ -40,7 +40,7 @@ export const getColleges = async (req, res) => {
 
     // Filtering by isFeatured and pinned
     if (isFeatured !== undefined) {
-      whereCondition.isFeatured = isFeatured === "true" ? 1 : 0;
+      whereCondition.is_featured = isFeatured === "true" ? 1 : 0;
     }
 
     if (pinned !== undefined) {
