@@ -387,6 +387,8 @@ CREATE TABLE banners (
     college_id INT,
     title VARCHAR(255),
     website_url VARCHAR(255),
+    display_position VARCHAR(32) NULL,
+    priority INT UNISIGNED DEFAULT 0,
     
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
