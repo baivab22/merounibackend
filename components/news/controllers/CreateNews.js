@@ -1,33 +1,44 @@
 import slug from "slug";
+import Joi from "joi";
 import Blog from "../model/NewsModel.js";
+
+// Joi Schema for validation
+const newsSchema = Joi.object({
+  title: Joi.string().required().messages({
+    "any.required": "Title is required",
+  }),
+
+  category: Joi.number().required().messages({
+    "any.required": "Category is required",
+  }),
+
+  tags: Joi.array().required().messages({
+    "any.required": "Tags are required",
+  }),
+
+  description: Joi.string().optional(),
+  content: Joi.string().optional(),
+  featuredImage: Joi.string().optional(),
+  author: Joi.number().optional(),
+  reactions: Joi.object().optional(),
+  status: Joi.string().optional(),
+  visibility: Joi.string().optional(),
+});
 
 export const createBlog = async (req, res) => {
   try {
-    const {
-      title,
-      category,
-      tags,
-      description,
-      content,
-      featuredImage,
-      author,
-      reactions,
-      status,
-      visibility,
-    } = req.body;
+    const { error, value } = newsSchema.validate(req.body);
 
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
+    // Create new blog post
     const newBlog = await Blog.create({
-      title,
-      slug: slug(title),
-      category,
-      tags,
-      description,
-      content,
-      featuredImage,
-      author,
-      reactions,
-      status,
-      visibility,
+      ...value,
+      slug: slug(value.title),
     });
 
     return res.status(201).json({ message: "Blog created", blog: newBlog });

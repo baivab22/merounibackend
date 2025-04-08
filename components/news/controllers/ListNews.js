@@ -30,13 +30,16 @@ export const getAllBlogs = async (req, res) => {
       }
     }
 
-    let whereCondition = {};
+    let whereCondition = {
+      status: "published",
+      visibility: "public",
+    };
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
     if (categoryItem) {
-      whereCondition.category = categoryItem.id; // Use found category's ID
+      whereCondition.category = categoryItem.id;
     }
 
     if (authorId) {
@@ -74,7 +77,11 @@ export const getBlogById = async (req, res) => {
         slug,
       },
       include: [
-        { model: Category, as: "newsCategory", attributes: ["id","title", "slugs"] },
+        {
+          model: Category,
+          as: "newsCategory",
+          attributes: ["id", "title", "slugs"],
+        },
         {
           model: User,
           as: "newsAuthor",
@@ -93,10 +100,14 @@ export const getBlogById = async (req, res) => {
       },
       where: {
         category: blog.newsCategory.id,
-        slug: { [Op.ne]: slug },  
+        slug: { [Op.ne]: slug },
       },
       include: [
-        { model: Category, as: "newsCategory", attributes: ["id","title", "slugs"] },
+        {
+          model: Category,
+          as: "newsCategory",
+          attributes: ["id", "title", "slugs"],
+        },
         {
           model: User,
           as: "newsAuthor",
@@ -109,7 +120,7 @@ export const getBlogById = async (req, res) => {
     res.status(200).json({
       message: "Blog retrieved",
       blog,
-     similarBlogs,
+      similarBlogs,
     });
   } catch (error) {
     console.error("Error getting blog by ID:", error);

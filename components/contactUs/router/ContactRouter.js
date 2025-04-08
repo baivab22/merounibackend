@@ -18,7 +18,7 @@ const route = express.Router();
 route
   .get("/", listContacts)
   .get("/:slugs", listContact)
-  .post("/")
+  .post("/", addContactController)
   .delete(
     "/",
     authenticateUser,

@@ -30,7 +30,7 @@ ContactUs.init(
       allowNull: true,
     },
     status: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false,
       defaultValue: "unread",
     }
