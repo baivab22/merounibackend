@@ -13,6 +13,7 @@ export const getAllBlogs = async (req, res) => {
     let search = req.query.q || "";
     let categoryTitle = req.query.category_title;
     let authorId = req.query.author_id;
+    let is_featured = req.query.is_featured;
 
     let categoryItem;
     if (categoryTitle) {
@@ -40,6 +41,10 @@ export const getAllBlogs = async (req, res) => {
 
     if (categoryItem) {
       whereCondition.category = categoryItem.id;
+    }
+
+    if (is_featured) {
+      whereCondition.is_featured = is_featured;
     }
 
     if (authorId) {

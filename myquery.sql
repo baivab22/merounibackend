@@ -45,6 +45,7 @@ CREATE TABLE blogs (
     content TEXT NOT NULL,
     featuredImage VARCHAR(255) NOT NULL,
     author INT NOT NULL,
+    is_featured TINYINT DEFAULT 0,
     reactions JSON NOT NULL DEFAULT ('{}'),
     status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
     visibility ENUM('public', 'private') NOT NULL DEFAULT 'public',

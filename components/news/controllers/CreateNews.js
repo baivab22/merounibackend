@@ -19,6 +19,7 @@ const newsSchema = Joi.object({
   description: Joi.string().optional(),
   content: Joi.string().optional(),
   featuredImage: Joi.string().optional(),
+  is_featured: Joi.number().default(0),
   author: Joi.number().optional(),
   reactions: Joi.object().optional(),
   status: Joi.string().optional(),

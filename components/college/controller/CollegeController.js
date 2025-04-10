@@ -25,7 +25,8 @@ export const getColleges = async (req, res) => {
     let country = req.query.country || "";
     let state = req.query.state || "";
     let city = req.query.city || "";
-    let degree = req.query.degree || ""; // Degree filter
+    let degree = req.query.discipline || "";
+    let university = req.query.university || "";
 
     const offset = (page - 1) * limit;
 
@@ -111,6 +112,13 @@ export const getColleges = async (req, res) => {
           model: University,
           as: "university",
           attributes: ["fullname", "slugs"],
+          where: university
+            ? {
+                slugs: {
+                  [Op.like]: `%${university}%`,
+                },
+              }
+            : undefined,
         },
       ],
     });
