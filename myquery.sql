@@ -356,7 +356,8 @@ CREATE TABLE college_admissions (
 
 CREATE TABLE college_gallery(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    images JSON NOT NULL default ('[]'),
+    file_type VARCHAR(255) NOT null,
+    file_url VARCHAR(255) NOT null,
     college_id INT,
 
     FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE

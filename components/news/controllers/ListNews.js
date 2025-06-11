@@ -14,6 +14,8 @@ export const getAllBlogs = async (req, res) => {
     let categoryTitle = req.query.category_title;
     let authorId = req.query.author_id;
     let is_featured = req.query.is_featured;
+    let status = req.query.status;
+    let visibility = req.query.visibility;
 
     let categoryItem;
     if (categoryTitle) {
@@ -32,8 +34,8 @@ export const getAllBlogs = async (req, res) => {
     }
 
     let whereCondition = {
-      status: "published",
-      visibility: "public",
+      status: status || "published",
+      visibility: visibility || "public",
     };
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };

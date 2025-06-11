@@ -14,7 +14,11 @@ CollegeGallery.init(
         key: "id",
       },
     },
-    img_url: {
+    file_type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    file_url: {
       type: DataTypes.STRING,
       allowNull: false,
     },

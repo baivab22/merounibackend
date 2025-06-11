@@ -129,9 +129,10 @@ export const createOrUpdateCollege = async (req, res) => {
         transaction: t,
       });
 
-      const galleryRecords = images.map((url) => ({
+      const galleryRecords = images.map((value) => ({
         college_id: collegeId,
-        img_url: url,
+        file_url: value.url,
+        file_type: value.file_type || "image",
       }));
       await CollegeGallery.bulkCreate(galleryRecords, { transaction: t });
     }
