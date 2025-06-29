@@ -7,7 +7,7 @@ import {
   UniversityMember,
   UniversityAsset,
   UniversityGallery,
-  UniversityCourses,
+  UniversityProgram,
 } from "../../university/model/UniversityModel.js";
 
 export const createOrUpdateUniversity = async (req, res) => {
@@ -27,7 +27,7 @@ export const createOrUpdateUniversity = async (req, res) => {
       description,
       contact,
       levels,
-      courses,
+      programs,
       author_id,
       members,
       assets,
@@ -102,15 +102,15 @@ export const createOrUpdateUniversity = async (req, res) => {
       );
     }
 
-    if (courses?.length) {
-      await UniversityCourses.destroy({
+    if (programs?.length) {
+      await UniversityProgram.destroy({
         where: { university_id: university.id },
         transaction: t,
       });
-      await UniversityCourses.bulkCreate(
-        courses.map((course_id) => ({
+      await UniversityProgram.bulkCreate(
+        programs.map((program_id) => ({
           university_id: university.id,
-          course_id,
+          program_id,
         })),
         { transaction: t }
       );

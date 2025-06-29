@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { sequelize } from "../../../config/database.js";
 
 import Level from "../../level/model/LevelModel.js";
-import Course from "../../courses/model/CourseModel.js";
+import Program from "../../program/model/ProgramModel.js";
 
 export const University = sequelize.define(
   "University",
@@ -123,8 +123,8 @@ export const UniversityLevel = sequelize.define(
   }
 );
 
-export const UniversityCourses = sequelize.define(
-  "UniversityCourses",
+export const UniversityProgram = sequelize.define(
+  "UniversityProgram",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -139,17 +139,17 @@ export const UniversityCourses = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    course_id: {
+    program_id: {
       // Assuming you have a 'levels' table
       type: DataTypes.INTEGER,
       references: {
-        model: Course, // Your Levels model
+        model: Program, // Your Levels model
         key: "id",
       },
     },
   },
   {
-    tableName: "university_courses",
+    tableName: "university_programs",
     timestamps: false,
   }
 );
@@ -265,11 +265,11 @@ UniversityLevel.belongsTo(University, {
   as: "university",
   foreignKey: "university_id",
 });
-University.hasMany(UniversityCourses, {
-  as: "university_courses",
+University.hasMany(UniversityProgram, {
+  as: "university_programs",
   foreignKey: "university_id",
 });
-UniversityCourses.belongsTo(University, {
+UniversityProgram.belongsTo(University, {
   as: "university",
   foreignKey: "university_id",
 });

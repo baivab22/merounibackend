@@ -171,13 +171,13 @@ CREATE TABLE university_members (
 );
 
 -- University Course Table
-CREATE TABLE university_courses (
+CREATE TABLE university_programs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     university_id INT,
-    course_id INT,
+    program_id INT,
 
     FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE,
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+    FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE CASCADE
 );
 
 -- Assets Table
