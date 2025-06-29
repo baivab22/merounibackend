@@ -7,6 +7,7 @@ import {
   UniversityMember,
   UniversityAsset,
   UniversityGallery,
+  UniversityCourses,
 } from "../../university/model/UniversityModel.js";
 
 export const createOrUpdateUniversity = async (req, res) => {
@@ -26,6 +27,7 @@ export const createOrUpdateUniversity = async (req, res) => {
       description,
       contact,
       levels,
+      courses,
       author_id,
       members,
       assets,
@@ -100,6 +102,20 @@ export const createOrUpdateUniversity = async (req, res) => {
       );
     }
 
+    if (courses?.length) {
+      await UniversityCourses.destroy({
+        where: { university_id: university.id },
+        transaction: t,
+      });
+      await UniversityCourses.bulkCreate(
+        courses.map((course_id) => ({
+          university_id: university.id,
+          course_id,
+        })),
+        { transaction: t }
+      );
+    }
+
     if (members?.length) {
       await UniversityMember.destroy({
         where: { university_id: university.id },
@@ -140,9 +156,10 @@ export const createOrUpdateUniversity = async (req, res) => {
 
     await t.commit();
     res.status(200).json({
-      message:         !id || id === "null" || id === "undefined" || id === ""
-        ? "University updated successfully!"
-        : "University created successfully!",
+      message:
+        !id || id === "null" || id === "undefined" || id === ""
+          ? "University updated successfully!"
+          : "University created successfully!",
       universityId: university.id, // Access the ID from the university instance
     });
   } catch (error) {

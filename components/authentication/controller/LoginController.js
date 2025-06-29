@@ -6,7 +6,7 @@ import { loginHelper } from "../helper/AuthHelper.js";
 
 let { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV } = process.env;
 let REFRESH_TOKEN_EXPIRY = "14d";
-let ACCESS_TOKEN_EXPIRY = "15s";
+let ACCESS_TOKEN_EXPIRY = "7d";
 
 export const loginUser = async (req, res) => {
   try {
@@ -74,7 +74,7 @@ export const loginUser = async (req, res) => {
     res.cookie("token", accessToken, {
       httpOnly: true,
       secure: NODE_ENV === "production",
-      sameSite: NODE_ENV === "production" ? "none" : "lax", 
+      sameSite: NODE_ENV === "production" ? "none" : "lax",
       domain: NODE_ENV === "production" ? ".merouni.com" : undefined,
       maxAge: 24 * 60 * 60 * 1000,
     });

@@ -18,6 +18,7 @@ export const createOrUpdateProgram = async (req, res) => {
     const {
       id,
       title,
+      code,
       author,
       faculty_id,
       duration,
@@ -78,6 +79,7 @@ export const createOrUpdateProgram = async (req, res) => {
       const newProgram = await Program.create(
         {
           title,
+          code,
           slugs: slug(title),
           author,
           faculty_id,
@@ -108,6 +110,7 @@ export const createOrUpdateProgram = async (req, res) => {
       await Program.update(
         {
           title,
+          code,
           slugs: slug(title),
           author,
           faculty_id,

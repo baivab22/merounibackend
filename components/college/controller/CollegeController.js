@@ -109,6 +109,10 @@ export const getColleges = async (req, res) => {
           ],
         },
         {
+          model: CollegeGallery,
+          as: "collegeGallery"
+        },
+        {
           model: University,
           as: "university",
           attributes: ["fullname", "slugs"],

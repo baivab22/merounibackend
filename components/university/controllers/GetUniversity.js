@@ -35,7 +35,6 @@ export const listAllUniversities = async (req, res) => {
     const totalCountResult = await sequelize.query(countQuery, {
       replacements: { searchQuery: `%${searchQuery}%` }, // Add searchQuery to replacements
       type: sequelize.QueryTypes.SELECT,
-
     });
 
     const totalCount = totalCountResult[0].total;
@@ -53,7 +52,6 @@ export const listAllUniversities = async (req, res) => {
   }
 };
 
-
 export const universityProfile = async (req, res) => {
   const { slug } = req.params;
 
@@ -64,7 +62,8 @@ export const universityProfile = async (req, res) => {
       { replacements: [slug], type: sequelize.QueryTypes.SELECT }
     );
 
-    if (!university) return res.status(404).json({ error: "University not found" });
+    if (!university)
+      return res.status(404).json({ error: "University not found" });
 
     let id = university.id;
 
@@ -77,6 +76,12 @@ export const universityProfile = async (req, res) => {
     //  Get Levels
     const levels = await sequelize.query(
       `SELECT level_id FROM university_levels WHERE university_id = ?`,
+      { replacements: [id], type: sequelize.QueryTypes.SELECT }
+    );
+
+    //  Get Levels
+    const courses = await sequelize.query(
+      `SELECT course_id FROM university_courses WHERE university_id = ?`,
       { replacements: [id], type: sequelize.QueryTypes.SELECT }
     );
 
@@ -102,10 +107,11 @@ export const universityProfile = async (req, res) => {
     const universityData = {
       ...university,
       contact: contact[0] || null,
-      levels: levels.map(level => level.level_id),
+      levels: levels.map((level) => level.level_id),
+      courses: courses.map((course) => course.course_id),
       members,
       assets: assets || null,
-      gallery: gallery.map(img => img.image_url),
+      gallery: gallery.map((img) => img.image_url),
     };
 
     res.status(200).json(universityData);
@@ -113,4 +119,3 @@ export const universityProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-

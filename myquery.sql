@@ -170,6 +170,16 @@ CREATE TABLE university_members (
     FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE
 );
 
+-- University Course Table
+CREATE TABLE university_courses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    university_id INT,
+    course_id INT,
+
+    FOREIGN KEY (university_id) REFERENCES university(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
 -- Assets Table
 CREATE TABLE university_assets (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -233,6 +243,7 @@ CREATE TABLE application_details (
 CREATE TABLE programs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL UNIQUE,
+    code VARCHAR(50) NOT NULL UNIQUE,
     slugs VARCHAR(255) NOT NULL UNIQUE,
     author INT NOT NULL,
     faculty_id INT NOT NULL,

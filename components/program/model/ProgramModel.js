@@ -10,6 +10,11 @@ Program.init(
       allowNull: false,
       unique: true,
     },
+    code: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
     slugs: {
       type: DataTypes.STRING,
       unique: true,
