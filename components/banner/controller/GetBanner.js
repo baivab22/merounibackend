@@ -10,15 +10,23 @@ export const getBanners = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     let sort = req.query.sort || "asc";
     let search = req.query.q || "";
+    const filter = req.query.filter || "active"; // "active" or "all"
 
     const offset = (page - 1) * limit;
 
     let whereCondition = {};
 
+    // Search condition
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
+    // Filter condition for non-expired banners
+    if (filter === "active") {
+      whereCondition.date_of_expiry = { [Op.gte]: new Date() }; // Date should be in the future
+    }
+
+    // Fetch banners with the filter and pagination
     const { count: totalCount, rows: items } = await Banner.findAndCountAll({
       where: whereCondition,
       limit,

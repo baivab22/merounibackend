@@ -4,8 +4,14 @@ import College from "../../college/models/CollegeModel.js";
 
 export const createBanner = async (req, res) => {
   try {
-    const { collegeId, bannerImage, website_url, display_position, priority } =
-      req.body;
+    const {
+      collegeId,
+      bannerImage,
+      website_url,
+      display_position,
+      priority,
+      date_of_expiry,
+    } = req.body;
 
     // Check if the college exists
     const college = await College.findByPk(collegeId);
@@ -20,6 +26,7 @@ export const createBanner = async (req, res) => {
         website_url,
         display_position,
         priority,
+        date_of_expiry,
       });
 
       for (const [size, url] of Object.entries(banner.gallery)) {

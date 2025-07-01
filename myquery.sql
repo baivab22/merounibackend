@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS courses (
   slugs VARCHAR(255) UNIQUE,
   code VARCHAR(255) UNIQUE NOT NULL,
   description TEXT,
-  credits INT NOT NULL,
+  credits DECIMAL(10,2 ) NOT NULL,
   duration INT NOT NULL,
   syllabus JSON,  
   authorId INT NOT NULL,
@@ -248,7 +248,7 @@ CREATE TABLE programs (
     author INT NOT NULL,
     faculty_id INT NOT NULL,
     duration VARCHAR(50),
-    credits INT,
+    credits DECIMAL(10,2),
     level_id INT NOT NULL,
     language VARCHAR(100),
     eligibility_criteria TEXT,
@@ -402,6 +402,7 @@ CREATE TABLE banners (
     website_url VARCHAR(255),
     display_position VARCHAR(32) NULL,
     priority INT UNISIGNED DEFAULT 0,
+    date_of_expiry TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL 30 DAY)
     
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

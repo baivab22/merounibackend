@@ -79,9 +79,12 @@ export const universityProfile = async (req, res) => {
       { replacements: [id], type: sequelize.QueryTypes.SELECT }
     );
 
-    //  Get programs
+    // Get programs with titles
     const programs = await sequelize.query(
-      `SELECT program_id FROM university_program WHERE university_id = ?`,
+      `SELECT p.id, p.title 
+   FROM university_programs up
+   JOIN programs p ON up.program_id = p.id
+   WHERE up.university_id = ?`,
       { replacements: [id], type: sequelize.QueryTypes.SELECT }
     );
 
@@ -108,7 +111,7 @@ export const universityProfile = async (req, res) => {
       ...university,
       contact: contact[0] || null,
       levels: levels.map((level) => level.level_id),
-      programs: programs.map((program) => program.program_id),
+      programs: programs.map((p) => p.title),
       members,
       assets: assets || null,
       gallery: gallery.map((img) => img.image_url),

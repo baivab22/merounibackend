@@ -22,9 +22,9 @@ const Banner = sequelize.define(
     website_url: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: "https://merouni.com"
+      defaultValue: "https://merouni.com",
     },
-    display_position:{
+    display_position: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -32,7 +32,15 @@ const Banner = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-    }
+    },
+    date_of_expiry: {
+      type: DataTypes.DATE,
+      defaultValue: () => {
+        const now = new Date();
+        now.setDate(now.getDate() + 30);
+        return now;
+      },
+    },
   },
   {
     tableName: "banners",
