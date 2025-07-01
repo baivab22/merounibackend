@@ -1,7 +1,10 @@
 import express from "express";
 import { getBanners, getBannersById } from "../controller/GetBanner.js";
 import { createBanner } from "../controller/CreateOrUpdateBanner.js";
-import { deleteBanner, deleteBannerGalleryItem } from "../controller/DeleteBanner.js";
+import {
+  deleteBanner,
+  deleteBannerGalleryItem,
+} from "../controller/DeleteBanner.js";
 
 // authorized middleware
 import { authenticateUser } from "../../../middleware/AuthMiddleware.js";
@@ -21,13 +24,13 @@ router
   .delete(
     "/:id",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["super-admin", "admin", "editor"]),
     deleteBanner
   )
   .delete(
     "/:galleryId/delete",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["super-admin", "admin", "editor"]),
     deleteBannerGalleryItem
   );
 

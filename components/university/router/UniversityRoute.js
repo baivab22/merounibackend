@@ -26,7 +26,7 @@ route
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["super-admin", "admin", "editor"]),
     deleteUniversity
   );
 

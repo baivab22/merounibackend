@@ -1,4 +1,4 @@
-import { Model, DataTypes,Sequelize } from "sequelize";
+import { Model, DataTypes, Sequelize } from "sequelize";
 
 import { sequelize } from "../../../config/database.js";
 
@@ -47,6 +47,22 @@ UserModel.init(
       allowNull: false,
       defaultValue: { student: false },
       // roles: super-admin, admin, agent, editor, and student
+      validate: {
+        isValidRoles(value) {
+          const allowedRoles = [
+            "super-admin",
+            "admin",
+            "agent",
+            "editor",
+            "student",
+          ];
+          const keys = Object.keys(value || {});
+          const isValid = keys.every((role) => allowedRoles.includes(role));
+          if (!isValid) {
+            throw new Error("Invalid role(s) assigned");
+          }
+        },
+      },
     },
     pendingRoles: {
       type: DataTypes.JSON,

@@ -20,7 +20,7 @@ router.get("/:slugs", getExam);
 router.delete(
   "/:id",
   authenticateUser,
-  authorizeRole(["super-admin", "admin"]),
+  authorizeRole(["super-admin", "admin", "editor"]),
   deleteExam
 );
 
