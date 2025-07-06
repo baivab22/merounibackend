@@ -39,7 +39,7 @@ route
     authorizeRole(["super-admin", "admin"]),
     deleteUser
   )
-  .put("/edit-profile", authenticateUser, updateUserProfile)
+  .put("/edit-profile", updateUserProfile)
   .get(
     "/pending-role",
     authenticateUser,
