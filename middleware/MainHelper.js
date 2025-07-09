@@ -2,13 +2,15 @@ import nodemailer from "nodemailer";
 
 // Configure your transporter
 const transporter = nodemailer.createTransport({
-  host: "mail.chiyagallery.com",
+  host: "mail.merouni.com",
   port: 465,
   secure: true,
   auth: {
     user: process.env.EMAIL,
     pass: process.env.PASSWORD,
   },
+  debug: true,
+  logger: true,
 });
 
 // Function to send email

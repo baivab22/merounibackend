@@ -3,6 +3,7 @@ import {
   getApplications,
   getUserReferrals,
   getApplicationsByType,
+  getCollegeApplications,
 } from "../controller/getApplicant.js";
 import { createReferredApplication } from "../controller/createReferredApplication.js";
 import { createSelfApplication } from "../controller/selfApplyRefer.js";
@@ -32,10 +33,13 @@ router.get(
   authorizeRole(["super-admin", "admin", "editor", "agent"]),
   getApplicationsByType
 );
-router.get(
-  "/",
-  authenticateUser,
-  getUserReferrals
-);
+router
+  .get("/", authenticateUser, getUserReferrals)
+  .get(
+    "/college-student/:college_id",
+    authorizeRole(["super-admin", "admin", "college-admin"]),
+    authenticateUser,
+    getCollegeApplications
+  );
 
 export default router;

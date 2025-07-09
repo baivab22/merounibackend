@@ -18,7 +18,14 @@ export const registerHelper = (data) => {
     password: Joi.string().min(6).required(),
     roles: Joi.string()
       .default("student")
-      .valid("super-admin", "admin", "editor", "teacher", "student")
+      .valid(
+        "super-admin",
+        "admin",
+        "editor",
+        "teacher",
+        "student",
+        "college-admin"
+      )
       .optional(""),
     phoneNo: Joi.number().required(),
   });

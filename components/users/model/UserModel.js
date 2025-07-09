@@ -46,7 +46,7 @@ UserModel.init(
       type: DataTypes.JSON,
       allowNull: false,
       defaultValue: { student: false },
-      // roles: super-admin, admin, agent, editor, and student
+      // roles: super-admin, admin, agent, editor, college-admin, and student
       validate: {
         isValidRoles(value) {
           const allowedRoles = [
@@ -55,6 +55,7 @@ UserModel.init(
             "agent",
             "editor",
             "student",
+            "college-admin",
           ];
           const keys = Object.keys(value || {});
           const isValid = keys.every((role) => allowedRoles.includes(role));

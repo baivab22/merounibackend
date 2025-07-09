@@ -3,21 +3,16 @@ import { roleHelper } from "../../authentication/helper/RoleHelper.js";
 
 export const deleteUser = async (req, res) => {
   try {
-    let { id, role } = req.user;
-    let {user_id} = req.body;
+    let { user_id, role } = req.body;
 
-    if (!id) {
+    if (!user_id) {
       return res.status(400).json({ message: "User ID is required" });
-    }
-
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
     }
 
     // Get parsed roles using the helper function
     const loggedInUserRoles = roleHelper(role);
 
-    console.log(`Pre-role: ${role} \n Post Role: ${loggedInUserRoles}`)
+    console.log(`Pre-role: ${role} \n Post Role: ${loggedInUserRoles}`);
 
     if (!loggedInUserRoles) {
       return res.status(500).json({ message: "Invalid role format" });

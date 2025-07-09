@@ -46,7 +46,7 @@ export const RegisterUser = async (req, res) => {
         lastName,
         email,
         phoneNo,
-        roles: { student: false },
+        roles: roles ?? { student: false },
         password: hashedPassword,
         otp,
         otpExpiresAt,
