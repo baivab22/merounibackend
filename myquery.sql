@@ -304,6 +304,7 @@ CREATE TABLE colleges (
     is_featured TINYINT DEFAULT 0,
     featured_img VARCHAR(255) NOT NULL,
     college_logo VARCHAR(255) NOT NULL,
+    college_broucher VARCHAR(255) NOT NULL,
     pinned TINYINT DEFAULT 0,
     description varchar(255) null,
     content text not null,
