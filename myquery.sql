@@ -325,6 +325,16 @@ CREATE TABLE college_addresses (
     FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE
 );
 
+CREATE TABLE college_facility(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    college_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    icon VARCHAR(255) NOT NULL, 
+
+    FOREIGN KEY (college_id) REFERENCES colleges(id) ON DELETE CASCADE
+);
+
 CREATE TABLE college_contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     college_id INT NOT NULL,

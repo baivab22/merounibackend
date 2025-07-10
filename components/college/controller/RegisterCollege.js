@@ -8,6 +8,7 @@ import CollegeCourse from "../models/CollegeCourse.js";
 import CollegeMember from "../models/CollegeMember.js";
 import CollegeAdmission from "../models/CollegeAdmission.js";
 import CollegeGallery from "../models/CollegeGallery.js";
+import CollegeFacility from "../models/CollegeFacility.js";
 
 export const createOrUpdateCollege = async (req, res) => {
   const t = await sequelize.transaction(); // Start transaction
@@ -27,6 +28,7 @@ export const createOrUpdateCollege = async (req, res) => {
       address,
       contacts,
       courses,
+      facilities,
       members,
       is_featured,
       pinned,
@@ -120,6 +122,22 @@ export const createOrUpdateCollege = async (req, res) => {
         course_id: courseId,
       }));
       await CollegeCourse.bulkCreate(courseRecords, { transaction: t });
+    }
+
+    // **UPDATE OR CREATE FACILITY**
+    if (facilities && facilities.length > 0) {
+      await CollegeFacility.destroy({
+        where: { college_id: collegeId },
+        transaction: t,
+      });
+
+      const courseFacility = facilities.map((value) => ({
+        college_id: collegeId,
+        title: value.title,
+        description: value.description,
+        icon: value.icon,
+      }));
+      await CollegeFacility.bulkCreate(courseFacility, { transaction: t });
     }
 
     // **UPDATE OR CREATE GALLERY**
