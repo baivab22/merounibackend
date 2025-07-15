@@ -10,6 +10,7 @@ import CollegeGallery from "../models/CollegeGallery.js";
 import Program from "../../program/model/ProgramModel.js";
 import User from "../../users/model/UserModel.js";
 import { University } from "../../university/model/UniversityModel.js";
+import CollegeFacility from "../models/CollegeFacility.js";
 
 // Get All Colleges
 export const getColleges = async (req, res) => {
@@ -110,7 +111,7 @@ export const getColleges = async (req, res) => {
         },
         {
           model: CollegeGallery,
-          as: "collegeGallery"
+          as: "collegeGallery",
         },
         {
           model: University,
@@ -149,6 +150,11 @@ export const getCollegeById = async (req, res) => {
         exclude: ["author_id", "university_id"],
       },
       include: [
+        {
+          model: CollegeFacility,
+          as: "collegeFacility",
+          attributes: ["title", "description", "icon"],
+        },
         {
           model: CollegeAddress,
           as: "collegeAddress",

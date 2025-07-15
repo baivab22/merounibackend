@@ -47,7 +47,7 @@ Course.init(
       type: DataTypes.TINYINT,
       allowNull: true,
       defaultValue: 0,
-      field: "is_featured"
+      field: "is_featured",
     },
     authorId: {
       type: DataTypes.INTEGER,
@@ -66,6 +66,10 @@ Course.init(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+    featured_image: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {

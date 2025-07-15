@@ -26,7 +26,12 @@ CollegeFacility.init(
       allowNull: false,
     },
   },
-  { sequelize, modelName: "college_facility", timestamps: false }
+  {
+    sequelize,
+    modelName: "college_facility",
+    timestamps: false,
+    freezeTableName: true,
+  }
 );
 
 College.hasOne(CollegeFacility, { foreignKey: "college_id", as: "facility" });

@@ -34,6 +34,10 @@ Faculty.init(
       },
       onDelete: "CASCADE",
     },
+    featured_image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize,

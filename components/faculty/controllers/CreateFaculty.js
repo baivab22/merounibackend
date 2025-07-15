@@ -3,13 +3,14 @@ import Faculty from "../model/FacultyModel.js";
 
 export const createFaculty = async (req, res) => {
   try {
-    const { title, description, author } = req.body;
+    const { title, description, featured_image, author } = req.body;
 
     await Faculty.create({
       title,
       slugs: slug(title),
       description,
       author,
+      featured_image,
     });
 
     return res.status(201).json({
