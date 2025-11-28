@@ -1,0 +1,69 @@
+import ProgramService from "../../services/program/Program.service.js";
+
+const programService = new ProgramService();
+
+class ProgramController {
+  static async listPrograms(req, res) {
+    try {
+      const { items, pagination } = await programService.listPrograms(
+        req.query
+      );
+
+      return res.status(200).json({
+        message: "success",
+        items,
+        pagination,
+      });
+    } catch (error) {
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
+
+  static async getProgram(req, res) {
+    try {
+      const program = await programService.getProgram(req.params.slugs);
+      return res.status(200).json(program);
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Server error" : error.message,
+      });
+    }
+  }
+
+  static async createOrUpdateProgram(req, res) {
+    try {
+      const programId = await programService.createOrUpdateProgram(req.body);
+      return res.status(200).json({
+        message: req.body.id
+          ? "Program updated successfully!"
+          : "Program created successfully!",
+        programId,
+      });
+    } catch (error) {
+      console.error("Sequelize Validation Error:", error);
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
+
+  static async deleteProgram(req, res) {
+    try {
+      const { id } = req.params;
+      await programService.deleteProgram(id);
+      return res.status(200).json({ message: "Program deleted successfully!" });
+    } catch (error) {
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
+}
+
+export default ProgramController;

@@ -1,0 +1,46 @@
+import express from "express";
+
+import ReferralController from "../controllers/referral/Referral.controller.js";
+import { authenticateUser } from "../middlewares/Auth.middleware.js";
+import { authorizeRole } from "../middlewares/AuthorizeRole.js";
+
+const router = express.Router();
+
+router.post("/self-apply", ReferralController.createSelfApplication);
+router.post(
+  "/agent-apply",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  ReferralController.createReferredApplication
+);
+router.get(
+  "/",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  ReferralController.getApplications
+);
+router.get(
+  "/user/referrals",
+  authenticateUser,
+  ReferralController.getUserReferrals
+);
+router.get(
+  "/type/:type",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  ReferralController.getApplicationsByType
+);
+router.get(
+  "/college/:college_id",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "college-admin"]),
+  ReferralController.getCollegeApplications
+);
+router.get(
+  "/college/:college_id/type/:type",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "college-admin"]),
+  ReferralController.getCollegeApplicationsByType
+);
+
+export default router;

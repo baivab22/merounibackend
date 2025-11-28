@@ -1,0 +1,77 @@
+// import library function
+import express from "express";
+
+// instance for route of express
+const router = express.Router();
+
+import contactRoute from "./Contact.route.js";
+router.use("/contact-us", contactRoute);
+
+import newsletterRoute from "./Newsletter.route.js";
+router.use("/newsletter", newsletterRoute);
+
+import HomeController from "../controllers/home/Home.controller.js";
+router.get("/search", HomeController.search);
+
+// import user-defined components
+import userRoute from "./User.route.js";
+router.use("/users", userRoute);
+
+import consultancyRoute from "./Consultancy.route.js";
+router.use("/consultancy", consultancyRoute);
+
+import categoryRoute from "./Category.route.js";
+router.use("/category", categoryRoute);
+
+import tagRoute from "./Tag.route.js";
+router.use("/tag", tagRoute);
+
+import newsRoute from "./News.route.js";
+router.use("/blogs", newsRoute);
+
+import levelRoute from "./Level.route.js";
+router.use("/level", levelRoute);
+
+import facultyRoute from "./Faculty.route.js";
+router.use("/faculty", facultyRoute);
+
+import materialRoute from "./Material.route.js";
+router.use("/material", materialRoute);
+
+import scholarshipRoute from "./Scholarship.route.js";
+router.use("/scholarship", scholarshipRoute);
+
+import universityRoute from "./University.route.js";
+router.use("/university", universityRoute);
+
+import coursesRoute from "./Course.route.js";
+router.use("/course", coursesRoute);
+
+import programRoute from "./Program.route.js";
+router.use("/program", programRoute);
+
+import examRoute from "./Exam.route.js";
+router.use("/exam", examRoute);
+
+import collegeRoute from "./College.route.js";
+router.use("/college", collegeRoute);
+
+import eventRoute from "./Event.route.js";
+router.use("/event", eventRoute);
+
+import bannerRoute from "./Banner.route.js";
+router.use("/banner", bannerRoute);
+
+import wishlistRoute from "./Wishlist.route.js";
+router.use("/wishlist", wishlistRoute);
+
+import referralRoute from "./Referral.route.js";
+router.use("/referral", referralRoute);
+
+import careerRoute from "./Career.route.js";
+router.use("/career", careerRoute);
+
+import authRoute from "./Auth.route.js";
+router.use("/auth", authRoute);
+
+export default router;
