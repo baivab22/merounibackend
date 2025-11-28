@@ -6,7 +6,7 @@ export const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   port: DB_PORT,
   host: DB_HOST,
   dialect: DB_DIALECT,
-  sync: true,
+  sync: process.env.NODE_ENV === "production" ? false : true,
 });
 
 export const authenticate = async () => {
