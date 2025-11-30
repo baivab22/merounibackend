@@ -3,6 +3,13 @@ import express from "express";
 import CollegeController from "../controllers/college/College.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
+import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import {
+  paginationSchema,
+  collegeSlugParamSchema,
+  collegeIdParamSchema,
+  createOrUpdateCollegeSchema,
+} from "../validators/college/College.validator.js";
 
 const router = express.Router();
 
@@ -11,16 +18,34 @@ router
     "/",
     authenticateUser,
     authorizeRole(["super-admin", "admin", "editor", "agent"]),
+    requestValidator(createOrUpdateCollegeSchema, "body"),
     CollegeController.createOrUpdateCollege
   )
-  .get("/admission", CollegeController.listAdmissions)
-  .get("/list-school", CollegeController.listSchools)
-  .get("/", CollegeController.listColleges)
-  .get("/:slugs", CollegeController.getCollegeBySlug)
+  .get(
+    "/admission",
+    requestValidator(paginationSchema, "query"),
+    CollegeController.listAdmissions
+  )
+  .get(
+    "/list-school",
+    requestValidator(paginationSchema, "query"),
+    CollegeController.listSchools
+  )
+  .get(
+    "/",
+    requestValidator(paginationSchema, "query"),
+    CollegeController.listColleges
+  )
+  .get(
+    "/:slugs",
+    requestValidator(collegeSlugParamSchema, "params"),
+    CollegeController.getCollegeBySlug
+  )
   .delete(
     "/:id",
     authenticateUser,
     authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidator(collegeIdParamSchema, "params"),
     CollegeController.deleteCollege
   );
 

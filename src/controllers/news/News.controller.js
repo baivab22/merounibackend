@@ -1,28 +1,6 @@
-import Joi from "joi";
-
 import NewsService from "../../services/news/News.service.js";
 
 const newsService = new NewsService();
-
-const newsSchema = Joi.object({
-  title: Joi.string().required().messages({
-    "any.required": "Title is required",
-  }),
-  category: Joi.number().required().messages({
-    "any.required": "Category is required",
-  }),
-  tags: Joi.array().required().messages({
-    "any.required": "Tags are required",
-  }),
-  description: Joi.string().optional(),
-  content: Joi.string().optional(),
-  featuredImage: Joi.string().optional(),
-  is_featured: Joi.number().default(0),
-  author: Joi.number().optional(),
-  reactions: Joi.object().optional(),
-  status: Joi.string().optional(),
-  visibility: Joi.string().optional(),
-});
 
 class NewsController {
   static async listBlogs(req, res) {
@@ -62,22 +40,16 @@ class NewsController {
 
   static async createBlog(req, res) {
     try {
-      const { error, value } = newsSchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({
-          message: error.details[0].message,
-        });
-      }
-
-      const newBlog = await newsService.createBlog(value);
+      const newBlog = await newsService.createBlog(req.body);
 
       return res.status(201).json({ message: "Blog created", blog: newBlog });
-    } catch (err) {
-      console.error("Error creating blog:", err);
-      return res
-        .status(500)
-        .json({ message: "Server error", error: err.message });
+    } catch (error) {
+      console.error("Error creating blog:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
     }
   }
 

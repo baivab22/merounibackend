@@ -8,7 +8,7 @@ import {
   forgotPasswordHelper,
   resetPasswordHelper,
 } from "../../validators/authentication/Auth.validator.js";
-import { sendMail } from "../../middlewares/MainHelper.js";
+import { sendMail } from "../../utils/Mail.util.js";
 import AuthService from "../../services/auth/Auth.service.js";
 
 const {
@@ -25,7 +25,7 @@ const authService = new AuthService();
 class AuthController {
   static async registerUser(req, res) {
     try {
-      const response = registerHelper(req.body);
+      const response = await registerHelper(req.body);
       if (response.error) {
         return res
           .status(400)
@@ -60,7 +60,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
 
-      let response = loginHelper({ email, password });
+      let response = await loginHelper({ email, password });
 
       if (response.error) {
         return res.status(400).json({
@@ -212,7 +212,7 @@ class AuthController {
     try {
       const { email } = req.body;
 
-      let response = forgotPasswordHelper(req.body);
+      let response = await forgotPasswordHelper(req.body);
 
       if (response.error) {
         return res.status(400).json({
@@ -250,7 +250,7 @@ class AuthController {
     try {
       const { email, otp, new_password: newPassword } = req.body;
 
-      let response = resetPasswordHelper(req.body);
+      let response = await resetPasswordHelper(req.body);
 
       if (response.error) {
         return res.status(400).json({

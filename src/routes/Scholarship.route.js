@@ -3,28 +3,54 @@ import express from "express";
 import ScholarshipController from "../controllers/scholarship/Scholarship.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
+import {
+  requestValidator,
+  requestValidatorMultiple,
+} from "../middlewares/RequestValidator.middleware.js";
+import {
+  paginationSchema,
+  scholarshipIdParamSchema,
+  createScholarshipSchema,
+  updateScholarshipQuerySchema,
+  updateScholarshipBodySchema,
+  deleteScholarshipQuerySchema,
+} from "../validators/scholarship/Scholarship.validator.js";
 
 const route = express.Router();
 
 route
-  .get("/", ScholarshipController.listScholarships)
-  .get("/:id", ScholarshipController.getScholarship)
+  .get(
+    "/",
+    requestValidator(paginationSchema, "query"),
+    ScholarshipController.listScholarships
+  )
+  .get(
+    "/:id",
+    requestValidator(scholarshipIdParamSchema, "params"),
+    ScholarshipController.getScholarship
+  )
   .post(
     "/",
     authenticateUser,
     authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidator(createScholarshipSchema, "body"),
     ScholarshipController.createScholarship
   )
   .delete(
     "/",
     authenticateUser,
     authorizeRole(["super-admin", "admin"]),
+    requestValidator(deleteScholarshipQuerySchema, "query"),
     ScholarshipController.deleteScholarship
   )
   .put(
     "/",
     authenticateUser,
     authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidatorMultiple([
+      { schema: updateScholarshipQuerySchema, property: "query" },
+      { schema: updateScholarshipBodySchema, property: "body" },
+    ]),
     ScholarshipController.updateScholarship
   );
 

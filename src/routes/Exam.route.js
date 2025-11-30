@@ -3,21 +3,38 @@ import express from "express";
 import ExamController from "../controllers/exam/Exam.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
+import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import {
+  paginationSchema,
+  examSlugParamSchema,
+  examIdParamSchema,
+  createOrUpdateExamSchema,
+} from "../validators/exam/Exam.validator.js";
 
 const router = express.Router();
 
-router.get("/", ExamController.listExams);
+router.get(
+  "/",
+  requestValidator(paginationSchema, "query"),
+  ExamController.listExams
+);
 router.post(
   "/",
   authenticateUser,
   authorizeRole(["super-admin", "admin", "editor"]),
+  requestValidator(createOrUpdateExamSchema, "body"),
   ExamController.createOrUpdateExam
 );
-router.get("/:slugs", ExamController.getExam);
+router.get(
+  "/:slugs",
+  requestValidator(examSlugParamSchema, "params"),
+  ExamController.getExam
+);
 router.delete(
   "/:id",
   authenticateUser,
   authorizeRole(["super-admin", "admin", "editor"]),
+  requestValidator(examIdParamSchema, "params"),
   ExamController.deleteExam
 );
 

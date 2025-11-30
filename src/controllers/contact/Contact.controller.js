@@ -1,19 +1,4 @@
-import Joi from "joi";
-
 import ContactService from "../../services/contact/Contact.service.js";
-
-const contactSchema = Joi.object({
-  fullname: Joi.string().required().messages({
-    "any.required": "Fullname is required",
-  }),
-  email: Joi.string().email().required().messages({
-    "any.required": "Email is required",
-  }),
-  subject: Joi.string().required().messages({
-    "any.required": "Subject is required",
-  }),
-  message: Joi.string().optional(),
-});
 
 const contactService = new ContactService();
 
@@ -53,23 +38,15 @@ class ContactController {
 
   static async addContact(req, res) {
     try {
-      const { error, value } = contactSchema.validate(req.body);
-
-      if (error) {
-        return res.status(400).json({
-          message: error.details[0].message,
-        });
-      }
-
-      const data = await contactService.createContact(value);
+      const data = await contactService.createContact(req.body);
 
       return res.status(201).json({
         message: "Added Successfully",
         data,
       });
-    } catch (err) {
+    } catch (error) {
       return res.status(500).json({
-        message: err.message || "Internal Server Error",
+        message: error.message || "Internal Server Error",
       });
     }
   }

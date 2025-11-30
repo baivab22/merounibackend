@@ -1,50 +1,101 @@
-import Joi from "joi";
+import * as yup from "yup";
 
-export const loginHelper = (data) => {
-  let schema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
+export const loginHelper = async (data) => {
+  const schema = yup.object({
+    email: yup.string().email().required(),
+    password: yup.string().min(6).required(),
   });
 
-  return schema.validate(data);
+  try {
+    const value = await schema.validate(data, { abortEarly: false });
+    return { error: null, value };
+  } catch (error) {
+    return {
+      error: {
+        details: error.errors?.map((msg) => ({ message: msg })) || [
+          { message: error.message },
+        ],
+      },
+      value: null,
+    };
+  }
 };
 
-export const registerHelper = (data) => {
-  let schema = Joi.object({
-    firstName: Joi.string().required(),
-    middleName: Joi.string().optional(),
-    lastName: Joi.string().required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required(),
-    roles: Joi.string()
-      .default("student")
-      .valid(
+export const registerHelper = async (data) => {
+  const schema = yup.object({
+    firstName: yup.string().required(),
+    middleName: yup.string().optional(),
+    lastName: yup.string().required(),
+    email: yup.string().email().required(),
+    password: yup.string().min(6).required(),
+    roles: yup
+      .string()
+      .oneOf([
         "super-admin",
         "admin",
         "editor",
         "teacher",
         "student",
-        "college-admin"
-      )
-      .optional(""),
-    phoneNo: Joi.number().required(),
+        "college-admin",
+      ])
+      .default("student")
+      .optional(),
+    phoneNo: yup.number().required(),
   });
 
-  return schema.validate(data);
+  try {
+    const value = await schema.validate(data, { abortEarly: false });
+    return { error: null, value };
+  } catch (error) {
+    return {
+      error: {
+        details: error.errors?.map((msg) => ({ message: msg })) || [
+          { message: error.message },
+        ],
+      },
+      value: null,
+    };
+  }
 };
 
-export const forgotPasswordHelper = (data) => {
-  let schema = Joi.object({
-    email: Joi.string().email().required(),
+export const forgotPasswordHelper = async (data) => {
+  const schema = yup.object({
+    email: yup.string().email().required(),
   });
-  return schema.validate(data);
+
+  try {
+    const value = await schema.validate(data, { abortEarly: false });
+    return { error: null, value };
+  } catch (error) {
+    return {
+      error: {
+        details: error.errors?.map((msg) => ({ message: msg })) || [
+          { message: error.message },
+        ],
+      },
+      value: null,
+    };
+  }
 };
 
-export const resetPasswordHelper = (data) => {
-  let schema = Joi.object({
-    email: Joi.string().email().required(),
-    otp: Joi.number().required(),
-    new_password: Joi.string().required(),
+export const resetPasswordHelper = async (data) => {
+  const schema = yup.object({
+    email: yup.string().email().required(),
+    otp: yup.number().required(),
+    new_password: yup.string().required(),
   });
-  return schema.validate(data);
+
+  try {
+    const value = await schema.validate(data, { abortEarly: false });
+    return { error: null, value };
+  } catch (error) {
+    return {
+      error: {
+        details: error.errors?.map((msg) => ({ message: msg })) || [
+          { message: error.message },
+        ],
+      },
+      value: null,
+    };
+  }
 };

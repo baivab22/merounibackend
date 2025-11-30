@@ -3,28 +3,46 @@ import express from "express";
 import BannerController from "../controllers/banner/Banner.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
+import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import {
+  paginationSchema,
+  bannerIdParamSchema,
+  galleryIdParamSchema,
+  createBannerSchema,
+} from "../validators/banner/Banner.validator.js";
 
 const router = express.Router();
 
 router
   .post(
     "/",
-    // authenticateUser,
-    // authorizeRole(["super-admin", "admin", "editor"]),
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidator(createBannerSchema, "body"),
     BannerController.createBanner
   )
-  .get("/", BannerController.getBanners)
-  .get("/:id", BannerController.getBannersById)
+  .get(
+    "/",
+    requestValidator(paginationSchema, "query"),
+    BannerController.getBanners
+  )
+  .get(
+    "/:id",
+    requestValidator(bannerIdParamSchema, "params"),
+    BannerController.getBannersById
+  )
   .delete(
     "/:id",
     authenticateUser,
     authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidator(bannerIdParamSchema, "params"),
     BannerController.deleteBanner
   )
   .delete(
     "/:galleryId/delete",
     authenticateUser,
     authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidator(galleryIdParamSchema, "params"),
     BannerController.deleteBannerGalleryItem
   );
 

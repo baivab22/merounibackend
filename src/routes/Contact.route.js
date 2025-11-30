@@ -3,17 +3,37 @@ import express from "express";
 import ContactController from "../controllers/contact/Contact.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
+import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import {
+  paginationSchema,
+  createContactSchema,
+  contactEmailQuerySchema,
+  idQuerySchema,
+} from "../validators/contact/Contact.validator.js";
 
 const route = express.Router();
 
 route
-  .get("/", ContactController.listContacts)
-  .get("/:slugs", ContactController.getContact)
-  .post("/", ContactController.addContact)
+  .get(
+    "/",
+    requestValidator(paginationSchema, "query"),
+    ContactController.listContacts
+  )
+  .get(
+    "/:slugs",
+    requestValidator(contactEmailQuerySchema, "query"),
+    ContactController.getContact
+  )
+  .post(
+    "/",
+    requestValidator(createContactSchema, "body"),
+    ContactController.addContact
+  )
   .delete(
     "/",
     authenticateUser,
     authorizeRole(["super-admin", "admin"]),
+    requestValidator(idQuerySchema, "query"),
     ContactController.deleteContact
   );
 
