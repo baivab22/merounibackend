@@ -90,6 +90,36 @@ class CollegeController {
       return res.status(500).json({ error: error.message });
     }
   }
+
+  static async getCollegeByInstitutionUser(req, res) {
+    try {
+      const college = await collegeService.getCollegeByInstitutionUser(
+        req.user
+      );
+      return res.status(200).json({ item: college });
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({ error: error.message });
+    }
+  }
+
+  static async updateCollegeByInstitutionUser(req, res) {
+    try {
+      const { collegeId, isNew } =
+        await collegeService.updateCollegeByInstitutionUser(req.user, req.body);
+      return res.status(200).json({
+        message: isNew
+          ? "College created successfully!"
+          : "College updated successfully!",
+        collegeId,
+      });
+    } catch (error) {
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: error.message || "Server error" });
+    }
+  }
 }
 
 export default CollegeController;

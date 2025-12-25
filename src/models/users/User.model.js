@@ -56,6 +56,7 @@ UserModel.init(
             "editor",
             "student",
             "college-admin",
+            "institution",
           ];
           const keys = Object.keys(value || {});
           const isValid = keys.every((role) => allowedRoles.includes(role));
@@ -79,6 +80,17 @@ UserModel.init(
       type: DataTypes.DATE,
       allowNull: true,
       field: "otp_expiry_time",
+    },
+    createdByAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: "created_by_admin",
+    },
+    collegeId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "college_id",
     },
     createdAt: {
       type: DataTypes.DATE,

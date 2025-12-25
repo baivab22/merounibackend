@@ -137,7 +137,7 @@ class UniversityService {
         gallery,
       } = payload;
 
-      const slugs = slug(fullname);
+      const slugs = fullname ? slug(fullname) : undefined;
 
       let university;
 

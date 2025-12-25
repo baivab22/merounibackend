@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { Op, Sequelize } from "sequelize";
 import { Parser } from "json2csv";
 
@@ -9,7 +9,7 @@ class UserService {
   async listUsers(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
-    const sort = (query.sort || "asc").toUpperCase();
+    const sort = (query.sort || "desc").toUpperCase();
     const search = query.q;
 
     const whereCondition = {};
@@ -24,7 +24,7 @@ class UserService {
 
     const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
       where: whereCondition,
-      order: [["id", sort]],
+      order: [["createdAt", sort]],
       distinct: true,
       limit,
       offset,
@@ -283,6 +283,51 @@ class UserService {
     }
 
     await user.update({ roles, pendingRoles });
+    return user;
+  }
+
+  async createCollegeCredentials(payload) {
+    const { firstName, lastName, email, password, phoneNo, collegeId } =
+      payload;
+
+    if (!firstName || !lastName || !email || !password || !phoneNo) {
+      const error = new Error("All fields are required");
+      error.status = 400;
+      throw error;
+    }
+
+    // Check if user with email already exists
+    const existingUser = await UserModel.findOne({ where: { email } });
+    if (existingUser) {
+      const error = new Error("User with this email already exists");
+      error.status = 400;
+      throw error;
+    }
+
+    // Check if user with phone already exists
+    const existingPhone = await UserModel.findOne({ where: { phoneNo } });
+    if (existingPhone) {
+      const error = new Error("User with this phone number already exists");
+      error.status = 400;
+      throw error;
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user with institution role, created_by_admin flag, and college_id
+    const user = await UserModel.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      phoneNo,
+      roles: { institution: true },
+      createdByAdmin: true,
+      collegeId: collegeId || null,
+    });
+
     return user;
   }
 }

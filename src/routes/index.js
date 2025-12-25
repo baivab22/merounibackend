@@ -71,7 +71,13 @@ router.use("/referral", referralRoute);
 import careerRoute from "./Career.route.js";
 router.use("/career", careerRoute);
 
+import vacancyRoute from "./Vacancy.route.js";
+router.use("/vacancy", vacancyRoute);
+
 import authRoute from "./Auth.route.js";
 router.use("/auth", authRoute);
+
+import analyticsRoute from "./Analytics.route.js";
+router.use("/analytics", analyticsRoute);
 
 export default router;

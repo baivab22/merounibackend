@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 import UserModel from "../../models/users/User.model.js";
@@ -25,13 +25,16 @@ class AuthService {
       const otp = crypto.randomInt(100000, 999999).toString();
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-      await UserModel.create(
+      const user = await UserModel.create(
         {
           firstName,
           lastName,
           email,
           phoneNo,
-          roles: roles ?? { student: false },
+          // Default role as student on registration if no roles are provided
+          // This ensures every newly registered user starts with student role = true
+          roles:
+            roles && Object.keys(roles).length > 0 ? roles : { student: true },
           password: hashedPassword,
           otp,
           otpExpiresAt,
@@ -41,7 +44,7 @@ class AuthService {
 
       await transaction.commit();
 
-      return { email, otp };
+      return { email, otp, user };
     } catch (error) {
       if (transaction) await transaction.rollback();
       throw error;

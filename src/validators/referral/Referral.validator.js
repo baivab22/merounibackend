@@ -1,16 +1,49 @@
 import * as yup from "yup";
 
-// Create Referred Application schema
+// Schema for agent/teacher referred applications
 export const createReferredApplicationSchema = yup
-  .object({
-    // Add required fields based on your Referral model
-  })
-  .required();
+  .array()
+  .of(
+    yup.object({
+      college_id: yup.number().integer().positive().required(),
+      teacher_id: yup.number().integer().positive().required(),
+      students: yup
+        .array()
+        .of(
+          yup.object({
+            student_name: yup.string().trim().min(2).required(),
+            student_phone_no: yup
+              .string()
+              .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+              .required(),
+            student_email: yup.string().email().required(),
+            student_description: yup
+              .string()
+              .min(10, "Description must be at least 10 characters")
+              .optional(),
+            course_id: yup.number().integer().positive().nullable(),
+          })
+        )
+        .min(1, "At least one student is required")
+        .required(),
+    })
+  )
+  .required("Applications array is required");
 
-// Create Self Application schema
+// Schema for self applications (student applies themselves)
 export const createSelfApplicationSchema = yup
   .object({
-    // Add required fields based on your Referral model
+    student_id: yup.number().integer().positive().required(),
+    referral_type: yup.string().oneOf(["self"]).default("self").required(),
+    college_id: yup.number().integer().positive().required(),
+    course_id: yup.number().integer().positive().nullable(),
+    // description is optional; only validate length if provided
+    description: yup
+      .string()
+      .trim()
+      .min(10, "Description must be at least 10 characters")
+      .notRequired()
+      .nullable(),
   })
   .required();
 
@@ -25,4 +58,16 @@ export const collegeIdParamSchema = yup.object({
 export const collegeIdAndTypeParamSchema = yup.object({
   college_id: yup.number().integer().positive().required(),
   type: yup.string().trim().required(),
+});
+
+export const referralIdParamSchema = yup.object({
+  id: yup.number().integer().positive().required(),
+});
+
+export const updateReferralStatusSchema = yup.object({
+  status: yup
+    .string()
+    .oneOf(["IN_PROGRESS", "ACCEPTED", "REJECTED"])
+    .required(),
+  remarks: yup.string().nullable().optional(),
 });

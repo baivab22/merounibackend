@@ -3,13 +3,18 @@ import express from "express";
 import ReferralController from "../controllers/referral/Referral.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
-import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import {
+  requestValidator,
+  requestValidatorMultiple,
+} from "../middlewares/RequestValidator.middleware.js";
 import {
   createSelfApplicationSchema,
   createReferredApplicationSchema,
   applicationTypeParamSchema,
   collegeIdParamSchema,
   collegeIdAndTypeParamSchema,
+  referralIdParamSchema,
+  updateReferralStatusSchema,
 } from "../validators/referral/Referral.validator.js";
 
 const router = express.Router();
@@ -38,6 +43,12 @@ router.get(
   ReferralController.getUserReferrals
 );
 router.get(
+  "/institution/applications",
+  authenticateUser,
+  authorizeRole(["institution"]),
+  ReferralController.getInstitutionApplications
+);
+router.get(
   "/type/:type",
   authenticateUser,
   authorizeRole(["super-admin", "admin", "editor", "agent"]),
@@ -57,6 +68,25 @@ router.get(
   authorizeRole(["super-admin", "admin", "college-admin"]),
   requestValidator(collegeIdAndTypeParamSchema, "params"),
   ReferralController.getCollegeApplicationsByType
+);
+
+router.patch(
+  "/:id/status",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  requestValidatorMultiple([
+    { schema: referralIdParamSchema, property: "params" },
+    { schema: updateReferralStatusSchema, property: "body" },
+  ]),
+  ReferralController.updateStatus
+);
+
+router.delete(
+  "/:id",
+  authenticateUser,
+  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  requestValidator(referralIdParamSchema, "params"),
+  ReferralController.deleteReferral
 );
 
 export default router;

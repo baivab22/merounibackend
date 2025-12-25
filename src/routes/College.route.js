@@ -47,6 +47,19 @@ router
     authorizeRole(["super-admin", "admin", "editor"]),
     requestValidator(collegeIdParamSchema, "params"),
     CollegeController.deleteCollege
+  )
+  .get(
+    "/institution/my-college",
+    authenticateUser,
+    authorizeRole(["institution"]),
+    CollegeController.getCollegeByInstitutionUser
+  )
+  .put(
+    "/institution/my-college",
+    authenticateUser,
+    authorizeRole(["institution"]),
+    requestValidator(createOrUpdateCollegeSchema, "body"),
+    CollegeController.updateCollegeByInstitutionUser
   );
 
 export default router;

@@ -109,6 +109,55 @@ class ReferralController {
       });
     }
   }
+
+  static async getInstitutionApplications(req, res) {
+    try {
+      const applications = await referralService.getInstitutionApplications(
+        req.user
+      );
+      return res.status(200).json(applications);
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+
+  static async updateStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status, remarks } = req.body;
+
+      const referral = await referralService.updateStatus(id, status, remarks);
+
+      return res.status(200).json({
+        message: "Referral status updated successfully",
+        referral,
+      });
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+
+  static async deleteReferral(req, res) {
+    try {
+      const { id } = req.params;
+      await referralService.deleteReferral(id);
+      return res.status(200).json({ message: "Referral deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
 }
 
 export default ReferralController;

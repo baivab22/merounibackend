@@ -45,12 +45,31 @@ class CollegeService {
       } = payload;
 
       let collegeId = id;
-      const slugs = slug(name);
+
+      // If updating and name is not provided, fetch existing name
+      let collegeName = name;
+      if (collegeId && !collegeName) {
+        const existingCollege = await College.findByPk(collegeId, {
+          transaction,
+        });
+        if (existingCollege) {
+          collegeName = existingCollege.name;
+        }
+      }
+
+      // Validate that name exists
+      if (!collegeName) {
+        const error = new Error("College name is required");
+        error.status = 400;
+        throw error;
+      }
+
+      const slugs = slug(collegeName);
 
       if (!collegeId) {
         const newCollege = await College.create(
           {
-            name,
+            name: collegeName,
             slugs,
             institute_type,
             institute_level,
@@ -70,26 +89,32 @@ class CollegeService {
         );
         collegeId = newCollege.id;
       } else {
-        await College.update(
-          {
-            name,
-            slugs,
-            institute_type,
-            institute_level,
-            author_id,
-            is_featured,
-            pinned,
-            description: description || "",
-            content,
-            featured_img,
-            college_logo,
-            college_broucher,
-            university_id,
-            google_map_url,
-            website_url,
-          },
-          { where: { id: collegeId }, transaction }
-        );
+        const updateData = {
+          slugs,
+          institute_type,
+          institute_level,
+          author_id,
+          is_featured,
+          pinned,
+          description: description || "",
+          content,
+          featured_img,
+          college_logo,
+          college_broucher,
+          university_id,
+          google_map_url,
+          website_url,
+        };
+
+        // Only update name if it was provided
+        if (name) {
+          updateData.name = collegeName;
+        }
+
+        await College.update(updateData, {
+          where: { id: collegeId },
+          transaction,
+        });
       }
 
       if (address) {
@@ -534,6 +559,139 @@ class CollegeService {
     }
 
     await college.destroy();
+  }
+
+  async getCollegeByInstitutionUser(user) {
+    // Fetch the full user from database to get college_id
+    const fullUser = await UserModel.findByPk(user?.id || user?.user_id);
+
+    if (!fullUser) {
+      const error = new Error("User not found");
+      error.status = 404;
+      throw error;
+    }
+
+    const collegeId = fullUser.collegeId || fullUser.college_id;
+
+    if (!collegeId) {
+      const error = new Error("User is not associated with a college");
+      error.status = 400;
+      throw error;
+    }
+
+    const college = await College.findOne({
+      where: { id: collegeId },
+      attributes: {
+        exclude: ["author_id", "university_id"],
+      },
+      include: [
+        {
+          model: CollegeFacility,
+          as: "collegeFacility",
+          attributes: ["title", "description", "icon"],
+        },
+        {
+          model: CollegeAddress,
+          as: "collegeAddress",
+          attributes: ["country", "state", "city", "street", "postal_code"],
+        },
+        {
+          model: CollegeContact,
+          as: "collegeContacts",
+          attributes: ["contact_number"],
+        },
+        {
+          model: CollegeGallery,
+          as: "collegeGallery",
+        },
+        {
+          model: CollegeCourse,
+          as: "collegeCourses",
+          attributes: {
+            exclude: ["college_id", "course_id"],
+          },
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["title", "slugs"],
+            },
+          ],
+        },
+        {
+          model: CollegeMember,
+          as: "collegeMembers",
+          attributes: ["name", "contact_number", "role", "description"],
+        },
+        {
+          model: CollegeAdmission,
+          as: "collegeAdmissions",
+          attributes: {
+            exclude: ["id", "college_id", "course_id"],
+          },
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["title", "slugs"],
+            },
+          ],
+        },
+        {
+          model: University,
+          as: "university",
+          attributes: ["fullname", "slugs"],
+        },
+        {
+          model: UserModel,
+          as: "authorDetails",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+      ],
+    });
+
+    if (!college) {
+      const error = new Error("College not found!");
+      error.status = 404;
+      throw error;
+    }
+
+    return college;
+  }
+
+  async updateCollegeByInstitutionUser(user, payload) {
+    // Fetch the full user from database to get college_id
+    const fullUser = await UserModel.findByPk(user?.id || user?.user_id);
+
+    if (!fullUser) {
+      const error = new Error("User not found");
+      error.status = 404;
+      throw error;
+    }
+
+    const collegeId = fullUser.collegeId || fullUser.college_id;
+
+    if (!collegeId) {
+      const error = new Error("User is not associated with a college");
+      error.status = 400;
+      throw error;
+    }
+
+    // Ensure the payload college ID matches the user's college_id
+    if (payload.id && payload.id !== collegeId) {
+      const error = new Error("You can only edit your own college");
+      error.status = 403;
+      throw error;
+    }
+
+    // Set the college ID from user's college_id
+    payload.id = collegeId;
+
+    // Call the existing createOrUpdateCollege method
+    const { collegeId: updatedCollegeId, isNew } =
+      await this.createOrUpdateCollege(payload);
+
+    return { collegeId: updatedCollegeId, isNew };
   }
 }
 

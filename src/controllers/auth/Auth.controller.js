@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
@@ -32,7 +32,7 @@ class AuthController {
           .json({ message: response.error.details[0].message });
       }
 
-      const { otp, email } = await authService.registerUser(req.body);
+      const { otp, email, user } = await authService.registerUser(req.body);
 
       await sendMail(
         email,
@@ -41,9 +41,10 @@ class AuthController {
         `<p>Your OTP is: <strong>${otp}</strong></p>`
       );
 
-      return res
-        .status(201)
-        .json({ message: "User registered successfully. OTP sent to email." });
+      return res.status(201).json({
+        message: "User registered successfully. OTP sent to email.",
+        user,
+      });
     } catch (error) {
       const status =
         error.status ||

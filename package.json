@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "seed:admin": "node seeds/createAdmin.js",
+    "seed:admin": "node src/seeders/createAdmin.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
@@ -21,7 +21,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",

@@ -17,7 +17,21 @@ export const updateUserProfileQuerySchema = yup.object({
 
 export const updateUserProfileBodySchema = yup
   .object({
-    // Add fields based on your User model
+    firstName: yup.string().trim().min(2),
+    middleName: yup.string().trim().nullable(),
+    lastName: yup.string().trim().min(2),
+    email: yup.string().email().trim(),
+    phoneNo: yup.string().trim(),
+    password: yup.string().min(6),
+    roles: yup.object().shape({
+      "super-admin": yup.boolean(),
+      admin: yup.boolean(),
+      agent: yup.boolean(),
+      editor: yup.boolean(),
+      student: yup.boolean(),
+      "college-admin": yup.boolean(),
+    }),
+    pendingRoles: yup.mixed(), // optional, handled in service
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;
@@ -34,5 +48,16 @@ export const reviewAgentRequestSchema = yup
     action: yup.string().oneOf(["approve", "reject"]).required(),
     user_id: yup.number().integer().positive().required(),
     // Add other required fields
+  })
+  .required();
+
+export const createCollegeCredentialsSchema = yup
+  .object({
+    firstName: yup.string().trim().min(2).required(),
+    lastName: yup.string().trim().min(2).required(),
+    email: yup.string().email().trim().required(),
+    password: yup.string().min(6).required(),
+    phoneNo: yup.string().trim().required(),
+    collegeId: yup.number().integer().positive().nullable().optional(),
   })
   .required();

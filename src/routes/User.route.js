@@ -16,6 +16,7 @@ import {
   updateUserProfileBodySchema,
   applyForAgentRoleSchema,
   reviewAgentRequestSchema,
+  createCollegeCredentialsSchema,
 } from "../validators/user/User.validator.js";
 
 const route = express.Router();
@@ -73,6 +74,13 @@ route
     authorizeRole(["admin", "super-admin"]),
     requestValidator(reviewAgentRequestSchema, "body"),
     UserController.reviewAgentRequest
+  )
+  .post(
+    "/college-credentials",
+    authenticateUser,
+    authorizeRole(["super-admin", "admin", "editor"]),
+    requestValidator(createCollegeCredentialsSchema, "body"),
+    UserController.createCollegeCredentials
   );
 
 export default route;
