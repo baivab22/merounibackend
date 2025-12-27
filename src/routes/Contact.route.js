@@ -32,7 +32,7 @@ route
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(idQuerySchema, "query"),
     ContactController.deleteContact
   );

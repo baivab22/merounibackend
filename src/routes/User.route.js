@@ -11,6 +11,7 @@ import {
   paginationSchema,
   getUserProfileQuerySchema,
   exportUsersQuerySchema,
+  listUsersQuerySchema,
   deleteUserBodySchema,
   updateUserProfileQuerySchema,
   updateUserProfileBodySchema,
@@ -25,8 +26,8 @@ route
   .get(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
-    requestValidator(paginationSchema, "query"),
+    authorizeRole(["admin"]),
+    requestValidator(listUsersQuerySchema, "query"),
     UserController.listUsers
   )
   .get(
@@ -43,7 +44,7 @@ route
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteUserBodySchema, "body"),
     UserController.deleteUser
   )
@@ -58,7 +59,7 @@ route
   .get(
     "/pending-role",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(paginationSchema, "query"),
     UserController.listPendingAgentRole
   )
@@ -71,14 +72,14 @@ route
   .put(
     "/review-agent",
     authenticateUser,
-    authorizeRole(["admin", "super-admin"]),
+    authorizeRole(["admin"]),
     requestValidator(reviewAgentRequestSchema, "body"),
     UserController.reviewAgentRequest
   )
   .post(
     "/college-credentials",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createCollegeCredentialsSchema, "body"),
     UserController.createCollegeCredentials
   );

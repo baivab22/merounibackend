@@ -20,20 +20,20 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createNewsletterSchema, "body"),
     NewsletterController.createNewsletter
   );
 //   .delete(
 //     "/",
 //     authenticateUser,
-//     authorizeRole(["super-admin", "admin"]),
+//     authorizeRole(["admin"]),
 //     deleteMaterial
 //   )
 //   .put(
 //     "/",
 //     authenticateUser,
-//     authorizeRole(["super-admin", "admin", "editor"]),
+//     authorizeRole(["admin", "editor"]),
 //     updateMaterial
 //   );
 

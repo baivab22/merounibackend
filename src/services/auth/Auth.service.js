@@ -7,7 +7,15 @@ class AuthService {
   async registerUser(payload) {
     const transaction = await UserModel.sequelize.transaction();
     try {
-      const { firstName, lastName, email, phoneNo, password, roles } = payload;
+      const {
+        firstName,
+        lastName,
+        email,
+        phoneNo,
+        password,
+        roles,
+        created_by_admin,
+      } = payload;
 
       const existingUser = await UserModel.findOne({
         where: { email },
@@ -20,10 +28,29 @@ class AuthService {
         throw error;
       }
 
+      const sameContact = await UserModel.findOne({ where: { phoneNo } });
+      if (sameContact) {
+        const error = new Error("Phone number already exists");
+        error.status = 400;
+        throw error;
+      }
+
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const otp = crypto.randomInt(100000, 999999).toString();
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+      // Convert roles string to object format if it's a string
+      let rolesObject = { student: true }; // default
+      if (roles) {
+        if (typeof roles === "string") {
+          // If roles is a string, convert it to object format
+          rolesObject = { [roles]: true };
+        } else if (typeof roles === "object" && Object.keys(roles).length > 0) {
+          // If roles is already an object, use it
+          rolesObject = roles;
+        }
+      }
 
       const user = await UserModel.create(
         {
@@ -31,13 +58,11 @@ class AuthService {
           lastName,
           email,
           phoneNo,
-          // Default role as student on registration if no roles are provided
-          // This ensures every newly registered user starts with student role = true
-          roles:
-            roles && Object.keys(roles).length > 0 ? roles : { student: true },
+          roles: rolesObject,
           password: hashedPassword,
           otp,
           otpExpiresAt,
+          createdByAdmin: created_by_admin === 1 || created_by_admin === true,
         },
         { transaction }
       );

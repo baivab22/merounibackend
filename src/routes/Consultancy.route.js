@@ -27,14 +27,14 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createOrUpdateConsultancySchema, "body"),
     ConsultancyController.createOrUpdateConsultancy
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteConsultancyQuerySchema, "query"),
     ConsultancyController.deleteConsultancy
   );

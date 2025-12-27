@@ -5,7 +5,7 @@ const referralService = new ReferralService();
 class ReferralController {
   static async createReferredApplication(req, res) {
     try {
-      await referralService.createReferredApplication(req.body);
+      await referralService.createReferredApplication(req.body, req.user);
 
       return res
         .status(201)
@@ -51,6 +51,11 @@ class ReferralController {
 
   static async getUserReferrals(req, res) {
     try {
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Authentication required",
+        });
+      }
       const referrals = await referralService.getUserReferrals(req.user);
       return res.status(200).json(referrals);
     } catch (error) {

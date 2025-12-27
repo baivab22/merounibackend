@@ -32,21 +32,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createLevelSchema, "body"),
     LevelController.createLevel
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteLevelQuerySchema, "query"),
     LevelController.deleteLevel
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateLevelQuerySchema, property: "query" },
       { schema: updateLevelBodySchema, property: "body" },

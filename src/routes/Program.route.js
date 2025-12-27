@@ -26,14 +26,14 @@ router.get(
 router.post(
   "/",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createOrUpdateProgramSchema, "body"),
   ProgramController.createOrUpdateProgram
 );
 router.delete(
   "/:id",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor"]),
+  authorizeRole(["admin", "editor"]),
   requestValidator(programIdParamSchema, "params"),
   ProgramController.deleteProgram
 );

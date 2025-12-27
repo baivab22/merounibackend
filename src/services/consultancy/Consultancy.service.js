@@ -69,21 +69,63 @@ class ConsultancyService {
   }
 
   async createOrUpdateConsultancy(payload) {
+    console.log(
+      "ConsultancyService - Received payload:",
+      JSON.stringify(payload, null, 2)
+    );
+
     const {
       id,
       title,
       destination,
       address,
       featured_image,
+      logo,
+      description,
+      contact,
+      website_url,
+      google_map_url,
+      video_url,
       pinned,
       courses,
       status,
       visibility,
     } = payload;
 
-    const slugs = slug(title);
-    const parsedCourses =
-      typeof courses === "string" ? JSON.parse(courses) : courses;
+    console.log("ConsultancyService - Extracted fields:", {
+      id,
+      title,
+      logo,
+      description,
+      website_url,
+      google_map_url,
+      video_url,
+      contact,
+    });
+
+    // Validate title for create operation
+    if (!id && !title) {
+      const error = new Error("Title is required for creating consultancy");
+      error.status = 400;
+      throw error;
+    }
+
+    // Generate slug only if title is provided
+    const slugs = title ? slug(title) : null;
+
+    // Parse courses - handle string, array, or undefined/null
+    let parsedCourses = [];
+    if (courses !== undefined && courses !== null) {
+      if (typeof courses === "string") {
+        try {
+          parsedCourses = courses.trim() ? JSON.parse(courses) : [];
+        } catch (e) {
+          parsedCourses = [];
+        }
+      } else if (Array.isArray(courses)) {
+        parsedCourses = courses;
+      }
+    }
 
     if (!Array.isArray(parsedCourses)) {
       const error = new Error("Courses should be an array");
@@ -109,26 +151,77 @@ class ConsultancyService {
         error.status = 404;
         throw error;
       }
-      await consultancy.update({
-        title,
-        slugs,
-        destination,
-        address,
-        featured_image,
-        pinned,
-        status,
-        visibility,
-      });
+
+      // Build update object, include all fields (handle empty strings as null for optional fields)
+      const updateData = {};
+      if (title !== undefined) updateData.title = title;
+      if (slugs !== null && slugs !== undefined) updateData.slugs = slugs;
+      if (destination !== undefined) updateData.destination = destination;
+      if (address !== undefined) updateData.address = address;
+      if (featured_image !== undefined)
+        updateData.featured_image = featured_image;
+      // Handle logo - empty string or null becomes null
+      if (logo !== undefined)
+        updateData.logo = logo === "" || logo === null ? null : logo;
+      // Handle description - empty string or null becomes null
+      if (description !== undefined)
+        updateData.description =
+          description === "" || description === null ? null : description;
+      if (contact !== undefined) updateData.contact = contact || [];
+      // Handle website_url - empty string or null becomes null
+      if (website_url !== undefined)
+        updateData.website_url =
+          website_url === "" || website_url === null ? null : website_url;
+      // Handle google_map_url - empty string or null becomes null
+      if (google_map_url !== undefined)
+        updateData.google_map_url =
+          google_map_url === "" || google_map_url === null
+            ? null
+            : google_map_url;
+      // Handle video_url - empty string or null becomes null
+      if (video_url !== undefined)
+        updateData.video_url =
+          video_url === "" || video_url === null ? null : video_url;
+      if (pinned !== undefined) updateData.pinned = pinned;
+      if (status !== undefined) updateData.status = status;
+      if (visibility !== undefined) updateData.visibility = visibility;
+
+      await consultancy.update(updateData);
     } else {
+      // For create, handle empty strings and undefined as null for optional fields
       consultancy = await Consultancy.create({
         title,
         slugs,
-        destination,
-        address,
-        featured_image,
-        pinned,
-        status,
-        visibility,
+        destination: destination || [],
+        address: address || {},
+        featured_image: featured_image || "",
+        logo: logo === "" || logo === null || logo === undefined ? null : logo,
+        description:
+          description === "" ||
+          description === null ||
+          description === undefined
+            ? null
+            : description,
+        contact: contact || [],
+        website_url:
+          website_url === "" ||
+          website_url === null ||
+          website_url === undefined
+            ? null
+            : website_url,
+        google_map_url:
+          google_map_url === "" ||
+          google_map_url === null ||
+          google_map_url === undefined
+            ? null
+            : google_map_url,
+        video_url:
+          video_url === "" || video_url === null || video_url === undefined
+            ? null
+            : video_url,
+        pinned: pinned !== undefined ? pinned : 0,
+        status: status || "published",
+        visibility: visibility || "public",
       });
     }
 

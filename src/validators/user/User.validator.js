@@ -7,6 +7,14 @@ export const getUserProfileQuerySchema = idQuerySchema;
 
 export const exportUsersQuerySchema = paginationSchema;
 
+// Schema for listing users with role filter
+export const listUsersQuerySchema = paginationSchema.shape({
+  role: yup
+    .string()
+    .oneOf(["student", "editor", "admin", "agent", "institution"])
+    .optional(),
+});
+
 export const deleteUserBodySchema = yup.object({
   user_id: yup.number().integer().positive().required(),
 });
@@ -24,12 +32,11 @@ export const updateUserProfileBodySchema = yup
     phoneNo: yup.string().trim(),
     password: yup.string().min(6),
     roles: yup.object().shape({
-      "super-admin": yup.boolean(),
       admin: yup.boolean(),
       agent: yup.boolean(),
       editor: yup.boolean(),
       student: yup.boolean(),
-      "college-admin": yup.boolean(),
+      institution: yup.boolean(),
     }),
     pendingRoles: yup.mixed(), // optional, handled in service
   })

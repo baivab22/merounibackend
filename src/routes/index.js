@@ -38,6 +38,9 @@ router.use("/faculty", facultyRoute);
 import materialRoute from "./Material.route.js";
 router.use("/material", materialRoute);
 
+import materialCategoryRoute from "./MaterialCategory.route.js";
+router.use("/material-category", materialCategoryRoute);
+
 import scholarshipRoute from "./Scholarship.route.js";
 router.use("/scholarship", scholarshipRoute);
 
@@ -55,6 +58,9 @@ router.use("/exam", examRoute);
 
 import collegeRoute from "./College.route.js";
 router.use("/college", collegeRoute);
+
+import collegeRankingRoute from "./CollegeRanking.route.js";
+router.use("/college-ranking", collegeRankingRoute);
 
 import eventRoute from "./Event.route.js";
 router.use("/event", eventRoute);

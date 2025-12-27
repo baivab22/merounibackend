@@ -27,14 +27,14 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createOrUpdateUniversitySchema, "body"),
     UniversityController.createOrUpdateUniversity
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(deleteUniversityQuerySchema, "query"),
     UniversityController.deleteUniversity
   );

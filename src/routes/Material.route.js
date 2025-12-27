@@ -14,6 +14,7 @@ import {
   updateMaterialQuerySchema,
   updateMaterialBodySchema,
   deleteMaterialQuerySchema,
+  materialCategoryQuerySchema,
 } from "../validators/material/Material.validator.js";
 
 const route = express.Router();
@@ -25,6 +26,11 @@ route
     MaterialController.listMaterials
   )
   .get(
+    "/category",
+    requestValidator(materialCategoryQuerySchema, "query"),
+    MaterialController.listMaterialsByCategory
+  )
+  .get(
     "/:id",
     requestValidator(materialIdParamSchema, "params"),
     MaterialController.getMaterial
@@ -32,21 +38,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createMaterialSchema, "body"),
     MaterialController.createMaterial
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteMaterialQuerySchema, "query"),
     MaterialController.deleteMaterial
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateMaterialQuerySchema, property: "query" },
       { schema: updateMaterialBodySchema, property: "body" },

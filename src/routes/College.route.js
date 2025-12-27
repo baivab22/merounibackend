@@ -9,6 +9,7 @@ import {
   collegeSlugParamSchema,
   collegeIdParamSchema,
   createOrUpdateCollegeSchema,
+  updateCollegeOrderSchema,
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
@@ -17,7 +18,7 @@ router
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor", "agent"]),
+    authorizeRole(["admin", "editor", "agent"]),
     requestValidator(createOrUpdateCollegeSchema, "body"),
     CollegeController.createOrUpdateCollege
   )
@@ -44,7 +45,7 @@ router
   .delete(
     "/:id",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(collegeIdParamSchema, "params"),
     CollegeController.deleteCollege
   )
@@ -60,6 +61,13 @@ router
     authorizeRole(["institution"]),
     requestValidator(createOrUpdateCollegeSchema, "body"),
     CollegeController.updateCollegeByInstitutionUser
+  )
+  .put(
+    "/order",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidator(updateCollegeOrderSchema, "body"),
+    CollegeController.updateCollegeOrder
   );
 
 export default router;

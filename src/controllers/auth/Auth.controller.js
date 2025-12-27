@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 
 import {
   loginHelper,
-  registerHelper,
   forgotPasswordHelper,
   resetPasswordHelper,
 } from "../../validators/authentication/Auth.validator.js";
@@ -25,21 +24,14 @@ const authService = new AuthService();
 class AuthController {
   static async registerUser(req, res) {
     try {
-      const response = await registerHelper(req.body);
-      if (response.error) {
-        return res
-          .status(400)
-          .json({ message: response.error.details[0].message });
-      }
-
       const { otp, email, user } = await authService.registerUser(req.body);
 
-      await sendMail(
-        email,
-        "Your OTP Code",
-        `Your OTP is: ${otp}`,
-        `<p>Your OTP is: <strong>${otp}</strong></p>`
-      );
+      // await sendMail(
+      //   email,
+      //   "Your OTP Code",
+      //   `Your OTP is: ${otp}`,
+      //   `<p>Your OTP is: <strong>${otp}</strong></p>`
+      // );
 
       return res.status(201).json({
         message: "User registered successfully. OTP sent to email.",

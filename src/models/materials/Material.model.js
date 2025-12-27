@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import Tag from "../tags/Tag.model.js";
+import MaterialCategory from "./MaterialCategory.model.js";
 
 class Material extends Model {}
 
@@ -32,7 +33,7 @@ Material.init(
     },
     file: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     author: {
       type: DataTypes.INTEGER,
@@ -43,15 +44,19 @@ Material.init(
       },
       onDelete: "CASCADE",
     },
-    status: {
-      type: DataTypes.ENUM("draft", "published", "archived"),
-      allowNull: false,
-      defaultValue: "draft",
-    },
     visibility: {
       type: DataTypes.ENUM("public", "private"),
       allowNull: false,
       defaultValue: "public",
+    },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "material_categories",
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
   },
   {
@@ -61,5 +66,11 @@ Material.init(
     timestamps: true,
   }
 );
+
+// Define associations
+Material.belongsTo(MaterialCategory, {
+  foreignKey: "category_id",
+  as: "category",
+});
 
 export default Material;

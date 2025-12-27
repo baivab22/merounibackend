@@ -32,21 +32,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createFacultySchema, "body"),
     FacultyController.createFaculty
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteFacultyQuerySchema, "query"),
     FacultyController.deleteFaculty
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateFacultyQuerySchema, property: "query" },
       { schema: updateFacultyBodySchema, property: "body" },

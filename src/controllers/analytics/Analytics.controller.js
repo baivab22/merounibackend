@@ -5,7 +5,7 @@ const analyticsService = new AnalyticsService();
 class AnalyticsController {
   static async getAdminOverview(req, res) {
     try {
-      const data = await analyticsService.getAdminOverview();
+      const data = await analyticsService.getAdminOverview(req.query);
       return res.status(200).json({
         message: "Analytics overview fetched successfully",
         data,

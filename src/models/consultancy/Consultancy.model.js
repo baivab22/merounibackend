@@ -35,6 +35,31 @@ Consultancy.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    logo: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    contact: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+    },
+    website_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    google_map_url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    video_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     pinned: {
       type: DataTypes.TINYINT,
       defaultValue: 0,

@@ -11,6 +11,7 @@ import {
   UniversityGallery,
   UniversityProgram,
 } from "../../models/university/University.model.js";
+import Program from "../../models/program/Program.model.js";
 
 class UniversityService {
   async listUniversities(query = {}) {
@@ -56,10 +57,44 @@ class UniversityService {
   }
 
   async getUniversityProfile(slugParam) {
-    const [university] = await sequelize.query(
-      `SELECT * FROM university WHERE slugs = ?`,
-      { replacements: [slugParam], type: QueryTypes.SELECT }
-    );
+    const university = await University.findOne({
+      where: { slugs: slugParam },
+      include: [
+        {
+          model: UniversityProgram,
+          as: "university_programs",
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["id", "title"],
+            },
+          ],
+        },
+        {
+          model: UniversityContact,
+          as: "contact",
+          required: false, // Make it a LEFT JOIN so it's included even if no contact exists
+        },
+        {
+          model: UniversityLevel,
+          as: "levels",
+        },
+        {
+          model: UniversityMember,
+          as: "members",
+        },
+        {
+          model: UniversityAsset,
+          as: "asset",
+        },
+        {
+          model: UniversityGallery,
+          as: "gallery",
+          attributes: ["image_url"],
+        },
+      ],
+    });
 
     if (!university) {
       const error = new Error("University not found");
@@ -67,49 +102,22 @@ class UniversityService {
       throw error;
     }
 
-    const id = university.id;
+    // Convert to plain object to avoid Sequelize instance issues
+    const universityData = university.get({ plain: true });
 
-    const contact = await sequelize.query(
-      `SELECT faxes, poboxes, email, phone_number FROM university_contact WHERE university_id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT }
-    );
-
-    const levels = await sequelize.query(
-      `SELECT level_id FROM university_levels WHERE university_id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT }
-    );
-
-    const programs = await sequelize.query(
-      `SELECT p.id, p.title 
-       FROM university_programs up
-       JOIN programs p ON up.program_id = p.id
-       WHERE up.university_id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT }
-    );
-
-    const members = await sequelize.query(
-      `SELECT role, salutation, name, phone, email FROM university_members WHERE university_id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT }
-    );
-
-    const [assets] = await sequelize.query(
-      `SELECT featured_image, videos FROM university_assets WHERE university_id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT }
-    );
-
-    const gallery = await sequelize.query(
-      `SELECT image_url FROM university_gallery WHERE university_id = ?`,
-      { replacements: [id], type: QueryTypes.SELECT }
+    console.log(
+      "getUniversityProfile: universityData.contact:",
+      universityData.contact
     );
 
     return {
-      ...university,
-      contact: contact[0] || null,
-      levels: levels.map((level) => level.level_id),
-      programs: programs.map((p) => p.title),
-      members,
-      assets: assets || null,
-      gallery: gallery.map((img) => img.image_url),
+      ...universityData,
+      contact: universityData.contact || null,
+      levels: (universityData.levels || []).map((level) => level.level_id),
+      programs: universityData.university_programs || [],
+      members: universityData.members || [],
+      assets: universityData.asset || null,
+      gallery: (universityData.gallery || []).map((img) => img.image_url),
     };
   }
 
@@ -178,6 +186,10 @@ class UniversityService {
         );
       }
 
+      console.log(
+        "createOrUpdateUniversity: contact payload:",
+        JSON.stringify(contact)
+      );
       await this.upsertContact(university.id, contact, transaction);
       await this.syncLevels(university.id, levels, transaction);
       await this.syncPrograms(university.id, programs, transaction);
@@ -200,14 +212,85 @@ class UniversityService {
   }
 
   async upsertContact(universityId, contact, transaction) {
-    if (!contact) return;
-    await UniversityContact.upsert(
-      {
-        university_id: universityId,
-        ...contact,
-      },
-      { transaction }
+    // Allow empty object but not null/undefined
+    if (contact === null || contact === undefined) {
+      console.log("upsertContact: contact is null/undefined, skipping");
+      return;
+    }
+
+    console.log(
+      "upsertContact: Received contact data:",
+      JSON.stringify(contact)
     );
+    console.log("upsertContact: universityId:", universityId);
+
+    // Find existing contact for this university
+    const existingContact = await UniversityContact.findOne({
+      where: { university_id: universityId },
+      transaction,
+    });
+
+    console.log("upsertContact: existingContact found:", !!existingContact);
+
+    // Preserve empty strings - convert empty strings to null for database
+    // but keep actual values as they are
+    const contactData = {
+      faxes:
+        contact.faxes !== undefined
+          ? contact.faxes === ""
+            ? null
+            : contact.faxes
+          : null,
+      poboxes:
+        contact.poboxes !== undefined
+          ? contact.poboxes === ""
+            ? null
+            : contact.poboxes
+          : null,
+      email:
+        contact.email !== undefined
+          ? contact.email === ""
+            ? null
+            : contact.email
+          : null,
+      phone_number:
+        contact.phone_number !== undefined
+          ? contact.phone_number === ""
+            ? null
+            : contact.phone_number
+          : null,
+    };
+
+    console.log(
+      "upsertContact: contactData to save:",
+      JSON.stringify(contactData)
+    );
+
+    if (existingContact) {
+      // Update existing contact - use set and save to ensure changes are applied
+      existingContact.set(contactData);
+      await existingContact.save({ transaction });
+      console.log(
+        "upsertContact: Updated contact:",
+        existingContact.get({ plain: true })
+      );
+    } else {
+      // Create new contact - always create even if all fields are null/empty
+      const created = await UniversityContact.create(
+        {
+          university_id: universityId,
+          faxes: contactData.faxes,
+          poboxes: contactData.poboxes,
+          email: contactData.email,
+          phone_number: contactData.phone_number,
+        },
+        { transaction }
+      );
+      console.log(
+        "upsertContact: Created new contact:",
+        created.get({ plain: true })
+      );
+    }
   }
 
   async syncLevels(universityId, levels, transaction) {
@@ -226,18 +309,39 @@ class UniversityService {
   }
 
   async syncPrograms(universityId, programs, transaction) {
+    // If programs is not provided (undefined/null), skip updating programs
+    // If programs is an empty array, clear all programs
+    // If programs is an array with values, replace all programs
+    if (programs === undefined || programs === null) return;
+
     if (!Array.isArray(programs)) return;
+
+    // Always destroy existing programs first
     await UniversityProgram.destroy({
       where: { university_id: universityId },
       transaction,
     });
-    await UniversityProgram.bulkCreate(
-      programs.map((program_id) => ({
-        university_id: universityId,
-        program_id,
-      })),
-      { transaction }
-    );
+
+    // Only create new programs if the array is not empty
+    if (programs.length > 0) {
+      // Filter out invalid program IDs and ensure they are integers
+      const validPrograms = programs
+        .map((program_id) => {
+          const id = parseInt(program_id, 10);
+          return isNaN(id) ? null : id;
+        })
+        .filter((id) => id !== null && id > 0);
+
+      if (validPrograms.length > 0) {
+        await UniversityProgram.bulkCreate(
+          validPrograms.map((program_id) => ({
+            university_id: universityId,
+            program_id,
+          })),
+          { transaction }
+        );
+      }
+    }
   }
 
   async syncMembers(universityId, members, transaction) {

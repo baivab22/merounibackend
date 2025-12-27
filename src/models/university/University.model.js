@@ -273,6 +273,14 @@ UniversityProgram.belongsTo(University, {
   as: "university",
   foreignKey: "university_id",
 });
+UniversityProgram.belongsTo(Program, {
+  as: "program",
+  foreignKey: "program_id",
+});
+Program.hasMany(UniversityProgram, {
+  as: "university_programs",
+  foreignKey: "program_id",
+});
 University.hasMany(UniversityMember, {
   as: "members",
   foreignKey: "university_id",

@@ -32,21 +32,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createCareerSchema, "body"),
     CareerController.createCareer
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteCareerQuerySchema, "query"),
     CareerController.deleteCareer
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateCareerQuerySchema, property: "query" },
       { schema: updateCareerBodySchema, property: "body" },

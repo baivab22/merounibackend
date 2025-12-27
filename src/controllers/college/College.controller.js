@@ -120,6 +120,18 @@ class CollegeController {
         .json({ error: error.message || "Server error" });
     }
   }
+
+  static async updateCollegeOrder(req, res) {
+    try {
+      const result = await collegeService.updateCollegeOrder(req.body.colleges);
+      return res.status(200).json(result);
+    } catch (error) {
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: error.message || "Server error" });
+    }
+  }
 }
 
 export default CollegeController;

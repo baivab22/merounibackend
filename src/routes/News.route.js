@@ -32,21 +32,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createNewsSchema, "body"),
     NewsController.createBlog
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteNewsQuerySchema, "query"),
     NewsController.deleteBlog
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateNewsQuerySchema, property: "query" },
       { schema: updateNewsBodySchema, property: "body" },

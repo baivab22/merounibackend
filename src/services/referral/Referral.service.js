@@ -1,14 +1,33 @@
 import Referral from "../../models/referral/Referral.model.js";
 import College from "../../models/college/College.model.js";
+import CollegeAddress from "../../models/college/CollegeAddress.model.js";
+import CollegeContact from "../../models/college/CollegeContact.model.js";
 import UserModel from "../../models/users/User.model.js";
 import Course from "../../models/courses/Course.model.js";
+import { roleHelper } from "../../utils/RoleHelper.js";
 
 class ReferralService {
-  async createReferredApplication(payload) {
+  async createReferredApplication(payload, user) {
     const applications = Array.isArray(payload) ? payload : [payload];
 
+    // Extract agent_id from the authenticated user
+    if (!user || !user.id) {
+      const error = new Error("Authentication required");
+      error.status = 401;
+      throw error;
+    }
+
+    const userRoles = roleHelper(user?.role);
+    if (!userRoles?.agent) {
+      const error = new Error("Only agents can create referrals");
+      error.status = 403;
+      throw error;
+    }
+
+    const agent_id = user.id;
+
     for (const application of applications) {
-      const { college_id, teacher_id, students = [] } = application;
+      const { college_id, students = [] } = application;
 
       if (!college_id) {
         const error = new Error("College ID is required");
@@ -22,23 +41,11 @@ class ReferralService {
         throw error;
       }
 
-      if (teacher_id) {
-        const teacherExists = await UserModel.findOne({
-          where: { id: teacher_id },
-        });
-
-        if (!teacherExists) {
-          const error = new Error("Invalid teacher ID");
-          error.status = 400;
-          throw error;
-        }
-      }
-
       // Create one referral per student
       for (const student of students) {
         await Referral.create({
           college_id,
-          teacher_id,
+          agent_id,
           application_type: "referred",
           student_name: student.student_name,
           student_phone_no: student.student_phone_no,
@@ -97,8 +104,10 @@ class ReferralService {
   async getApplications(user) {
     const whereCondition = {};
 
-    if (user?.role === "agent") {
-      whereCondition.teacher_id = user.id;
+    const userRoles = roleHelper(user?.role);
+
+    if (userRoles?.agent) {
+      whereCondition.agent_id = user.id;
     }
 
     return Referral.findAll({
@@ -106,7 +115,7 @@ class ReferralService {
       include: [
         {
           model: UserModel,
-          as: "referralTeacher",
+          as: "referralAgent",
           attributes: ["firstName", "middleName", "lastName"],
         },
         {
@@ -126,8 +135,10 @@ class ReferralService {
   async getUserReferrals(user) {
     const whereCondition = {};
 
-    if (user?.role === "agent") {
-      whereCondition.teacher_id = user.id;
+    const userRoles = roleHelper(user?.role);
+
+    if (userRoles?.agent) {
+      whereCondition.agent_id = user.id;
     } else if (user?.id) {
       // student or other authenticated user
       whereCondition.student_id = user.id;
@@ -139,7 +150,21 @@ class ReferralService {
         {
           model: College,
           as: "referralCollege",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slugs", "college_logo"],
+          include: [
+            {
+              model: CollegeAddress,
+              as: "address",
+              attributes: ["country", "state", "city", "street", "postal_code"],
+              required: false,
+            },
+            {
+              model: CollegeContact,
+              as: "contacts",
+              attributes: ["contact_number"],
+              required: false,
+            },
+          ],
         },
         {
           model: Course,

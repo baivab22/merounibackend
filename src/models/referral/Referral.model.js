@@ -21,7 +21,7 @@ Referral.init(
         key: "id",
       },
     },
-    teacher_id: {
+    agent_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -94,8 +94,8 @@ Referral.belongsTo(College, {
 });
 
 Referral.belongsTo(User, {
-  foreignKey: "teacher_id",
-  as: "referralTeacher",
+  foreignKey: "agent_id",
+  as: "referralAgent",
 });
 
 Referral.belongsTo(Course, {

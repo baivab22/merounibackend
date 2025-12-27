@@ -27,14 +27,14 @@ router.post(
 router.post(
   "/agent-apply",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createReferredApplicationSchema, "body"),
   ReferralController.createReferredApplication
 );
 router.get(
   "/",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent"]),
   ReferralController.getApplications
 );
 router.get(
@@ -51,21 +51,21 @@ router.get(
 router.get(
   "/type/:type",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent"]),
   requestValidator(applicationTypeParamSchema, "params"),
   ReferralController.getApplicationsByType
 );
 router.get(
   "/college/:college_id",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "college-admin"]),
+  authorizeRole(["admin"]),
   requestValidator(collegeIdParamSchema, "params"),
   ReferralController.getCollegeApplications
 );
 router.get(
   "/college/:college_id/type/:type",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "college-admin"]),
+  authorizeRole(["admin"]),
   requestValidator(collegeIdAndTypeParamSchema, "params"),
   ReferralController.getCollegeApplicationsByType
 );
@@ -73,7 +73,7 @@ router.get(
 router.patch(
   "/:id/status",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent", "institution"]),
   requestValidatorMultiple([
     { schema: referralIdParamSchema, property: "params" },
     { schema: updateReferralStatusSchema, property: "body" },
@@ -84,7 +84,7 @@ router.patch(
 router.delete(
   "/:id",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent"]),
   requestValidator(referralIdParamSchema, "params"),
   ReferralController.deleteReferral
 );

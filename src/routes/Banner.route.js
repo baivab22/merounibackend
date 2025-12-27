@@ -17,7 +17,7 @@ router
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createBannerSchema, "body"),
     BannerController.createBanner
   )
@@ -34,14 +34,14 @@ router
   .delete(
     "/:id",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(bannerIdParamSchema, "params"),
     BannerController.deleteBanner
   )
   .delete(
     "/:galleryId/delete",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(galleryIdParamSchema, "params"),
     BannerController.deleteBannerGalleryItem
   );

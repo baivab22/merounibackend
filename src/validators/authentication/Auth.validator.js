@@ -21,30 +21,24 @@ export const loginHelper = async (data) => {
   }
 };
 
-export const registerHelper = async (data) => {
-  const schema = yup.object({
-    firstName: yup.string().required(),
-    middleName: yup.string().optional(),
-    lastName: yup.string().required(),
-    email: yup.string().email().required(),
-    password: yup.string().min(6).required(),
-    roles: yup
-      .string()
-      .oneOf([
-        "super-admin",
-        "admin",
-        "editor",
-        "teacher",
-        "student",
-        "college-admin",
-      ])
-      .default("student")
-      .optional(),
-    phoneNo: yup.number().required(),
-  });
+export const registerSchema = yup.object({
+  firstName: yup.string().required(),
+  middleName: yup.string().optional(),
+  lastName: yup.string().required(),
+  email: yup.string().email().required(),
+  password: yup.string().min(6).required(),
+  roles: yup
+    .string()
+    .oneOf(["admin", "editor", "student", "agent", "institution"])
+    .default("student")
+    .optional(),
+  phoneNo: yup.number().required(),
+  created_by_admin: yup.number().oneOf([0, 1]).optional(),
+});
 
+export const registerHelper = async (data) => {
   try {
-    const value = await schema.validate(data, { abortEarly: false });
+    const value = await registerSchema.validate(data, { abortEarly: false });
     return { error: null, value };
   } catch (error) {
     return {

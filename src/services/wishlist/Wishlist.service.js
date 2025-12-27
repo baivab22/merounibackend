@@ -17,7 +17,8 @@ class WishlistService {
       include: [
         {
           model: College,
-          attributes: ["id", "name", "slugs", "description"],
+          as: "college",
+          attributes: ["id", "name", "slugs", "description", "college_logo"],
         },
       ],
     });

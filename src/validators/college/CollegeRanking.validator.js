@@ -1,0 +1,40 @@
+import * as yup from "yup";
+import { paginationSchema } from "../common/common.validator.js";
+
+export { paginationSchema };
+
+export const createCollegeRankingSchema = yup
+  .object({
+    program_id: yup.number().integer().positive().required(),
+    college_id: yup.number().integer().positive().required(),
+    rank: yup.number().integer().positive().optional(),
+  })
+  .required();
+
+export const updateRankingOrderSchema = yup
+  .object({
+    program_id: yup.number().integer().positive().required(),
+    rankings: yup
+      .array()
+      .of(
+        yup.object({
+          id: yup.number().integer().positive().required(),
+          rank: yup.number().integer().positive().required(),
+        })
+      )
+      .min(1)
+      .required(),
+  })
+  .required();
+
+export const deleteRankingQuerySchema = yup.object({
+  ranking_id: yup.number().integer().positive().required(),
+});
+
+export const deleteProgramRankingsQuerySchema = yup.object({
+  program_id: yup.number().integer().positive().required(),
+});
+
+export const getRankingsByProgramQuerySchema = yup.object({
+  program_id: yup.number().integer().positive().required(),
+});

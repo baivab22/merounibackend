@@ -11,15 +11,111 @@ export const consultancySlugParamSchema = yup.object({
   slugs: yup.string().trim().required(),
 });
 
-// Create/Update Consultancy schema - adjust based on actual requirements
-export const createOrUpdateConsultancySchema = yup
-  .object({
-    id: yup.number().integer().positive().optional(),
-    // Add other required fields based on your Consultancy model
-  })
-  .test("has-fields", "At least one field must be provided", (value) => {
-    if (value && value.id) return true; // Update case
-    return true; // Adjust based on actual requirements
-  });
+// Create/Update Consultancy schema
+export const createOrUpdateConsultancySchema = yup.object({
+  id: yup.number().integer().positive().optional(),
+  title: yup
+    .string()
+    .trim()
+    .when("id", {
+      is: (id) => !id, // Required for create
+      then: (schema) => schema.required("Title is required"),
+      otherwise: (schema) => schema.optional(),
+    }),
+  destination: yup
+    .mixed()
+    .nullable()
+    .optional()
+    .test("is-array", "Destination must be an array", (value) => {
+      if (value === null || value === undefined) return true;
+      return Array.isArray(value);
+    }),
+  address: yup
+    .mixed()
+    .nullable()
+    .optional()
+    .test("is-object", "Address must be an object", (value) => {
+      if (value === null || value === undefined) return true;
+      return typeof value === "object" && !Array.isArray(value);
+    }),
+  featured_image: yup
+    .string()
+    .url()
+    .when("id", {
+      is: (id) => !id, // Required for create
+      then: (schema) => schema.required("Featured image is required"),
+      otherwise: (schema) => schema.optional(),
+    }),
+  logo: yup
+    .mixed()
+    .nullable()
+    .optional()
+    .test("is-url-or-null", "Logo must be a valid URL or null", (value) => {
+      if (value === null || value === undefined || value === "") return true;
+      if (typeof value === "string") {
+        try {
+          new URL(value);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }),
+  description: yup
+    .mixed()
+    .nullable()
+    .optional()
+    .test(
+      "is-string-or-null",
+      "Description must be a string or null",
+      (value) => {
+        if (value === null || value === undefined || value === "") return true;
+        return typeof value === "string";
+      }
+    ),
+  contact: yup.array().of(yup.string()).nullable().optional().default([]),
+  website_url: yup
+    .string()
+    .url("Website URL must be a valid URL")
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .optional(),
+  google_map_url: yup
+    .mixed()
+    .nullable()
+    .optional()
+    .test(
+      "is-string-or-null",
+      "Google Map URL must be a string or null",
+      (value) => {
+        if (value === null || value === undefined || value === "") return true;
+        return typeof value === "string";
+      }
+    ),
+  video_url: yup
+    .string()
+    .url("Video URL must be a valid URL")
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .optional(),
+  pinned: yup.number().integer().min(0).max(1).optional().default(0),
+  courses: yup
+    .array()
+    .of(yup.number().integer().positive())
+    .nullable()
+    .optional()
+    .default([]),
+  status: yup
+    .string()
+    .oneOf(["draft", "published", "archived"])
+    .optional()
+    .default("published"),
+  visibility: yup
+    .string()
+    .oneOf(["public", "private"])
+    .optional()
+    .default("public"),
+});
 
 export const deleteConsultancyQuerySchema = idQuerySchema;

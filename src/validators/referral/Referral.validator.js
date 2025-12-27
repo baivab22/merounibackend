@@ -1,12 +1,11 @@
 import * as yup from "yup";
 
-// Schema for agent/teacher referred applications
+// Schema for agent referred applications
 export const createReferredApplicationSchema = yup
   .array()
   .of(
     yup.object({
       college_id: yup.number().integer().positive().required(),
-      teacher_id: yup.number().integer().positive().required(),
       students: yup
         .array()
         .of(

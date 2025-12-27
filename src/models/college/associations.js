@@ -5,6 +5,7 @@ import CollegeCourse from "./CollegeCourse.model.js";
 import CollegeMember from "./CollegeMember.model.js";
 import CollegeAdmission from "./CollegeAdmission.model.js";
 import CollegeGallery from "./CollegeGallery.model.js";
+import CollegeRanking from "./CollegeRanking.model.js";
 import { University } from "../university/University.model.js";
 import Program from "../program/Program.model.js";
 import User from "../users/User.model.js";
@@ -89,6 +90,24 @@ CollegeAdmission.belongsTo(College, {
 });
 CollegeAdmission.belongsTo(Program, { foreignKey: "course_id", as: "program" });
 
+// CollegeRanking Associations
+CollegeRanking.belongsTo(College, {
+  foreignKey: "college_id",
+  as: "college",
+});
+CollegeRanking.belongsTo(Program, {
+  foreignKey: "program_id",
+  as: "program",
+});
+College.hasMany(CollegeRanking, {
+  foreignKey: "college_id",
+  as: "collegeRankings",
+});
+Program.hasMany(CollegeRanking, {
+  foreignKey: "program_id",
+  as: "programRankings",
+});
+
 export {
   College,
   CollegeAddress,
@@ -97,6 +116,7 @@ export {
   CollegeCourse,
   CollegeMember,
   CollegeFacility,
+  CollegeRanking,
   Program,
   University,
   User,

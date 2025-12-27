@@ -21,6 +21,25 @@ class MaterialController {
     }
   }
 
+  static async listMaterialsByCategory(req, res) {
+    try {
+      console.log("req.query", req.query);
+      const { materials, pagination } = await materialService.listMaterials(
+        req.query
+      );
+      return res.status(200).json({
+        message: "Materials retrieved by category",
+        materials,
+        pagination,
+      });
+    } catch (error) {
+      console.error("Error getting materials by category:", error);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
+
   static async getMaterial(req, res) {
     try {
       const material = await materialService.getMaterial(req.params.id);
@@ -39,7 +58,19 @@ class MaterialController {
 
   static async createMaterial(req, res) {
     try {
-      const newMaterial = await materialService.createMaterial(req.body);
+      // Extract author from authenticated user
+      const authorId = req.user?.id;
+      if (!authorId) {
+        return res.status(401).json({
+          message: "Unauthorized",
+          error: "User ID not found in token",
+        });
+      }
+
+      const newMaterial = await materialService.createMaterial({
+        ...req.body,
+        author: authorId,
+      });
 
       return res
         .status(201)

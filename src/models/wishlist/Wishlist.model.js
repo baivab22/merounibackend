@@ -41,6 +41,6 @@ const Wishlist = sequelize.define(
 User.hasMany(Wishlist, { foreignKey: "user_id" });
 College.hasMany(Wishlist, { foreignKey: "college_id" });
 Wishlist.belongsTo(User, { foreignKey: "user_id" });
-Wishlist.belongsTo(College, { foreignKey: "college_id" });
+Wishlist.belongsTo(College, { as: "college", foreignKey: "college_id" });
 
 export default Wishlist;

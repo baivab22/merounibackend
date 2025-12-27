@@ -37,14 +37,14 @@ router
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor", "agent"]),
+    authorizeRole(["admin", "editor", "agent"]),
     requestValidator(createOrUpdateEventSchema, "body"),
     EventController.createOrUpdateEvent
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin"]),
+    authorizeRole(["admin"]),
     requestValidator(deleteEventQuerySchema, "query"),
     EventController.deleteEvent
   );

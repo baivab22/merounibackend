@@ -21,7 +21,7 @@ router.get(
 router.post(
   "/",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor"]),
+  authorizeRole(["admin", "editor"]),
   requestValidator(createOrUpdateExamSchema, "body"),
   ExamController.createOrUpdateExam
 );
@@ -33,7 +33,7 @@ router.get(
 router.delete(
   "/:id",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor"]),
+  authorizeRole(["admin", "editor"]),
   requestValidator(examIdParamSchema, "params"),
   ExamController.deleteExam
 );

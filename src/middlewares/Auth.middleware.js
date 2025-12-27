@@ -44,7 +44,7 @@ export const authenticateUser = async (req, res, next) => {
           data: {
             id: user.id,
             firstName: user.first_name,
-            middleName: user.last_name,
+            middleName: user.middle_name,
             lastName: user.last_name,
             email: user.email,
             phoneNo: user.phone_no,
@@ -64,7 +64,16 @@ export const authenticateUser = async (req, res, next) => {
         maxAge: 24 * 60 * 60 * 1000,
       });
 
-      req.user = decodedRefresh.data;
+      // Set req.user with fresh user data from database, including roles
+      req.user = {
+        id: user.id,
+        firstName: user.first_name,
+        middleName: user.middle_name,
+        lastName: user.last_name,
+        email: user.email,
+        phoneNo: user.phone_no,
+        role: user.roles,
+      };
       return next();
     } catch (error) {
       return res.status(401).json({

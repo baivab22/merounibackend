@@ -9,7 +9,7 @@ const route = express.Router();
 route.get(
   "/admin-overview",
   authenticateUser,
-  authorizeRole(["super-admin", "admin", "editor"]),
+  authorizeRole(["admin", "editor"]),
   AnalyticsController.getAdminOverview
 );
 

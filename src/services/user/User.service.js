@@ -11,14 +11,32 @@ class UserService {
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "desc").toUpperCase();
     const search = query.q;
+    const role = query.role;
 
-    const whereCondition = {};
+    const whereConditions = [];
+
     if (search) {
-      whereCondition[Op.or] = [
-        { email: { [Op.like]: `%${search}%` } },
-        { firstName: { [Op.like]: `%${search}%` } },
-      ];
+      whereConditions.push({
+        [Op.or]: [
+          { email: { [Op.like]: `%${search}%` } },
+          { firstName: { [Op.like]: `%${search}%` } },
+        ],
+      });
     }
+
+    // Filter by role if provided
+    if (role) {
+      // For MySQL JSON fields, use JSON_EXTRACT to query nested JSON properties
+      whereConditions.push(
+        Sequelize.where(
+          Sequelize.literal(`JSON_EXTRACT(roles, '$.${role}')`),
+          true
+        )
+      );
+    }
+
+    const whereCondition =
+      whereConditions.length > 0 ? { [Op.and]: whereConditions } : {};
 
     const offset = (page - 1) * limit;
 
@@ -120,8 +138,7 @@ class UserService {
     }
 
     const loggedInUserRoles = roleHelper(loggedInUser?.role);
-    const isAdmin =
-      loggedInUserRoles?.admin || loggedInUserRoles?.["super-admin"];
+    const isAdmin = loggedInUserRoles?.admin;
 
     if (!isAdmin && loggedInUser?.id !== Number(userId)) {
       const error = new Error("You are not allowed to delete this account!");
@@ -239,7 +256,7 @@ class UserService {
 
     const loggedInUserRoles = roleHelper(loggedInUser.role);
 
-    if (!loggedInUserRoles?.admin && !loggedInUserRoles?.["super-admin"]) {
+    if (!loggedInUserRoles?.admin) {
       const error = new Error(
         "Access denied. Only admins can review role requests."
       );

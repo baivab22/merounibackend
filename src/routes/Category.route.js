@@ -32,21 +32,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor", "agent"]),
+    authorizeRole(["admin", "editor", "agent"]),
     requestValidator(createCategorySchema, "body"),
     CategoryController.createCategory
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(deleteCategoryQuerySchema, "query"),
     CategoryController.deleteCategory
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateCategoryQuerySchema, property: "query" },
       { schema: updateCategoryBodySchema, property: "body" },

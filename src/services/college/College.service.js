@@ -363,6 +363,7 @@ class CollegeService {
     const city = query.city || "";
     const degree = query.discipline || "";
     const university = query.university || "";
+    const programId = query.program_id ? parseInt(query.program_id, 10) : null;
 
     const offset = (page - 1) * limit;
 
@@ -414,7 +415,10 @@ class CollegeService {
       limit,
       offset,
       distinct: true,
-      order: [["id", sort]],
+      order: [
+        ["order_no_for_website", "ASC"],
+        ["id", sort],
+      ],
       include: [
         {
           model: CollegeAddress,
@@ -427,15 +431,24 @@ class CollegeService {
         {
           model: CollegeCourse,
           as: "collegeCourses",
-          attributes: { exclude: ["college_id", "course_id"] },
+          attributes: { exclude: ["college_id"] }, // Include course_id for filtering
+          required: !!programId, // Make required when filtering by program_id
           include: [
             {
               model: Program,
               as: "program",
-              attributes: ["title", "slugs"],
-              where: Object.keys(degreeCondition).length
-                ? degreeCondition
-                : undefined,
+              attributes: ["id", "title", "slugs"],
+              where: (() => {
+                const conditions = {};
+                if (Object.keys(degreeCondition).length) {
+                  Object.assign(conditions, degreeCondition);
+                }
+                // Filter by program_id if provided
+                if (programId) {
+                  conditions.id = programId;
+                }
+                return Object.keys(conditions).length ? conditions : undefined;
+              })(),
             },
           ],
         },
@@ -458,8 +471,48 @@ class CollegeService {
       ],
     });
 
+    // Check if each college has a user account (institution user)
+    const collegeIds = items.map((college) => college.id);
+
+    // Find all users with institution role and matching collegeId
+    // Since roles is JSON, we need to check for institution:true in the JSON
+    const usersWithCollegeId = await UserModel.findAll({
+      where: {
+        collegeId: { [Op.in]: collegeIds },
+      },
+      attributes: ["collegeId", "roles"],
+      raw: true,
+    });
+
+    // Filter users that have institution role and create a Set of college IDs
+    const collegesWithAccounts = new Set(
+      usersWithCollegeId
+        .filter((user) => {
+          try {
+            const roles =
+              typeof user.roles === "string"
+                ? JSON.parse(user.roles)
+                : user.roles;
+            return roles?.institution === true && user.collegeId;
+          } catch {
+            return false;
+          }
+        })
+        .map((user) => user.collegeId)
+        .filter(Boolean)
+    );
+
+    // Add has_account field to each college item
+    const itemsWithAccountStatus = items.map((college) => {
+      const collegeData = college.toJSON ? college.toJSON() : college;
+      return {
+        ...collegeData,
+        has_account: collegesWithAccounts.has(college.id),
+      };
+    });
+
     return {
-      items,
+      items: itemsWithAccountStatus,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
@@ -692,6 +745,42 @@ class CollegeService {
       await this.createOrUpdateCollege(payload);
 
     return { collegeId: updatedCollegeId, isNew };
+  }
+
+  async updateCollegeOrder(colleges) {
+    const transaction = await sequelize.transaction();
+    try {
+      // Validate all college IDs exist
+      const collegeIds = colleges.map((c) => c.id);
+      const existingColleges = await College.findAll({
+        where: {
+          id: { [Op.in]: collegeIds },
+        },
+        transaction,
+      });
+
+      if (existingColleges.length !== collegeIds.length) {
+        const error = new Error("Invalid college IDs");
+        error.status = 400;
+        throw error;
+      }
+
+      // Update order_no_for_website for each college
+      const updates = colleges.map((college) =>
+        College.update(
+          { order_no_for_website: college.order_no },
+          { where: { id: college.id }, transaction }
+        )
+      );
+
+      await Promise.all(updates);
+      await transaction.commit();
+
+      return { message: "College order updated successfully" };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 }
 

@@ -38,11 +38,10 @@ async function ensureAdminUser() {
       phoneNo: SEED_ADMIN_PHONE,
       roles: {
         admin: true,
-        "super-admin": true,
-        editor: false,
         agent: false,
+        editor: false,
         student: false,
-        "college-admin": false,
+        institution: false,
       },
       pendingRoles: [],
     });

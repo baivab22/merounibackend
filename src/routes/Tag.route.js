@@ -28,21 +28,21 @@ route
   .post(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(createTagSchema, "body"),
     TagController.createTag
   )
   .delete(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidator(deleteTagQuerySchema, "query"),
     TagController.deleteTag
   )
   .put(
     "/",
     authenticateUser,
-    authorizeRole(["super-admin", "admin", "editor"]),
+    authorizeRole(["admin", "editor"]),
     requestValidatorMultiple([
       { schema: updateTagQuerySchema, property: "query" },
       { schema: updateTagBodySchema, property: "body" },
