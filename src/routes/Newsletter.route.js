@@ -11,19 +11,72 @@ import {
 
 const route = express.Router();
 
-route
-  .get(
-    "/",
-    requestValidator(paginationSchema, "query"),
-    NewsletterController.listNewsletter
-  )
-  .post(
-    "/",
-    authenticateUser,
-    authorizeRole(["admin", "editor"]),
-    requestValidator(createNewsletterSchema, "body"),
-    NewsletterController.createNewsletter
-  );
+/**
+ * @swagger
+ * /newsletter:
+ *   get:
+ *     summary: List all newsletter subscriptions with pagination
+ *     tags: [Newsletter]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of newsletter subscriptions
+ */
+route.get(
+  "/",
+  requestValidator(paginationSchema, "query"),
+  NewsletterController.listNewsletter
+);
+
+/**
+ * @swagger
+ * /newsletter:
+ *   post:
+ *     summary: Subscribe to newsletter
+ *     tags: [Newsletter]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: subscriber@example.com
+ *     responses:
+ *       201:
+ *         description: Successfully subscribed to newsletter
+ *       400:
+ *         description: Bad request (email already exists)
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+route.post(
+  "/",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(createNewsletterSchema, "body"),
+  NewsletterController.createNewsletter
+);
 //   .delete(
 //     "/",
 //     authenticateUser,

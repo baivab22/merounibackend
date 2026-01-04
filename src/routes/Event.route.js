@@ -13,40 +13,204 @@ import {
 
 const router = express.Router();
 
-router
-  .get(
-    "/",
-    requestValidator(paginationSchema, "query"),
-    EventController.listEvents
-  )
-  .get(
-    "/this-week",
-    requestValidator(paginationSchema, "query"),
-    EventController.getEventsThisWeek
-  )
-  .get(
-    "/next-month",
-    requestValidator(paginationSchema, "query"),
-    EventController.getEventsNextMonth
-  )
-  .get(
-    "/:slugs",
-    requestValidator(eventSlugParamSchema, "params"),
-    EventController.getEvent
-  )
-  .post(
-    "/",
-    authenticateUser,
-    authorizeRole(["admin", "editor", "agent"]),
-    requestValidator(createOrUpdateEventSchema, "body"),
-    EventController.createOrUpdateEvent
-  )
-  .delete(
-    "/",
-    authenticateUser,
-    authorizeRole(["admin"]),
-    requestValidator(deleteEventQuerySchema, "query"),
-    EventController.deleteEvent
-  );
+/**
+ * @swagger
+ * /event:
+ *   get:
+ *     summary: List all events with pagination
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *     responses:
+ *       200:
+ *         description: List of events
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/",
+  requestValidator(paginationSchema, "query"),
+  EventController.listEvents
+);
+
+/**
+ * @swagger
+ * /event/this-week:
+ *   get:
+ *     summary: Get events happening this week
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of events this week
+ */
+router.get(
+  "/this-week",
+  requestValidator(paginationSchema, "query"),
+  EventController.getEventsThisWeek
+);
+
+/**
+ * @swagger
+ * /event/next-month:
+ *   get:
+ *     summary: Get events happening next month
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of events next month
+ */
+router.get(
+  "/next-month",
+  requestValidator(paginationSchema, "query"),
+  EventController.getEventsNextMonth
+);
+
+/**
+ * @swagger
+ * /event/{slugs}:
+ *   get:
+ *     summary: Get event by slug
+ *     tags: [Events]
+ *     parameters:
+ *       - in: path
+ *         name: slugs
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Event details
+ *       404:
+ *         description: Event not found
+ */
+router.get(
+  "/:slugs",
+  requestValidator(eventSlugParamSchema, "params"),
+  EventController.getEvent
+);
+
+/**
+ * @swagger
+ * /event:
+ *   post:
+ *     summary: Create or update an event
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - startDate
+ *               - endDate
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Tech Conference 2024
+ *               description:
+ *                 type: string
+ *                 example: Annual technology conference
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               location:
+ *                 type: string
+ *               is_featured:
+ *                 type: boolean
+ *     responses:
+ *       201:
+ *         description: Event created/updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.post(
+  "/",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(createOrUpdateEventSchema, "body"),
+  EventController.createOrUpdateEvent
+);
+
+/**
+ * @swagger
+ * /event:
+ *   delete:
+ *     summary: Delete an event
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: event_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Event not found
+ */
+router.delete(
+  "/",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(deleteEventQuerySchema, "query"),
+  EventController.deleteEvent
+);
 
 export default router;

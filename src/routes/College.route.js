@@ -14,60 +14,304 @@ import {
 
 const router = express.Router();
 
-router
-  .post(
-    "/",
-    authenticateUser,
-    authorizeRole(["admin", "editor", "agent"]),
-    requestValidator(createOrUpdateCollegeSchema, "body"),
-    CollegeController.createOrUpdateCollege
-  )
-  .get(
-    "/admission",
-    requestValidator(paginationSchema, "query"),
-    CollegeController.listAdmissions
-  )
-  .get(
-    "/list-school",
-    requestValidator(paginationSchema, "query"),
-    CollegeController.listSchools
-  )
-  .get(
-    "/",
-    requestValidator(paginationSchema, "query"),
-    CollegeController.listColleges
-  )
-  .get(
-    "/:slugs",
-    requestValidator(collegeSlugParamSchema, "params"),
-    CollegeController.getCollegeBySlug
-  )
-  .delete(
-    "/:id",
-    authenticateUser,
-    authorizeRole(["admin", "editor"]),
-    requestValidator(collegeIdParamSchema, "params"),
-    CollegeController.deleteCollege
-  )
-  .get(
-    "/institution/my-college",
-    authenticateUser,
-    authorizeRole(["institution"]),
-    CollegeController.getCollegeByInstitutionUser
-  )
-  .put(
-    "/institution/my-college",
-    authenticateUser,
-    authorizeRole(["institution"]),
-    requestValidator(createOrUpdateCollegeSchema, "body"),
-    CollegeController.updateCollegeByInstitutionUser
-  )
-  .put(
-    "/order",
-    authenticateUser,
-    authorizeRole(["admin", "editor"]),
-    requestValidator(updateCollegeOrderSchema, "body"),
-    CollegeController.updateCollegeOrder
-  );
+/**
+ * @swagger
+ * /college:
+ *   post:
+ *     summary: Create or update a college
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               featured_img:
+ *                 type: string
+ *                 format: uri
+ *     responses:
+ *       201:
+ *         description: College created/updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.post(
+  "/",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(createOrUpdateCollegeSchema, "body"),
+  CollegeController.createOrUpdateCollege
+);
+
+/**
+ * @swagger
+ * /college/admission:
+ *   get:
+ *     summary: List college admissions
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of admissions
+ */
+router.get(
+  "/admission",
+  requestValidator(paginationSchema, "query"),
+  CollegeController.listAdmissions
+);
+
+/**
+ * @swagger
+ * /college/list-school:
+ *   get:
+ *     summary: List schools
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *     responses:
+ *       200:
+ *         description: List of schools
+ */
+router.get(
+  "/list-school",
+  requestValidator(paginationSchema, "query"),
+  CollegeController.listSchools
+);
+
+/**
+ * @swagger
+ * /college:
+ *   get:
+ *     summary: List all colleges with pagination
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *       - in: query
+ *         name: pinned
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: is_featured
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: List of colleges
+ */
+router.get(
+  "/",
+  requestValidator(paginationSchema, "query"),
+  CollegeController.listColleges
+);
+
+/**
+ * @swagger
+ * /college/{slugs}:
+ *   get:
+ *     summary: Get college by slug
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: path
+ *         name: slugs
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: College details
+ *       404:
+ *         description: College not found
+ */
+router.get(
+  "/:slugs",
+  requestValidator(collegeSlugParamSchema, "params"),
+  CollegeController.getCollegeBySlug
+);
+
+/**
+ * @swagger
+ * /college/{id}:
+ *   delete:
+ *     summary: Delete a college
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: College deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: College not found
+ */
+router.delete(
+  "/:id",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(collegeIdParamSchema, "params"),
+  CollegeController.deleteCollege
+);
+
+/**
+ * @swagger
+ * /college/institution/my-college:
+ *   get:
+ *     summary: Get college by institution user (Institution only)
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: College details
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: College not found
+ */
+router.get(
+  "/institution/my-college",
+  authenticateUser,
+  authorizeRole(["institution"]),
+  CollegeController.getCollegeByInstitutionUser
+);
+
+/**
+ * @swagger
+ * /college/institution/my-college:
+ *   put:
+ *     summary: Update college by institution user (Institution only)
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: College updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.put(
+  "/institution/my-college",
+  authenticateUser,
+  authorizeRole(["institution"]),
+  requestValidator(createOrUpdateCollegeSchema, "body"),
+  CollegeController.updateCollegeByInstitutionUser
+);
+
+/**
+ * @swagger
+ * /college/order:
+ *   put:
+ *     summary: Update college display order
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - college_id
+ *               - order_no_for_website
+ *             properties:
+ *               college_id:
+ *                 type: integer
+ *               order_no_for_website:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Order updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.put(
+  "/order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(updateCollegeOrderSchema, "body"),
+  CollegeController.updateCollegeOrder
+);
 
 export default router;

@@ -11,6 +11,25 @@ import newsletterRoute from "./Newsletter.route.js";
 router.use("/newsletter", newsletterRoute);
 
 import HomeController from "../controllers/home/Home.controller.js";
+/**
+ * @swagger
+ * /search:
+ *   get:
+ *     summary: Global search across all resources
+ *     tags: [Search]
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *     responses:
+ *       200:
+ *         description: Search results across colleges, universities, programs, events, news, etc.
+ *       500:
+ *         description: Server error
+ */
 router.get("/search", HomeController.search);
 
 // import user-defined components

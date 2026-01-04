@@ -55,6 +55,34 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
+// Swagger setup
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.config.js";
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Mero Uni API Documentation",
+  })
+);
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Server is working
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: Server is Working
+ */
 // check health status of the server
 app.get("/health", (req, res) => {
   res.send("Server is Working");

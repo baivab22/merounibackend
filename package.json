@@ -35,6 +35,8 @@
     "nodemon": "^3.1.11",
     "sequelize": "^6.37.7",
     "slug": "^10.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "winston": "^3.18.3",
     "winston-daily-rotate-file": "^5.0.0",
     "yup": "^1.7.1"

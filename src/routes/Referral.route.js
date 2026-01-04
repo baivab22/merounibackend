@@ -19,11 +19,81 @@ import {
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /referral/self-apply:
+ *   post:
+ *     summary: Create a self-application (student applies directly)
+ *     tags: [Referrals]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - user_id
+ *               - college_id
+ *               - course_id
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *               college_id:
+ *                 type: integer
+ *               course_id:
+ *                 type: integer
+ *               student_description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Self-application created successfully
+ *       400:
+ *         description: Bad request
+ */
 router.post(
   "/self-apply",
   requestValidator(createSelfApplicationSchema, "body"),
   ReferralController.createSelfApplication
 );
+
+/**
+ * @swagger
+ * /referral/agent-apply:
+ *   post:
+ *     summary: Create a referred application (agent refers a student)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - student_id
+ *               - college_id
+ *               - course_id
+ *             properties:
+ *               student_id:
+ *                 type: integer
+ *               college_id:
+ *                 type: integer
+ *               course_id:
+ *                 type: integer
+ *               student_description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Referred application created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.post(
   "/agent-apply",
   authenticateUser,
@@ -31,23 +101,100 @@ router.post(
   requestValidator(createReferredApplicationSchema, "body"),
   ReferralController.createReferredApplication
 );
+
+/**
+ * @swagger
+ * /referral:
+ *   get:
+ *     summary: Get all applications (Admin/Editor/Agent only)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all applications
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get(
   "/",
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
   ReferralController.getApplications
 );
+
+/**
+ * @swagger
+ * /referral/user/referrals:
+ *   get:
+ *     summary: Get user's own referrals/applications
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user's referrals
+ *       401:
+ *         description: Unauthorized
+ */
 router.get(
   "/user/referrals",
   authenticateUser,
   ReferralController.getUserReferrals
 );
+
+/**
+ * @swagger
+ * /referral/institution/applications:
+ *   get:
+ *     summary: Get applications for institution's college (Institution only)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of applications for the institution
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get(
   "/institution/applications",
   authenticateUser,
   authorizeRole(["institution"]),
   ReferralController.getInstitutionApplications
 );
+
+/**
+ * @swagger
+ * /referral/type/{type}:
+ *   get:
+ *     summary: Get applications by type (Admin/Editor/Agent only)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [self, referred]
+ *     responses:
+ *       200:
+ *         description: List of applications filtered by type
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get(
   "/type/:type",
   authenticateUser,
@@ -55,6 +202,30 @@ router.get(
   requestValidator(applicationTypeParamSchema, "params"),
   ReferralController.getApplicationsByType
 );
+
+/**
+ * @swagger
+ * /referral/college/{college_id}:
+ *   get:
+ *     summary: Get applications for a specific college (Admin only)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: college_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of applications for the college
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get(
   "/college/:college_id",
   authenticateUser,
@@ -62,6 +233,36 @@ router.get(
   requestValidator(collegeIdParamSchema, "params"),
   ReferralController.getCollegeApplications
 );
+
+/**
+ * @swagger
+ * /referral/college/{college_id}/type/{type}:
+ *   get:
+ *     summary: Get applications for a college by type (Admin only)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: college_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [self, referred]
+ *     responses:
+ *       200:
+ *         description: List of applications filtered by college and type
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get(
   "/college/:college_id/type/:type",
   authenticateUser,
@@ -70,6 +271,47 @@ router.get(
   ReferralController.getCollegeApplicationsByType
 );
 
+/**
+ * @swagger
+ * /referral/{id}/status:
+ *   patch:
+ *     summary: Update referral/application status
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, ACCEPTED, REJECTED]
+ *               remarks:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Referral not found
+ */
 router.patch(
   "/:id/status",
   authenticateUser,
@@ -81,6 +323,31 @@ router.patch(
   ReferralController.updateStatus
 );
 
+/**
+ * @swagger
+ * /referral/{id}:
+ *   delete:
+ *     summary: Delete a referral/application
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Referral deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Referral not found
+ */
 router.delete(
   "/:id",
   authenticateUser,
