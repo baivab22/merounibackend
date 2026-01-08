@@ -36,6 +36,13 @@ class ProgramController {
 
   static async createOrUpdateProgram(req, res) {
     try {
+      console.log("Received program data:", JSON.stringify(req.body, null, 2));
+      console.log(
+        "Faculty ID:",
+        req.body.faculty_id,
+        "Type:",
+        typeof req.body.faculty_id
+      );
       const programId = await programService.createOrUpdateProgram(req.body);
       return res.status(200).json({
         message: req.body.id
@@ -44,7 +51,12 @@ class ProgramController {
         programId,
       });
     } catch (error) {
-      console.error("Sequelize Validation Error:", error);
+      console.error("Error creating/updating program:", error);
+      console.error("Error details:", {
+        message: error.message,
+        status: error.status,
+        stack: error.stack,
+      });
       const status = error.status || 500;
       return res
         .status(status)

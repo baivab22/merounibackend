@@ -47,14 +47,37 @@ class ScholarshipService {
   }
 
   async createScholarship(data) {
+    // Generate slug from title if provided, otherwise use name
+    // Handle both empty strings and undefined/null values
+    const title = data.title?.trim();
+    const name = data.name?.trim();
+    const titleOrName = title || name;
+
+    if (!titleOrName || titleOrName.length === 0) {
+      console.error(
+        "Scholarship creation error - received data:",
+        JSON.stringify(data, null, 2)
+      );
+      const error = new Error("Title or name is required to generate slug");
+      error.status = 400;
+      throw error;
+    }
+
     return Scholarship.create({
       ...data,
-      slugs: slug(data.name),
+      slugs: slug(titleOrName),
     });
   }
 
   async updateScholarship(id, data) {
-    const [updatedRows] = await Scholarship.update(data, {
+    // If title or name is being updated, regenerate the slug
+    const updateData = { ...data };
+    if (data.title || data.name) {
+      const titleOrName = data.title || data.name;
+      updateData.slugs = slug(titleOrName);
+    }
+
+    const [updatedRows] = await Scholarship.update(updateData, {
       where: { id },
     });
 

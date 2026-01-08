@@ -271,41 +271,110 @@ class ProgramService {
     exam_id,
     author,
   }) {
-    const facultyExists = await Faculty.findByPk(faculty_id);
+    // Validate faculty_id
+    if (!faculty_id) {
+      const error = new Error("faculty_id is required");
+      error.status = 400;
+      throw error;
+    }
+
+    const facultyIdNum = Number(faculty_id);
+    console.log(
+      `Checking faculty with ID: ${facultyIdNum} (original: ${faculty_id}, type: ${typeof faculty_id})`
+    );
+
+    // Try findByPk first, if it fails try findOne as fallback
+    let facultyExists = await Faculty.findByPk(facultyIdNum);
+
     if (!facultyExists) {
-      const error = new Error("Invalid faculty_id");
+      // Try with findOne as fallback
+      facultyExists = await Faculty.findOne({
+        where: { id: facultyIdNum },
+      });
+    }
+
+    if (!facultyExists) {
+      // Try raw query to see if record exists
+      const [results] = await sequelize.query(
+        `SELECT id FROM faculty WHERE id = :id`,
+        {
+          replacements: { id: facultyIdNum },
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
+      console.log(`Raw query result for faculty ${facultyIdNum}:`, results);
+
+      console.error(`Faculty with ID ${facultyIdNum} not found via Sequelize`);
+      const error = new Error(
+        `Invalid faculty_id: ${facultyIdNum}. Faculty does not exist.`
+      );
       error.status = 400;
       throw error;
     }
 
-    const levelExists = await Level.findByPk(level_id);
+    console.log(
+      `Faculty ${facultyIdNum} found successfully:`,
+      facultyExists.title
+    );
+
+    // Validate level_id
+    if (!level_id) {
+      const error = new Error("level_id is required");
+      error.status = 400;
+      throw error;
+    }
+
+    const levelExists = await Level.findByPk(Number(level_id));
     if (!levelExists) {
-      const error = new Error("Invalid level_id");
+      console.error(`Level with ID ${level_id} not found`);
+      const error = new Error(
+        `Invalid level_id: ${level_id}. Level does not exist.`
+      );
       error.status = 400;
       throw error;
     }
 
+    // Validate scholarship_id (optional)
     if (scholarship_id) {
-      const scholarshipExists = await Scholarship.findByPk(scholarship_id);
+      const scholarshipExists = await Scholarship.findByPk(
+        Number(scholarship_id)
+      );
       if (!scholarshipExists) {
-        const error = new Error("Invalid scholarship_id");
+        console.error(`Scholarship with ID ${scholarship_id} not found`);
+        const error = new Error(
+          `Invalid scholarship_id: ${scholarship_id}. Scholarship does not exist.`
+        );
         error.status = 400;
         throw error;
       }
     }
 
+    // Validate exam_id (optional)
     if (exam_id) {
-      const examExists = await Exam.findByPk(exam_id);
+      const examExists = await Exam.findByPk(Number(exam_id));
       if (!examExists) {
-        const error = new Error("Invalid exam_id");
+        console.error(`Exam with ID ${exam_id} not found`);
+        const error = new Error(
+          `Invalid exam_id: ${exam_id}. Exam does not exist.`
+        );
         error.status = 400;
         throw error;
       }
     }
 
-    const authorExists = await UserModel.findByPk(author);
+    // Validate author
+    if (!author) {
+      const error = new Error("author is required");
+      error.status = 400;
+      throw error;
+    }
+
+    const authorExists = await UserModel.findByPk(Number(author));
     if (!authorExists) {
-      const error = new Error("Invalid author ID");
+      console.error(`User with ID ${author} not found`);
+      const error = new Error(
+        `Invalid author ID: ${author}. User does not exist.`
+      );
       error.status = 400;
       throw error;
     }

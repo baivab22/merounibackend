@@ -42,6 +42,7 @@ Faculty.init(
   {
     sequelize,
     modelName: "faculty",
+    tableName: "faculty",
     freezeTableName: true,
     timestamps: true,
   }

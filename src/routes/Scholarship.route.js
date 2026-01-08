@@ -90,18 +90,28 @@ route.get(
  *           schema:
  *             type: object
  *             required:
- *               - title
- *               - description
+ *               - name
  *             properties:
- *               title:
+ *               name:
  *                 type: string
  *                 example: Merit Scholarship
  *               description:
  *                 type: string
+ *               eligibilityCriteria:
+ *                 type: string
  *               amount:
  *                 type: number
- *               eligibility:
+ *               applicationDeadline:
  *                 type: string
+ *               author:
+ *                 type: integer
+ *               renewalCriteria:
+ *                 type: string
+ *               contactInfo:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *                 description: Optional, for backward compatibility
  *     responses:
  *       201:
  *         description: Scholarship created successfully
@@ -175,14 +185,23 @@ route.delete(
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               name:
  *                 type: string
  *               description:
  *                 type: string
+ *               eligibilityCriteria:
+ *                 type: string
  *               amount:
  *                 type: number
- *               eligibility:
+ *               applicationDeadline:
  *                 type: string
+ *               renewalCriteria:
+ *                 type: string
+ *               contactInfo:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *                 description: Optional, for backward compatibility
  *     responses:
  *       200:
  *         description: Scholarship updated successfully

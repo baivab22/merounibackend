@@ -42,9 +42,6 @@ class ScholarshipController {
 
   static async createScholarship(req, res) {
     try {
-      const newScholarship = await scholarshipService.createScholarship(
-        req.body
-      );
       return res.status(201).json({
         message: "Scholarship created",
         scholarship: newScholarship,
