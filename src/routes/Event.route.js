@@ -49,9 +49,9 @@ router.get(
 
 /**
  * @swagger
- * /event/this-week:
+ * /event/unexpired:
  *   get:
- *     summary: Get events happening this week
+ *     summary: Get all unexpired events (for website homepage)
  *     tags: [Events]
  *     parameters:
  *       - in: query
@@ -66,39 +66,14 @@ router.get(
  *           default: 10
  *     responses:
  *       200:
- *         description: List of events this week
+ *         description: List of unexpired events
+ *       500:
+ *         description: Server error
  */
 router.get(
-  "/this-week",
+  "/unexpired",
   requestValidator(paginationSchema, "query"),
-  EventController.getEventsThisWeek
-);
-
-/**
- * @swagger
- * /event/next-month:
- *   get:
- *     summary: Get events happening next month
- *     tags: [Events]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *     responses:
- *       200:
- *         description: List of events next month
- */
-router.get(
-  "/next-month",
-  requestValidator(paginationSchema, "query"),
-  EventController.getEventsNextMonth
+  EventController.getUnExpiredEvents
 );
 
 /**

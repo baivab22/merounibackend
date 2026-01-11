@@ -5,6 +5,11 @@ const eventService = new EventService();
 class EventController {
   static async createOrUpdateEvent(req, res) {
     try {
+      console.log("[EventController] createOrUpdateEvent called");
+      console.log(
+        "[EventController] req.body:",
+        JSON.stringify(req.body, null, 2)
+      );
       const { eventId, isNew } = await eventService.createOrUpdateEvent(
         req.body
       );
@@ -15,6 +20,7 @@ class EventController {
         eventId,
       });
     } catch (error) {
+      console.log("req.body:", JSON.stringify(req.body));
       console.error("Error creating/updating event:", error);
       return res
         .status(error.status || 500)
@@ -47,6 +53,25 @@ class EventController {
     }
   }
 
+  // for website, to show all the un expired events.
+  static async getUnExpiredEvents(req, res) {
+    try {
+      const { events, pagination } = await eventService.getUnExpiredEvents(
+        req.query
+      );
+      return res.status(200).json({
+        message: "Un expired events retrieved",
+        items: events,
+        pagination,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
+
+  // for admin dashboard, to show all the events.
   static async listEvents(req, res) {
     try {
       const { items, pagination } = await eventService.listEvents(req.query);
@@ -57,44 +82,6 @@ class EventController {
       });
     } catch (error) {
       return res.status(500).json({ error: error.message });
-    }
-  }
-
-  static async getEventsThisWeek(req, res) {
-    try {
-      const { events, pagination } = await eventService.listEventsThisWeek(
-        req.query
-      );
-
-      return res.status(200).json({
-        message: "success",
-        events,
-        pagination,
-      });
-    } catch (error) {
-      console.error("Error in getEventsThisWeek:", error);
-      return res.status(500).json({
-        message: `Server Error: ${error.message}`,
-      });
-    }
-  }
-
-  static async getEventsNextMonth(req, res) {
-    try {
-      const { events, pagination } = await eventService.listEventsNextMonth(
-        req.query
-      );
-
-      return res.status(200).json({
-        message: "success",
-        events,
-        pagination,
-      });
-    } catch (error) {
-      console.error("Error in getEventsNextMonth:", error);
-      return res.status(500).json({
-        message: `Server Error: ${error.message}`,
-      });
     }
   }
 }
