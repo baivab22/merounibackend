@@ -19,12 +19,6 @@ import "./models/faculty/associations.js";
 
 const app = express();
 
-// Replacing console.log with winston
-console.log = (message) => {
-  logger.info(message);
-};
-
-// secret file
 const PORT = process.env.PORT || 8888;
 const version = process.env.VERSION;
 
