@@ -29,7 +29,7 @@ Event.init(
     },
     college_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "colleges",
         key: "id",
