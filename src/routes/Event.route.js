@@ -78,6 +78,64 @@ router.get(
 
 /**
  * @swagger
+ * /event/this-week:
+ *   get:
+ *     summary: Get events happening this week (Monday to Sunday)
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of events happening this week
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/this-week",
+  requestValidator(paginationSchema, "query"),
+  EventController.getThisWeekEvents
+);
+
+/**
+ * @swagger
+ * /event/next-month:
+ *   get:
+ *     summary: Get events happening next month (first day to last day of next month)
+ *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: List of events happening next month
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/next-month",
+  requestValidator(paginationSchema, "query"),
+  EventController.getNextMonthEvents
+);
+
+/**
+ * @swagger
  * /event/{slugs}:
  *   get:
  *     summary: Get event by slug

@@ -63,9 +63,12 @@ class FacultyService {
   async createFaculty(data) {
     const { title, description, featured_image, author } = data;
 
+    // Generate slug from title (title is already validated by the validator)
+    const generatedSlug = slug(title);
+
     await Faculty.create({
       title,
-      slugs: slug(title),
+      slugs: generatedSlug,
       description,
       author,
       featured_image,
@@ -83,6 +86,12 @@ class FacultyService {
 
     let updatedSlug = faculty.slugs;
     if (data.title && data.title !== faculty.title) {
+      // Validate title
+      if (data.title.trim() === "") {
+        const error = new Error("Title cannot be empty");
+        error.status = 400;
+        throw error;
+      }
       updatedSlug = slug(data.title);
     }
 

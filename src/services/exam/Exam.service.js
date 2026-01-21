@@ -27,7 +27,7 @@ class ExamService {
 
     const { count: totalCount, rows: items } = await Exam.findAndCountAll({
       where: whereCondition,
-      order: [["id", sort]],
+      order: [["createdAt", "DESC"]],
       limit,
       offset,
       distinct: true,

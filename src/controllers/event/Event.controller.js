@@ -84,6 +84,42 @@ class EventController {
       return res.status(500).json({ error: error.message });
     }
   }
+
+  // for website, to show events happening this week.
+  static async getThisWeekEvents(req, res) {
+    try {
+      const { events, pagination } = await eventService.getThisWeekEvents(
+        req.query
+      );
+      return res.status(200).json({
+        message: "This week events retrieved",
+        items: events,
+        pagination,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
+
+  // for website, to show events happening next month.
+  static async getNextMonthEvents(req, res) {
+    try {
+      const { events, pagination } = await eventService.getNextMonthEvents(
+        req.query
+      );
+      return res.status(200).json({
+        message: "Next month events retrieved",
+        items: events,
+        pagination,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
 }
 
 export default EventController;

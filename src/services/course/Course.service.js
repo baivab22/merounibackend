@@ -102,9 +102,16 @@ class CourseService {
 
   async createOrUpdateCourse(payload) {
     const { id, title, ...rest } = payload;
-    const slugs = slug(title);
+
+    // Generate slug from title if provided, otherwise throw error
+    const slugs = title ? slug(title) : undefined;
 
     if (!id) {
+      if (!title) {
+        const error = new Error("Title is required to create a course");
+        error.status = 400;
+        throw error;
+      }
       return Course.create({ ...rest, title, slugs });
     }
 
@@ -115,7 +122,14 @@ class CourseService {
       throw error;
     }
 
-    await Course.update({ ...rest, title, slugs }, { where: { id } });
+    // Only update title and slugs if provided
+    const updateData = { ...rest };
+    if (title) {
+      updateData.title = title;
+      updateData.slugs = slugs;
+    }
+
+    await Course.update(updateData, { where: { id } });
     return course;
   }
 

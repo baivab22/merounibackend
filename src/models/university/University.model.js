@@ -50,6 +50,10 @@ export const University = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    featured_img: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "university",

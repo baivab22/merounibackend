@@ -22,7 +22,7 @@ class ScholarshipService {
         limit,
         offset,
         distinct: true,
-        order: [["applicationDeadline", "ASC"]],
+        order: [['createdAt', 'DESC']],
       });
 
     return {

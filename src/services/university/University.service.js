@@ -32,7 +32,7 @@ class UniversityService {
       countQuery += searchCondition;
     }
 
-    sqlQuery += ` LIMIT :limit OFFSET :offset`;
+    sqlQuery += ` ORDER BY createdAt DESC LIMIT :limit OFFSET :offset`;
 
     const items = await sequelize.query(sqlQuery, {
       replacements: { limit, offset, searchQuery: `%${searchQuery}%` },
@@ -145,7 +145,14 @@ class UniversityService {
         gallery,
       } = payload;
 
-      const slugs = fullname ? slug(fullname) : undefined;
+      // Validate fullname exists
+      if (!fullname || fullname.trim() === "") {
+        const error = new Error("University name (fullname) is required");
+        error.status = 400;
+        throw error;
+      }
+
+      const slugs = slug(fullname);
 
       let university;
 

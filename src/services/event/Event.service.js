@@ -229,6 +229,92 @@ class EventService {
       },
     };
   }
+
+  async getThisWeekEvents(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    // Get start of current week (Monday) and end of current week (Sunday)
+    const startOfWeek = moment().startOf('week').format('YYYY-MM-DD');
+    const endOfWeek = moment().endOf('week').format('YYYY-MM-DD');
+
+    const dateLiteral = literal(`
+      STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
+      >= STR_TO_DATE('${startOfWeek}', '%Y-%m-%d')
+      AND STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
+      <= STR_TO_DATE('${endOfWeek}', '%Y-%m-%d')
+    `);
+
+    const totalCount = await Event.count({
+      where: dateLiteral,
+    });
+
+    const events = await Event.findAll({
+      where: dateLiteral,
+      limit,
+      offset,
+      order: [
+        literal(
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
+        ),
+      ],
+      subQuery: false,
+    });
+
+    return {
+      events,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+  }
+
+  async getNextMonthEvents(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    // Get start of next month (first day) and end of next month (last day)
+    const startOfNextMonth = moment().add(1, 'month').startOf('month').format('YYYY-MM-DD');
+    const endOfNextMonth = moment().add(1, 'month').endOf('month').format('YYYY-MM-DD');
+
+    const dateLiteral = literal(`
+      STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
+      >= STR_TO_DATE('${startOfNextMonth}', '%Y-%m-%d')
+      AND STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
+      <= STR_TO_DATE('${endOfNextMonth}', '%Y-%m-%d')
+    `);
+
+    const totalCount = await Event.count({
+      where: dateLiteral,
+    });
+
+    const events = await Event.findAll({
+      where: dateLiteral,
+      limit,
+      offset,
+      order: [
+        literal(
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
+        ),
+      ],
+      subQuery: false,
+    });
+
+    return {
+      events,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    };
+  }
 }
 
 export default EventService;
