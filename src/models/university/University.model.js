@@ -45,7 +45,10 @@ export const University = sequelize.define(
     author_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: "mu_users",
+      references: {
+        model: "mu_users",
+        key: "id",
+      },
     },
     description: {
       type: DataTypes.TEXT,

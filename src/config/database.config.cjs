@@ -1,23 +1,20 @@
 // use this config for migration and seeding
-require("dotenv/config");
-
-const { DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT } = process.env;
+// import envConfig from "./env.config.js";
+const envConfig = require("./env.config.js");
 
 module.exports = {
   development: {
-    username: DB_USER,
-    password: DB_PASS,
-    database: DB_NAME,
-    host: DB_HOST,
-    port: parseInt(DB_PORT) || 3306,
-    dialect: "mysql",
+    username: envConfig.DB_USER,
+    password: envConfig.DB_PASS,
+    database: envConfig.DB_NAME,
+    host: envConfig.DB_HOST,
+    port: parseInt(envConfig.DB_PORT) || 3306,
   },
   production: {
-    username: DB_USER,
-    password: DB_PASS,
-    database: DB_NAME,
-    host: DB_HOST,
-    port: parseInt(DB_PORT) || 3306,
-    dialect: "mysql",
+    username: envConfig.DB_USER,
+    password: envConfig.DB_PASS,
+    database: envConfig.DB_NAME,
+    host: envConfig.DB_HOST,
+    port: parseInt(envConfig.DB_PORT) || 3306,
   },
 };

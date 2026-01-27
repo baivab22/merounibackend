@@ -1,7 +1,8 @@
-import express from "express";
 import "dotenv/config";
+import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import envConfig from "./config/env.config.js";
 
 /**
  * import user defined components
@@ -19,8 +20,8 @@ import "./models/faculty/associations.js";
 
 const app = express();
 
-const PORT = process.env.PORT || 8888;
-const version = process.env.VERSION;
+const PORT = envConfig.PORT || 8888;
+const version = envConfig.VERSION;
 
 // use of middleware
 app.use(express.json());

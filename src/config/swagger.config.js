@@ -14,7 +14,7 @@ const options = {
       description: "API documentation for Mero Uni platform",
       contact: {
         name: "API Support",
-        email: "support@merouni.com",
+        email: "[EMAIL_ADDRESS]",
       },
       license: {
         name: "ISC",
