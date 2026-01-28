@@ -42,8 +42,11 @@ export const authenticate = async () => {
       }
     }
 
-    await sequelize.sync({
-    });
+    if (envConfig.NODE_ENV.toLowerCase() === "development") {
+      await sequelize.sync({
+        alter: true,
+      });
+    }
     console.log("Models synced");
 
     console.log("Connection has been established successfully.");

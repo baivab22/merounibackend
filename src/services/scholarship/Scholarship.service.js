@@ -28,7 +28,7 @@ class ScholarshipService {
     }
 
     if (categoryId) {
-      whereCondition.category = categoryId;
+      whereCondition.category_id = categoryId;
     }
 
     if (minAmount || maxAmount) {
@@ -115,10 +115,20 @@ class ScholarshipService {
       throw error;
     }
 
-    return Scholarship.create({
+    const createData = {
       ...data,
       slugs: slug(titleOrName),
-    });
+    };
+
+    // Map old field names to new field names for backward compatibility
+    if (data.category && !data.category_id) {
+      createData.category_id = data.category;
+    }
+    if (data.author && !data.author_id) {
+      createData.author_id = data.author;
+    }
+
+    return Scholarship.create(createData);
   }
 
   async updateScholarship(id, data) {
@@ -127,6 +137,14 @@ class ScholarshipService {
     if (data.title || data.name) {
       const titleOrName = data.title || data.name;
       updateData.slugs = slug(titleOrName);
+    }
+
+    // Map old field names to new field names for backward compatibility
+    if (data.category && !data.category_id) {
+      updateData.category_id = data.category;
+    }
+    if (data.author && !data.author_id) {
+      updateData.author_id = data.author;
     }
 
     const [updatedRows] = await Scholarship.update(updateData, {
