@@ -23,20 +23,6 @@ News.init(
       allowNull: false,
       unique: true,
     },
-    category: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: "categories",
-        key: "id",
-      },
-      onDelete: "CASCADE",
-    },
-    tags: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
-    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -57,16 +43,6 @@ News.init(
         key: "id",
       },
       onDelete: "CASCADE",
-    },
-    reactions: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: {},
-    },
-    status: {
-      type: DataTypes.ENUM("draft", "published", "archived"),
-      allowNull: false,
-      defaultValue: "draft",
     },
     visibility: {
       type: DataTypes.ENUM("public", "private"),
