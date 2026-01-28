@@ -13,10 +13,12 @@ authenticate();
 
 import "./models/events/associations.js";
 import "./models/news/associations.js";
+import "./models/blogs/associations.js";
 import "./models/college/associations.js";
 import "./models/career/associations.js";
 import "./models/program/associations.js";
 import "./models/faculty/associations.js";
+import "./models/scholarship/associations.js";
 
 const app = express();
 

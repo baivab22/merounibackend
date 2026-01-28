@@ -40,6 +40,11 @@ const route = express.Router();
  *         schema:
  *           type: string
  *         description: Search query
+ *       - in: query
+ *         name: categoryId
+ *         schema:
+ *           type: integer
+ *         description: Filter by category ID
  *     responses:
  *       200:
  *         description: List of scholarships
@@ -97,6 +102,9 @@ route.get(
  *                 example: Merit Scholarship
  *               description:
  *                 type: string
+ *               category:
+ *                 type: integer
+ *                 description: Category ID (optional)
  *               eligibilityCriteria:
  *                 type: string
  *               amount:
@@ -189,6 +197,9 @@ route.delete(
  *                 type: string
  *               description:
  *                 type: string
+ *               category:
+ *                 type: integer
+ *                 description: Category ID (optional)
  *               eligibilityCriteria:
  *                 type: string
  *               amount:

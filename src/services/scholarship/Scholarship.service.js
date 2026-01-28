@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import slug from "slug";
 
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
+import Category from "../../models/category/Category.model.js";
 
 class ScholarshipService {
   async listScholarships(query = {}) {
@@ -10,6 +11,7 @@ class ScholarshipService {
     const offset = (page - 1) * limit;
 
     const searchQuery = query.q || "";
+    const categoryId = query.categoryId;
     const minAmount = query.minAmount;
     const maxAmount = query.maxAmount;
     const activeOnly = query.activeOnly === "true";
@@ -23,6 +25,10 @@ class ScholarshipService {
         { name: { [Op.like]: `%${searchQuery}%` } },
         { description: { [Op.like]: `%${searchQuery}%` } },
       ];
+    }
+
+    if (categoryId) {
+      whereCondition.category = categoryId;
     }
 
     if (minAmount || maxAmount) {
@@ -54,6 +60,14 @@ class ScholarshipService {
         offset,
         distinct: true,
         order,
+        include: [
+          {
+            model: Category,
+            as: "scholarshipCategory",
+            attributes: ["id", "title", "slugs"],
+            required: false,
+          },
+        ],
       });
 
     return {
@@ -68,7 +82,16 @@ class ScholarshipService {
   }
 
   async getScholarship(id) {
-    const scholarship = await Scholarship.findByPk(id);
+    const scholarship = await Scholarship.findByPk(id, {
+      include: [
+        {
+          model: Category,
+          as: "scholarshipCategory",
+          attributes: ["id", "title", "slugs"],
+          required: false,
+        },
+      ],
+    });
     if (!scholarship) {
       const error = new Error("Scholarship not found");
       error.status = 404;
@@ -78,8 +101,6 @@ class ScholarshipService {
   }
 
   async createScholarship(data) {
-    // Generate slug from title if provided, otherwise use name
-    // Handle both empty strings and undefined/null values
     const title = data.title?.trim();
     const name = data.name?.trim();
     const titleOrName = title || name;

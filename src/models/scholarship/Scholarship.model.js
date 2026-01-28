@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Scholarship extends Model {}
+class Scholarship extends Model { }
 
 Scholarship.init(
   {
@@ -22,6 +22,15 @@ Scholarship.init(
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    category: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "categories",
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
     eligibilityCriteria: {
       type: DataTypes.JSON,

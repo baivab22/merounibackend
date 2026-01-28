@@ -1,11 +1,15 @@
 import * as yup from "yup";
 import {
-  paginationSchema,
+  paginationSchema as basePaginationSchema,
   idParamSchema,
   idQuerySchema,
 } from "../common/common.validator.js";
 
-export { paginationSchema, idParamSchema };
+export { idParamSchema };
+
+export const paginationSchema = basePaginationSchema.shape({
+  categoryId: yup.number().integer().positive().optional(),
+});
 
 export const scholarshipIdParamSchema = yup.object({
   id: yup.number().integer().positive().required(),
@@ -16,6 +20,7 @@ export const createScholarshipSchema = yup
   .object({
     name: yup.string().required("Name is required"),
     description: yup.string(),
+    category: yup.number().integer().positive().optional(),
     eligibilityCriteria: yup.string(),
     amount: yup.number().positive(),
     applicationDeadline: yup.string(),
@@ -34,6 +39,7 @@ export const updateScholarshipBodySchema = yup
   .object({
     name: yup.string(),
     description: yup.string(),
+    category: yup.number().integer().positive(),
     eligibilityCriteria: yup.string(),
     amount: yup.number().positive(),
     applicationDeadline: yup.string(),
