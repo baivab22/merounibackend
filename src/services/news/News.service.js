@@ -1,12 +1,12 @@
 import { Op } from "sequelize";
 import slugify from "slug";
 
-import Blog from "../../models/news/News.model.js";
+import News from "../../models/news/News.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
 
 class NewsService {
-  async listBlogs(query = {}) {
+  async listNews(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const offset = (page - 1) * limit;
@@ -54,7 +54,7 @@ class NewsService {
       whereCondition.author_id = authorId;
     }
 
-    const { count: totalCount, rows: items } = await Blog.findAndCountAll({
+    const { count: totalCount, rows: items } = await News.findAndCountAll({
       where: whereCondition,
       limit,
       offset,
@@ -73,8 +73,8 @@ class NewsService {
     };
   }
 
-  async getBlog(slug) {
-    const blog = await Blog.findOne({
+  async getNews(slug) {
+    const news = await News.findOne({
       attributes: {
         exclude: ["category", "author"],
       },
@@ -95,18 +95,18 @@ class NewsService {
       ],
     });
 
-    if (!blog) {
-      const error = new Error("Blog not found");
+    if (!news) {
+      const error = new Error("News not found");
       error.status = 404;
       throw error;
     }
 
-    const similarBlogs = await Blog.findAll({
+    const similarNews = await News.findAll({
       attributes: {
         exclude: ["category", "author"],
       },
       where: {
-        category: blog.newsCategory.id,
+        category: news.newsCategory.id,
         slug: { [Op.ne]: slug },
       },
       include: [
@@ -124,30 +124,30 @@ class NewsService {
       limit: 5,
     });
 
-    return { blog, similarBlogs };
+    return { news, similarNews };
   }
 
-  async createBlog(data) {
-    return Blog.create({
+  async createNews(data) {
+    return News.create({
       ...data,
       slug: slugify(data.title),
     });
   }
 
-  async updateBlog(id, data) {
-    const blog = await Blog.findByPk(id);
-    if (!blog) {
-      const error = new Error("Blog not found");
+  async updateNews(id, data) {
+    const news = await News.findByPk(id);
+    if (!news) {
+      const error = new Error("News not found");
       error.status = 404;
       throw error;
     }
 
-    let updatedSlug = blog.slug;
-    if (data.title && data.title !== blog.title) {
+    let updatedSlug = news.slug;
+    if (data.title && data.title !== news.title) {
       updatedSlug = slugify(data.title);
     }
 
-    const [updatedRows] = await Blog.update(
+    const [updatedRows] = await News.update(
       {
         ...data,
         slug: updatedSlug,
@@ -156,18 +156,18 @@ class NewsService {
     );
 
     if (updatedRows === 0) {
-      const error = new Error("Blog not found");
+      const error = new Error("News not found");
       error.status = 404;
       throw error;
     }
 
-    return Blog.findByPk(id);
+    return News.findByPk(id);
   }
 
-  async deleteBlog(id) {
-    const deletedRows = await Blog.destroy({ where: { id } });
+  async deleteNews(id) {
+    const deletedRows = await News.destroy({ where: { id } });
     if (deletedRows === 0) {
-      const error = new Error("Blog not found");
+      const error = new Error("News not found");
       error.status = 404;
       throw error;
     }

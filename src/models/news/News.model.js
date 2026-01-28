@@ -4,9 +4,9 @@ import { sequelize } from "../../config/database.config.js";
 import Category from "../category/Category.model.js";
 import User from "../users/User.model.js";
 
-class Blog extends Model {}
+class News extends Model { }
 
-Blog.init(
+News.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -85,10 +85,10 @@ Blog.init(
   },
   {
     sequelize,
-    modelName: "blogs",
+    modelName: "news",
     freezeTableName: true,
     timestamps: true,
   }
 );
 
-export default Blog;
+export default News;

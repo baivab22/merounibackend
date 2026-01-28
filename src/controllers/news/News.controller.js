@@ -3,16 +3,16 @@ import NewsService from "../../services/news/News.service.js";
 const newsService = new NewsService();
 
 class NewsController {
-  static async listBlogs(req, res) {
+  static async listNews(req, res) {
     try {
-      const { items, pagination } = await newsService.listBlogs(req.query);
+      const { items, pagination } = await newsService.listNews(req.query);
       return res.status(200).json({
-        message: "Blogs retrieved",
+        message: "News retrieved",
         items,
         pagination,
       });
     } catch (error) {
-      console.error("Error getting blogs:", error);
+      console.error("Error getting news:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message: status === 500 ? "Server error" : error.message,
@@ -21,30 +21,30 @@ class NewsController {
     }
   }
 
-  static async getBlog(req, res) {
+  static async getNews(req, res) {
     try {
-      const { blog, similarBlogs } = await newsService.getBlog(req.params.slug);
+      const { news, similarNews } = await newsService.getNews(req.params.slug);
 
       return res.status(200).json({
-        message: "Blog retrieved",
-        blog,
-        similarBlogs,
+        message: "News retrieved",
+        news,
+        similarNews,
       });
     } catch (error) {
-      console.error("Error getting blog by ID:", error);
+      console.error("Error getting news by ID:", error);
       return res
         .status(500)
         .json({ message: "Server error", error: error.message });
     }
   }
 
-  static async createBlog(req, res) {
+  static async createNews(req, res) {
     try {
-      const newBlog = await newsService.createBlog(req.body);
+      const newNews = await newsService.createNews(req.body);
 
-      return res.status(201).json({ message: "Blog created", blog: newBlog });
+      return res.status(201).json({ message: "News created", news: newNews });
     } catch (error) {
-      console.error("Error creating blog:", error);
+      console.error("Error creating news:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message: status === 500 ? "Server error" : error.message,
@@ -53,14 +53,14 @@ class NewsController {
     }
   }
 
-  static async updateBlog(req, res) {
+  static async updateNews(req, res) {
     try {
-      const updatedBlog = await newsService.updateBlog(req.query.id, req.body);
+      const updatedNews = await newsService.updateNews(req.query.id, req.body);
       return res
         .status(200)
-        .json({ message: "Blog updated", blog: updatedBlog });
+        .json({ message: "News updated", news: updatedNews });
     } catch (error) {
-      console.error("Error updating blog:", error);
+      console.error("Error updating news:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message: status === 500 ? "Server error" : error.message,
@@ -69,12 +69,12 @@ class NewsController {
     }
   }
 
-  static async deleteBlog(req, res) {
+  static async deleteNews(req, res) {
     try {
-      await newsService.deleteBlog(req.query.id);
-      return res.status(200).json({ message: "Blog deleted" });
+      await newsService.deleteNews(req.query.id);
+      return res.status(200).json({ message: "News deleted" });
     } catch (error) {
-      console.error("Error deleting blog:", error);
+      console.error("Error deleting news:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message: status === 500 ? "Server error" : error.message,

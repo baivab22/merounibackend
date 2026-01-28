@@ -1,29 +1,29 @@
 import express from "express";
 
-import NewsController from "../controllers/news/News.controller.js";
+import BlogController from "../controllers/blogs/Blog.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import {
-  requestValidator,
-  requestValidatorMultiple,
+    requestValidator,
+    requestValidatorMultiple,
 } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  newsSlugParamSchema,
-  createNewsSchema,
-  updateNewsQuerySchema,
-  updateNewsBodySchema,
-  deleteNewsQuerySchema,
-} from "../validators/news/News.validator.js";
+    paginationSchema,
+    blogSlugParamSchema,
+    createBlogSchema,
+    updateBlogQuerySchema,
+    updateBlogBodySchema,
+    deleteBlogQuerySchema,
+} from "../validators/blogs/Blog.validator.js";
 
 const route = express.Router();
 
 /**
  * @swagger
- * /news:
+ * /blogs:
  *   get:
- *     summary: List all news with pagination
- *     tags: [News]
+ *     summary: List all blog posts with pagination
+ *     tags: [Blogs]
  *     parameters:
  *       - in: query
  *         name: page
@@ -47,22 +47,22 @@ const route = express.Router();
  *         description: Filter by category
  *     responses:
  *       200:
- *         description: List of news
+ *         description: List of blog posts
  *       500:
  *         description: Server error
  */
 route.get(
-  "/",
-  requestValidator(paginationSchema, "query"),
-  NewsController.listNews
+    "/",
+    requestValidator(paginationSchema, "query"),
+    BlogController.listBlogs
 );
 
 /**
  * @swagger
- * /news/{slug}:
+ * /blogs/{slug}:
  *   get:
- *     summary: Get news by slug
- *     tags: [News]
+ *     summary: Get blog post by slug
+ *     tags: [Blogs]
  *     parameters:
  *       - in: path
  *         name: slug
@@ -71,22 +71,22 @@ route.get(
  *           type: string
  *     responses:
  *       200:
- *         description: News details with similar news
+ *         description: Blog post details with similar posts
  *       404:
- *         description: News not found
+ *         description: Post not found
  */
 route.get(
-  "/:slug",
-  requestValidator(newsSlugParamSchema, "params"),
-  NewsController.getNews
+    "/:slug",
+    requestValidator(blogSlugParamSchema, "params"),
+    BlogController.getBlog
 );
 
 /**
  * @swagger
- * /news:
+ * /blogs:
  *   post:
- *     summary: Create a new news post
- *     tags: [News]
+ *     summary: Create a new blog post
+ *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -103,7 +103,7 @@ route.get(
  *             properties:
  *               title:
  *                 type: string
- *                 example: Latest Education News
+ *                 example: Latest Blog Post
  *               content:
  *                 type: string
  *                 example: Full article content here...
@@ -118,7 +118,7 @@ route.get(
  *                 type: integer
  *     responses:
  *       201:
- *         description: News created successfully
+ *         description: Blog post created successfully
  *       400:
  *         description: Bad request
  *       401:
@@ -127,19 +127,19 @@ route.get(
  *         description: Forbidden
  */
 route.post(
-  "/",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
-  requestValidator(createNewsSchema, "body"),
-  NewsController.createNews
+    "/",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidator(createBlogSchema, "body"),
+    BlogController.createBlog
 );
 
 /**
  * @swagger
- * /news:
+ * /blogs:
  *   delete:
- *     summary: Delete a news post
- *     tags: [News]
+ *     summary: Delete a blog post
+ *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -151,28 +151,28 @@ route.post(
  *           type: integer
  *     responses:
  *       200:
- *         description: News deleted successfully
+ *         description: Post deleted successfully
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  *       404:
- *         description: News not found
+ *         description: Post not found
  */
 route.delete(
-  "/",
-  authenticateUser,
-  authorizeRole(["admin"]),
-  requestValidator(deleteNewsQuerySchema, "query"),
-  NewsController.deleteNews
+    "/",
+    authenticateUser,
+    authorizeRole(["admin"]),
+    requestValidator(deleteBlogQuerySchema, "query"),
+    BlogController.deleteBlog
 );
 
 /**
  * @swagger
- * /news:
+ * /blogs:
  *   put:
- *     summary: Update a news post
- *     tags: [News]
+ *     summary: Update a blog post
+ *     tags: [Blogs]
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -202,7 +202,7 @@ route.delete(
  *                 type: integer
  *     responses:
  *       200:
- *         description: News updated successfully
+ *         description: Post updated successfully
  *       400:
  *         description: Bad request
  *       401:
@@ -210,17 +210,17 @@ route.delete(
  *       403:
  *         description: Forbidden
  *       404:
- *         description: News not found
+ *         description: Post not found
  */
 route.put(
-  "/",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
-  requestValidatorMultiple([
-    { schema: updateNewsQuerySchema, property: "query" },
-    { schema: updateNewsBodySchema, property: "body" },
-  ]),
-  NewsController.updateNews
+    "/",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidatorMultiple([
+        { schema: updateBlogQuerySchema, property: "query" },
+        { schema: updateBlogBodySchema, property: "body" },
+    ]),
+    BlogController.updateBlog
 );
 
 export default route;

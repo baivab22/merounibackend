@@ -45,8 +45,11 @@ router.use("/category", categoryRoute);
 import tagRoute from "./Tag.route.js";
 router.use("/tag", tagRoute);
 
+import blogRoute from "./Blog.route.js";
+router.use("/blogs", blogRoute);
+
 import newsRoute from "./News.route.js";
-router.use("/blogs", newsRoute);
+router.use("/news", newsRoute);
 
 import levelRoute from "./Level.route.js";
 router.use("/level", levelRoute);
