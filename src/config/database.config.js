@@ -9,12 +9,12 @@ console.log(envConfig, "envConfigenvConfig");
 export const sequelize = new Sequelize(
   envConfig.DB_NAME,
   envConfig.DB_USER,
-  envConfig.DB_PASSWORD,
+  envConfig.DB_PASS,
   {
     host: envConfig.DB_HOST,
     port: Number(envConfig.DB_PORT) || 3306,
     dialect: "mysql",
-    logging: true,
+    // logging: true,
     // sync: true,
   }
 );

@@ -9,6 +9,7 @@ import {
   examSlugParamSchema,
   examIdParamSchema,
   createOrUpdateExamSchema,
+  listExamsSchema,
 } from "../validators/exam/Exam.validator.js";
 
 const router = express.Router();
@@ -35,13 +36,39 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Search query
+ *       - in: query
+ *         name: levelId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: universityId
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: isOpen
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: isUpcoming
+ *         schema:
+ *           type: boolean
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [title, createdAt]
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
  *     responses:
  *       200:
  *         description: List of exams
  */
 router.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(listExamsSchema, "query"),
   ExamController.listExams
 );
 

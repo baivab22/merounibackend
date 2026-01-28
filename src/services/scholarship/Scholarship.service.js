@@ -10,11 +10,42 @@ class ScholarshipService {
     const offset = (page - 1) * limit;
 
     const searchQuery = query.q || "";
+    const minAmount = query.minAmount;
+    const maxAmount = query.maxAmount;
+    const activeOnly = query.activeOnly === "true";
+    const sortBy = query.sortBy || "createdAt";
+    const sortOrder = query.sortOrder || "DESC";
 
     const whereCondition = {};
+
     if (searchQuery) {
-      whereCondition.name = { [Op.like]: `%${searchQuery}%` };
+      whereCondition[Op.or] = [
+        { name: { [Op.like]: `%${searchQuery}%` } },
+        { description: { [Op.like]: `%${searchQuery}%` } },
+      ];
     }
+
+    if (minAmount || maxAmount) {
+      whereCondition.amount = {};
+      if (minAmount) whereCondition.amount[Op.gte] = minAmount;
+      if (maxAmount) whereCondition.amount[Op.lte] = maxAmount;
+    }
+
+    if (activeOnly) {
+      whereCondition.applicationDeadline = { [Op.gte]: new Date() };
+    }
+
+    // Validate sort fields
+    const validSortFields = [
+      "createdAt",
+      "amount",
+      "applicationDeadline",
+      "name",
+    ];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const order = [
+      [sortField, sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC"],
+    ];
 
     const { count: totalCount, rows: scholarships } =
       await Scholarship.findAndCountAll({
@@ -22,7 +53,7 @@ class ScholarshipService {
         limit,
         offset,
         distinct: true,
-        order: [['createdAt', 'DESC']],
+        order,
       });
 
     return {

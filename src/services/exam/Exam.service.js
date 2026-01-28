@@ -15,22 +15,58 @@ class ExamService {
   async listExams(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
-    const sort = (query.sort || "asc").toUpperCase();
-    const search = query.q || "";
-
     const offset = (page - 1) * limit;
 
+    const {
+      q,
+      levelId,
+      universityId,
+      isOpen,
+      isUpcoming,
+      sortBy,
+      sortOrder,
+    } = query;
+
     const whereCondition = {};
-    if (search) {
-      whereCondition.title = { [Op.like]: `%${search}%` };
+
+    // Search query
+    if (q) {
+      whereCondition[Op.or] = [
+        { title: { [Op.like]: `%${q}%` } },
+        { description: { [Op.like]: `%${q}%` } },
+      ];
     }
+
+    // Direct filters
+    if (levelId) whereCondition.level_id = levelId;
+    if (universityId) whereCondition.affiliation = universityId;
+
+    // Application Detail filters (Date based)
+    const applicationWhere = {};
+    const now = new Date();
+
+    if (isOpen === "true") {
+      applicationWhere.opening_date = { [Op.lte]: now };
+      applicationWhere.closing_date = { [Op.gte]: now };
+    }
+
+    if (isUpcoming === "true") {
+      applicationWhere.exam_date = { [Op.gt]: now };
+    }
+
+    // Sorting
+    const validSortFields = ["title", "createdAt"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const order = [
+      [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
+    ];
 
     const { count: totalCount, rows: items } = await Exam.findAndCountAll({
       where: whereCondition,
-      order: [["createdAt", "DESC"]],
       limit,
       offset,
       distinct: true,
+      order,
       include: [
         { model: Level, attributes: ["id", "title"], as: "level" },
         {
@@ -44,7 +80,15 @@ class ExamService {
           as: "authorDetails",
         },
         { model: ExamDetail, as: "exam_details" },
-        { model: ApplicationDetail, as: "application_details" },
+        {
+          model: ApplicationDetail,
+          as: "application_details",
+          where:
+            Object.keys(applicationWhere).length > 0
+              ? applicationWhere
+              : undefined,
+          required: Object.keys(applicationWhere).length > 0,
+        },
       ],
     });
 

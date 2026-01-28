@@ -1,6 +1,4 @@
-// require("dotenv/config")
-import "dotenv/config";
-
+import "dotenv/config"
 
 
 class EnvConfig {

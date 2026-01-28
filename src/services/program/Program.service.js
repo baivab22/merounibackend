@@ -20,23 +20,67 @@ class ProgramService {
     const limit = parseInt(query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
-    const { facultyId, levelId, examId, q } = query;
+    const {
+      facultyId,
+      levelId,
+      examId,
+      q,
+      deliveryType,
+      deliveryMode,
+      language,
+      minCredits,
+      maxCredits,
+      sortBy,
+      sortOrder,
+    } = query;
 
     const whereConditions = {};
-    if (facultyId) whereConditions.facultyId = facultyId;
-    if (levelId) whereConditions.levelId = levelId;
-    if (examId) whereConditions.examId = examId;
 
-    if (q) {
-      whereConditions.title = { [Op.like]: `%${q}%` };
+    // Foreign key filters
+    if (facultyId) whereConditions.faculty_id = facultyId;
+    if (levelId) whereConditions.level_id = levelId;
+    if (examId) whereConditions.exam_id = examId;
+
+    // Direct text/enum filters
+    if (deliveryType) whereConditions.delivery_type = deliveryType;
+    if (deliveryMode) whereConditions.delivery_mode = deliveryMode;
+    if (language) whereConditions.language = language;
+
+    // Numeric range filters
+    if (minCredits || maxCredits) {
+      whereConditions.credits = {};
+      if (minCredits) whereConditions.credits[Op.gte] = minCredits;
+      if (maxCredits) whereConditions.credits[Op.lte] = maxCredits;
     }
+
+    // Search query
+    if (q) {
+      whereConditions[Op.or] = [
+        { title: { [Op.like]: `%${q}%` } },
+        { code: { [Op.like]: `%${q}%` } },
+      ];
+    }
+
+    // Sorting
+    const validSortFields = [
+      "title",
+      "code",
+      "createdAt",
+      "duration",
+      "credits",
+      "fee",
+    ];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const order = [
+      [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
+    ];
 
     const { count: totalCount, rows: items } = await Program.findAndCountAll({
       where: whereConditions,
       limit,
       offset,
       distinct: true,
-      order: [["createdAt", "DESC"]],
+      order,
     });
 
     return {

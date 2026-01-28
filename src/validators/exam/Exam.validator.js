@@ -15,6 +15,22 @@ export const examIdParamSchema = yup.object({
   id: yup.number().integer().positive().required(),
 });
 
+export const listExamsSchema = paginationSchema.shape({
+  levelId: yup.number().integer().positive().optional(),
+  universityId: yup.number().integer().positive().optional(),
+  isOpen: yup.boolean().optional(),
+  isUpcoming: yup.boolean().optional(),
+  sortBy: yup
+    .string()
+    .oneOf(["title", "createdAt"])
+    .default("createdAt"),
+  sortOrder: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "DESC"))
+    .default("DESC"),
+});
+
 // Create/Update Exam schema - adjust fields based on actual requirements
 export const createOrUpdateExamSchema = yup
   .object({
