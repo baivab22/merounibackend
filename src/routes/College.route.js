@@ -86,38 +86,6 @@ router.get(
 
 /**
  * @swagger
- * /college/list-school:
- *   get:
- *     summary: List schools
- *     tags: [Colleges]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *     responses:
- *       200:
- *         description: List of schools
- */
-router.get(
-  "/list-school",
-  requestValidator(paginationSchema, "query"),
-  CollegeController.listSchools
-);
-
-/**
- * @swagger
  * /college:
  *   get:
  *     summary: List all colleges with pagination

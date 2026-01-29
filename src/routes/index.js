@@ -102,6 +102,9 @@ router.use("/career", careerRoute);
 import vacancyRoute from "./Vacancy.route.js";
 router.use("/vacancy", vacancyRoute);
 
+import schoolRoute from "./School.route.js";
+router.use("/school", schoolRoute);
+
 import authRoute from "./Auth.route.js";
 router.use("/auth", authRoute);
 

@@ -18,18 +18,24 @@ class ConsultancyService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
+    const includeOptions = [
+      {
+        model: Course,
+        as: "consultancyCourses",
+        attributes: ["id", "title"],
+        through: { attributes: [] },
+      },
+    ];
+
+    if (query.courseId) {
+      includeOptions[0].where = { id: query.courseId };
+    }
+
     const { count: totalCount, rows: items } =
       await Consultancy.findAndCountAll({
         where: whereCondition,
         distinct: true,
-        include: [
-          {
-            model: Course,
-            as: "consultancyCourses",
-            attributes: ["id", "title"],
-            through: { attributes: [] },
-          },
-        ],
+        include: includeOptions,
         limit,
         offset,
         order: [["id", sort]],
@@ -198,21 +204,21 @@ class ConsultancyService {
         logo: logo === "" || logo === null || logo === undefined ? null : logo,
         description:
           description === "" ||
-          description === null ||
-          description === undefined
+            description === null ||
+            description === undefined
             ? null
             : description,
         contact: contact || [],
         website_url:
           website_url === "" ||
-          website_url === null ||
-          website_url === undefined
+            website_url === null ||
+            website_url === undefined
             ? null
             : website_url,
         google_map_url:
           google_map_url === "" ||
-          google_map_url === null ||
-          google_map_url === undefined
+            google_map_url === null ||
+            google_map_url === undefined
             ? null
             : google_map_url,
         video_url:

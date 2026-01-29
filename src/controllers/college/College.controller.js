@@ -40,22 +40,6 @@ class CollegeController {
     }
   }
 
-  static async listSchools(req, res) {
-    try {
-      const { items, pagination } = await collegeService.listSchools(req.query);
-
-      return res.status(200).json({
-        message: "success",
-        items,
-        pagination,
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: `Error: ${error}`,
-      });
-    }
-  }
-
   static async listColleges(req, res) {
     try {
       const { items, pagination } = await collegeService.listColleges(

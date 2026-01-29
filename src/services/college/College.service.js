@@ -427,7 +427,7 @@ class CollegeService {
     }
 
     if (isFeatured !== undefined) {
-      whereCondition.isFeatured = isFeatured === "true" ? 1 : 0;
+      whereCondition.is_featured = isFeatured === "true" ? 1 : 0;
     }
 
     if (pinned !== undefined) {
@@ -472,6 +472,61 @@ class CollegeService {
         totalCount,
       },
     };
+  }
+
+  async getSchoolBySlug(slugs) {
+    const school = await College.findOne({
+      where: {
+        slugs,
+        [Op.and]: [
+          Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
+        ],
+      },
+      include: [
+        {
+          model: CollegeAddress,
+          as: "address",
+          attributes: ["country", "state", "city", "street", "postal_code"],
+        },
+        {
+          model: CollegeContact,
+          as: "contacts",
+          attributes: ["contact_number"],
+        },
+        {
+          model: CollegeCourse,
+          as: "collegeCourses",
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["id", "title", "slugs"],
+            },
+          ],
+        },
+        {
+          model: CollegeFacility,
+          as: "facilities",
+        },
+        {
+          model: CollegeGallery,
+          as: "collegeGallery",
+        },
+        {
+          model: University,
+          as: "university",
+          attributes: ["fullname", "slugs"],
+        },
+      ],
+    });
+
+    if (!school) {
+      const error = new Error("School not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return school;
   }
 
   async listColleges(query = {}) {
