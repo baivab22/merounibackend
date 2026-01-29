@@ -72,8 +72,8 @@ route.get(
  */
 route.post(
   "/",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
+  // authenticateUser,
+  // authorizeRole(["admin", "editor"]),
   requestValidator(createNewsletterSchema, "body"),
   NewsletterController.createNewsletter
 );

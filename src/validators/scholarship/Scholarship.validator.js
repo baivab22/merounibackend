@@ -27,6 +27,7 @@ export const createScholarshipSchema = yup
     author: yup.number().integer().positive(),
     renewalCriteria: yup.string(),
     contactInfo: yup.string(),
+    categoryId: yup.number().integer().positive(),
     title: yup.string(), // Optional, for backward compatibility
   })
   .required();
