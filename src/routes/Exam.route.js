@@ -5,11 +5,10 @@ import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  examSlugParamSchema,
-  examIdParamSchema,
   createOrUpdateExamSchema,
-  listExamsSchema,
+  examIdParamSchema,
+  examSlugParamSchema,
+  listExamsSchema
 } from "../validators/exam/Exam.validator.js";
 
 const router = express.Router();

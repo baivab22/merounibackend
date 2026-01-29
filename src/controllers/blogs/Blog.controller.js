@@ -38,6 +38,23 @@ class BlogController {
         }
     }
 
+    static async getBlogBySlug(req, res) {
+        try {
+            const { blog, similarBlogs } = await blogService.getBlog(req.params.slug);
+
+            return res.status(200).json({
+                message: "Blog retrieved",
+                blog,
+                similarBlogs,
+            });
+        } catch (error) {
+            console.error("Error getting blog by slug:", error);
+            return res
+                .status(500)
+                .json({ message: "Server error", error: error.message });
+        }
+    }
+
     static async createBlog(req, res) {
         try {
             const newBlog = await blogService.createBlog(req.body);

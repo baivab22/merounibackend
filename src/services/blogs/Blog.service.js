@@ -88,14 +88,19 @@ class BlogService {
         };
     }
 
-    async getBlog(slug) {
+    async getBlog(identifier) {
+        let whereCondition = {};
+        if (!isNaN(identifier)) {
+            whereCondition = { id: identifier };
+        } else {
+            whereCondition = { slug: identifier };
+        }
+
         const blog = await Blog.findOne({
             attributes: {
                 exclude: ["category", "author"],
             },
-            where: {
-                slug,
-            },
+            where: whereCondition,
             include: [
                 {
                     model: Category,
@@ -122,7 +127,7 @@ class BlogService {
             },
             where: {
                 category: blog.blogCategory.id,
-                slug: { [Op.ne]: slug },
+                id: { [Op.ne]: blog.id },
             },
             include: [
                 {

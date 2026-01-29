@@ -164,6 +164,7 @@ class EventService {
     const offset = (page - 1) * limit;
     const isFeatured = query.is_featured;
     const search = query.q || "";
+    const collegeId = query.college_id;
 
     const whereCondition = {};
     if (search) {
@@ -172,6 +173,10 @@ class EventService {
 
     if (isFeatured !== undefined) {
       whereCondition.is_featured = isFeatured === "true" ? 1 : 0;
+    }
+
+    if (collegeId) {
+      whereCondition.college_id = collegeId;
     }
 
     const { count: totalCount, rows: items } = await Event.findAndCountAll({
@@ -203,12 +208,17 @@ class EventService {
       >= CURDATE()
     `);
 
+    const whereCondition = { [Op.and]: [dateLiteral] };
+    if (query.college_id) {
+      whereCondition.college_id = query.college_id;
+    }
+
     const totalCount = await Event.count({
-      where: dateLiteral,
+      where: whereCondition,
     });
 
     const events = await Event.findAll({
-      where: dateLiteral,
+      where: whereCondition,
       limit,
       offset,
       order: [
@@ -246,12 +256,17 @@ class EventService {
       <= STR_TO_DATE('${endOfWeek}', '%Y-%m-%d')
     `);
 
+    const whereCondition = { [Op.and]: [dateLiteral] };
+    if (query.college_id) {
+      whereCondition.college_id = query.college_id;
+    }
+
     const totalCount = await Event.count({
-      where: dateLiteral,
+      where: whereCondition,
     });
 
     const events = await Event.findAll({
-      where: dateLiteral,
+      where: whereCondition,
       limit,
       offset,
       order: [
@@ -289,12 +304,17 @@ class EventService {
       <= STR_TO_DATE('${endOfNextMonth}', '%Y-%m-%d')
     `);
 
+    const whereCondition = { [Op.and]: [dateLiteral] };
+    if (query.college_id) {
+      whereCondition.college_id = query.college_id;
+    }
+
     const totalCount = await Event.count({
-      where: dateLiteral,
+      where: whereCondition,
     });
 
     const events = await Event.findAll({
-      where: dateLiteral,
+      where: whereCondition,
       limit,
       offset,
       order: [
