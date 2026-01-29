@@ -42,6 +42,8 @@ class ScholarshipService {
       whereCondition.applicationDeadline = { [Op.gte]: new Date() };
     }
 
+    console.log(whereCondition,"whereConditionwhereCondition")
+
     // Validate sort fields
     const validSortFields = [
       "createdAt",
@@ -161,11 +163,11 @@ class ScholarshipService {
     };
 
     // Ensure category_id from API is mapped to category if needed
-    if (data.category_id && !data.category) {
-      createData.category = data.category_id;
+    if (data.categoryId) {
+      createData.category = data.categoryId;
     }
-    if (data.author_id && !data.author) {
-      createData.author = data.author_id;
+    if (data.author) {
+      createData.author = data.author;
     }
 
     return Scholarship.create(createData);
@@ -180,8 +182,9 @@ class ScholarshipService {
     }
 
     // Ensure category_id from API is mapped to category if needed
-    if (data.category_id && !data.category) {
-      updateData.category = data.category_id;
+    if (data.categoryId) {
+      console.log(data.categoryId,"data.categoryIddata.categoryIddata.categoryId")
+      updateData.category = data.categoryId;
     }
     if (data.author_id && !data.author) {
       updateData.author = data.author_id;
