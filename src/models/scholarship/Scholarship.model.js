@@ -23,7 +23,7 @@ Scholarship.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    category_id: {
+    category: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -31,7 +31,6 @@ Scholarship.init(
         key: "id",
       },
       onDelete: "SET NULL",
-      field: "category_id",
     },
     eligibilityCriteria: {
       type: DataTypes.JSON,
@@ -46,7 +45,7 @@ Scholarship.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    author_id: {
+    author: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -54,7 +53,6 @@ Scholarship.init(
         key: "id",
       },
       onDelete: "CASCADE",
-      field: "author_id",
     },
     renewalCriteria: {
       type: DataTypes.JSON,

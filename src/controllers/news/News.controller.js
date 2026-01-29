@@ -31,10 +31,12 @@ class NewsController {
         similarNews,
       });
     } catch (error) {
-      console.error("Error getting news by ID:", error);
-      return res
-        .status(500)
-        .json({ message: "Server error", error: error.message });
+      console.error("Error getting news:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
     }
   }
 

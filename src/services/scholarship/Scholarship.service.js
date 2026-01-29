@@ -3,6 +3,7 @@ import slug from "slug";
 
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import Category from "../../models/category/Category.model.js";
+import UserModel from "../../models/users/User.model.js";
 
 class ScholarshipService {
   async listScholarships(query = {}) {
@@ -28,7 +29,7 @@ class ScholarshipService {
     }
 
     if (categoryId) {
-      whereCondition.category_id = categoryId;
+      whereCondition.category = categoryId;
     }
 
     if (minAmount || maxAmount) {
@@ -67,6 +68,12 @@ class ScholarshipService {
             attributes: ["id", "title", "slugs"],
             required: false,
           },
+          {
+            model: UserModel,
+            as: "scholarshipAuthor",
+            attributes: ["firstName", "middleName", "lastName"],
+            required: false,
+          },
         ],
       });
 
@@ -90,8 +97,41 @@ class ScholarshipService {
           attributes: ["id", "title", "slugs"],
           required: false,
         },
+        {
+          model: UserModel,
+          as: "scholarshipAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+          required: false,
+        },
       ],
     });
+    if (!scholarship) {
+      const error = new Error("Scholarship not found");
+      error.status = 404;
+      throw error;
+    }
+    return scholarship;
+  }
+
+  async getScholarshipBySlug(slugs) {
+    const scholarship = await Scholarship.findOne({
+      where: { slugs },
+      include: [
+        {
+          model: Category,
+          as: "scholarshipCategory",
+          attributes: ["id", "title", "slugs"],
+          required: false,
+        },
+        {
+          model: UserModel,
+          as: "scholarshipAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+          required: false,
+        },
+      ],
+    });
+
     if (!scholarship) {
       const error = new Error("Scholarship not found");
       error.status = 404;
@@ -120,12 +160,12 @@ class ScholarshipService {
       slugs: slug(titleOrName),
     };
 
-    // Map old field names to new field names for backward compatibility
-    if (data.category && !data.category_id) {
-      createData.category_id = data.category;
+    // Ensure category_id from API is mapped to category if needed
+    if (data.category_id && !data.category) {
+      createData.category = data.category_id;
     }
-    if (data.author && !data.author_id) {
-      createData.author_id = data.author;
+    if (data.author_id && !data.author) {
+      createData.author = data.author_id;
     }
 
     return Scholarship.create(createData);
@@ -139,12 +179,12 @@ class ScholarshipService {
       updateData.slugs = slug(titleOrName);
     }
 
-    // Map old field names to new field names for backward compatibility
-    if (data.category && !data.category_id) {
-      updateData.category_id = data.category;
+    // Ensure category_id from API is mapped to category if needed
+    if (data.category_id && !data.category) {
+      updateData.category = data.category_id;
     }
-    if (data.author && !data.author_id) {
-      updateData.author_id = data.author;
+    if (data.author_id && !data.author) {
+      updateData.author = data.author_id;
     }
 
     const [updatedRows] = await Scholarship.update(updateData, {

@@ -12,17 +12,20 @@ class BlogService {
         const offset = (page - 1) * limit;
 
         const search = query.q || "";
-        const categoryTitle = query.category_title;
+        const categoryFilter = query.category_title || query.category;
         const authorId = query.author_id;
         const is_featured = query.is_featured;
         const status = query.status || "published";
         const visibility = query.visibility || "public";
 
         let categoryItem;
-        if (categoryTitle) {
+        if (categoryFilter) {
             categoryItem = await Category.findOne({
                 where: {
-                    title: categoryTitle,
+                    [Op.or]: [
+                        { title: categoryFilter },
+                        { slugs: categoryFilter }
+                    ]
                 },
             });
 
@@ -60,6 +63,18 @@ class BlogService {
             offset,
             distinct: true,
             order: [["createdAt", "DESC"]],
+            include: [
+                {
+                    model: Category,
+                    as: "blogCategory",
+                    attributes: ["id", "title", "slugs"],
+                },
+                {
+                    model: UserModel,
+                    as: "blogAuthor",
+                    attributes: ["firstName", "middleName", "lastName"],
+                },
+            ],
         });
 
         return {

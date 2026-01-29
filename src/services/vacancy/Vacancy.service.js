@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import slug from "slug";
 
 import VacancyModel from "../../models/vacancy/Vacancy.model.js";
+import UserModel from "../../models/users/User.model.js";
 
 class VacancyService {
   async listVacancies(query = {}) {
@@ -24,6 +25,13 @@ class VacancyService {
         order: [["id", sort]],
         limit,
         offset,
+        include: [
+          {
+            model: UserModel,
+            as: "vacancyAuthor",
+            attributes: ["firstName", "middleName", "lastName"],
+          },
+        ],
       });
 
     return {
@@ -40,6 +48,13 @@ class VacancyService {
   async getVacancyBySlug(slugs) {
     const vacancy = await VacancyModel.findOne({
       where: { slugs },
+      include: [
+        {
+          model: UserModel,
+          as: "vacancyAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+      ],
     });
 
     if (!vacancy) {

@@ -12,17 +12,16 @@ class NewsService {
     const offset = (page - 1) * limit;
 
     const search = query.q || "";
-    const categoryTitle = query.category_title;
-    const authorId = query.author_id;
-    const is_featured = query.is_featured;
+    const author = query.author;
+    const categoryFilter = query.category_title || query.category;
     const status = query.status || "published";
     const visibility = query.visibility || "public";
 
     let categoryItem;
-    if (categoryTitle) {
+    if (categoryFilter) {
       categoryItem = await Category.findOne({
         where: {
-          title: categoryTitle,
+          [Op.or]: [{ title: categoryFilter }, { slugs: categoryFilter }],
         },
       });
 
@@ -42,16 +41,12 @@ class NewsService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
+    if (author) {
+      whereCondition.author = author;
+    }
+
     if (categoryItem) {
       whereCondition.category = categoryItem.id;
-    }
-
-    if (typeof is_featured !== "undefined") {
-      whereCondition.is_featured = is_featured;
-    }
-
-    if (authorId) {
-      whereCondition.author_id = authorId;
     }
 
     const { count: totalCount, rows: items } = await News.findAndCountAll({
@@ -60,6 +55,18 @@ class NewsService {
       offset,
       distinct: true,
       order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Category,
+          as: "newsCategory",
+          attributes: ["id", "title", "slugs"],
+        },
+        {
+          model: UserModel,
+          as: "newsAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+      ],
     });
 
     return {
@@ -76,7 +83,7 @@ class NewsService {
   async getNews(slug) {
     const news = await News.findOne({
       attributes: {
-        exclude: ["category", "author"],
+        exclude: ["author"],
       },
       where: {
         slug,
@@ -103,24 +110,20 @@ class NewsService {
 
     const similarNews = await News.findAll({
       attributes: {
-        exclude: ["category", "author"],
+        exclude: ["author"],
       },
       where: {
-        category: news.newsCategory.id,
         slug: { [Op.ne]: slug },
+        status: "published",
       },
       include: [
-        {
-          model: Category,
-          as: "newsCategory",
-          attributes: ["id", "title", "slugs"],
-        },
         {
           model: UserModel,
           as: "newsAuthor",
           attributes: ["firstName", "middleName", "lastName"],
         },
       ],
+      order: [["createdAt", "DESC"]],
       limit: 5,
     });
 
@@ -147,7 +150,7 @@ class NewsService {
       updatedSlug = slugify(data.title);
     }
 
-    const [updatedRows] = await News.update(
+    await News.update(
       {
         ...data,
         slug: updatedSlug,
@@ -155,13 +158,20 @@ class NewsService {
       { where: { id } }
     );
 
-    if (updatedRows === 0) {
-      const error = new Error("News not found");
-      error.status = 404;
-      throw error;
-    }
-
-    return News.findByPk(id);
+    return News.findByPk(id, {
+      include: [
+        {
+          model: Category,
+          as: "newsCategory",
+          attributes: ["id", "title", "slugs"],
+        },
+        {
+          model: UserModel,
+          as: "newsAuthor",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+      ],
+    });
   }
 
   async deleteNews(id) {

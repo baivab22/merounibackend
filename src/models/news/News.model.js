@@ -23,9 +23,20 @@ News.init(
       allowNull: false,
       unique: true,
     },
+
+
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    category: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "categories",
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     content: {
       type: DataTypes.TEXT,
@@ -43,6 +54,12 @@ News.init(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      allowNull: false,
+      defaultValue: "draft",
     },
     visibility: {
       type: DataTypes.ENUM("public", "private"),

@@ -24,14 +24,30 @@ class ScholarshipController {
 
   static async getScholarship(req, res) {
     try {
-      const scholarship = await scholarshipService.getScholarship(
-        req.params.id
-      );
+      const scholarship = await scholarshipService.getScholarship(req.params.id);
       return res
         .status(200)
         .json({ message: "Scholarship retrieved", scholarship });
     } catch (error) {
       console.error("Error getting scholarship by ID:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
+
+  static async getScholarshipBySlug(req, res) {
+    try {
+      const scholarship = await scholarshipService.getScholarshipBySlug(
+        req.params.slugs
+      );
+      return res
+        .status(200)
+        .json({ message: "Scholarship retrieved", scholarship });
+    } catch (error) {
+      console.error("Error getting scholarship by slug:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message: status === 500 ? "Server error" : error.message,

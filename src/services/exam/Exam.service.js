@@ -19,8 +19,10 @@ class ExamService {
 
     const {
       q,
-      levelId,
-      universityId,
+      level,
+      affiliation,
+      discipline,
+      examType,
       isOpen,
       isUpcoming,
       sortBy,
@@ -28,6 +30,7 @@ class ExamService {
     } = query;
 
     const whereCondition = {};
+    const include = [];
 
     // Search query
     if (q) {
@@ -37,9 +40,78 @@ class ExamService {
       ];
     }
 
-    // Direct filters
-    if (levelId) whereCondition.level_id = levelId;
-    if (universityId) whereCondition.affiliation = universityId;
+    // Level filter (ID or Slug)
+    if (level) {
+      if (!isNaN(level)) {
+        whereCondition.level_id = parseInt(level, 10);
+      } else {
+        include.push({
+          model: Level,
+          as: "level",
+          where: { slugs: level },
+          attributes: ["id", "title"],
+        });
+      }
+    } else {
+      include.push({ model: Level, attributes: ["id", "title"], as: "level" });
+    }
+
+    // Affiliation filter (ID or Slug)
+    if (affiliation) {
+      if (!isNaN(affiliation)) {
+        whereCondition.affiliation = parseInt(affiliation, 10);
+      } else {
+        include.push({
+          model: University,
+          as: "university",
+          where: { slugs: affiliation },
+          attributes: ["id", "fullname"],
+        });
+      }
+    } else {
+      include.push({
+        model: University,
+        attributes: ["id", "fullname"],
+        as: "university",
+      });
+    }
+
+    // Exam Type filter
+    const examDetailWhere = {};
+    if (examType) {
+      examDetailWhere.exam_type = examType;
+    }
+
+    include.push({
+      model: ExamDetail,
+      as: "exam_details",
+      where: Object.keys(examDetailWhere).length > 0 ? examDetailWhere : undefined,
+      required: !!examType,
+    });
+
+    // Discipline filter (ID or Slug) - Joined via Program
+    if (discipline) {
+      const facultyWhere = {};
+      if (!isNaN(discipline)) {
+        facultyWhere.id = parseInt(discipline, 10);
+      } else {
+        facultyWhere.slugs = discipline;
+      }
+
+      include.push({
+        association: "programs", // Exam.hasMany(Program)
+        required: true,
+        attributes: [],
+        include: [
+          {
+            association: "programfaculty", // Program.belongsTo(Faculty)
+            where: facultyWhere,
+            required: true,
+            attributes: [],
+          },
+        ],
+      });
+    }
 
     // Application Detail filters (Date based)
     const applicationWhere = {};
@@ -54,6 +126,23 @@ class ExamService {
       applicationWhere.exam_date = { [Op.gt]: now };
     }
 
+    include.push({
+      model: ApplicationDetail,
+      as: "application_details",
+      where:
+        Object.keys(applicationWhere).length > 0
+          ? applicationWhere
+          : undefined,
+      required: Object.keys(applicationWhere).length > 0,
+    });
+
+    // Author Details
+    include.push({
+      model: UserModel,
+      attributes: ["id", "firstName"],
+      as: "authorDetails",
+    });
+
     // Sorting
     const validSortFields = ["title", "createdAt"];
     const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
@@ -67,29 +156,7 @@ class ExamService {
       offset,
       distinct: true,
       order,
-      include: [
-        { model: Level, attributes: ["id", "title"], as: "level" },
-        {
-          model: University,
-          attributes: ["id", "fullname"],
-          as: "university",
-        },
-        {
-          model: UserModel,
-          attributes: ["id", "firstName"],
-          as: "authorDetails",
-        },
-        { model: ExamDetail, as: "exam_details" },
-        {
-          model: ApplicationDetail,
-          as: "application_details",
-          where:
-            Object.keys(applicationWhere).length > 0
-              ? applicationWhere
-              : undefined,
-          required: Object.keys(applicationWhere).length > 0,
-        },
-      ],
+      include,
     });
 
     return {

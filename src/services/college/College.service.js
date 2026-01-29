@@ -293,16 +293,89 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const search = query.q || "";
+    const { q, level, affiliation, discipline } = query;
 
     const offset = (page - 1) * limit;
 
-    let whereCondition = {};
-    if (search) {
-      whereCondition = {
-        [Op.or]: [{ name: { [Op.like]: `%${search}%` } }],
-      };
+    const whereCondition = {};
+    const include = [];
+
+    if (q) {
+      whereCondition[Op.or] = [{ name: { [Op.like]: `%${q}%` } }];
     }
+
+    // College and Affiliation (University) filter
+    const collegeInclude = {
+      model: College,
+      as: "collegeAdmissionCollege",
+      attributes: ["name", "slugs"],
+      include: [],
+    };
+
+    if (affiliation) {
+      const universityWhere = {};
+      if (!isNaN(affiliation)) {
+        universityWhere.id = parseInt(affiliation, 10);
+      } else {
+        universityWhere.slugs = affiliation;
+      }
+      collegeInclude.include.push({
+        model: University,
+        as: "university",
+        where: universityWhere,
+        required: true,
+      });
+      collegeInclude.required = true;
+    } else {
+      collegeInclude.include.push({
+        model: University,
+        as: "university",
+        attributes: ["fullname", "slugs"],
+      });
+    }
+    include.push(collegeInclude);
+
+    // Program, Level, and Discipline filter
+    const programInclude = {
+      model: Program,
+      as: "program",
+      attributes: ["title", "slugs"],
+      include: [],
+    };
+
+    if (level) {
+      const levelWhere = {};
+      if (!isNaN(level)) {
+        levelWhere.id = parseInt(level, 10);
+      } else {
+        levelWhere.slugs = level;
+      }
+      programInclude.include.push({
+        model: Level,
+        as: "programlevel",
+        where: levelWhere,
+        required: true,
+      });
+      programInclude.required = true;
+    }
+
+    if (discipline) {
+      const facultyWhere = {};
+      if (!isNaN(discipline)) {
+        facultyWhere.id = parseInt(discipline, 10);
+      } else {
+        facultyWhere.slugs = discipline;
+      }
+      programInclude.include.push({
+        model: FacultyModel,
+        as: "programfaculty",
+        where: facultyWhere,
+        required: true,
+      });
+      programInclude.required = true;
+    }
+
+    include.push(programInclude);
 
     const { count: totalCount, rows: items } =
       await CollegeAdmission.findAndCountAll({
@@ -314,18 +387,7 @@ class CollegeService {
         attributes: {
           exclude: ["college_id", "course_id"],
         },
-        include: [
-          {
-            model: College,
-            as: "collegeAdmissionCollege",
-            attributes: ["name", "slugs"],
-          },
-          {
-            model: Program,
-            as: "program",
-            attributes: ["title", "slugs"],
-          },
-        ],
+        include,
       });
 
     return {
@@ -524,10 +586,10 @@ class CollegeService {
           attributes: ["fullname", "slugs"],
           where: university
             ? {
-                slugs: {
-                  [Op.like]: `%${university}%`,
-                },
-              }
+              slugs: {
+                [Op.like]: `%${university}%`,
+              },
+            }
             : undefined,
         },
       ],

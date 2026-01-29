@@ -81,6 +81,29 @@ route.get(
 
 /**
  * @swagger
+ * /scholarship/detail/{slugs}:
+ *   get:
+ *     summary: Get scholarship by slug
+ *     tags: [Scholarships]
+ *     parameters:
+ *       - in: path
+ *         name: slugs
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Scholarship details
+ *       404:
+ *         description: Scholarship not found
+ */
+route.get(
+  "/detail/:slugs",
+  ScholarshipController.getScholarshipBySlug
+);
+
+/**
+ * @swagger
  * /scholarship:
  *   post:
  *     summary: Create a new scholarship

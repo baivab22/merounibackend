@@ -23,6 +23,8 @@ class ProgramService {
     const {
       facultyId,
       levelId,
+      discipline,
+      level,
       examId,
       q,
       deliveryType,
@@ -61,6 +63,27 @@ class ProgramService {
       ];
     }
 
+    // Include conditions for slug-based filtering
+    const include = [];
+
+    if (discipline) {
+      include.push({
+        model: Faculty,
+        as: "programfaculty",
+        where: { slugs: discipline },
+        attributes: [], // We only need it for filtering here
+      });
+    }
+
+    if (level) {
+      include.push({
+        model: Level,
+        as: "programlevel",
+        where: { slugs: level },
+        attributes: [], // We only need it for filtering here
+      });
+    }
+
     // Sorting
     const validSortFields = [
       "title",
@@ -77,6 +100,7 @@ class ProgramService {
 
     const { count: totalCount, rows: items } = await Program.findAndCountAll({
       where: whereConditions,
+      include: include.length > 0 ? include : undefined,
       limit,
       offset,
       distinct: true,
