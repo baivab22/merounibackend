@@ -16,6 +16,9 @@ class VacancyService {
     const offset = (page - 1) * limit;
 
     const whereCondition = {};
+
+    console.log("[VacancyService] listVacancies query:", JSON.stringify(query, null, 2));
+
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
