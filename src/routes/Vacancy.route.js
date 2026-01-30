@@ -40,6 +40,11 @@ const route = express.Router();
  *         schema:
  *           type: string
  *         description: Search query
+ *       - in: query
+ *         name: college_id
+ *         schema:
+ *           type: integer
+ *         description: Filter by College ID
  *     responses:
  *       200:
  *         description: List of vacancies
