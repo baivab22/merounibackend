@@ -15,6 +15,7 @@ import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 
 class ProgramService {
+
   async listPrograms(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
@@ -23,39 +24,24 @@ class ProgramService {
     const {
       facultyId,
       levelId,
-      discipline,
-      level,
-      examId,
       q,
-      deliveryType,
-      deliveryMode,
-      language,
-      minCredits,
-      maxCredits,
       sortBy,
       sortOrder,
     } = query;
 
     const whereConditions = {};
+    const include = [];
 
-    // Foreign key filters
-    if (facultyId) whereConditions.faculty_id = facultyId;
-    if (levelId) whereConditions.level_id = levelId;
-    if (examId) whereConditions.exam_id = examId;
+    console.log("[ProgramService] listPrograms query:", JSON.stringify(query, null, 2));
 
-    // Direct text/enum filters
-    if (deliveryType) whereConditions.delivery_type = deliveryType;
-    if (deliveryMode) whereConditions.delivery_mode = deliveryMode;
-    if (language) whereConditions.language = language;
-
-    // Numeric range filters
-    if (minCredits || maxCredits) {
-      whereConditions.credits = {};
-      if (minCredits) whereConditions.credits[Op.gte] = minCredits;
-      if (maxCredits) whereConditions.credits[Op.lte] = maxCredits;
+    if (facultyId) {
+      whereConditions.faculty_id = facultyId;
     }
 
-    // Search query
+    if (levelId) {
+      whereConditions.level_id = levelId;
+
+    }
     if (q) {
       whereConditions[Op.or] = [
         { title: { [Op.like]: `%${q}%` } },
@@ -63,28 +49,11 @@ class ProgramService {
       ];
     }
 
-    // Include conditions for slug-based filtering
-    const include = [];
+    console.log(
+      "[ProgramService] whereConditions:",
+      JSON.stringify(whereConditions, null, 2)
+    );
 
-    if (discipline) {
-      include.push({
-        model: Faculty,
-        as: "programfaculty",
-        where: { slugs: discipline },
-        attributes: [], // We only need it for filtering here
-      });
-    }
-
-    if (level) {
-      include.push({
-        model: Level,
-        as: "programlevel",
-        where: { slugs: level },
-        attributes: [], // We only need it for filtering here
-      });
-    }
-
-    // Sorting
     const validSortFields = [
       "title",
       "code",
@@ -93,19 +62,24 @@ class ProgramService {
       "credits",
       "fee",
     ];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : "createdAt";
+
     const order = [
       [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
     ];
 
-    const { count: totalCount, rows: items } = await Program.findAndCountAll({
-      where: whereConditions,
-      include: include.length > 0 ? include : undefined,
-      limit,
-      offset,
-      distinct: true,
-      order,
-    });
+    const { count: totalCount, rows: items } =
+      await Program.findAndCountAll({
+        where: whereConditions,
+        include: include.length ? include : undefined,
+        limit,
+        offset,
+        distinct: true,
+        order,
+      });
 
     return {
       items,
@@ -117,6 +91,7 @@ class ProgramService {
       },
     };
   }
+
 
   async getProgram(slugs) {
     const program = await Program.findOne({

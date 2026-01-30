@@ -41,7 +41,7 @@ const router = express.Router();
  */
 router.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  // requestValidator(paginationSchema, "query"),
   ProgramController.listPrograms
 );
 

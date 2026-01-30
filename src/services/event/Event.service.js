@@ -167,6 +167,7 @@ class EventService {
     const search = query.q || "";
     const collegeId = query.college_id;
 
+    console.log(collegeId,"collegeIdcollegeId")
     const whereCondition = {};
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };

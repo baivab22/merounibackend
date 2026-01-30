@@ -4,6 +4,8 @@ import * as yup from "yup";
 export const paginationSchema = yup.object({
   page: yup.number().integer().min(1).default(1),
   limit: yup.number().integer().min(1).max(1000).default(10),
+  facultyId: yup.number().integer().min(1).max(1000).default(10),
+  level: yup.number().integer().min(1).max(1000).default(10),
   sort: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])
