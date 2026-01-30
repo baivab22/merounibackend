@@ -46,7 +46,7 @@ class EventController {
 
       return res.status(200).json({ message: "Event retrieved", item });
     } catch (error) {
-      console.error("Error getting event by ID:", error);
+      console.error("Error getting event by slug:", error);
       return res
         .status(500)
         .json({ message: "Server error", error: error.message });
