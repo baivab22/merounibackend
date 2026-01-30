@@ -23,7 +23,9 @@ class NewsController {
 
   static async getNews(req, res) {
     try {
-      const { news, similarNews } = await newsService.getNews(req.params.slug);
+      const { news, similarNews } = await newsService.getNewsBySlug(
+        req.params.slug
+      );
 
       return res.status(200).json({
         message: "News retrieved",
@@ -32,6 +34,24 @@ class NewsController {
       });
     } catch (error) {
       console.error("Error getting news:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
+
+  static async getNewsById(req, res) {
+    try {
+      const news = await newsService.getNewsById(req.params.id);
+
+      return res.status(200).json({
+        message: "News retrieved",
+        news,
+      });
+    } catch (error) {
+      console.error("Error getting news by id:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message: status === 500 ? "Server error" : error.message,

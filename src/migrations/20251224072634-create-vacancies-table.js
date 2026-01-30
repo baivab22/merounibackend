@@ -3,7 +3,7 @@ import Sequelize from "sequelize";
 
 /** @type {import('sequelize-cli').Migration} */
 export async function up(queryInterface) {
-  await queryInterface.createTable('vacancies', {
+  await queryInterface.createTable("vacancies", {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -23,10 +23,10 @@ export async function up(queryInterface) {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'mu_users',
-        key: 'id',
+        model: "mu_users",
+        key: "id",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     description: {
       type: DataTypes.TEXT,
@@ -43,16 +43,18 @@ export async function up(queryInterface) {
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
     },
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+      defaultValue: Sequelize.literal(
+        "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+      ),
     },
   });
 }
 
 export async function down(queryInterface) {
-  await queryInterface.dropTable('vacancies');
+  await queryInterface.dropTable("vacancies");
 }

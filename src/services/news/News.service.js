@@ -4,6 +4,7 @@ import slugify from "slug";
 import News from "../../models/news/News.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
+import CollegeModel from "../../models/college/College.model.js";
 
 class NewsService {
   async listNews(query = {}) {
@@ -12,13 +13,14 @@ class NewsService {
     const offset = (page - 1) * limit;
 
     const search = query.q || "";
-    const author = query.author;
-    const categoryFilter = query.category_title || query.category;
+    const author = query.author || query.author_id;
+    const categoryFilter = query.category_title || query.category || query.category_id;
+    const collegeId = query.collegeId || query.college_id;
     const status = query.status || "published";
     const visibility = query.visibility || "public";
 
     let categoryItem;
-    if (categoryFilter) {
+    if (categoryFilter && isNaN(categoryFilter)) {
       categoryItem = await Category.findOne({
         where: {
           [Op.or]: [{ title: categoryFilter }, { slugs: categoryFilter }],
@@ -47,6 +49,12 @@ class NewsService {
 
     if (categoryItem) {
       whereCondition.category = categoryItem.id;
+    } else if (categoryFilter && !isNaN(categoryFilter)) {
+      whereCondition.category = categoryFilter;
+    }
+
+    if (collegeId) {
+      whereCondition.college_id = collegeId;
     }
 
     const { count: totalCount, rows: items } = await News.findAndCountAll({
@@ -59,12 +67,14 @@ class NewsService {
         {
           model: Category,
           as: "newsCategory",
-          attributes: ["id", "title", "slugs"],
         },
         {
           model: UserModel,
           as: "newsAuthor",
-          attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: CollegeModel,
+          as: "newsCollege",
         },
       ],
     });
@@ -80,7 +90,7 @@ class NewsService {
     };
   }
 
-  async getNews(slug) {
+  async getNewsBySlug(slug) {
     const news = await News.findOne({
       attributes: {
         exclude: ["author"],
@@ -92,12 +102,14 @@ class NewsService {
         {
           model: Category,
           as: "newsCategory",
-          attributes: ["id", "title", "slugs"],
         },
         {
           model: UserModel,
           as: "newsAuthor",
-          attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: CollegeModel,
+          as: "newsCollege",
         },
       ],
     });
@@ -120,7 +132,6 @@ class NewsService {
         {
           model: UserModel,
           as: "newsAuthor",
-          attributes: ["firstName", "middleName", "lastName"],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -130,10 +141,45 @@ class NewsService {
     return { news, similarNews };
   }
 
+  async getNewsById(id) {
+    const news = await News.findByPk(id, {
+      attributes: {
+        exclude: ["author"],
+      },
+      include: [
+        {
+          model: Category,
+          as: "newsCategory",
+        },
+        {
+          model: UserModel,
+          as: "newsAuthor",
+        },
+        {
+          model: CollegeModel,
+          as: "newsCollege",
+        },
+      ],
+    });
+
+    if (!news) {
+      const error = new Error("News not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return news;
+  }
+
   async createNews(data) {
+    const { title, author, author_id, category_id, college_id, ...rest } = data;
     return News.create({
-      ...data,
-      slug: slugify(data.title),
+      ...rest,
+      title,
+      author: author || author_id,
+      category: category_id,
+      college_id: college_id || null,
+      slug: slugify(title),
     });
   }
 
@@ -145,14 +191,19 @@ class NewsService {
       throw error;
     }
 
+    const { title, author, author_id, category, category_id, college_id, ...rest } = data;
     let updatedSlug = news.slug;
-    if (data.title && data.title !== news.title) {
-      updatedSlug = slugify(data.title);
+    if (title && title !== news.title) {
+      updatedSlug = slugify(title);
     }
 
     await News.update(
       {
-        ...data,
+        ...rest,
+        title: title || news.title,
+        author: author || author_id || news.author,
+        category: category || category_id || news.category,
+        college_id: college_id !== undefined ? college_id : news.college_id,
         slug: updatedSlug,
       },
       { where: { id } }
@@ -163,12 +214,14 @@ class NewsService {
         {
           model: Category,
           as: "newsCategory",
-          attributes: ["id", "title", "slugs"],
         },
         {
           model: UserModel,
           as: "newsAuthor",
-          attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: CollegeModel,
+          as: "newsCollege",
         },
       ],
     });

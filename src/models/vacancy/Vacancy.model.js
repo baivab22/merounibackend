@@ -2,7 +2,7 @@ import { Model, DataTypes } from "sequelize";
 
 import { sequelize } from "../../config/database.config.js";
 
-class VacancyModel extends Model {}
+class VacancyModel extends Model { }
 
 VacancyModel.init(
   {
@@ -29,6 +29,15 @@ VacancyModel.init(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+    college_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "colleges",
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
     description: {
       type: DataTypes.TEXT,

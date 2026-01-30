@@ -10,6 +10,7 @@ import {
 import {
   paginationSchema,
   newsSlugParamSchema,
+  newsIdParamSchema,
   createNewsSchema,
   updateNewsQuerySchema,
   updateNewsBodySchema,
@@ -83,6 +84,36 @@ route.get(
 
 /**
  * @swagger
+ * /news/id/{id}:
+ *   get:
+ *     summary: Get news by id (Authenticated)
+ *     tags: [News]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: News details
+ *       404:
+ *         description: News not found
+ *       401:
+ *         description: Unauthorized
+ */
+route.get(
+  "/id/:id",
+  authenticateUser,
+  requestValidator(newsIdParamSchema, "params"),
+  NewsController.getNewsById
+);
+
+/**
+ * @swagger
  * /news:
  *   post:
  *     summary: Create a new news post
@@ -99,7 +130,9 @@ route.get(
  *             required:
  *               - title
  *               - content
- *               - author_id
+ *               - author
+ *               - category
+ *               - featuredImage
  *             properties:
  *               title:
  *                 type: string
@@ -107,14 +140,16 @@ route.get(
  *               content:
  *                 type: string
  *                 example: Full article content here...
- *               author_id:
+ *               author:
+ *                 type: integer
+ *               category:
  *                 type: integer
  *               description:
  *                 type: string
  *               featuredImage:
  *                 type: string
  *                 format: uri
- *               category_id:
+ *               college_id:
  *                 type: integer
  *     responses:
  *       201:
@@ -193,12 +228,16 @@ route.delete(
  *                 type: string
  *               content:
  *                 type: string
+ *               category:
+ *                 type: integer
+ *               author:
+ *                 type: integer
  *               description:
  *                 type: string
  *               featuredImage:
  *                 type: string
  *                 format: uri
- *               category_id:
+ *               college_id:
  *                 type: integer
  *     responses:
  *       200:

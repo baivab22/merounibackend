@@ -12,6 +12,8 @@ export const paginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
+  collegeId: yup.number().integer().positive().nullable(),
+  college_id: yup.number().integer().positive().nullable(),
 });
 
 export const slugParamSchema = yup.object({
@@ -22,6 +24,7 @@ export const createVacancySchema = yup
   .object({
     title: yup.string().trim().min(3).required(),
     author_id: yup.number().integer().positive().required(),
+    college_id: yup.number().integer().positive().nullable(),
     featuredImage: yup.string().trim().nullable(),
     description: yup
       .string()
@@ -42,6 +45,7 @@ export const updateVacancyBodySchema = yup
   .object({
     title: yup.string().trim().min(3),
     author_id: yup.number().integer().positive(),
+    college_id: yup.number().integer().positive().nullable(),
     featuredImage: yup.string().trim(),
     description: yup
       .string()

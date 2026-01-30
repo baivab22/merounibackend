@@ -7,12 +7,14 @@ import {
 export { paginationSchema, slugParamSchema };
 
 export const createNewsSchema = yup.object({
-  title: yup.string().required("Title is required"),
-  description: yup.string().optional(),
-  featuredImage: yup.string().optional(),
-  author: yup.number().optional(),
-  status: yup.string().optional(),
-  visibility: yup.string().optional(),
+  title: yup.string().trim().min(3).required("Title is required"),
+  category_id: yup.number().integer().positive().required("Category is required"),
+  author: yup.number().integer().positive().required("Author is required"),
+  description: yup.string().trim().nullable(),
+  featuredImage: yup.string().trim().required("Featured image is required"),
+  college_id: yup.number().integer().positive().nullable(),
+  status: yup.string().oneOf(["draft", "published", "archived"]).default("draft"),
+  visibility: yup.string().oneOf(["public", "private"]).default("public"),
 });
 
 export const updateNewsQuerySchema = yup.object({
@@ -21,12 +23,14 @@ export const updateNewsQuerySchema = yup.object({
 
 export const updateNewsBodySchema = yup
   .object({
-    title: yup.string(),
-    description: yup.string(),
-    featuredImage: yup.string(),
-    author: yup.number(),
-    status: yup.string(),
-    visibility: yup.string(),
+    title: yup.string().trim().min(3),
+    category: yup.number().integer().positive(),
+    author: yup.number().integer().positive(),
+    description: yup.string().trim().nullable(),
+    featuredImage: yup.string().trim(),
+    college_id: yup.number().integer().positive().nullable(),
+    status: yup.string().oneOf(["draft", "published", "archived"]),
+    visibility: yup.string().oneOf(["public", "private"]),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;
@@ -38,4 +42,8 @@ export const deleteNewsQuerySchema = yup.object({
 
 export const newsSlugParamSchema = yup.object({
   slug: yup.string().trim().required(),
+});
+
+export const newsIdParamSchema = yup.object({
+  id: yup.number().integer().positive().required(),
 });

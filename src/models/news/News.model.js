@@ -29,6 +29,15 @@ News.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    college_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "colleges",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+    },
     category: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -37,10 +46,6 @@ News.init(
         key: "id",
       },
       onDelete: "CASCADE",
-    },
-    content: {
-      type: DataTypes.TEXT,
-      allowNull: false,
     },
     featuredImage: {
       type: DataTypes.STRING,
