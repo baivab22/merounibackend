@@ -1,11 +1,9 @@
-import CollegeService from "../../services/college/College.service.js";
-
-const collegeService = new CollegeService();
+import schoolService from "../../services/college/school.service.js";
 
 class SchoolController {
     static async listSchools(req, res) {
         try {
-            const { items, pagination } = await collegeService.listSchools(req.query);
+            const { items, pagination } = await schoolService.listSchools(req.query);
 
             return res.status(200).json({
                 message: "success",
@@ -22,7 +20,7 @@ class SchoolController {
 
     static async getSchoolBySlug(req, res) {
         try {
-            const school = await collegeService.getSchoolBySlug(req.params.slugs);
+            const school = await schoolService.getSchoolBySlug(req.params.slugs);
 
             return res.status(200).json({
                 message: "success",

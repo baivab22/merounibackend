@@ -12,7 +12,7 @@ import {
   newsSlugParamSchema,
   newsIdParamSchema,
   createNewsSchema,
-  updateNewsQuerySchema,
+  updateNewsParamsSchema,
   updateNewsBodySchema,
   deleteNewsQuerySchema,
 } from "../validators/news/News.validator.js";
@@ -54,6 +54,46 @@ const route = express.Router();
  */
 route.get(
   "/",
+  requestValidator(paginationSchema, "query"),
+  NewsController.listNews
+);
+
+
+/**
+ * @swagger
+ * /news:
+ *   get:
+ *     summary: List all news with pagination
+ *     tags: [News]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *       - in: query
+ *         name: category_title
+ *         schema:
+ *           type: string
+ *         description: Filter by category
+ *     responses:
+ *       200:
+ *         description: List of news
+ *       500:
+ *         description: Server error
+ */
+route.get(
+  "/admin/list",
   requestValidator(paginationSchema, "query"),
   NewsController.listNews
 );
@@ -142,7 +182,7 @@ route.get(
  *                 example: Full article content here...
  *               author:
  *                 type: integer
- *               category:
+ *               category_id:
  *                 type: integer
  *               description:
  *                 type: string
@@ -195,10 +235,10 @@ route.post(
  *         description: News not found
  */
 route.delete(
-  "/",
+  "/:id",
   authenticateUser,
   authorizeRole(["admin"]),
-  requestValidator(deleteNewsQuerySchema, "query"),
+  requestValidator(deleteNewsQuerySchema, "params"),
   NewsController.deleteNews
 );
 
@@ -228,7 +268,7 @@ route.delete(
  *                 type: string
  *               content:
  *                 type: string
- *               category:
+ *               category_id:
  *                 type: integer
  *               author:
  *                 type: integer
@@ -252,11 +292,11 @@ route.delete(
  *         description: News not found
  */
 route.put(
-  "/",
+  "/:id",
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidatorMultiple([
-    { schema: updateNewsQuerySchema, property: "query" },
+    { schema: updateNewsParamsSchema, property: "params" },
     { schema: updateNewsBodySchema, property: "body" },
   ]),
   NewsController.updateNews

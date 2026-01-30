@@ -17,7 +17,7 @@ export const createNewsSchema = yup.object({
   visibility: yup.string().oneOf(["public", "private"]).default("public"),
 });
 
-export const updateNewsQuerySchema = yup.object({
+export const updateNewsParamsSchema = yup.object({
   id: yup.number().integer().positive().required(),
 });
 

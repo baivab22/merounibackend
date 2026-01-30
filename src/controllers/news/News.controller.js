@@ -77,7 +77,7 @@ class NewsController {
 
   static async updateNews(req, res) {
     try {
-      const updatedNews = await newsService.updateNews(req.query.id, req.body);
+      const updatedNews = await newsService.updateNews(req.params.id, req.body);
       return res
         .status(200)
         .json({ message: "News updated", news: updatedNews });
@@ -93,7 +93,7 @@ class NewsController {
 
   static async deleteNews(req, res) {
     try {
-      await newsService.deleteNews(req.query.id);
+      await newsService.deleteNews(req.params.id);
       return res.status(200).json({ message: "News deleted" });
     } catch (error) {
       console.error("Error deleting news:", error);

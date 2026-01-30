@@ -401,211 +401,8 @@ class CollegeService {
     };
   }
 
-  async listSchools(query = {}) {
-    const page = parseInt(query.page, 10) || 1;
-    const limit = parseInt(query.limit, 10) || 10;
-    const sort = (query.sort || "asc").toUpperCase();
 
-    const search = query.q || "";
-    const isFeatured = query.is_featured;
-    const pinned = query.pinned;
 
-    const country = query.country || "";
-    const state = query.state || "";
-    const city = query.city || "";
-    const district = query.district || ""; // Added district
-
-    // New Filters
-    const instituteType = query.type || "";
-    var grade = query.grade || "";
-    if (grade) {
-      grade = grade.trim();
-      // Ensure grade is properly quoted for JSON search if it's a string
-      if (!grade.startsWith('"') && !grade.endsWith('"')) {
-        grade = `"${grade}"`;
-      }
-    }
-    const affiliation = query.affiliation || ""; // Univesity slug or name
-    const amenity = query.amenity || ""; // Facility title
-
-    const offset = (page - 1) * limit;
-
-    const whereCondition = {
-      [Op.and]: [
-        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
-      ],
-    };
-
-    if (search) {
-      whereCondition.name = { [Op.like]: `%${search}%` };
-    }
-
-    if (isFeatured !== undefined) {
-      whereCondition.is_featured = isFeatured === "true" ? 1 : 0;
-    }
-
-    if (pinned !== undefined) {
-      whereCondition.pinned = pinned === "true" ? 1 : 0;
-    }
-
-    // Filter by Type
-    if (instituteType) {
-      whereCondition.institute_type = instituteType;
-    }
-
-    // Filter by Grade (institute_level)
-    if (grade) {
-      // Assuming grade is stored in institute_level JSON array like ["Plus Two (Class 11-12)", "School"]
-      // We need to check if the JSON array contains the grade
-      // Using JSON_CONTAINS
-      // Note: grade value should be exact match
-      whereCondition[Op.and].push(
-        Sequelize.literal(`JSON_CONTAINS(institute_level, '${grade}')`)
-      );
-    }
-
-    const addressCondition = {};
-    if (country) {
-      addressCondition.country = { [Op.like]: `%${country}%` };
-    }
-    if (state) {
-      addressCondition.state = { [Op.like]: `%${state}%` };
-    }
-    if (city) {
-      addressCondition.city = { [Op.like]: `%${city}%` };
-    }
-    // Filter by District (assuming district is mapped to city or state, checking user request implies distinct field but usually city/district are used interchangeably in address models if no specific district field. 
-    // Looking at CollegeAddress model: country, state, city, street, postal_code. 
-    // Often City or State is used for district. If explicitly 'district', checking if logic maps to city as district or strict field.
-    // Given the previous code, district wasn't handled. I will map district filter to city or state using OR for flexibility or check if I should add it.
-    // For now, I'll map 'district' query to 'city' field as a common fallback or state.
-    // Let's assume district maps to 'city' or 'state' loosely or strict 'city'. Let's try matching city.
-    if (district) {
-      addressCondition.city = { [Op.like]: `%${district}%` };
-    }
-
-    const include = [
-      {
-        model: CollegeAddress,
-        as: "address",
-        attributes: ["country", "state", "city"],
-        where: Object.keys(addressCondition).length
-          ? addressCondition
-          : undefined,
-      },
-    ];
-
-    // Filter by Affiliation (University)
-    if (affiliation) {
-      include.push({
-        model: University,
-        as: "university",
-        attributes: ["fullname", "slugs"],
-        where: {
-          [Op.or]: [
-            { slugs: { [Op.like]: `%${affiliation}%` } },
-            { fullname: { [Op.like]: `%${affiliation}%` } }
-          ]
-        },
-        required: true
-      });
-    }
-
-    // Filter by Amenity (Facility)
-    if (amenity) {
-      // Since amenity is a separate table and a college can have multiple, we check if ANY matches.
-      include.push({
-        model: CollegeFacility,
-        as: "facilities", // Verify alias in model definition: College.hasOne(CollegeFacility, { foreignKey: "college_id", as: "facility" }); -> It says hasOne but usually facilities are many.
-        // Let's check CollegeService getSchoolBySlug includes: as: "facilities".
-        // Checking College.model.js relation... Not shown in snippet but CollegeFacility model showed:
-        // College.hasOne(CollegeFacility, { foreignKey: "college_id", as: "facility" }); 
-        // Wait, assumes One-to-One? That seems wrong for facilities. Usually hasMany.
-        // However, getSchoolBySlug uses `as: "facilities"`. This implies the relation might be defined differently in College.model.js (which I viewed partially) or the alias in Service is using "facilities" but model says "facility".
-        // Let's trust getSchoolBySlug usage: `as: "facilities"`.
-        // If it is indeed hasMany (logical), filtering logic holds.
-        attributes: [],
-        where: {
-          title: { [Op.like]: `%${amenity}%` }
-        },
-        required: true
-      });
-    }
-
-    const { count: totalCount, rows: items } = await College.findAndCountAll({
-      where: whereCondition,
-      limit,
-      offset,
-      distinct: true,
-      order: [["id", sort]],
-      include,
-    });
-
-    return {
-      items,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalCount / limit),
-        limit,
-        totalCount,
-      },
-    };
-  }
-
-  async getSchoolBySlug(slugs) {
-    const school = await College.findOne({
-      where: {
-        slugs,
-        [Op.and]: [
-          Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
-        ],
-      },
-      include: [
-        {
-          model: CollegeAddress,
-          as: "address",
-          attributes: ["country", "state", "city", "street", "postal_code"],
-        },
-        {
-          model: CollegeContact,
-          as: "contacts",
-          attributes: ["contact_number"],
-        },
-        {
-          model: CollegeCourse,
-          as: "collegeCourses",
-          include: [
-            {
-              model: Program,
-              as: "program",
-              attributes: ["id", "title", "slugs"],
-            },
-          ],
-        },
-        {
-          model: CollegeFacility,
-          as: "facilities",
-        },
-        {
-          model: CollegeGallery,
-          as: "collegeGallery",
-        },
-        {
-          model: University,
-          as: "university",
-          attributes: ["fullname", "slugs"],
-        },
-      ],
-    });
-
-    if (!school) {
-      const error = new Error("School not found");
-      error.status = 404;
-      throw error;
-    }
-
-    return school;
-  }
 
   async listColleges(query = {}) {
     const page = parseInt(query.page, 10) || 1;
@@ -788,7 +585,7 @@ class CollegeService {
       include: [
         {
           model: CollegeFacility,
-          as: "collegeFacility",
+          as: "facilities",
           attributes: ["title", "description", "icon"],
         },
         {
@@ -897,7 +694,7 @@ class CollegeService {
       include: [
         {
           model: CollegeFacility,
-          as: "collegeFacility",
+          as: "facilities",
           attributes: ["title", "description", "icon"],
         },
         {

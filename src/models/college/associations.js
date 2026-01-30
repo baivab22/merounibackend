@@ -23,7 +23,7 @@ College.hasOne(CollegeAddress, {
 });
 College.hasMany(CollegeFacility, {
   foreignKey: "college_id",
-  as: "collegeFacility",
+  as: "facilities",
 });
 College.hasMany(CollegeContact, {
   foreignKey: "college_id",

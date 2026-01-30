@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
 
-class CollegeFacility extends Model {}
+class CollegeFacility extends Model { }
 
 CollegeFacility.init(
   {
@@ -34,6 +34,5 @@ CollegeFacility.init(
   }
 );
 
-College.hasOne(CollegeFacility, { foreignKey: "college_id", as: "facility" });
 
 export default CollegeFacility;
