@@ -43,3 +43,7 @@ export const deleteNewsQuerySchema = yup.object({
 export const newsSlugParamSchema = yup.object({
   slug: yup.string().trim().required(),
 });
+
+export const newsIdParamSchema = yup.object({
+  id: yup.number().integer().positive().required(),
+});

@@ -10,6 +10,7 @@ import {
 import {
   paginationSchema,
   newsSlugParamSchema,
+  newsIdParamSchema,
   createNewsSchema,
   updateNewsQuerySchema,
   updateNewsBodySchema,
@@ -79,6 +80,36 @@ route.get(
   "/:slug",
   requestValidator(newsSlugParamSchema, "params"),
   NewsController.getNews
+);
+
+/**
+ * @swagger
+ * /news/id/{id}:
+ *   get:
+ *     summary: Get news by id (Authenticated)
+ *     tags: [News]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: News details
+ *       404:
+ *         description: News not found
+ *       401:
+ *         description: Unauthorized
+ */
+route.get(
+  "/id/:id",
+  authenticateUser,
+  requestValidator(newsIdParamSchema, "params"),
+  NewsController.getNewsById
 );
 
 /**

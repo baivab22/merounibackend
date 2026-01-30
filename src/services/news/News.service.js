@@ -90,7 +90,7 @@ class NewsService {
     };
   }
 
-  async getNews(slug) {
+  async getNewsBySlug(slug) {
     const news = await News.findOne({
       attributes: {
         exclude: ["author"],
@@ -139,6 +139,36 @@ class NewsService {
     });
 
     return { news, similarNews };
+  }
+
+  async getNewsById(id) {
+    const news = await News.findByPk(id, {
+      attributes: {
+        exclude: ["author"],
+      },
+      include: [
+        {
+          model: Category,
+          as: "newsCategory",
+        },
+        {
+          model: UserModel,
+          as: "newsAuthor",
+        },
+        {
+          model: CollegeModel,
+          as: "newsCollege",
+        },
+      ],
+    });
+
+    if (!news) {
+      const error = new Error("News not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return news;
   }
 
   async createNews(data) {
