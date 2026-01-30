@@ -21,6 +21,7 @@ Consultancy.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    /** Array of country names (strings) only, e.g. ["Nepal", "Australia"] */
     destination: {
       type: DataTypes.JSON,
       allowNull: true,
@@ -78,7 +79,7 @@ Consultancy.init(
     modelName: "consultancies",
     tableName: "consultancies",
     timestamps: true,
-  }
+  },
 );
 
 Consultancy.belongsToMany(Course, {

@@ -6,14 +6,12 @@ export const paginationSchema = yup.object({
   sort: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])
-    .transform((value) => (value ? value.toUpperCase() : "ASC"))
-    .default("ASC"),
+    .transform((value) => (value ? value.toUpperCase() : "DESC"))
+    .default("DESC"),
   q: yup
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
-  collegeId: yup.number().integer().positive().nullable(),
-  college_id: yup.number().integer().positive().nullable(),
 });
 
 export const slugParamSchema = yup.object({
@@ -24,7 +22,7 @@ export const createVacancySchema = yup
   .object({
     title: yup.string().trim().min(3).required(),
     author_id: yup.number().integer().positive().required(),
-    college_id: yup.number().integer().positive().nullable(),
+    associated_organization_name: yup.string().trim().max(255).nullable(),
     featuredImage: yup.string().trim().nullable(),
     description: yup
       .string()
@@ -45,7 +43,7 @@ export const updateVacancyBodySchema = yup
   .object({
     title: yup.string().trim().min(3),
     author_id: yup.number().integer().positive(),
-    college_id: yup.number().integer().positive().nullable(),
+    associated_organization_name: yup.string().trim().max(255).nullable(),
     featuredImage: yup.string().trim(),
     description: yup
       .string()

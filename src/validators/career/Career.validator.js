@@ -6,8 +6,8 @@ export const paginationSchema = yup.object({
   sort: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])
-    .transform((value) => (value ? value.toUpperCase() : "ASC"))
-    .default("ASC"),
+    .transform((value) => (value ? value.toUpperCase() : "DESC"))
+    .default("DESC"),
   q: yup
     .string()
     .nullable()
@@ -23,6 +23,10 @@ export const createCareerSchema = yup
     title: yup.string().trim().min(3).required(),
     author_id: yup.number().integer().positive().required(),
     featuredImage: yup.string().trim().required(),
+    status: yup
+      .string()
+      .oneOf(["active", "inactive"])
+      .default("active"),
     description: yup
       .string()
       .nullable()
@@ -43,6 +47,7 @@ export const updateCareerBodySchema = yup
     title: yup.string().trim().min(3),
     author_id: yup.number().integer().positive(),
     featuredImage: yup.string().trim(),
+    status: yup.string().oneOf(["active", "inactive"]),
     description: yup
       .string()
       .nullable()

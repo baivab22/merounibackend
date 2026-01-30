@@ -44,6 +44,11 @@ CareerModel.init(
       unique: true,
       field: "featured_image",
     },
+    status: {
+      type: DataTypes.ENUM("active", "inactive"),
+      allowNull: false,
+      defaultValue: "active",
+    },
   },
   {
     sequelize,

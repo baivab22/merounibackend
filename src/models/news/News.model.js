@@ -40,12 +40,12 @@ News.init(
     },
     category: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "categories",
         key: "id",
       },
-      onDelete: "CASCADE",
+      onDelete: "SET NULL",
     },
     featuredImage: {
       type: DataTypes.STRING,

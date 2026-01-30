@@ -13,8 +13,6 @@ class ScholarshipService {
 
     const searchQuery = query.q || "";
     const categoryId = query.category || query.categoryId;
-    const minAmount = query.minAmount;
-    const maxAmount = query.maxAmount;
     const activeOnly = query.activeOnly === "true";
     const sortBy = query.sortBy || "createdAt";
     const sortOrder = query.sortOrder || "DESC";
@@ -32,17 +30,11 @@ class ScholarshipService {
       whereCondition.category = categoryId;
     }
 
-    if (minAmount || maxAmount) {
-      whereCondition.amount = {};
-      if (minAmount) whereCondition.amount[Op.gte] = minAmount;
-      if (maxAmount) whereCondition.amount[Op.lte] = maxAmount;
-    }
-
     if (activeOnly) {
       whereCondition.applicationDeadline = { [Op.gte]: new Date() };
     }
 
-    console.log(whereCondition,"whereConditionwhereCondition")
+    console.log(whereCondition, "whereConditionwhereCondition");
 
     // Validate sort fields
     const validSortFields = [
@@ -150,7 +142,7 @@ class ScholarshipService {
     if (!titleOrName || titleOrName.length === 0) {
       console.error(
         "Scholarship creation error - received data:",
-        JSON.stringify(data, null, 2)
+        JSON.stringify(data, null, 2),
       );
       const error = new Error("Title or name is required to generate slug");
       error.status = 400;
@@ -183,7 +175,10 @@ class ScholarshipService {
 
     // Ensure category_id from API is mapped to category if needed
     if (data.categoryId) {
-      console.log(data.categoryId,"data.categoryIddata.categoryIddata.categoryId")
+      console.log(
+        data.categoryId,
+        "data.categoryIddata.categoryIddata.categoryId",
+      );
       updateData.category = data.categoryId;
     }
     if (data.author_id && !data.author) {

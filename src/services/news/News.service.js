@@ -177,7 +177,7 @@ class NewsService {
       ...rest,
       title,
       author: author || author_id,
-      category: category_id,
+      category: category_id || null,
       college_id: college_id || null,
       slug: slugify(title),
     });
@@ -202,7 +202,12 @@ class NewsService {
         ...rest,
         title: title || news.title,
         author: author || author_id || news.author,
-        category: category || category_id || news.category,
+        category:
+          category !== undefined
+            ? category
+            : category_id !== undefined
+              ? category_id
+              : news.category,
         college_id: college_id !== undefined ? college_id : news.college_id,
         slug: updatedSlug,
       },

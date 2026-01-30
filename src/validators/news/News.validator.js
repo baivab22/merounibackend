@@ -8,7 +8,13 @@ export { paginationSchema, slugParamSchema };
 
 export const createNewsSchema = yup.object({
   title: yup.string().trim().min(3).required("Title is required"),
-  category_id: yup.number().integer().positive().required("Category is required"),
+  category_id: yup
+    .number()
+    .integer()
+    .positive()
+    .nullable()
+    .transform((v) => (v === "" || v === undefined ? null : v))
+    .optional(),
   author: yup.number().integer().positive().required("Author is required"),
   description: yup.string().trim().nullable(),
   featuredImage: yup.string().trim().required("Featured image is required"),

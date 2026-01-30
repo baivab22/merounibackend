@@ -8,7 +8,7 @@ class ConsultancyService {
   async listConsultancy(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
-    const sort = (query.sort || "asc").toUpperCase();
+    const sort = (query.sort || "desc").toUpperCase();
     const search = query.q || "";
 
     const offset = (page - 1) * limit;
@@ -38,7 +38,7 @@ class ConsultancyService {
         include: includeOptions,
         limit,
         offset,
-        order: [["id", sort]],
+        order: [["createdAt", sort]],
       });
 
     return {

@@ -7,6 +7,14 @@ import {
 
 export { paginationSchema, slugParamSchema, idQuerySchema };
 
+export const listConsultancyQuerySchema = paginationSchema.shape({
+  sort: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "DESC"))
+    .default("DESC"),
+});
+
 export const consultancySlugParamSchema = yup.object({
   slugs: yup.string().trim().required(),
 });
@@ -26,10 +34,20 @@ export const createOrUpdateConsultancySchema = yup.object({
     .mixed()
     .nullable()
     .optional()
-    .test("is-array", "Destination must be an array", (value) => {
-      if (value === null || value === undefined) return true;
-      return Array.isArray(value);
-    }),
+    .transform((value) => {
+      if (value == null) return [];
+      if (!Array.isArray(value)) return [];
+      return value
+        .map((v) =>
+          typeof v === "string"
+            ? v.trim()
+            : v?.country
+              ? String(v.country).trim()
+              : "",
+        )
+        .filter(Boolean);
+    })
+    .default([]),
   address: yup
     .mixed()
     .nullable()
@@ -72,7 +90,7 @@ export const createOrUpdateConsultancySchema = yup.object({
       (value) => {
         if (value === null || value === undefined || value === "") return true;
         return typeof value === "string";
-      }
+      },
     ),
   contact: yup.array().of(yup.string()).nullable().optional().default([]),
   website_url: yup
@@ -91,7 +109,7 @@ export const createOrUpdateConsultancySchema = yup.object({
       (value) => {
         if (value === null || value === undefined || value === "") return true;
         return typeof value === "string";
-      }
+      },
     ),
   video_url: yup
     .string()

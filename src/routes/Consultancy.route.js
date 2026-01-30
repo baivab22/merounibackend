@@ -5,7 +5,7 @@ import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
+  listConsultancyQuerySchema,
   consultancySlugParamSchema,
   createOrUpdateConsultancySchema,
   deleteConsultancyQuerySchema,
@@ -41,8 +41,8 @@ const route = express.Router();
  */
 route.get(
   "/",
-  requestValidator(paginationSchema, "query"),
-  ConsultancyController.listConsultancy
+  requestValidator(listConsultancyQuerySchema, "query"),
+  ConsultancyController.listConsultancy,
 );
 
 /**
@@ -66,7 +66,7 @@ route.get(
 route.get(
   "/:slugs",
   requestValidator(consultancySlugParamSchema, "params"),
-  ConsultancyController.getConsultancy
+  ConsultancyController.getConsultancy,
 );
 
 /**
@@ -120,7 +120,7 @@ route.post(
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidator(createOrUpdateConsultancySchema, "body"),
-  ConsultancyController.createOrUpdateConsultancy
+  ConsultancyController.createOrUpdateConsultancy,
 );
 
 /**
@@ -153,7 +153,7 @@ route.delete(
   authenticateUser,
   authorizeRole(["admin"]),
   requestValidator(deleteConsultancyQuerySchema, "query"),
-  ConsultancyController.deleteConsultancy
+  ConsultancyController.deleteConsultancy,
 );
 
 export default route;

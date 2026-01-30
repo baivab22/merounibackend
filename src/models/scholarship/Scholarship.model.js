@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Scholarship extends Model { }
+class Scholarship extends Model {}
 
 Scholarship.init(
   {
@@ -38,7 +38,7 @@ Scholarship.init(
       defaultValue: [],
     },
     amount: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     applicationDeadline: {
@@ -69,7 +69,7 @@ Scholarship.init(
     modelName: "scholarships",
     freezeTableName: true,
     timestamps: true,
-  }
+  },
 );
 
 export default Scholarship;

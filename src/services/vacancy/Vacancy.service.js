@@ -3,45 +3,36 @@ import slug from "slug";
 
 import VacancyModel from "../../models/vacancy/Vacancy.model.js";
 import UserModel from "../../models/users/User.model.js";
-import CollegeModel from "../../models/college/College.model.js";
 
 class VacancyService {
   async listVacancies(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
-    const sort = (query.sort || "asc").toUpperCase();
+    const sort = (query.sort || "desc").toUpperCase();
     const search = query.q || "";
-    const collegeId = query.collegeId || query.college_id;
 
     const offset = (page - 1) * limit;
 
     const whereCondition = {};
 
-    console.log("[VacancyService] listVacancies query:", JSON.stringify(query, null, 2));
-
     if (search) {
-      whereCondition.title = { [Op.like]: `%${search}%` };
-    }
-
-    if (collegeId) {
-      whereCondition.college_id = collegeId;
+      whereCondition[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { associated_organization_name: { [Op.like]: `%${search}%` } },
+      ];
     }
 
     const { count: totalCount, rows: items } =
       await VacancyModel.findAndCountAll({
         where: whereCondition,
         distinct: true,
-        order: [["id", sort]],
+        order: [["createdAt", sort]],
         limit,
         offset,
         include: [
           {
             model: UserModel,
             as: "vacancyAuthor",
-          },
-          {
-            model: CollegeModel,
-            as: "vacancyCollege",
           },
         ],
       });
@@ -65,10 +56,6 @@ class VacancyService {
           model: UserModel,
           as: "vacancyAuthor",
         },
-        {
-          model: CollegeModel,
-          as: "vacancyCollege",
-        },
       ],
     });
 
@@ -82,14 +69,21 @@ class VacancyService {
   }
 
   async createVacancy(data) {
-    const { title, author_id, college_id, featuredImage, description, content } = data;
+    const {
+      title,
+      author_id,
+      associated_organization_name,
+      featuredImage,
+      description,
+      content,
+    } = data;
     const slugs = slug(title);
 
     return VacancyModel.create({
       title,
       slugs,
       author_id,
-      college_id: college_id || null,
+      associated_organization_name: associated_organization_name || null,
       description,
       content,
       featuredImage,
@@ -110,7 +104,10 @@ class VacancyService {
       title: data.title || vacancy.title,
       slugs,
       author_id: data.author_id || vacancy.author_id,
-      college_id: data.college_id !== undefined ? data.college_id : vacancy.college_id,
+      associated_organization_name:
+        data.associated_organization_name !== undefined
+          ? data.associated_organization_name
+          : vacancy.associated_organization_name,
       description: data.description || vacancy.description,
       content: data.content || vacancy.content,
       featuredImage: data.featuredImage || vacancy.featuredImage,

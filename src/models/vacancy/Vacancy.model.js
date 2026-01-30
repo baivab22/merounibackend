@@ -30,14 +30,9 @@ VacancyModel.init(
       },
       onDelete: "CASCADE",
     },
-    college_id: {
-      type: DataTypes.INTEGER,
+    associated_organization_name: {
+      type: DataTypes.STRING(255),
       allowNull: true,
-      references: {
-        model: "colleges",
-        key: "id",
-      },
-      onDelete: "SET NULL",
     },
     description: {
       type: DataTypes.TEXT,

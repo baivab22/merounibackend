@@ -39,12 +39,7 @@ const route = express.Router();
  *         name: q
  *         schema:
  *           type: string
- *         description: Search query
- *       - in: query
- *         name: college_id
- *         schema:
- *           type: integer
- *         description: Filter by College ID
+ *         description: Search in title or associated organization name
  *     responses:
  *       200:
  *         description: List of vacancies
@@ -52,7 +47,7 @@ const route = express.Router();
 route.get(
   "/",
   requestValidator(paginationSchema, "query"),
-  VacancyController.listVacancies
+  VacancyController.listVacancies,
 );
 
 /**
@@ -76,7 +71,7 @@ route.get(
 route.get(
   "/:slugs",
   requestValidator(slugParamSchema, "params"),
-  VacancyController.getVacancyBySlug
+  VacancyController.getVacancyBySlug,
 );
 
 /**
@@ -126,7 +121,7 @@ route.post(
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidator(createVacancySchema, "body"),
-  VacancyController.createVacancy
+  VacancyController.createVacancy,
 );
 
 /**
@@ -159,7 +154,7 @@ route.delete(
   authenticateUser,
   authorizeRole(["admin"]),
   requestValidator(deleteVacancyQuerySchema, "query"),
-  VacancyController.deleteVacancy
+  VacancyController.deleteVacancy,
 );
 
 /**
@@ -213,7 +208,7 @@ route.put(
     { schema: updateVacancyQuerySchema, property: "query" },
     { schema: updateVacancyBodySchema, property: "body" },
   ]),
-  VacancyController.updateVacancy
+  VacancyController.updateVacancy,
 );
 
 export default route;

@@ -8,7 +8,7 @@ class CareerService {
   async listCareers(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
-    const sort = (query.sort || "asc").toUpperCase();
+    const sort = (query.sort || "desc").toUpperCase();
     const search = query.q || "";
 
     const offset = (page - 1) * limit;
@@ -22,7 +22,7 @@ class CareerService {
       await CareerModel.findAndCountAll({
         where: whereCondition,
         distinct: true,
-        order: [["id", sort]],
+        order: [["createdAt", sort]],
         limit,
         offset,
       });
@@ -63,7 +63,14 @@ class CareerService {
   }
 
   async createCareer(data) {
-    const { title, author_id, featuredImage, description, content } = data;
+    const {
+      title,
+      author_id,
+      featuredImage,
+      description,
+      content,
+      status,
+    } = data;
     const slugs = slug(title);
 
     return CareerModel.create({
@@ -73,6 +80,7 @@ class CareerService {
       description,
       content,
       featuredImage,
+      status: status || "active",
     });
   }
 
@@ -93,6 +101,7 @@ class CareerService {
       description: data.description || career.description,
       content: data.content || career.content,
       featuredImage: data.featuredImage || career.featuredImage,
+      status: data.status !== undefined ? data.status : career.status,
     });
 
     return career;
