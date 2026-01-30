@@ -70,7 +70,7 @@ class ReferralController {
   static async getApplicationsByType(req, res) {
     try {
       const applications = await referralService.getApplicationsByType(
-        req.params.type
+        req.params.type,
       );
 
       return res.status(200).json(applications);
@@ -86,7 +86,7 @@ class ReferralController {
   static async getCollegeApplications(req, res) {
     try {
       const applications = await referralService.getCollegeApplications(
-        req.params.college_id
+        req.params.college_id,
       );
       return res.status(200).json(applications);
     } catch (error) {
@@ -102,7 +102,7 @@ class ReferralController {
     try {
       const applications = await referralService.getCollegeApplicationsByType(
         req.params.college_id,
-        req.params.type
+        req.params.type,
       );
 
       return res.status(200).json(applications);
@@ -118,7 +118,7 @@ class ReferralController {
   static async getInstitutionApplications(req, res) {
     try {
       const applications = await referralService.getInstitutionApplications(
-        req.user
+        req.user,
       );
       return res.status(200).json(applications);
     } catch (error) {
@@ -153,8 +153,25 @@ class ReferralController {
   static async deleteReferral(req, res) {
     try {
       const { id } = req.params;
-      await referralService.deleteReferral(id);
+      await referralService.deleteReferral(id, req.user);
       return res.status(200).json({ message: "Referral deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+
+  static async getTopAgents(req, res) {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 5;
+      const result = await referralService.getTopAgents(limit);
+      return res.status(200).json({
+        message: "Top agents retrieved successfully",
+        data: result,
+      });
     } catch (error) {
       console.error(error);
       const status = error.status || 500;

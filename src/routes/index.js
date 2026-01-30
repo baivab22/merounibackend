@@ -66,6 +66,9 @@ router.use("/material-category", materialCategoryRoute);
 import scholarshipRoute from "./Scholarship.route.js";
 router.use("/scholarship", scholarshipRoute);
 
+import scholarshipApplicationRoute from "./ScholarshipApplication.route.js";
+router.use("/scholarship-application", scholarshipApplicationRoute);
+
 import universityRoute from "./University.route.js";
 router.use("/university", universityRoute);
 
@@ -110,5 +113,8 @@ router.use("/auth", authRoute);
 
 import analyticsRoute from "./Analytics.route.js";
 router.use("/analytics", analyticsRoute);
+
+import configRoute from "./Config.route.js";
+router.use("/config", configRoute);
 
 export default router;

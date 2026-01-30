@@ -4,6 +4,7 @@ import Event from "../../models/events/Event.model.js";
 import Referral from "../../models/referral/Referral.model.js";
 import { University } from "../../models/university/University.model.js";
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
+import Blog from "../../models/blogs/Blog.model.js";
 import { Sequelize, QueryTypes } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
@@ -17,6 +18,7 @@ class AnalyticsService {
       totalAgents,
       totalUniversities,
       totalConsultancies,
+      totalBlogs,
     ] = await Promise.all([
       UserModel.count(),
       College.count(),
@@ -29,6 +31,7 @@ class AnalyticsService {
       }),
       University.count(),
       Consultancy.count(),
+      Blog.count(),
     ]);
 
     const educationalInstitutions = [
@@ -135,6 +138,7 @@ class AnalyticsService {
       totalAgents,
       totalUniversities,
       totalConsultancies,
+      totalBlogs,
       educationalInstitutions,
       studentEnrollmentGrowth,
       availableYears:

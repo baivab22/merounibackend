@@ -53,7 +53,7 @@ const router = express.Router();
 router.post(
   "/self-apply",
   requestValidator(createSelfApplicationSchema, "body"),
-  ReferralController.createSelfApplication
+  ReferralController.createSelfApplication,
 );
 
 /**
@@ -99,7 +99,7 @@ router.post(
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createReferredApplicationSchema, "body"),
-  ReferralController.createReferredApplication
+  ReferralController.createReferredApplication,
 );
 
 /**
@@ -123,7 +123,7 @@ router.get(
   "/",
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
-  ReferralController.getApplications
+  ReferralController.getApplications,
 );
 
 /**
@@ -144,7 +144,7 @@ router.get(
 router.get(
   "/user/referrals",
   authenticateUser,
-  ReferralController.getUserReferrals
+  ReferralController.getUserReferrals,
 );
 
 /**
@@ -168,7 +168,7 @@ router.get(
   "/institution/applications",
   authenticateUser,
   authorizeRole(["institution"]),
-  ReferralController.getInstitutionApplications
+  ReferralController.getInstitutionApplications,
 );
 
 /**
@@ -200,7 +200,7 @@ router.get(
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(applicationTypeParamSchema, "params"),
-  ReferralController.getApplicationsByType
+  ReferralController.getApplicationsByType,
 );
 
 /**
@@ -231,7 +231,7 @@ router.get(
   authenticateUser,
   authorizeRole(["admin"]),
   requestValidator(collegeIdParamSchema, "params"),
-  ReferralController.getCollegeApplications
+  ReferralController.getCollegeApplications,
 );
 
 /**
@@ -268,7 +268,7 @@ router.get(
   authenticateUser,
   authorizeRole(["admin"]),
   requestValidator(collegeIdAndTypeParamSchema, "params"),
-  ReferralController.getCollegeApplicationsByType
+  ReferralController.getCollegeApplicationsByType,
 );
 
 /**
@@ -320,7 +320,7 @@ router.patch(
     { schema: referralIdParamSchema, property: "params" },
     { schema: updateReferralStatusSchema, property: "body" },
   ]),
-  ReferralController.updateStatus
+  ReferralController.updateStatus,
 );
 
 /**
@@ -348,12 +348,43 @@ router.patch(
  *       404:
  *         description: Referral not found
  */
+/**
+ * @swagger
+ * /referral/top-agents:
+ *   get:
+ *     summary: Get top agents by referral score (admin only)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 5
+ *         description: Number of top agents to return
+ *     responses:
+ *       200:
+ *         description: Top agents retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.get(
+  "/top-agents",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  ReferralController.getTopAgents,
+);
+
 router.delete(
   "/:id",
   authenticateUser,
-  authorizeRole(["admin", "editor", "agent"]),
+  // Allow students to delete their own applications, admins/editors/agents can delete any
   requestValidator(referralIdParamSchema, "params"),
-  ReferralController.deleteReferral
+  ReferralController.deleteReferral,
 );
 
 export default router;

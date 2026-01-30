@@ -5,6 +5,9 @@ import CollegeContact from "../../models/college/CollegeContact.model.js";
 import UserModel from "../../models/users/User.model.js";
 import Course from "../../models/courses/Course.model.js";
 import { roleHelper } from "../../utils/RoleHelper.js";
+import Config from "../../models/config/Config.model.js";
+import { Sequelize, Op, QueryTypes } from "sequelize";
+import { sequelize } from "../../config/database.config.js";
 
 class ReferralService {
   async createReferredApplication(payload, user) {
@@ -291,7 +294,7 @@ class ReferralService {
     return referral;
   }
 
-  async deleteReferral(id) {
+  async deleteReferral(id, user = null) {
     const referral = await Referral.findByPk(id);
 
     if (!referral) {
@@ -300,7 +303,88 @@ class ReferralService {
       throw error;
     }
 
+    // If user is provided, check if they own this referral (for students)
+    if (user) {
+      const userRoles = roleHelper(user?.role);
+      // If user is a student (not admin/editor/agent), they can only delete their own referrals
+      if (!userRoles?.admin && !userRoles?.editor && !userRoles?.agent) {
+        if (referral.student_id !== user.id) {
+          const error = new Error("You can only delete your own applications");
+          error.status = 403;
+          throw error;
+        }
+      }
+    }
+
     await referral.destroy();
+  }
+
+  async getTopAgents(limit = 5) {
+    // Fetch referral point from Config table
+    const referralPointConfig = await Config.findOne({
+      where: { type: "referral_point" },
+    });
+
+    // Default to 10 if not configured
+    const referralPoint = referralPointConfig
+      ? parseFloat(referralPointConfig.value) || 10
+      : 10;
+
+    // Use raw query to count referrals grouped by agent_id
+    const agentStats = await sequelize.query(
+      `
+      SELECT 
+        r.agent_id,
+        COUNT(r.id) as referral_count
+      FROM referral r
+      WHERE r.agent_id IS NOT NULL 
+        AND r.application_type = 'referred'
+      GROUP BY r.agent_id
+      ORDER BY referral_count DESC
+      LIMIT :limit
+      `,
+      {
+        replacements: { limit },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    // Get agent IDs and fetch user details
+    const agentIds = agentStats.map((stat) => stat.agent_id);
+    const agents = await UserModel.findAll({
+      where: { id: { [Op.in]: agentIds } },
+      attributes: ["id", "firstName", "lastName", "email"],
+    });
+
+    // Create a map for quick lookup
+    const agentMap = new Map(agents.map((agent) => [agent.id, agent]));
+
+    // Calculate scores and format response
+    const topAgents = agentStats.map((stat) => {
+      const referralCount = parseInt(stat.referral_count || 0);
+      const totalScore = referralCount * referralPoint;
+      const agent = agentMap.get(stat.agent_id);
+
+      return {
+        agent_id: stat.agent_id,
+        agent: agent
+          ? {
+              id: agent.id,
+              firstName: agent.firstName,
+              lastName: agent.lastName,
+              email: agent.email,
+              fullName: `${agent.firstName || ""} ${agent.lastName || ""}`.trim(),
+            }
+          : null,
+        referralCount,
+        totalScore,
+      };
+    });
+
+    return {
+      topAgents,
+      referralPoint,
+    };
   }
 }
 
