@@ -1,6 +1,6 @@
 // use this config for migration and seeding
 // import envConfig from "./env.config.js";
-const envConfig = require("./env.config.js");
+const envConfig = require("./env.config.js").default;
 
 module.exports = {
   development: {
@@ -9,6 +9,7 @@ module.exports = {
     database: envConfig.DB_NAME,
     host: envConfig.DB_HOST,
     port: parseInt(envConfig.DB_PORT) || 3306,
+    dialect: "mysql",
   },
   production: {
     username: envConfig.DB_USER,
@@ -16,5 +17,6 @@ module.exports = {
     database: envConfig.DB_NAME,
     host: envConfig.DB_HOST,
     port: parseInt(envConfig.DB_PORT) || 3306,
+    dialect: "mysql",
   },
 };

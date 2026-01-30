@@ -50,10 +50,10 @@ Event.init(
       field: "is_featured",
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     content: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     image: {

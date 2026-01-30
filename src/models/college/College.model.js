@@ -47,9 +47,9 @@ College.init(
     },
     author_id: { type: DataTypes.INTEGER, allowNull: false },
     university_id: { type: DataTypes.INTEGER, allowNull: false },
-    google_map_url: { type: DataTypes.STRING },
+    google_map_url: { type: DataTypes.TEXT },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     content: {

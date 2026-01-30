@@ -99,7 +99,9 @@ route.get(
  *             required:
  *               - title
  *               - content
- *               - author_id
+ *               - author
+ *               - category
+ *               - featuredImage
  *             properties:
  *               title:
  *                 type: string
@@ -107,14 +109,16 @@ route.get(
  *               content:
  *                 type: string
  *                 example: Full article content here...
- *               author_id:
+ *               author:
+ *                 type: integer
+ *               category:
  *                 type: integer
  *               description:
  *                 type: string
  *               featuredImage:
  *                 type: string
  *                 format: uri
- *               category_id:
+ *               college_id:
  *                 type: integer
  *     responses:
  *       201:
@@ -193,12 +197,16 @@ route.delete(
  *                 type: string
  *               content:
  *                 type: string
+ *               category:
+ *                 type: integer
+ *               author:
+ *                 type: integer
  *               description:
  *                 type: string
  *               featuredImage:
  *                 type: string
  *                 format: uri
- *               category_id:
+ *               college_id:
  *                 type: integer
  *     responses:
  *       200:
