@@ -13,19 +13,21 @@ class HomeService {
 
     const searchResults = await sequelize.query(
       `
-      (SELECT id, name, slugs, 'colleges' AS type, createdAt FROM colleges WHERE name LIKE :search)
+      (SELECT id, CONVERT(name USING utf8mb4) COLLATE utf8mb4_unicode_ci AS title, CONVERT(slugs USING utf8mb4) COLLATE utf8mb4_unicode_ci AS slugs, CONVERT('colleges' USING utf8mb4) COLLATE utf8mb4_unicode_ci AS type, createdAt FROM colleges WHERE name LIKE :search)
       UNION
-      (SELECT id, title, slugs, 'faculty' AS type, createdAt FROM faculty WHERE title LIKE :search)
+      (SELECT id, CONVERT(title USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slugs USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT('faculty' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt FROM faculty WHERE title LIKE :search)
       UNION
-      (SELECT id, title, slugs, 'event' AS type, createdAt FROM events WHERE title LIKE :search)
+      (SELECT id, CONVERT(title USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slugs USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT('event' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt FROM events WHERE title LIKE :search)
       UNION
-      (SELECT id, title, slug, 'blog' AS type, createdAt FROM blogs WHERE title LIKE :search)
+      (SELECT id, CONVERT(title USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slug USING utf8mb4) COLLATE utf8mb4_unicode_ci AS slugs, CONVERT('blog' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt FROM blogs WHERE title LIKE :search)
       UNION
-      (SELECT id, title, slugs, 'exams' AS type, createdAt FROM exams WHERE title LIKE :search)
+      (SELECT id, CONVERT(title USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slugs USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT('exams' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt FROM exams WHERE title LIKE :search)
       UNION
-      (SELECT id, title, slug, 'materials' AS type, createdAt FROM materials WHERE title LIKE :search)
+      (SELECT id, CONVERT(title USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slug USING utf8mb4) COLLATE utf8mb4_unicode_ci AS slugs, CONVERT('materials' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt FROM materials WHERE title LIKE :search)
       UNION
-      (SELECT id, fullname, slugs, 'university' AS type, createdAt  FROM university WHERE fullname LIKE :search)
+      (SELECT id, CONVERT(fullname USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slugs USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT('university' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt  FROM university WHERE fullname LIKE :search)
+      UNION
+      (SELECT id, CONVERT(title USING utf8mb4) COLLATE utf8mb4_unicode_ci, CONVERT(slug USING utf8mb4) COLLATE utf8mb4_unicode_ci AS slugs, CONVERT('news' USING utf8mb4) COLLATE utf8mb4_unicode_ci, createdAt FROM news WHERE title LIKE :search)
       ORDER BY createdAt DESC;
       `,
       {
@@ -42,6 +44,7 @@ class HomeService {
       exams: searchResults.filter((item) => item.type === "exams"),
       materials: searchResults.filter((item) => item.type === "materials"),
       university: searchResults.filter((item) => item.type === "university"),
+      news: searchResults.filter((item) => item.type === "news"),
     };
   }
 }
