@@ -117,4 +117,13 @@ router.use("/analytics", analyticsRoute);
 import configRoute from "./Config.route.js";
 router.use("/config", configRoute);
 
+import skillsBasedCourseRoute from "./SkillsBasedCourse.route.js";
+router.use("/skills-based-courses", skillsBasedCourseRoute);
+
+import disciplineRoute from "./Discipline.route.js";
+router.use("/discipline", disciplineRoute);
+
+import videoRoute from "./Video.route.js";
+router.use("/video", videoRoute);
+
 export default router;

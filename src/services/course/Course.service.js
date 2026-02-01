@@ -1,14 +1,12 @@
 import { Op } from "sequelize";
 import slug from "slug";
 
-import Course from "../../models/courses/Course.model.js";
-import UserModel from "../../models/users/User.model.js";
-import FacultyModel from "../../models/faculty/Faculty.model.js";
 import College from "../../models/college/College.model.js";
-import { University } from "../../models/university/University.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
-import Program from "../../models/program/Program.model.js";
-import Level from "../../models/level/Level.model.js";
+import Course from "../../models/courses/Course.model.js";
+import FacultyModel from "../../models/faculty/Faculty.model.js";
+import { University } from "../../models/university/University.model.js";
+import UserModel from "../../models/users/User.model.js";
 
 class CourseService {
   async listCourses(query = {}) {

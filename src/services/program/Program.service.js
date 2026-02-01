@@ -13,6 +13,7 @@ import { Exam } from "../../models/exams/Exam.model.js";
 import UserModel from "../../models/users/User.model.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
+import Discipline from "../../models/discipline/Discipline.model.js";
 
 class ProgramService {
 
@@ -24,6 +25,7 @@ class ProgramService {
     const {
       facultyId,
       levelId,
+      disciplineId,
       q,
       sortBy,
       sortOrder,
@@ -37,10 +39,11 @@ class ProgramService {
     if (facultyId) {
       whereConditions.faculty_id = facultyId;
     }
-
     if (levelId) {
       whereConditions.level_id = levelId;
-
+    }
+    if (disciplineId) {
+      whereConditions.discipline_id = disciplineId;
     }
     if (q) {
       whereConditions[Op.or] = [
@@ -112,6 +115,11 @@ class ProgramService {
           attributes: ["title", "slugs"],
         },
         {
+          model: Discipline,
+          as: "discipline",
+          attributes: ["title", "slugs"],
+        },
+        {
           model: ProgramSyllabus,
           as: "syllabus",
           include: [
@@ -169,6 +177,7 @@ class ProgramService {
         duration,
         credits,
         level_id,
+        discipline_id,
         language,
         eligibility_criteria,
         fee,
@@ -191,6 +200,7 @@ class ProgramService {
         scholarship_id,
         exam_id,
         author,
+        discipline_id,
       });
 
       if (!programId) {
@@ -211,6 +221,7 @@ class ProgramService {
             duration,
             credits,
             level_id,
+            discipline_id,
             language,
             eligibility_criteria,
             fee,
@@ -244,6 +255,7 @@ class ProgramService {
             duration,
             credits,
             level_id,
+            discipline_id,
             language,
             eligibility_criteria,
             fee,
@@ -313,6 +325,7 @@ class ProgramService {
     scholarship_id,
     exam_id,
     author,
+    discipline_id,
   }) {
     // Validate faculty_id
     if (!faculty_id) {
@@ -420,6 +433,19 @@ class ProgramService {
       );
       error.status = 400;
       throw error;
+    }
+
+    // Validate discipline_id (optional)
+    if (discipline_id) {
+      const disciplineExists = await Discipline.findByPk(Number(discipline_id));
+      if (!disciplineExists) {
+        console.error(`Discipline with ID ${discipline_id} not found`);
+        const error = new Error(
+          `Invalid discipline_id: ${discipline_id}. Discipline does not exist.`
+        );
+        error.status = 400;
+        throw error;
+      }
     }
   }
 }

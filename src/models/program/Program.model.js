@@ -1,7 +1,8 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
+import Discipline from "../discipline/Discipline.model.js";
 
-class Program extends Model {}
+class Program extends Model { }
 
 Program.init(
   {
@@ -26,6 +27,14 @@ Program.init(
     faculty_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    discipline_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "disciplines",
+        key: "id",
+      },
     },
     duration: {
       type: DataTypes.STRING,
@@ -78,5 +87,7 @@ Program.init(
     freezeTableName: true,
   }
 );
+
+Program.belongsTo(Discipline, { foreignKey: "discipline_id", as: "discipline" });
 
 export default Program;

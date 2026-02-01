@@ -1,0 +1,94 @@
+import { Op } from "sequelize";
+import Video from "../../models/video/Video.model.js";
+
+class VideoService {
+    async listVideos(query = {}) {
+        const page = parseInt(query.page, 10) || 1;
+        const limit = parseInt(query.limit, 10) || 10;
+        const offset = (page - 1) * limit;
+
+        const { q } = query;
+        const whereCondition = {};
+
+        if (q) {
+            whereCondition.title = { [Op.like]: `%${q}%` };
+        }
+
+        const { count: totalCount, rows: items } = await Video.findAndCountAll({
+            where: whereCondition,
+            limit,
+            offset,
+            order: [["createdAt", "DESC"]],
+        });
+
+        return {
+            items,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
+                limit,
+                totalCount,
+            },
+        };
+    }
+
+    async getVideoById(id) {
+        const video = await Video.findByPk(id);
+
+        if (!video) {
+            const error = new Error("Video not found");
+            error.status = 404;
+            throw error;
+        }
+
+        return video;
+    }
+
+    async getVideoBySlug(slug) {
+        const video = await Video.findOne({ where: { slug } });
+
+        if (!video) {
+            const error = new Error("Video not found");
+            error.status = 404;
+            throw error;
+        }
+
+        return video;
+    }
+
+    async createVideo(payload) {
+        const { title, ...rest } = payload;
+
+        if (!title) {
+            const error = new Error("Title is required");
+            error.status = 400;
+            throw error;
+        }
+        return Video.create({ ...rest, title });
+    }
+
+    async updateVideo(id, payload) {
+        const video = await Video.findByPk(id);
+        if (!video) {
+            const error = new Error("Video not found");
+            error.status = 404;
+            throw error;
+        }
+
+        await video.update(payload);
+        return video;
+    }
+
+    async deleteVideo(id) {
+        const deletedRows = await Video.destroy({
+            where: { id },
+        });
+        if (deletedRows === 0) {
+            const error = new Error("Video not found");
+            error.status = 404;
+            throw error;
+        }
+    }
+}
+
+export default VideoService;
