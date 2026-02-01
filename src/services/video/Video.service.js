@@ -1,6 +1,9 @@
 import { Op } from "sequelize";
 import Video from "../../models/video/Video.model.js";
 
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+
+
 class VideoService {
     async listVideos(query = {}) {
         const page = parseInt(query.page, 10) || 1;
@@ -59,12 +62,8 @@ class VideoService {
     async createVideo(payload) {
         const { title, ...rest } = payload;
 
-        if (!title) {
-            const error = new Error("Title is required");
-            error.status = 400;
-            throw error;
-        }
-        return Video.create({ ...rest, title });
+        const slug = generateUniqueSlug(title);
+        return Video.create({ ...rest, title, slug });
     }
 
     async updateVideo(id, payload) {

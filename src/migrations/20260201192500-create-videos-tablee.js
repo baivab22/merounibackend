@@ -28,6 +28,11 @@ export default {
                 type: Sequelize.TEXT,
                 allowNull: true,
             },
+            status: {
+                type: Sequelize.ENUM("active", "inactive"),
+                defaultValue: "active",
+                allowNull: false,
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE,

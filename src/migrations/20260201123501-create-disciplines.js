@@ -21,6 +21,10 @@ export default {
                 type: Sequelize.TEXT,
                 allowNull: true,
             },
+            featured_image: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
             status: {
                 type: Sequelize.ENUM("active", "inactive"),
                 defaultValue: "active",

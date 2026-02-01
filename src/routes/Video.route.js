@@ -179,6 +179,6 @@ router.put(
  *       500:
  *         description: Server error
  */
-router.delete("/", VideoController.deleteVideo);
+router.delete("/:id", VideoController.deleteVideo);
 
 export default router;

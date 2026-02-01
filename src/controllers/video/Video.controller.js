@@ -65,7 +65,7 @@ class VideoController {
 
     static async deleteVideo(req, res) {
         try {
-            await videoService.deleteVideo(req.query.id);
+            await videoService.deleteVideo(req.params.id);
             return res.status(200).json({ message: "Video deleted" });
         } catch (error) {
             console.error("Error deleting Video:", error);

@@ -6,6 +6,7 @@ export const createVideoSchema = yup.object({
     yt_video_link: yup.string().trim().required("YouTube video link is required"),
     featured_image: yup.string().trim().optional(),
     description: yup.string().trim().optional(),
+    status: yup.string().trim().optional(),
 });
 
 // Update Video schema
@@ -14,4 +15,5 @@ export const updateVideoSchema = yup.object({
     yt_video_link: yup.string().trim().optional(),
     featured_image: yup.string().trim().optional(),
     description: yup.string().trim().optional(),
+    status: yup.string().trim().optional(),
 });
