@@ -177,6 +177,6 @@ router.put(
  *       500:
  *         description: Server error
  */
-router.delete("/", DisciplineController.deleteDiscipline);
+router.delete("/:id", DisciplineController.deleteDiscipline);
 
 export default router;

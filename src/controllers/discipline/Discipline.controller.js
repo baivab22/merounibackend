@@ -69,7 +69,7 @@ class DisciplineController {
 
     static async deleteDiscipline(req, res) {
         try {
-            await disciplineService.deleteDiscipline(req.query.id);
+            await disciplineService.deleteDiscipline(req.params.id);
             return res.status(200).json({ message: "Discipline deleted" });
         } catch (error) {
             console.error("Error deleting Discipline:", error);

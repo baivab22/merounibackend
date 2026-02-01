@@ -65,13 +65,6 @@ class DisciplineService {
 
     async createDiscipline(payload) {
         const { title, ...rest } = payload;
-
-        if (!title) {
-            const error = new Error("Title is required");
-            error.status = 400;
-            throw error;
-        }
-
         const slugs = slug(title);
         return Discipline.create({ ...rest, title, slugs });
     }

@@ -1,5 +1,4 @@
 import * as yup from "yup";
-import { idQuerySchema } from "../common/common.validator.js";
 
 // Create Discipline schema
 export const createDisciplineSchema = yup.object({
