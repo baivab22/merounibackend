@@ -1,7 +1,5 @@
-"use strict";
-
-module.exports = {
-    up: async (queryInterface, Sequelize) => {
+export default {
+    async up(queryInterface, Sequelize) {
         await queryInterface.createTable("disciplines", {
             id: {
                 allowNull: false,
@@ -14,10 +12,14 @@ module.exports = {
                 allowNull: false,
                 unique: true,
             },
-            slugs: {
+            slug: {
                 type: Sequelize.STRING,
                 allowNull: false,
                 unique: true,
+            },
+            description: {
+                type: Sequelize.TEXT,
+                allowNull: true,
             },
             status: {
                 type: Sequelize.ENUM("active", "inactive"),
@@ -35,7 +37,7 @@ module.exports = {
         });
     },
 
-    down: async (queryInterface, Sequelize) => {
+    async down(queryInterface, Sequelize) {
         await queryInterface.dropTable("disciplines");
     },
 };

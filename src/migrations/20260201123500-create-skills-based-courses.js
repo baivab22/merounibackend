@@ -1,7 +1,5 @@
-"use strict";
-
-module.exports = {
-    up: async (queryInterface, Sequelize) => {
+export default {
+    async up(queryInterface, Sequelize) {
         await queryInterface.createTable("skills_based_courses", {
             id: {
                 allowNull: false,
@@ -28,8 +26,8 @@ module.exports = {
             },
             status: {
                 type: Sequelize.ENUM("active", "inactive"),
-                defaultValue: "active",
                 allowNull: false,
+                defaultValue: "active",
             },
             price: {
                 type: Sequelize.DECIMAL(10, 2),
@@ -58,7 +56,7 @@ module.exports = {
         });
     },
 
-    down: async (queryInterface, Sequelize) => {
+    async down(queryInterface, Sequelize) {
         await queryInterface.dropTable("skills_based_courses");
     },
 };

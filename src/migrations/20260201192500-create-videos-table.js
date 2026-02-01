@@ -1,8 +1,6 @@
-"use strict";
-
-module.exports = {
-    up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable("media", {
+export default {
+    async up(queryInterface, Sequelize) {
+        await queryInterface.createTable("videos", {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -13,9 +11,22 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
+            slug: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                unique: true,
+            },
             yt_video_link: {
                 type: Sequelize.STRING,
                 allowNull: false,
+            },
+            featured_image: {
+                type: Sequelize.STRING,
+                allowNull: true,
+            },
+            description: {
+                type: Sequelize.TEXT,
+                allowNull: true,
             },
             createdAt: {
                 allowNull: false,
@@ -28,7 +39,7 @@ module.exports = {
         });
     },
 
-    down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable("media");
+    async down(queryInterface, Sequelize) {
+        await queryInterface.dropTable("videos");
     },
 };

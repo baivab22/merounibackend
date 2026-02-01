@@ -16,6 +16,10 @@ Discipline.init(
             allowNull: false,
             unique: true,
         },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
         slug: {
             type: DataTypes.STRING,
             allowNull: false,
