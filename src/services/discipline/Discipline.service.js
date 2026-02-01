@@ -1,6 +1,6 @@
-import slug from "slug";
 import { Op } from "sequelize";
 import Discipline from "../../models/discipline/Discipline.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class DisciplineService {
     async listDisciplines(query = {}) {
@@ -65,8 +65,8 @@ class DisciplineService {
 
     async createDiscipline(payload) {
         const { title, ...rest } = payload;
-        const slugs = slug(title);
-        return Discipline.create({ ...rest, title, slugs });
+        const slug = generateUniqueSlug(title);
+        return Discipline.create({ ...rest, title, slug });
     }
 
     async updateDiscipline(id, payload) {
@@ -80,9 +80,9 @@ class DisciplineService {
         const { title, ...rest } = payload;
         const updateData = { ...rest };
 
-        if (title) {
+        if (title && title !== discipline.title) {
             updateData.title = title;
-            updateData.slugs = slug(title);
+            updateData.slug = generateUniqueSlug(title);
         }
 
         await discipline.update(updateData);
