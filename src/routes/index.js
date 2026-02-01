@@ -117,4 +117,7 @@ router.use("/analytics", analyticsRoute);
 import configRoute from "./Config.route.js";
 router.use("/config", configRoute);
 
+import degreeRoute from "./Degree.route.js";
+router.use("/degree", degreeRoute);
+
 export default router;

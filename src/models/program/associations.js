@@ -5,6 +5,7 @@ import Faculty from "../faculty/Faculty.model.js";
 import Scholarship from "../scholarship/Scholarship.model.js";
 import College from "../college/College.model.js";
 import Level from "../level/Level.model.js";
+import Degree from "../degree/Degree.model.js";
 import Course from "../courses/Course.model.js";
 import { Exam } from "../exams/Exam.model.js";
 import User from "../users/User.model.js";
@@ -17,6 +18,10 @@ Faculty.hasMany(Program, { foreignKey: "faculty_id", as: "programs" });
 // Program belongs to Level
 Program.belongsTo(Level, { foreignKey: "level_id", as: "programlevel" });
 Level.hasMany(Program, { foreignKey: "level_id", as: "programs" });
+
+// Program belongs to Degree (optional)
+Program.belongsTo(Degree, { foreignKey: "degree_id", as: "programdegree" });
+Degree.hasMany(Program, { foreignKey: "degree_id", as: "programs" });
 
 // Program belongs to Scholarship (optional)
 Program.belongsTo(Scholarship, {
@@ -77,4 +82,4 @@ CollegeAddress.belongsToMany(Program, {
 });
 
 
-export { Program, Faculty, Scholarship, Level, Exam, User };
+export { Program, Faculty, Scholarship, Level, Degree, Exam, User };

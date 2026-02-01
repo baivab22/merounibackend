@@ -39,16 +39,7 @@ export const createOrUpdateProgramSchema = yup
           schema.required("Author is required for new programs"),
         otherwise: (schema) => schema.optional(),
       }),
-    faculty_id: yup
-      .number()
-      .integer()
-      .positive()
-      .when("id", {
-        is: (id) => !id,
-        then: (schema) =>
-          schema.required("Faculty ID is required for new programs"),
-        otherwise: (schema) => schema.optional(),
-      }),
+    faculty_id: yup.number().integer().positive().nullable().optional(),
     level_id: yup
       .number()
       .integer()
@@ -59,12 +50,23 @@ export const createOrUpdateProgramSchema = yup
           schema.required("Level ID is required for new programs"),
         otherwise: (schema) => schema.optional(),
       }),
+    degree_id: yup.number().integer().positive().nullable().optional(),
     duration: yup.string().optional(),
     credits: yup.number().integer().positive().optional(),
     language: yup.string().optional(),
     eligibility_criteria: yup.string().optional(),
     fee: yup.string().optional(),
-    scholarship_id: yup.number().integer().positive().nullable().optional(),
+    scholarship_id: yup
+      .number()
+      .integer()
+      .positive()
+      .nullable()
+      .transform((value, originalValue) => {
+        if (originalValue === "" || originalValue == null) return null;
+        const num = Number(originalValue);
+        return isNaN(num) ? null : num;
+      })
+      .optional(),
     curriculum: yup.string().optional(),
     learning_outcomes: yup.string().optional(),
     delivery_type: yup
@@ -76,7 +78,17 @@ export const createOrUpdateProgramSchema = yup
       .oneOf(["On-campus", "Remote", "Blended"])
       .optional(),
     careers: yup.string().optional(),
-    exam_id: yup.number().integer().positive().nullable().optional(),
+    exam_id: yup
+      .number()
+      .integer()
+      .positive()
+      .nullable()
+      .transform((value, originalValue) => {
+        if (originalValue === "" || originalValue == null) return null;
+        const num = Number(originalValue);
+        return isNaN(num) ? null : num;
+      })
+      .optional(),
     syllabus: yup
       .array()
       .of(

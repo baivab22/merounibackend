@@ -25,7 +25,7 @@ Program.init(
     },
     faculty_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     duration: {
       type: DataTypes.STRING,
@@ -48,6 +48,7 @@ Program.init(
     },
     scholarship_id: {
       type: DataTypes.INTEGER,
+      allowNull: true,
     },
     curriculum: {
       type: DataTypes.TEXT,
@@ -68,6 +69,17 @@ Program.init(
     },
     exam_id: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    degree_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "degrees",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     },
   },
   {

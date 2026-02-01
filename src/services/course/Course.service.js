@@ -8,6 +8,7 @@ import College from "../../models/college/College.model.js";
 import { University } from "../../models/university/University.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import Program from "../../models/program/Program.model.js";
+import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
 import Level from "../../models/level/Level.model.js";
 
 class CourseService {
@@ -140,21 +141,31 @@ class CourseService {
         ];
       }
 
-      include.push({
-        association: "syllabusEntries", // Course.hasMany(ProgramSyllabus, {as: 'syllabusEntries'})
+      const programInclude = {
+        model: Program,
+        as: "program",
+        where: Object.keys(programWhere).length > 0 ? programWhere : undefined,
         required: true,
-        include: [{
-          association: "program", // ProgramSyllabus.belongsTo(Program, {as: 'program'})
-          where: programWhere,
+        attributes: ["id", "title", "slugs", "delivery_type", "delivery_mode"],
+      };
+      if (level) {
+        programInclude.include = [{
+          model: Level,
+          as: "programlevel",
+          where: {
+            [Op.or]: [{ title: level }, { slugs: level }],
+          },
           required: true,
-          include: level ? [{
-            association: "programlevel", // Program.belongsTo(Level, {as: 'programlevel'})
-            where: {
-              [Op.or]: [{ title: level }, { slugs: level }],
-            },
-            required: true
-          }] : []
-        }]
+          attributes: ["id", "title", "slugs"],
+        }];
+      }
+
+      include.push({
+        model: ProgramSyllabus,
+        as: "syllabusEntries",
+        required: true,
+        attributes: [],
+        include: [programInclude],
       });
     }
 
@@ -165,6 +176,7 @@ class CourseService {
       limit,
       offset,
       order: [["createdAt", "DESC"]],
+      subQuery: false,
     });
 
     return {

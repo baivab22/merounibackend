@@ -9,6 +9,7 @@ import Course from "../../models/courses/Course.model.js";
 import Faculty from "../../models/faculty/Faculty.model.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import Level from "../../models/level/Level.model.js";
+import Degree from "../../models/degree/Degree.model.js";
 import { Exam } from "../../models/exams/Exam.model.js";
 import UserModel from "../../models/users/User.model.js";
 import College from "../../models/college/College.model.js";
@@ -124,6 +125,12 @@ class ProgramService {
         },
         { model: Level, as: "programlevel", attributes: ["title", "slugs"] },
         {
+          model: Degree,
+          as: "programdegree",
+          attributes: ["id", "title", "short_name", "slug"],
+          required: false,
+        },
+        {
           model: Scholarship,
           as: "programscholarship",
           attributes: ["name", "slugs"],
@@ -169,6 +176,7 @@ class ProgramService {
         duration,
         credits,
         level_id,
+        degree_id,
         language,
         eligibility_criteria,
         fee,
@@ -188,6 +196,7 @@ class ProgramService {
       await this.validateReferences({
         faculty_id,
         level_id,
+        degree_id,
         scholarship_id,
         exam_id,
         author,
@@ -207,20 +216,21 @@ class ProgramService {
             code,
             slugs: slug(title),
             author,
-            faculty_id,
+            faculty_id: faculty_id || null,
             duration,
             credits,
             level_id,
+            degree_id: degree_id || null,
             language,
             eligibility_criteria,
             fee,
-            scholarship_id,
+            scholarship_id: scholarship_id || null,
             curriculum,
             learning_outcomes,
             delivery_type,
             delivery_mode,
             careers,
-            exam_id,
+            exam_id: exam_id || null,
           },
           { transaction }
         );
@@ -240,20 +250,21 @@ class ProgramService {
             code,
             slugs: slug(title),
             author,
-            faculty_id,
+            faculty_id: faculty_id ?? null,
             duration,
             credits,
             level_id,
+            degree_id: degree_id ?? null,
             language,
             eligibility_criteria,
             fee,
-            scholarship_id,
+            scholarship_id: scholarship_id ?? null,
             curriculum,
             learning_outcomes,
             delivery_type,
             delivery_mode,
             careers,
-            exam_id,
+            exam_id: exam_id ?? null,
           },
           { where: { id: programId }, transaction }
         );
@@ -310,55 +321,23 @@ class ProgramService {
   async validateReferences({
     faculty_id,
     level_id,
+    degree_id,
     scholarship_id,
     exam_id,
     author,
   }) {
-    // Validate faculty_id
-    if (!faculty_id) {
-      const error = new Error("faculty_id is required");
-      error.status = 400;
-      throw error;
+    // Validate faculty_id only when provided
+    if (faculty_id != null && faculty_id !== "") {
+      const facultyIdNum = Number(faculty_id);
+      const facultyExists = await Faculty.findByPk(facultyIdNum);
+      if (!facultyExists) {
+        const error = new Error(
+          `Invalid faculty_id: ${facultyIdNum}. Faculty does not exist.`
+        );
+        error.status = 400;
+        throw error;
+      }
     }
-
-    const facultyIdNum = Number(faculty_id);
-    console.log(
-      `Checking faculty with ID: ${facultyIdNum} (original: ${faculty_id}, type: ${typeof faculty_id})`
-    );
-
-    // Try findByPk first, if it fails try findOne as fallback
-    let facultyExists = await Faculty.findByPk(facultyIdNum);
-
-    if (!facultyExists) {
-      // Try with findOne as fallback
-      facultyExists = await Faculty.findOne({
-        where: { id: facultyIdNum },
-      });
-    }
-
-    if (!facultyExists) {
-      // Try raw query to see if record exists
-      const [results] = await sequelize.query(
-        `SELECT id FROM faculty WHERE id = :id`,
-        {
-          replacements: { id: facultyIdNum },
-          type: sequelize.QueryTypes.SELECT,
-        }
-      );
-      console.log(`Raw query result for faculty ${facultyIdNum}:`, results);
-
-      console.error(`Faculty with ID ${facultyIdNum} not found via Sequelize`);
-      const error = new Error(
-        `Invalid faculty_id: ${facultyIdNum}. Faculty does not exist.`
-      );
-      error.status = 400;
-      throw error;
-    }
-
-    console.log(
-      `Faculty ${facultyIdNum} found successfully:`,
-      facultyExists.title
-    );
 
     // Validate level_id
     if (!level_id) {
@@ -375,6 +354,18 @@ class ProgramService {
       );
       error.status = 400;
       throw error;
+    }
+
+    // Validate degree_id (optional)
+    if (degree_id) {
+      const degreeExists = await Degree.findByPk(Number(degree_id));
+      if (!degreeExists) {
+        const error = new Error(
+          `Invalid degree_id: ${degree_id}. Degree does not exist.`
+        );
+        error.status = 400;
+        throw error;
+      }
     }
 
     // Validate scholarship_id (optional)
