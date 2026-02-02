@@ -14,7 +14,7 @@ Degree.init(
         },
         short_name: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         title: {
             type: DataTypes.STRING,
