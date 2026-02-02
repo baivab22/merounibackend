@@ -23,6 +23,23 @@ class ConsultancyController {
     }
   }
 
+  static async getMyConsultancy (req,res){
+    try {
+      const consultancy = await consultancyService.getMyConsultancy(
+        req.user.id
+      );
+      return res
+        .status(200)
+        .json({ message: "Consultancy retrieved", consultancy });
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
+
   static async getConsultancy(req, res) {
     try {
       const consultancy = await consultancyService.getConsultancy(

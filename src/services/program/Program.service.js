@@ -1,19 +1,19 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
 import { sequelize } from "../../config/database.config.js";
-import Program from "../../models/program/Program.model.js";
-import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
-import ProgramCollege from "../../models/program/ProgramCollege.model.js";
-import Course from "../../models/courses/Course.model.js";
-import Faculty from "../../models/faculty/Faculty.model.js";
-import Scholarship from "../../models/scholarship/Scholarship.model.js";
-import Level from "../../models/level/Level.model.js";
-import Degree from "../../models/degree/Degree.model.js";
-import { Exam } from "../../models/exams/Exam.model.js";
-import UserModel from "../../models/users/User.model.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
+import Course from "../../models/courses/Course.model.js";
+import Discipline from "../../models/discipline/Discipline.model.js";
+import Degree from "../../models/degree/Degree.model.js";
+import { Exam } from "../../models/exams/Exam.model.js";
+import Level from "../../models/level/Level.model.js";
+import Program from "../../models/program/Program.model.js";
+import ProgramCollege from "../../models/program/ProgramCollege.model.js";
+import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
+import Scholarship from "../../models/scholarship/Scholarship.model.js";
+import UserModel from "../../models/users/User.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class ProgramService {
 
@@ -25,6 +25,7 @@ class ProgramService {
     const {
       facultyId,
       levelId,
+      disciplineId,
       q,
       sortBy,
       sortOrder,
@@ -35,13 +36,11 @@ class ProgramService {
 
     console.log("[ProgramService] listPrograms query:", JSON.stringify(query, null, 2));
 
-    if (facultyId) {
-      whereConditions.faculty_id = facultyId;
-    }
-
     if (levelId) {
       whereConditions.level_id = levelId;
-
+    }
+    if (disciplineId) {
+      whereConditions.discipline_id = disciplineId;
     }
     if (q) {
       whereConditions[Op.or] = [
@@ -100,18 +99,12 @@ class ProgramService {
       attributes: {
         exclude: [
           "author",
-          "faculty_id",
           "level_id",
           "scholarship_id",
           "exam_id",
         ],
       },
       include: [
-        {
-          model: Faculty,
-          as: "programfaculty",
-          attributes: ["title", "slugs"],
-        },
         {
           model: ProgramSyllabus,
           as: "syllabus",
@@ -123,7 +116,7 @@ class ProgramService {
             },
           ],
         },
-        { model: Level, as: "programlevel", attributes: ["title", "slugs"] },
+        { model: Level, as: "programlevel", attributes: ["title", "slugs","id"] },
         {
           model: Degree,
           as: "programdegree",
@@ -133,9 +126,9 @@ class ProgramService {
         {
           model: Scholarship,
           as: "programscholarship",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slugs","id"],
         },
-        { model: Exam, as: "programexam", attributes: ["title", "slugs"] },
+        { model: Exam, as: "programexam", attributes: ["title", "slugs","id"] },
         {
           model: UserModel,
           as: "programauthorDetails",
@@ -144,12 +137,12 @@ class ProgramService {
         {
           model: College,
           as: "colleges",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slugs","id"],
         },
         {
           model: CollegeAddress,
           as: "collegesAddress",
-          attributes: ["country", "city", "state"],
+          attributes: ["country", "city", "state","id"],
         },
       ],
     });
@@ -172,7 +165,6 @@ class ProgramService {
         title,
         code,
         author,
-        faculty_id,
         duration,
         credits,
         level_id,
@@ -194,7 +186,6 @@ class ProgramService {
       let programId = id;
 
       await this.validateReferences({
-        faculty_id,
         level_id,
         degree_id,
         scholarship_id,
@@ -214,9 +205,8 @@ class ProgramService {
           {
             title,
             code,
-            slugs: slug(title),
+            slugs: generateUniqueSlug(title),
             author,
-            faculty_id: faculty_id || null,
             duration,
             credits,
             level_id,
@@ -244,27 +234,30 @@ class ProgramService {
           throw error;
         }
 
+        if (existingProgram.title !== title) {
+          existingProgram.slugs = generateUniqueSlug(title);
+        }
+
         await Program.update(
           {
             title,
             code,
-            slugs: slug(title),
+            slugs: generateUniqueSlug(title),
             author,
-            faculty_id: faculty_id ?? null,
             duration,
             credits,
             level_id,
-            degree_id: degree_id ?? null,
+            degree_id: degree_id || null,
             language,
             eligibility_criteria,
             fee,
-            scholarship_id: scholarship_id ?? null,
+            scholarship_id: scholarship_id || null,
             curriculum,
             learning_outcomes,
             delivery_type,
             delivery_mode,
             careers,
-            exam_id: exam_id ?? null,
+            exam_id: exam_id || null,
           },
           { where: { id: programId }, transaction }
         );
@@ -276,7 +269,9 @@ class ProgramService {
           transaction,
         });
 
-        const syllabusData = syllabus.map((item) => ({
+        const syllabusData = syllabus
+          .filter(item => item.course_id)
+          .map((item) => ({
           year: item.year,
           semester: item.semester,
           is_elective: item.is_elective || false,
@@ -319,26 +314,12 @@ class ProgramService {
   }
 
   async validateReferences({
-    faculty_id,
     level_id,
     degree_id,
     scholarship_id,
     exam_id,
     author,
   }) {
-    // Validate faculty_id only when provided
-    if (faculty_id != null && faculty_id !== "") {
-      const facultyIdNum = Number(faculty_id);
-      const facultyExists = await Faculty.findByPk(facultyIdNum);
-      if (!facultyExists) {
-        const error = new Error(
-          `Invalid faculty_id: ${facultyIdNum}. Faculty does not exist.`
-        );
-        error.status = 400;
-        throw error;
-      }
-    }
-
     // Validate level_id
     if (!level_id) {
       const error = new Error("level_id is required");
@@ -412,6 +393,7 @@ class ProgramService {
       error.status = 400;
       throw error;
     }
+
   }
 }
 

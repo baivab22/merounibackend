@@ -39,7 +39,6 @@ export const createOrUpdateProgramSchema = yup
           schema.required("Author is required for new programs"),
         otherwise: (schema) => schema.optional(),
       }),
-    faculty_id: yup.number().integer().positive().nullable().optional(),
     level_id: yup
       .number()
       .integer()

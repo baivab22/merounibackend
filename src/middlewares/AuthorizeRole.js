@@ -2,16 +2,18 @@ export const authorizeRole = (allowedRoles) => {
   return async (req, res, next) => {
     const user = req.user;
 
-    if (!user || !user.role) {
+    const roles = user.roles || user.role;
+
+    if (!user || !roles) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    console.log("Raw user role:", user.role); // Debugging
+    console.log("Raw user roles:", roles); // Debugging
 
     let userRoles;
     try {
-      // Parse role if it's stored as a JSON string
-      userRoles = typeof user.role === "string" ? JSON.parse(user.role) : user.role;
+      // Parse roles if stored as a JSON string
+      userRoles = typeof roles === "string" ? JSON.parse(roles) : roles;
     } catch (error) {
       return res.status(500).json({ message: "Invalid role format" });
     }

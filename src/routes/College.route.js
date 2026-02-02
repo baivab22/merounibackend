@@ -126,6 +126,26 @@ router.get(
 
 /**
  * @swagger
+ * /college/filter:
+ *   post:
+ *     summary: List all colleges with filtering via body
+ *     tags: [Colleges]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: List of colleges
+ */
+router.post(
+  "/filter",
+  CollegeController.listColleges
+);
+
+/**
+ * @swagger
  * /college/{slugs}:
  *   get:
  *     summary: Get college by slug

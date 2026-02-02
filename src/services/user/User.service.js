@@ -347,6 +347,51 @@ class UserService {
 
     return user;
   }
+
+   async createConsultancyCredentials(payload) {
+    const { firstName, lastName, email, password, phoneNo, consultancyId } =
+      payload;
+
+    if (!firstName || !lastName || !email || !password || !phoneNo) {
+      const error = new Error("All fields are required");
+      error.status = 400;
+      throw error;
+    }
+
+    // Check if user with email already exists
+    const existingUser = await UserModel.findOne({ where: { email } });
+    if (existingUser) {
+      const error = new Error("User with this email already exists");
+      error.status = 400;
+      throw error;
+    }
+
+    // Check if user with phone already exists
+    const existingPhone = await UserModel.findOne({ where: { phoneNo } });
+    if (existingPhone) {
+      const error = new Error("User with this phone number already exists");
+      error.status = 400;
+      throw error;
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user with consultancy role, created_by_admin flag, and consultancy_id
+    const user = await UserModel.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      phoneNo,
+      roles: { consultancy: true },
+      createdByAdmin: true,
+      consultancyId: consultancyId || null,
+    });
+
+    return user;
+  }
 }
 
 export default UserService;

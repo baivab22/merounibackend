@@ -167,6 +167,33 @@ class UserController {
       });
     }
   }
+
+  static async createConsultancyCredentials(req, res) {
+    try {
+      const user = await userService.createConsultancyCredentials(req.body);
+      return res.status(201).json({
+        message: "Consultancy credentials created successfully",
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phoneNo: user.phoneNo,
+          roles: user.roles,
+          createdByAdmin: user.createdByAdmin,
+          consultancyId: user.consultancyId,
+        },
+      });
+    } catch (error) {
+      console.error("Error in createCollegeCredentials:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message:
+          status === 500 ? `Server Error: ${error.message}` : error.message,
+      });
+    }
+  }
+
 }
 
 export default UserController;

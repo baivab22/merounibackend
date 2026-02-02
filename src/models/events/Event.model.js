@@ -51,6 +51,7 @@ Event.init(
     },
     description: {
       type: DataTypes.TEXT,
+      
     },
     content: {
       type: DataTypes.TEXT,

@@ -1,15 +1,15 @@
 import express from "express";
 
-import ConsultancyController from "../controllers/consultancy/Consultancy.controller.js";
-import { authenticateUser } from "../middlewares/Auth.middleware.js";
-import { authorizeRole } from "../middlewares/AuthorizeRole.js";
-import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import ConsultancyController from "../../controllers/consultancy/Consultancy.controller.js";
+import { authenticateUser } from "../../middlewares/Auth.middleware.js";
+import { authorizeRole } from "../../middlewares/AuthorizeRole.js";
+import { requestValidator } from "../../middlewares/RequestValidator.middleware.js";
 import {
   listConsultancyQuerySchema,
   consultancySlugParamSchema,
   createOrUpdateConsultancySchema,
   deleteConsultancyQuerySchema,
-} from "../validators/consultancy/Consultancy.validator.js";
+} from "../../validators/consultancy/Consultancy.validator.js";
 
 const route = express.Router();
 
@@ -43,6 +43,28 @@ route.get(
   "/",
   requestValidator(listConsultancyQuerySchema, "query"),
   ConsultancyController.listConsultancy,
+);
+
+/**
+ * @swagger
+ * /consultancy
+ *   get:
+ *     summary: Get my consultancy
+ *     tags: [Consultancy]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: My consultancy details
+ *       404:
+ *         description: Consultancy not found
+ */
+route.get(
+  "/me",
+  authenticateUser,
+  authorizeRole(["admin", "editor","consultancy"]),
+  ConsultancyController.getMyConsultancy,
 );
 
 /**
@@ -118,7 +140,7 @@ route.get(
 route.post(
   "/",
   authenticateUser,
-  authorizeRole(["admin", "editor"]),
+  authorizeRole(["admin", "editor","consultancy"]),
   requestValidator(createOrUpdateConsultancySchema, "body"),
   ConsultancyController.createOrUpdateConsultancy,
 );

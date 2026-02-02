@@ -29,6 +29,8 @@ class ExamService {
       sortOrder,
     } = query;
 
+    console.log(query,"queryqueryqueryqueryqueryqueryqueryqueryquery")
+
     const whereCondition = {};
     const include = [];
 
@@ -40,21 +42,21 @@ class ExamService {
       ];
     }
 
-    // Level filter (ID or Slug)
-    if (level) {
-      if (!isNaN(level)) {
-        whereCondition.level_id = parseInt(level, 10);
-      } else {
-        include.push({
-          model: Level,
-          as: "level",
-          where: { slugs: level },
-          attributes: ["id", "title"],
-        });
-      }
-    } else {
-      include.push({ model: Level, attributes: ["id", "title"], as: "level" });
-    }
+    // // Level filter (ID or Slug)
+    // if (level) {
+    //   if (!isNaN(level)) {
+    //     whereCondition.level_id = parseInt(level, 10);
+    //   } else {
+    //     include.push({
+    //       model: Level,
+    //       as: "level",
+    //       where: { slugs: level },
+    //       attributes: ["id", "title"],
+    //     });
+    //   }
+    // } else {
+    //   include.push({ model: Level, attributes: ["id", "title"], as: "level" });
+    // }
 
     // Affiliation filter (ID or Slug)
     if (affiliation) {

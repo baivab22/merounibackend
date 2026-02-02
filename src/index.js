@@ -1,23 +1,22 @@
-import "dotenv/config";
-import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import "dotenv/config";
+import express from "express";
 import envConfig from "./config/env.config.js";
 
 /**
  * import user defined components
  */
-import { logger } from "./config/logger.config.js";
 import { authenticate } from "./config/database.config.js";
 authenticate();
 
-import "./models/events/associations.js";
-import "./models/news/associations.js";
 import "./models/blogs/associations.js";
-import "./models/college/associations.js";
 import "./models/career/associations.js";
-import "./models/program/associations.js";
+import "./models/college/associations.js";
+import "./models/events/associations.js";
 import "./models/faculty/associations.js";
+import "./models/news/associations.js";
+import "./models/program/associations.js";
 import "./models/scholarship/associations.js";
 import "./models/vacancy/associations.js";
 

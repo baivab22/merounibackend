@@ -36,7 +36,7 @@ router.get("/search", HomeController.search);
 import userRoute from "./User.route.js";
 router.use("/users", userRoute);
 
-import consultancyRoute from "./Consultancy.route.js";
+import consultancyRoute from "./consultancy/Consultancy.route.js";
 router.use("/consultancy", consultancyRoute);
 
 import categoryRoute from "./Category.route.js";
@@ -117,7 +117,20 @@ router.use("/analytics", analyticsRoute);
 import configRoute from "./Config.route.js";
 router.use("/config", configRoute);
 
+import skillsBasedCourseRoute from "./SkillsBasedCourse.route.js";
+router.use("/skills-based-courses", skillsBasedCourseRoute);
+
+import disciplineRoute from "./Discipline.route.js";
+router.use("/discipline", disciplineRoute);
+
+import videoRoute from "./Video.route.js";
+router.use("/video", videoRoute);
+
 import degreeRoute from "./Degree.route.js";
 router.use("/degree", degreeRoute);
 
+import consultancyApplicationRoute from "./consultancy/ConsultancyApplication.route.js";
+router.use("/consultancy-application", consultancyApplicationRoute);
+
 export default router;
+

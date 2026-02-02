@@ -1,56 +1,77 @@
-import express from "express";
 
+import express from "express";
 import DegreeController from "../controllers/degree/Degree.controller.js";
-import { authenticateUser } from "../middlewares/Auth.middleware.js";
-import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  degreeSlugParamSchema,
-  degreeIdParamSchema,
-  createDegreeSchema,
-  updateDegreeSchema,
+    createDegreeSchema,
+    updateDegreeSchema,
 } from "../validators/degree/Degree.validator.js";
+import { authenticateUser } from "../middlewares/Auth.middleware.js";
+import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 
 const router = express.Router();
 
 /**
  * @swagger
- * /degree:
+ * tags:
+ *   name: Degrees
+ *   description: Degree management API
+ */
+
+/**
+ * @swagger
+ * /degrees:
  *   get:
- *     summary: List all degrees with pagination
+ *     summary: List all degrees
  *     tags: [Degrees]
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *           default: 1
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           default: 10
+ *         description: Items per page
  *       - in: query
  *         name: q
  *         schema:
  *           type: string
- *         description: Search query
+ *         description: Search query for name
  *     responses:
  *       200:
  *         description: List of degrees
  */
-router.get(
-  "/",
-  requestValidator(paginationSchema, "query"),
-  DegreeController.listDegrees
-);
+router.get("/", DegreeController.listDegrees);
 
 /**
  * @swagger
- * /degree/{slug}:
+ * /degrees/id/{id}:
  *   get:
- *     summary: Get degree by slug or id
+ *     summary: Get degree by ID
+ *     tags: [Degrees]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Degree ID
+ *     responses:
+ *       200:
+ *         description: Degree details
+ *       404:
+ *         description: Degree not found
+ */
+router.get("/id/:id", DegreeController.getDegreeById);
+
+/**
+ * @swagger
+ * /degrees/slug/{slug}:
+ *   get:
+ *     summary: Get degree by Slug
  *     tags: [Degrees]
  *     parameters:
  *       - in: path
@@ -58,27 +79,23 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
+ *         description: Degree Slug
  *     responses:
  *       200:
  *         description: Degree details
  *       404:
  *         description: Degree not found
  */
-router.get(
-  "/:slug",
-  requestValidator(degreeSlugParamSchema, "params"),
-  DegreeController.getDegree
-);
+router.get("/:slug", DegreeController.getDegreeBySlug);
 
 /**
  * @swagger
- * /degree:
+ * /degrees:
  *   post:
- *     summary: Create a degree
+ *     summary: Create a new degree
  *     tags: [Degrees]
  *     security:
  *       - bearerAuth: []
- *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -86,65 +103,61 @@ router.get(
  *           schema:
  *             type: object
  *             required:
- *               - short_name
- *               - title
+ *               - name
  *             properties:
- *               cover_image:
+ *               name:
  *                 type: string
- *                 format: uri
- *               short_name:
+ *               description:
  *                 type: string
- *               title:
+ *               featured_image:
  *                 type: string
  *     responses:
  *       201:
- *         description: Degree created
- *       400:
- *         description: Bad request
+ *         description: Degree created successfully
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  */
 router.post(
-  "/",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
-  requestValidator(createDegreeSchema, "body"),
-  DegreeController.createDegree
+    "/",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidator(createDegreeSchema),
+    DegreeController.createDegree
 );
 
 /**
  * @swagger
- * /degree/{id}:
- *   put:
+ * /degrees/{id}:
+ *   patch:
  *     summary: Update a degree
  *     tags: [Degrees]
  *     security:
  *       - bearerAuth: []
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *         description: Degree ID
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               cover_image:
+ *               name:
  *                 type: string
- *                 format: uri
- *               short_name:
+ *               description:
  *                 type: string
- *               title:
+ *               featured_image:
  *                 type: string
  *     responses:
  *       200:
- *         description: Degree updated
+ *         description: Degree updated successfully
  *       401:
  *         description: Unauthorized
  *       403:
@@ -153,32 +166,31 @@ router.post(
  *         description: Degree not found
  */
 router.put(
-  "/:id",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
-  requestValidator(degreeIdParamSchema, "params"),
-  requestValidator(updateDegreeSchema, "body"),
-  DegreeController.updateDegree
+    "/:id",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidator(updateDegreeSchema),
+    DegreeController.updateDegree
 );
 
 /**
  * @swagger
- * /degree/{id}:
+ * /degrees/{id}:
  *   delete:
  *     summary: Delete a degree
  *     tags: [Degrees]
  *     security:
  *       - bearerAuth: []
- *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
+ *         description: Degree ID
  *     responses:
  *       200:
- *         description: Degree deleted
+ *         description: Degree deleted successfully
  *       401:
  *         description: Unauthorized
  *       403:
@@ -187,11 +199,10 @@ router.put(
  *         description: Degree not found
  */
 router.delete(
-  "/:id",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
-  requestValidator(degreeIdParamSchema, "params"),
-  DegreeController.deleteDegree
+    "/:id",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    DegreeController.deleteDegree
 );
 
 export default router;

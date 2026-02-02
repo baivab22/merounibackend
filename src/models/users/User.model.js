@@ -55,6 +55,7 @@ UserModel.init(
             "editor",
             "student",
             "institution",
+            "consultancy",
           ];
           const keys = Object.keys(value || {});
           const isValid = keys.every((role) => allowedRoles.includes(role));
@@ -89,6 +90,11 @@ UserModel.init(
       type: DataTypes.INTEGER,
       allowNull: true,
       field: "college_id",
+    },
+    consultancyId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "consultancy_id",
     },
     createdAt: {
       type: DataTypes.DATE,

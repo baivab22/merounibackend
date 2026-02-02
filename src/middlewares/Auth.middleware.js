@@ -48,7 +48,10 @@ export const authenticateUser = async (req, res, next) => {
             lastName: user.last_name,
             email: user.email,
             phoneNo: user.phone_no,
-            role: user.roles,
+            roles: user.roles,
+            role: user.roles, // Keep 'role' for backward compatibility
+            collegeId: user.collegeId,
+            consultancyId: user.consultancyId,
           },
         },
         ACCESS_TOKEN,
@@ -72,7 +75,10 @@ export const authenticateUser = async (req, res, next) => {
         lastName: user.last_name,
         email: user.email,
         phoneNo: user.phone_no,
-        role: user.roles,
+        roles: user.roles,
+        role: user.roles, // Keep 'role' for backward compatibility
+        collegeId: user.collegeId,
+        consultancyId: user.consultancyId,
       };
       return next();
     } catch (error) {

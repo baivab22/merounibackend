@@ -71,7 +71,10 @@ class AuthController {
           lastName: user.lastName,
           email: user.email,
           phoneNo: user.phoneNo,
-          role: user.roles,
+          roles: user.roles,
+          role: user.roles, // Keep 'role' for backward compatibility
+          collegeId: user.collegeId,
+          consultancyId: user.consultancyId,
         },
       };
 

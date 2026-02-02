@@ -1,7 +1,8 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
+import Discipline from "../discipline/Discipline.model.js";
 
-class Program extends Model {}
+class Program extends Model { }
 
 Program.init(
   {
@@ -22,10 +23,6 @@ Program.init(
     author: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    faculty_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
     },
     duration: {
       type: DataTypes.STRING,

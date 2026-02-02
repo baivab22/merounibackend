@@ -1,15 +1,12 @@
 import { Op } from "sequelize";
 import slug from "slug";
 
-import Course from "../../models/courses/Course.model.js";
-import UserModel from "../../models/users/User.model.js";
-import FacultyModel from "../../models/faculty/Faculty.model.js";
 import College from "../../models/college/College.model.js";
-import { University } from "../../models/university/University.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
-import Program from "../../models/program/Program.model.js";
-import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
-import Level from "../../models/level/Level.model.js";
+import Course from "../../models/courses/Course.model.js";
+import FacultyModel from "../../models/faculty/Faculty.model.js";
+import { University } from "../../models/university/University.model.js";
+import UserModel from "../../models/users/User.model.js";
 
 class CourseService {
   async listCourses(query = {}) {
@@ -100,73 +97,6 @@ class CourseService {
         { city: { [Op.like]: `%${district}%` } },
         { state: { [Op.like]: `%${district}%` } },
       ];
-    }
-
-    // We join Course -> College via the through table associations if they exist, 
-    // but Course.model.js doesn't show them. They are in associations.js.
-    // Assuming 'colleges' is the alias for the belongsToMany.
-    include.push({
-      model: College,
-      as: "colleges",
-      where: Object.keys(collegeWhere).length > 0 ? collegeWhere : undefined,
-      required: !!hasCollegeFilter,
-      include: [
-        {
-          model: University,
-          as: "university",
-          where: Object.keys(universityWhere).length > 0 ? universityWhere : undefined,
-          required: foreignAffiliation === "true",
-        },
-        {
-          model: CollegeAddress,
-          as: "collegeAddress",
-          where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-          required: !!district,
-        }
-      ]
-    });
-
-    // Program related filters (Level, Degree, Distant Learning)
-    // Course -> ProgramSyllabus -> Program
-    const hasProgramFilter = level || degree || distantLearning;
-    if (hasProgramFilter) {
-      const programWhere = {};
-      if (degree) {
-        programWhere.title = { [Op.like]: `%${degree}%` };
-      }
-      if (distantLearning === "true") {
-        programWhere[Op.or] = [
-          { delivery_mode: "Remote" },
-          { delivery_type: "Online" },
-        ];
-      }
-
-      const programInclude = {
-        model: Program,
-        as: "program",
-        where: Object.keys(programWhere).length > 0 ? programWhere : undefined,
-        required: true,
-        attributes: ["id", "title", "slugs", "delivery_type", "delivery_mode"],
-      };
-      if (level) {
-        programInclude.include = [{
-          model: Level,
-          as: "programlevel",
-          where: {
-            [Op.or]: [{ title: level }, { slugs: level }],
-          },
-          required: true,
-          attributes: ["id", "title", "slugs"],
-        }];
-      }
-
-      include.push({
-        model: ProgramSyllabus,
-        as: "syllabusEntries",
-        required: true,
-        attributes: [],
-        include: [programInclude],
-      });
     }
 
     const { count: totalCount, rows: items } = await Course.findAndCountAll({

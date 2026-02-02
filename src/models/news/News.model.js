@@ -1,8 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-import Category from "../category/Category.model.js";
-import User from "../users/User.model.js";
 
 class News extends Model { }
 

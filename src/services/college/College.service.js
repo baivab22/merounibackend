@@ -13,6 +13,7 @@ import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
 import { University } from "../../models/university/University.model.js";
+import Degree from "../../models/degree/Degree.model.js";
 
 class CollegeService {
   async createOrUpdateCollege(payload) {
@@ -415,9 +416,19 @@ class CollegeService {
     const country = query.country || "";
     const state = query.state || "";
     const city = query.city || "";
-    const degree = query.discipline || "";
+    const degree = query.degree || query.discipline || "";
     const university = query.university || "";
-    const programId = query.program_id ? parseInt(query.program_id, 10) : null;
+    let programIds = [];
+    if (query.program_id) {
+      if (Array.isArray(query.program_id)) {
+        programIds = query.program_id.map((id) => parseInt(id, 10));
+      } else if (typeof query.program_id === "string") {
+        programIds = query.program_id.split(",").map((id) => parseInt(id.trim(), 10));
+      } else {
+        programIds = [parseInt(query.program_id, 10)];
+      }
+    }
+    const programIdFilter = programIds.length > 0 ? { [Op.in]: programIds } : null;
 
     const offset = (page - 1) * limit;
 
@@ -436,32 +447,96 @@ class CollegeService {
       whereCondition.pinned = pinned === "true" ? 1 : 0;
     }
 
+    const type = query.type || "";
+    if (type && (Array.isArray(type) ? type.length > 0 : type !== "")) {
+      let types = [];
+      if (Array.isArray(type)) {
+        types = type;
+      } else if (typeof type === "string") {
+        types = type.split(",").map((t) => t.trim());
+      }
+      if (types.length > 0) {
+        whereCondition.institute_type = { [Op.in]: types };
+      }
+    }
+
     const addressCondition = {};
-    if (country) {
-      const countries = country.split(",").map((c) => c.trim());
-      addressCondition.country = {
-        [Op.or]: countries.map((c) => ({ [Op.like]: `%${c}%` })),
-      };
+    if (state && (Array.isArray(state) ? state.length > 0 : state !== "")) {
+      let states = [];
+      if (Array.isArray(state)) {
+        states = state;
+      } else if (typeof state === "string") {
+        states = state.split(",").map((s) => s.trim());
+      }
+      
+      if (states.length > 0) {
+        addressCondition.state = {
+          [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
+        };
+      }
     }
-    if (state) {
-      const states = state.split(",").map((s) => s.trim());
-      addressCondition.state = {
-        [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
-      };
-    }
-    if (city) {
-      const cities = city.split(",").map((c) => c.trim());
-      addressCondition.city = {
-        [Op.or]: cities.map((c) => ({ [Op.like]: `%${c}%` })),
-      };
+
+    if (city && (Array.isArray(city) ? city.length > 0 : city !== "")) {
+      let cities = [];
+      if (Array.isArray(city)) {
+        cities = city;
+      } else if (typeof city === "string") {
+        cities = city.split(",").map((c) => c.trim());
+      }
+      
+      if (cities.length > 0) {
+        addressCondition.city = {
+          [Op.or]: cities.map((c) => ({ [Op.like]: `%${c}%` })),
+        };
+      }
     }
 
     const degreeCondition = {};
-    if (degree) {
-      const degrees = degree.split(",").map((d) => d.trim());
-      degreeCondition.title = {
-        [Op.or]: degrees.map((d) => ({ [Op.like]: `%${d}%` })),
-      };
+    if (degree && (Array.isArray(degree) ? degree.length > 0 : degree !== "")) {
+      let degrees = [];
+      if (Array.isArray(degree)) {
+        degrees = degree;
+      } else if (typeof degree === "string") {
+        degrees = degree.split(",").map((d) => d.trim());
+      }
+
+      if (degrees.length > 0) {
+        const ids = degrees
+          .filter((d) => d && !isNaN(d))
+          .map((d) => parseInt(d, 10));
+        const titles = degrees.filter((d) => d && isNaN(d));
+
+        const orConditions = [];
+        if (ids.length > 0) {
+          // Find Degree IDs that have any of these Discipline IDs in their disciplines JSON
+          const matchingDegrees = await Degree.findAll({
+            where: {
+              [Op.or]: ids.map(id => 
+                Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(id.toString()))
+              )
+            },
+            attributes: ['id'],
+            raw: true
+          });
+          const degreeIds = matchingDegrees.map(d => d.id);
+          
+          if (degreeIds.length > 0) {
+            orConditions.push({ degree_id: { [Op.in]: degreeIds } });
+          } else {
+            // If no degrees match, we ensure no programs are found
+            orConditions.push({ degree_id: -1 });
+          }
+        }
+        if (titles.length > 0) {
+          orConditions.push(
+            ...titles.map((t) => ({ title: { [Op.like]: `%${t}%` } }))
+          );
+        }
+
+        if (orConditions.length > 0) {
+          degreeCondition[Op.or] = orConditions;
+        }
+      }
     }
 
     const { count: totalCount, rows: items } = await College.findAndCountAll({
@@ -486,7 +561,7 @@ class CollegeService {
           model: CollegeCourse,
           as: "collegeCourses",
           attributes: { exclude: ["college_id"] }, // Include course_id for filtering
-          required: !!programId, // Make required when filtering by program_id
+          required: !!programIdFilter || Object.keys(degreeCondition).length > 0, // Make required when filtering by program_id or degree
           include: [
             {
               model: Program,
@@ -498,8 +573,8 @@ class CollegeService {
                   Object.assign(conditions, degreeCondition);
                 }
                 // Filter by program_id if provided
-                if (programId) {
-                  conditions.id = programId;
+                if (programIdFilter) {
+                  conditions.id = programIdFilter;
                 }
                 return Object.keys(conditions).length ? conditions : undefined;
               })(),
@@ -514,13 +589,26 @@ class CollegeService {
           model: University,
           as: "university",
           attributes: ["fullname", "slugs"],
-          where: university
-            ? {
-              slugs: {
-                [Op.like]: `%${university}%`,
-              },
+          where: (() => {
+            if (!university || (Array.isArray(university) && university.length === 0)) return undefined;
+            let universities = [];
+            if (Array.isArray(university)) {
+              universities = university;
+            } else if (typeof university === "string") {
+              universities = university.split(",").map((u) => u.trim());
             }
-            : undefined,
+
+            if (universities.length === 0) return undefined;
+
+            return {
+              [Op.or]: universities.map((u) => ({
+                [Op.or]: [
+                  { slugs: { [Op.like]: `%${u}%` } },
+                  { fullname: { [Op.like]: `%${u}%` } }
+                ]
+              }))
+            };
+          })(),
         },
       ],
     });

@@ -1,26 +1,18 @@
-import * as yup from "yup";
-import { paginationSchema, idParamSchema } from "../common/common.validator.js";
 
-export { paginationSchema };
-
-export const degreeSlugParamSchema = yup.object({
-  slug: yup.string().trim().required(),
-});
-
-export const degreeIdParamSchema = idParamSchema;
+import yup from "yup";
 
 export const createDegreeSchema = yup.object({
-  cover_image: yup.string().trim().max(500).nullable().optional(),
-  short_name: yup.string().trim().min(1).required("Short name is required"),
-  title: yup.string().trim().min(1).required("Title is required"),
+    short_name: yup.string().required("Short name is required"),
+    title: yup.string().required("title is required"),
+    description: yup.string().nullable().optional(),
+    featured_image: yup.string().url("Must be a valid URL").nullable().optional(),
+    disciplines: yup.array().nullable().optional(),
 });
 
-export const updateDegreeSchema = yup
-  .object({
-    cover_image: yup.string().trim().max(500).nullable().optional(),
-    short_name: yup.string().trim().min(1).optional(),
-    title: yup.string().trim().min(1).optional(),
-  })
-  .test("at-least-one", "At least one field must be provided", (value) => {
-    return value && Object.keys(value).length > 0;
-  });
+export const updateDegreeSchema = yup.object({
+    short_name: yup.string().optional(),
+    title: yup.string().optional(),
+    description: yup.string().nullable().optional(),
+    featured_image: yup.string().url("Must be a valid URL").nullable().optional(),
+    disciplines: yup.array().nullable().optional(),
+});
