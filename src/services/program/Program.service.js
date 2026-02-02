@@ -1,19 +1,19 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
 import { sequelize } from "../../config/database.config.js";
-import Program from "../../models/program/Program.model.js";
-import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
-import ProgramCollege from "../../models/program/ProgramCollege.model.js";
-import Course from "../../models/courses/Course.model.js";
-import Faculty from "../../models/faculty/Faculty.model.js";
-import Scholarship from "../../models/scholarship/Scholarship.model.js";
-import Level from "../../models/level/Level.model.js";
-import { Exam } from "../../models/exams/Exam.model.js";
-import UserModel from "../../models/users/User.model.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
+import Course from "../../models/courses/Course.model.js";
 import Discipline from "../../models/discipline/Discipline.model.js";
+import { Exam } from "../../models/exams/Exam.model.js";
+import Faculty from "../../models/faculty/Faculty.model.js";
+import Level from "../../models/level/Level.model.js";
+import Program from "../../models/program/Program.model.js";
+import ProgramCollege from "../../models/program/ProgramCollege.model.js";
+import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
+import Scholarship from "../../models/scholarship/Scholarship.model.js";
+import UserModel from "../../models/users/User.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class ProgramService {
 
@@ -112,12 +112,12 @@ class ProgramService {
         {
           model: Faculty,
           as: "programfaculty",
-          attributes: ["title", "slugs"],
+          attributes: ["title", "slugs","id"],
         },
         {
           model: Discipline,
           as: "discipline",
-          attributes: ["title", "slugs"],
+          attributes: ["title", "slug","id"],
         },
         {
           model: ProgramSyllabus,
@@ -130,13 +130,13 @@ class ProgramService {
             },
           ],
         },
-        { model: Level, as: "programlevel", attributes: ["title", "slugs"] },
+        { model: Level, as: "programlevel", attributes: ["title", "slugs","id"] },
         {
           model: Scholarship,
           as: "programscholarship",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slugs","id"],
         },
-        { model: Exam, as: "programexam", attributes: ["title", "slugs"] },
+        { model: Exam, as: "programexam", attributes: ["title", "slugs","id"] },
         {
           model: UserModel,
           as: "programauthorDetails",
@@ -145,12 +145,12 @@ class ProgramService {
         {
           model: College,
           as: "colleges",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slugs","id"],
         },
         {
           model: CollegeAddress,
           as: "collegesAddress",
-          attributes: ["country", "city", "state"],
+          attributes: ["country", "city", "state","id"],
         },
       ],
     });
@@ -215,7 +215,7 @@ class ProgramService {
           {
             title,
             code,
-            slugs: slug(title),
+            slugs: generateUniqueSlug(title),
             author,
             faculty_id,
             duration,
@@ -245,11 +245,15 @@ class ProgramService {
           throw error;
         }
 
+        if (existingProgram.title !== title) {
+          existingProgram.slugs = generateUniqueSlug(title);
+        }
+
         await Program.update(
           {
             title,
             code,
-            slugs: slug(title),
+            slugs: generateUniqueSlug(title),
             author,
             faculty_id,
             duration,

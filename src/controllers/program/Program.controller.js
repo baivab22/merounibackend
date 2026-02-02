@@ -27,6 +27,7 @@ class ProgramController {
       const program = await programService.getProgram(req.params.slugs);
       return res.status(200).json(program);
     } catch (error) {
+      console.log(error,"ERORR")
       const status = error.status || 500;
       return res.status(status).json({
         error: status === 500 ? "Server error" : error.message,

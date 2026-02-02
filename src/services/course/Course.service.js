@@ -99,63 +99,6 @@ class CourseService {
       ];
     }
 
-    // We join Course -> College via the through table associations if they exist, 
-    // but Course.model.js doesn't show them. They are in associations.js.
-    // Assuming 'colleges' is the alias for the belongsToMany.
-    include.push({
-      model: College,
-      as: "colleges",
-      where: Object.keys(collegeWhere).length > 0 ? collegeWhere : undefined,
-      required: !!hasCollegeFilter,
-      include: [
-        {
-          model: University,
-          as: "university",
-          where: Object.keys(universityWhere).length > 0 ? universityWhere : undefined,
-          required: foreignAffiliation === "true",
-        },
-        {
-          model: CollegeAddress,
-          as: "collegeAddress",
-          where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-          required: !!district,
-        }
-      ]
-    });
-
-    // Program related filters (Level, Degree, Distant Learning)
-    // Course -> ProgramSyllabus -> Program
-    const hasProgramFilter = level || degree || distantLearning;
-    if (hasProgramFilter) {
-      const programWhere = {};
-      if (degree) {
-        programWhere.title = { [Op.like]: `%${degree}%` };
-      }
-      if (distantLearning === "true") {
-        programWhere[Op.or] = [
-          { delivery_mode: "Remote" },
-          { delivery_type: "Online" },
-        ];
-      }
-
-      include.push({
-        association: "syllabusEntries", // Course.hasMany(ProgramSyllabus, {as: 'syllabusEntries'})
-        required: true,
-        include: [{
-          association: "program", // ProgramSyllabus.belongsTo(Program, {as: 'program'})
-          where: programWhere,
-          required: true,
-          include: level ? [{
-            association: "programlevel", // Program.belongsTo(Level, {as: 'programlevel'})
-            where: {
-              [Op.or]: [{ title: level }, { slugs: level }],
-            },
-            required: true
-          }] : []
-        }]
-      });
-    }
-
     const { count: totalCount, rows: items } = await Course.findAndCountAll({
       where: whereCondition,
       include: include.length > 0 ? include : undefined,
