@@ -90,6 +90,11 @@ UserModel.init(
       allowNull: true,
       field: "college_id",
     },
+    consultencyId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "consultency_id",
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

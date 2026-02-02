@@ -18,6 +18,7 @@ import {
   applyForAgentRoleSchema,
   reviewAgentRequestSchema,
   createCollegeCredentialsSchema,
+  createConsultencyCredentialsSchema
 } from "../validators/user/User.validator.js";
 
 const route = express.Router();
@@ -360,5 +361,47 @@ route.post(
   requestValidator(createCollegeCredentialsSchema, "body"),
   UserController.createCollegeCredentials
 );
+
+/**
+ * @swagger
+ * /users/consultency-credentials:
+ *   post:
+ *     summary: Create consultency credentials for a user
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - user_id
+ *               - consultency_id
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *               consultency_id:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Credentials created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+route.post(
+  "/consultency-credentials",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(createConsultencyCredentialsSchema, "body"),
+  UserController.createConsultencyCredentials
+);
+
 
 export default route;
