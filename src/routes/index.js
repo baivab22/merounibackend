@@ -126,4 +126,8 @@ router.use("/discipline", disciplineRoute);
 import videoRoute from "./Video.route.js";
 router.use("/video", videoRoute);
 
+import degreeRoute from "./Degree.route.js";
+router.use("/degree", degreeRoute);
+
 export default router;
+

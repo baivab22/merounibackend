@@ -51,9 +51,9 @@ class SkillsBasedCourseService {
         return course;
     }
 
-    async getCourseBySlug(slugs) {
+    async getCourseBySlug(slug) {
         const course = await SkillsBasedCourse.findOne({
-            where: { slugs },
+            where: { slug },
         });
 
         if (!course) {
@@ -67,15 +67,8 @@ class SkillsBasedCourseService {
 
     async createCourse(payload) {
         const { title, ...rest } = payload;
-
-        if (!title) {
-            const error = new Error("Title is required");
-            error.status = 400;
-            throw error;
-        }
-
-        const slugs = await generateUniqueSlug(title);
-        return SkillsBasedCourse.create({ ...rest, title, slugs });
+        const slug =  generateUniqueSlug(title);
+        return SkillsBasedCourse.create({ ...rest, title, slug });
     }
 
     async updateCourse(id, payload) {
@@ -89,9 +82,9 @@ class SkillsBasedCourseService {
         const { title, ...rest } = payload;
         const updateData = { ...rest };
 
-        if (title) {
+        if (title && title !== course.title) {
             updateData.title = title;
-            updateData.slugs = await generateUniqueSlug(title);
+            updateData.slug = generateUniqueSlug(title);
         }
 
         await course.update(updateData);

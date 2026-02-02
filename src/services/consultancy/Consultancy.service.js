@@ -53,7 +53,6 @@ class ConsultancyService {
       attributes: ["consultancyId", "roles"],
       raw: true,
     });
-    console.log(usersWithConsultancyId,"usersWithConsultancyIdusersWithConsultancyId")
 
     const consultanciesWithAccounts = new Set(
       usersWithConsultancyId

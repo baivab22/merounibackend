@@ -36,7 +36,7 @@ class SkillsBasedCourseController {
     static async getCourseBySlug(req, res) {
         try {
             const course = await skillsBasedCourseService.getCourseBySlug(
-                req.params.slugs
+                req.params.slug
             );
             return res.status(200).json(course);
         } catch (error) {
