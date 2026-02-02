@@ -9,6 +9,7 @@ import {
   createContactSchema,
   contactEmailQuerySchema,
   idQuerySchema,
+  listContactSchema,
 } from "../validators/contact/Contact.validator.js";
 
 const route = express.Router();
@@ -30,13 +31,25 @@ const route = express.Router();
  *         schema:
  *           type: integer
  *           default: 10
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search by name, email, subject, or message
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [new, in_progress, resolved]
  *     responses:
  *       200:
  *         description: List of contact submissions
  */
 route.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(listContactSchema, "query"),
   ContactController.listContacts
 );
 
@@ -108,6 +121,54 @@ route.post(
   "/",
   requestValidator(createContactSchema, "body"),
   ContactController.addContact
+);
+
+/**
+ * @swagger
+ * /contact-us/update-status:
+ *   patch:
+ *     summary: Update contact status (Admin only)
+ *     tags: [Contact]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [new, in_progress, resolved]
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ */
+import { updateContactStatusSchema } from "../validators/contact/Contact.validator.js";
+
+route.patch(
+  "/update-status",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(idQuerySchema, "query"),
+  requestValidator(updateContactStatusSchema, "body"),
+  ContactController.updateStatus
 );
 
 /**

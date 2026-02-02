@@ -51,6 +51,24 @@ class ContactController {
     }
   }
 
+  static async updateStatus(req, res) {
+    try {
+      const { id } = req.query;
+      const { status } = req.body;
+      const data = await contactService.updateStatus(id, status);
+
+      return res.status(200).json({
+        message: "Status updated",
+        data,
+      });
+    } catch (error) {
+      console.log(error,"YOYOYO")
+      return res.status(error.status || 500).json({
+        message: error.message || "Internal Server Error",
+      });
+    }
+  }
+
   static async deleteContact(req, res) {
     try {
       await contactService.deleteContact(req.query.id);

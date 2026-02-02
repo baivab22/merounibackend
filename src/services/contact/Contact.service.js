@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import ContactUs from "../../models/contactUs/Contact.model.js";
 
 class ContactService {
@@ -6,7 +7,24 @@ class ContactService {
     const limit = parseInt(query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
+    const { q, status } = query;
+    const where = {};
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (q) {
+      where[Op.or] = [
+        { fullname: { [Op.like]: `%${q}%` } },
+        { email: { [Op.like]: `%${q}%` } },
+        { subject: { [Op.like]: `%${q}%` } },
+        { message: { [Op.like]: `%${q}%` } },
+      ];
+    }
+
     const { count: totalCount, rows: items } = await ContactUs.findAndCountAll({
+      where,
       limit,
       offset,
       distinct: true,
@@ -30,6 +48,19 @@ class ContactService {
 
   async createContact(data) {
     return ContactUs.create(data);
+  }
+
+  async updateStatus(id, status) {
+    const contact = await ContactUs.findByPk(id);
+    console.log(contact,"OWOWOW")
+    if (!contact) {
+      const error = new Error("Contact not found");
+      error.status = 404;
+      throw error;
+    }
+
+    contact.status = status;
+    return contact.save();
   }
 
   async deleteContact(id) {

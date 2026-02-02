@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Config from "../../models/config/Config.model.js";
 
 class ConfigService {
@@ -6,7 +7,14 @@ class ConfigService {
     const limit = parseInt(query.limit, 10) || 50;
     const offset = (page - 1) * limit;
 
+    const where = {};
+    if (query.types) {
+      const typesList = query.types.split(",").map((t) => t.trim());
+      where.type = { [Op.in]: typesList };
+    }
+
     const { count: totalCount, rows: items } = await Config.findAndCountAll({
+      where,
       limit,
       offset,
       order: [["type", "ASC"]],

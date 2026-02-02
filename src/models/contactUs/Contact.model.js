@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 
 import { sequelize } from "../../config/database.config.js";
 
-class ContactUs extends Model {}
+class ContactUs extends Model { }
 
 ContactUs.init(
   {

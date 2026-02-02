@@ -8,6 +8,7 @@ import {
   createConfigSchema,
   configTypeParamSchema,
   updateConfigSchema,
+  listConfigSchema,
 } from "../validators/config/Config.validator.js";
 
 const router = express.Router();
@@ -30,6 +31,11 @@ const router = express.Router();
  *         name: limit
  *         schema:
  *           type: integer
+ *       - in: query
+ *         name: types
+ *         schema:
+ *           type: string
+ *         description: Comma-separated list of types to filter (e.g. type1,type2)
  *     responses:
  *       200:
  *         description: List of configs
@@ -37,12 +43,14 @@ const router = express.Router();
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
+ *       500:
+ *         description: Server error
  */
 router.get(
   "/",
   authenticateUser,
   authorizeRole(["admin"]),
-  requestValidator(paginationSchema, "query"),
+  requestValidator(listConfigSchema, "query"),
   ConfigController.list
 );
 
