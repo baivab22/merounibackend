@@ -67,6 +67,16 @@ export const createOrUpdateProgramSchema = yup
     scholarship_id: yup.number().integer().positive().nullable().optional(),
     curriculum: yup.string().optional(),
     learning_outcomes: yup.string().optional(),
+    discipline_id: yup
+      .number()
+      .integer()
+      .positive()
+      .when("id", {
+        is: (id) => !id,
+        then: (schema) =>
+          schema.required("Discipline ID is required for new programs"),
+        otherwise: (schema) => schema.optional(),
+      }),
     delivery_type: yup
       .string()
       .oneOf(["Full-time", "Part-time", "Online", "Hybrid"])
