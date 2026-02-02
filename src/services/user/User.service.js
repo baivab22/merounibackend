@@ -348,8 +348,8 @@ class UserService {
     return user;
   }
 
-   async createConsultencyCredentials(payload) {
-    const { firstName, lastName, email, password, phoneNo, consultencyId } =
+   async createConsultancyCredentials(payload) {
+    const { firstName, lastName, email, password, phoneNo, consultancyId } =
       payload;
 
     if (!firstName || !lastName || !email || !password || !phoneNo) {
@@ -378,16 +378,16 @@ class UserService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user with institution role, created_by_admin flag, and college_id
+    // Create user with consultancy role, created_by_admin flag, and consultancy_id
     const user = await UserModel.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
       phoneNo,
-      roles: { institution: true },
+      roles: { consultancy: true },
       createdByAdmin: true,
-      consultencyId: consultencyId || null,
+      consultancyId: consultancyId || null,
     });
 
     return user;

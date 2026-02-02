@@ -69,13 +69,13 @@ export const createCollegeCredentialsSchema = yup
   })
   .required();
 
-export const createConsultencyCredentialsSchema = yup
+export const createConsultancyCredentialsSchema = yup
   .object({
     firstName: yup.string().trim().min(2).required(),
     lastName: yup.string().trim().min(2).required(),
     email: yup.string().email().trim().required(),
     password: yup.string().min(6).required(),
     phoneNo: yup.string().trim().required(),
-    consultencyId: yup.number().integer().positive().nullable().optional(),
+    consultancyId: yup.number().integer().positive().nullable().optional(),
   })
   .required();

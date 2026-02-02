@@ -168,11 +168,11 @@ class UserController {
     }
   }
 
-  static async createConsultencyCredentials(req, res) {
+  static async createConsultancyCredentials(req, res) {
     try {
-      const user = await userService.createConsultencyCredentials(req.body);
+      const user = await userService.createConsultancyCredentials(req.body);
       return res.status(201).json({
-        message: "Consultency credentials created successfully",
+        message: "Consultancy credentials created successfully",
         user: {
           id: user.id,
           firstName: user.firstName,
@@ -181,7 +181,7 @@ class UserController {
           phoneNo: user.phoneNo,
           roles: user.roles,
           createdByAdmin: user.createdByAdmin,
-          collegeId: user.collegeId,
+          consultancyId: user.consultancyId,
         },
       });
     } catch (error) {

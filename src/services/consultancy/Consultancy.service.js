@@ -3,6 +3,7 @@ import slug from "slug";
 
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
 import Course from "../../models/courses/Course.model.js";
+import UserModel from "../../models/users/User.model.js";
 
 class ConsultancyService {
   async listConsultancy(query = {}) {
@@ -31,6 +32,8 @@ class ConsultancyService {
       includeOptions[0].where = { id: query.courseId };
     }
 
+
+
     const { count: totalCount, rows: items } =
       await Consultancy.findAndCountAll({
         where: whereCondition,
@@ -40,9 +43,48 @@ class ConsultancyService {
         offset,
         order: [["createdAt", sort]],
       });
+    const consultancyIds = items.map((consultancy) => consultancy.id);
+      
+
+    const usersWithConsultancyId = await UserModel.findAll({
+      where: {
+        consultancyId: { [Op.in]: consultancyIds },
+      },
+      attributes: ["consultancyId", "roles"],
+      raw: true,
+    });
+    console.log(usersWithConsultancyId,"usersWithConsultancyIdusersWithConsultancyId")
+
+    const consultanciesWithAccounts = new Set(
+      usersWithConsultancyId
+        .filter((user) => {
+          try {
+            const roles =
+              typeof user.roles === "string"
+                ? JSON.parse(user.roles)
+                : user.roles;
+            return roles?.consultancy === true && user.consultancyId;
+          } catch {
+            return false;
+          }
+        })
+        .map((user) => user.consultancyId)
+        .filter(Boolean)
+    );
+
+
+
+    // Add has_account field to each consultancy item
+    const itemsWithAccountStatus = items.map((consultancy) => {
+      const consultancyData = consultancy.toJSON ? consultancy.toJSON() : consultancy;
+      return {
+        ...consultancyData,
+        has_account: consultanciesWithAccounts.has(consultancy.id),
+      };
+    });
 
     return {
-      items,
+      items: itemsWithAccountStatus,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
