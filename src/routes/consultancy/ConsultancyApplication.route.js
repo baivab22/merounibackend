@@ -5,8 +5,7 @@ import { authorizeRole } from "../../middlewares/AuthorizeRole.js";
 
 import { requestValidator } from "../../middlewares/RequestValidator.middleware.js";
 import {
-  applyConsultancySchema,
-  updateConsultancyApplicationStatusSchema,
+  updateConsultancyApplicationStatusSchema
 } from "../../validators/consultancy/ConsultancyApplication.validator.js";
 
 const router = express.Router();
@@ -16,7 +15,7 @@ router.post(
   "/apply",
   authenticateUser,
   authorizeRole(["admin", "editor", "student", "agent"]),
-  requestValidator(applyConsultancySchema, "body"),
+  // requestValidator(applyConsultancySchema, "body"),
   ConsultancyApplicationController.apply
 );
 
@@ -59,6 +58,14 @@ router.patch(
   authorizeRole(["admin", "editor", "consultancy"]),
   requestValidator(updateConsultancyApplicationStatusSchema, "body"),
   ConsultancyApplicationController.updateStatus
+);
+
+// Delete application
+router.delete(
+  "/:id",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "consultancy", "student", "agent"]),
+  ConsultancyApplicationController.deleteApplication
 );
 
 export default router;

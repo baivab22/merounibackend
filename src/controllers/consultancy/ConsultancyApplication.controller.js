@@ -88,6 +88,20 @@ class ConsultancyApplicationController {
       });
     }
   }
+
+  static async deleteApplication(req, res) {
+    try {
+      const { id } = req.params;
+      const result = await applicationService.deleteApplication(id, req.user);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
 }
 
 export default ConsultancyApplicationController;
