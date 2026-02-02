@@ -60,7 +60,7 @@ class ConsultancyApplicationController {
 
   static async getAllApplications(req, res) {
     try {
-      const applications = await applicationService.listAllApplications();
+      const applications = await applicationService.listAllApplications(req.query);
       return res.status(200).json(applications);
     } catch (error) {
       console.error(error);

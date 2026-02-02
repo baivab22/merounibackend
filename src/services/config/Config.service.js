@@ -74,6 +74,16 @@ class ConfigService {
     });
     return config;
   }
+
+  async deleteByType(type) {
+    const config = await Config.findOne({ where: { type } });
+    if (!config) {
+      const error = new Error("Config not found");
+      error.status = 404;
+      throw error;
+    }
+    await config.destroy();
+  }
 }
 
 export default ConfigService;

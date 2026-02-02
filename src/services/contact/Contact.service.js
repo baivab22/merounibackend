@@ -51,16 +51,8 @@ class ContactService {
   }
 
   async updateStatus(id, status) {
-    const contact = await ContactUs.findByPk(id);
-    console.log(contact,"OWOWOW")
-    if (!contact) {
-      const error = new Error("Contact not found");
-      error.status = 404;
-      throw error;
-    }
-
-    contact.status = status;
-    return contact.save();
+    const contact = await ContactUs.update({status},{where:{id}});
+    return contact;
   }
 
   async deleteContact(id) {

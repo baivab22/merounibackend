@@ -2,6 +2,7 @@ import ConsultancyApplication from "../../models/consultancy/ConsultancyApplicat
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
 import User from "../../models/users/User.model.js";
 import { roleHelper } from "../../utils/RoleHelper.js";
+import { Op } from "sequelize";
 
 class ConsultancyApplicationService {
   async applyToConsultancy(payload, user) {
@@ -80,8 +81,35 @@ class ConsultancyApplicationService {
     });
   }
 
-  async listAllApplications() {
-    return await ConsultancyApplication.findAll({
+
+  async listAllApplications(query) {
+  const { page = 1, limit = 10, search, status, consultancy_id } = query;
+
+  const pageNumber = Number(page);
+  const pageLimit = Number(limit);
+  const offset = (pageNumber - 1) * pageLimit;
+
+  const where = {};
+
+  if (search) {
+    where[Op.or] = [
+      { student_name: { [Op.like]: `%${search}%` } },
+      { student_email: { [Op.like]: `%${search}%` } },
+      { student_phone_no: { [Op.like]: `%${search}%` } },
+    ];
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (consultancy_id) {
+    where.consultancy_id = consultancy_id;
+  }
+
+  const { rows, count: totalCount } =
+    await ConsultancyApplication.findAndCountAll({
+      where,
       include: [
         {
           model: Consultancy,
@@ -91,12 +119,25 @@ class ConsultancyApplicationService {
         {
           model: User,
           as: "student",
-          attributes: ["firstName", "lastName", "email", "phoneNo"],
+          attributes: ["id","firstName", "lastName", "email", "phoneNo"],
         },
       ],
       order: [["createdAt", "DESC"]],
+      limit: pageLimit,
+      offset,
     });
-  }
+
+  return {
+    data: rows,
+    pagination: {
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalCount / pageLimit),
+      limit: pageLimit,
+      totalCount,
+    },
+  };
+}
+
 
   async updateStatus(id, status, remarks = null, user) {
     // Check if user has permission (consultancy owner or admin)

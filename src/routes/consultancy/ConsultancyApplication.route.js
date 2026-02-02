@@ -3,13 +3,20 @@ import ConsultancyApplicationController from "../../controllers/consultancy/Cons
 import { authenticateUser } from "../../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../../middlewares/AuthorizeRole.js";
 
+import { requestValidator } from "../../middlewares/RequestValidator.middleware.js";
+import {
+  applyConsultancySchema,
+  updateConsultancyApplicationStatusSchema,
+} from "../../validators/consultancy/ConsultancyApplication.validator.js";
+
 const router = express.Router();
 
 // Apply to consultancy
 router.post(
   "/apply",
   authenticateUser,
-  authorizeRole(["admin", "editor","student","agent"]),
+  authorizeRole(["admin", "editor", "student", "agent"]),
+  requestValidator(applyConsultancySchema, "body"),
   ConsultancyApplicationController.apply
 );
 
@@ -25,7 +32,7 @@ router.get(
 router.get(
   "/user/applications",
   authenticateUser,
-  authorizeRole(["admin", "editor","student","agent"]),
+  authorizeRole(["admin", "editor", "student", "agent"]),
   ConsultancyApplicationController.getUserApplications
 );
 
@@ -50,6 +57,7 @@ router.patch(
   "/:id/status",
   authenticateUser,
   authorizeRole(["admin", "editor", "consultancy"]),
+  requestValidator(updateConsultancyApplicationStatusSchema, "body"),
   ConsultancyApplicationController.updateStatus
 );
 

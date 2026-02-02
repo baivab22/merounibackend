@@ -84,6 +84,23 @@ class ConfigController {
         .json({ message: "Server error", error: error.message });
     }
   }
+
+  static async deleteByType(req, res) {
+    try {
+      await configService.deleteByType(req.params.type);
+      return res.status(200).json({
+        message: "Config deleted",
+      });
+    } catch (error) {
+      if (error.status === 404) {
+        return res.status(404).json({ message: error.message });
+      }
+      console.error("Error deleting config:", error);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
 }
 
 export default ConfigController;

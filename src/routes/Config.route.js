@@ -161,4 +161,33 @@ router.put(
   ConfigController.updateByType
 );
 
+/**
+ * @swagger
+ * /config/{type}:
+ *   delete:
+ *     summary: Delete config by type (admin)
+ *     tags: [Config]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Config deleted
+ *       404:
+ *         description: Config not found
+ */
+router.delete(
+  "/:type",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(configTypeParamSchema, "params"),
+  ConfigController.deleteByType
+);
+
 export default router;
