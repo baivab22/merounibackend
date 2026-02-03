@@ -1,12 +1,18 @@
 export default {
     async up(queryInterface, Sequelize) {
-        await queryInterface.addColumn("degrees", "short_name", {
-            type: Sequelize.STRING,
-            allowNull: true,
-        });
+        const tableInfo = await queryInterface.describeTable("degrees");
+        if (!tableInfo.short_name) {
+            await queryInterface.addColumn("degrees", "short_name", {
+                type: Sequelize.STRING,
+                allowNull: true,
+            });
+        }
     },
 
     async down(queryInterface, Sequelize) {
-        await queryInterface.removeColumn("degrees", "short_name");
+        const tableInfo = await queryInterface.describeTable("degrees");
+        if (tableInfo.short_name) {
+            await queryInterface.removeColumn("degrees", "short_name");
+        }
     },
 };

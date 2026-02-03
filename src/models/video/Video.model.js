@@ -28,11 +28,6 @@ Video.init(
             type: DataTypes.STRING,
             allowNull: true,
         },
-        status: {
-            type: DataTypes.ENUM("active", "inactive"),
-            defaultValue: "active",
-            allowNull: false,
-        },
         description: {
             type: DataTypes.TEXT,
             allowNull: true,
