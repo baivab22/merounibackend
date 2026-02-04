@@ -1,8 +1,8 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
 import VacancyModel from "../../models/vacancy/Vacancy.model.js";
 import UserModel from "../../models/users/User.model.js";
+import {generateUniqueSlug} from "../../utils/SlugHelper.js";
 
 class VacancyService {
   async listVacancies(query = {}) {
@@ -77,7 +77,7 @@ class VacancyService {
       description,
       content,
     } = data;
-    const slugs = slug(title);
+    const slugs = generateUniqueSlug(title);
 
     return VacancyModel.create({
       title,
@@ -98,11 +98,13 @@ class VacancyService {
       throw error;
     }
 
-    const slugs = data.title ? slug(data.title) : vacancy.slugs;
+    if (vacancy.title !== data.title) {
+      data.slugs = generateUniqueSlug(data.title);
+    }
 
     await vacancy.update({
       title: data.title || vacancy.title,
-      slugs,
+      slugs: data.slugs || vacancy.slugs,
       author_id: data.author_id || vacancy.author_id,
       associated_organization_name:
         data.associated_organization_name !== undefined

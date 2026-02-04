@@ -1,9 +1,9 @@
 import { Op } from "sequelize";
-import slugify from "slug";
 
 import Blog from "../../models/blogs/Blog.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class BlogService {
   async listBlogs(query = {}) {
@@ -148,7 +148,7 @@ class BlogService {
   async createBlog(data) {
     return Blog.create({
       ...data,
-      slug: slugify(data.title),
+      slug: generateUniqueSlug(data.title),
     });
   }
 
@@ -162,7 +162,7 @@ class BlogService {
 
     let updatedSlug = blog.slug;
     if (data.title && data.title !== blog.title) {
-      updatedSlug = slugify(data.title);
+      updatedSlug = generateUniqueSlug(data.title);
     }
 
     const [updatedRows] = await Blog.update(

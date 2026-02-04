@@ -1,8 +1,8 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
 import CareerModel from "../../models/career/Career.model.js";
 import UserModel from "../../models/users/User.model.js";
+import {generateUniqueSlug} from "../../utils/SlugHelper.js";
 
 class CareerService {
   async listCareers(query = {}) {
@@ -71,7 +71,7 @@ class CareerService {
       content,
       status,
     } = data;
-    const slugs = slug(title);
+    const slugs = generateUniqueSlug(title);
 
     return CareerModel.create({
       title,
@@ -91,12 +91,13 @@ class CareerService {
       error.status = 404;
       throw error;
     }
-
-    const slugs = data.title ? slug(data.title) : career.slugs;
+    if (data.title && data.title !== career.title) {
+      data.slugs = generateUniqueSlug(data.title);
+    }
 
     await career.update({
       title: data.title || career.title,
-      slugs,
+      slugs: data.slugs || career.slugs,
       author_id: data.author_id || career.author_id,
       description: data.description || career.description,
       content: data.content || career.content,

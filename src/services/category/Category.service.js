@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 import Category from "../../models/category/Category.model.js";
 
 class CategoryService {
@@ -51,7 +51,7 @@ class CategoryService {
 
     await Category.create({
       title,
-      slugs: slug(title),
+      slugs: generateUniqueSlug(title),
       description,
       author,
     });
@@ -68,7 +68,7 @@ class CategoryService {
 
     let updatedSlug = category.slugs;
     if (data.title && data.title !== category.title) {
-      updatedSlug = slug(data.title);
+      updatedSlug = generateUniqueSlug(data.title);
     }
 
     const [updatedCount] = await Category.update(

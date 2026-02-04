@@ -58,7 +58,6 @@ class BlogController {
     static async createBlog(req, res) {
         try {
             const newBlog = await blogService.createBlog(req.body);
-
             return res.status(201).json({ message: "Blog created", blog: newBlog });
         } catch (error) {
             console.error("Error creating blog:", error);

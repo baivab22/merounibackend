@@ -1,5 +1,5 @@
 import { Op, Sequelize } from "sequelize";
-import slug from "slug";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
@@ -65,9 +65,23 @@ class CollegeService {
         throw error;
       }
 
-      const slugs = slug(collegeName);
+      // const slugs = slug(collegeName);
 
       if (!collegeId) {
+        const collageData = await College.findOne({
+          where: { name: collegeName },
+          transaction,
+        });
+        if (collageData) {
+          const error = new Error("College already exists");
+          error.status = 400;
+          throw error;
+        } 
+        let slugs  = collegeData.slugs;
+        if (collageData.name != collegeName) {
+          slugs = generateUniqueSlug(collegeName);  
+        }
+        
         const newCollege = await College.create(
           {
             name: collegeName,
@@ -90,6 +104,7 @@ class CollegeService {
         );
         collegeId = newCollege.id;
       } else {
+        const slugs = generateUniqueSlug(collegeName);
         const updateData = {
           slugs,
           institute_type,
