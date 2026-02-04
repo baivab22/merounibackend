@@ -57,6 +57,10 @@ export const University = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    logo: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "university",

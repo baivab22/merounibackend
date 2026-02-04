@@ -13,6 +13,7 @@ export const listConsultancyQuerySchema = paginationSchema.shape({
     .oneOf(["ASC", "DESC", "asc", "desc"])
     .transform((value) => (value ? value.toUpperCase() : "DESC"))
     .default("DESC"),
+  courseId: yup.number().integer().positive().optional(),
 });
 
 export const consultancySlugParamSchema = yup.object({

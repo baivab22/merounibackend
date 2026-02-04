@@ -12,6 +12,7 @@ import {
   UniversityProgram,
 } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class UniversityService {
   async listUniversities(query = {}) {
@@ -143,38 +144,49 @@ class UniversityService {
         members,
         assets,
         gallery,
+        logo, // Add logo here
       } = payload;
 
-      // Validate fullname exists
+      // Validate fullname
       if (!fullname || fullname.trim() === "") {
         const error = new Error("University name (fullname) is required");
         error.status = 400;
         throw error;
       }
 
-      const slugs = slug(fullname);
-
       let university;
 
       if (id) {
-        await University.update(
-          {
-            fullname,
-            slugs,
-            country,
-            state,
-            city,
-            street,
-            postal_code,
-            author_id,
-            date_of_establish,
-            type_of_institute,
-            description,
-          },
-          { where: { id }, transaction }
-        );
         university = await University.findByPk(id, { transaction });
+
+        if (!university) {
+          const error = new Error("University not found");
+          error.status = 404;
+          throw error;
+        }
+
+        if (university.fullname !== fullname) {
+          university.slugs = await generateUniqueSlug(fullname);
+        }
+
+        university.fullname = fullname;
+        university.country = country;
+        university.state = state;
+        university.city = city;
+        university.street = street;
+        university.postal_code = postal_code;
+        university.author_id = author_id;
+        university.date_of_establish = date_of_establish;
+        university.type_of_institute = type_of_institute;
+        university.description = description;
+        university.logo = logo; // Update logo
+
+        await university.save({ transaction });
+
       } else {
+        // 🔹 CREATE
+        const slugs = await generateUniqueSlug(fullname);
+
         university = await University.create(
           {
             fullname,
@@ -188,15 +200,13 @@ class UniversityService {
             date_of_establish,
             type_of_institute,
             description,
+            logo, // Add logo
           },
           { transaction }
         );
       }
 
-      console.log(
-        "createOrUpdateUniversity: contact payload:",
-        JSON.stringify(contact)
-      );
+      // 🔹 Related data (NO guards)
       await this.upsertContact(university.id, contact, transaction);
       await this.syncLevels(university.id, levels, transaction);
       await this.syncPrograms(university.id, programs, transaction);
@@ -206,11 +216,13 @@ class UniversityService {
 
       await transaction.commit();
       return university.id;
+
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
   }
+
 
   async deleteUniversity(id) {
     await sequelize.query(`DELETE FROM university WHERE id=?`, {

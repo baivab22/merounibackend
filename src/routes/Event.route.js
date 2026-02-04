@@ -9,6 +9,7 @@ import {
   eventSlugParamSchema,
   createOrUpdateEventSchema,
   deleteEventQuerySchema,
+  eventListAllQuerySchema
 } from "../validators/event/Event.validator.js";
 
 const router = express.Router();
@@ -43,7 +44,7 @@ const router = express.Router();
  */
 router.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(eventListAllQuerySchema, "query"),
   EventController.listEvents
 );
 

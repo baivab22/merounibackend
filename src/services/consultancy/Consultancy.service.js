@@ -19,6 +19,8 @@ class ConsultancyService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
+
+    console.log(query,"query.courseIdquery.courseId")
     const includeOptions = [
       {
         model: Course,
