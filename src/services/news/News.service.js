@@ -1,11 +1,12 @@
 import { Op } from "sequelize";
-import slugify from "slug";
+
 
 import News from "../../models/news/News.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
 import CollegeModel from "../../models/college/College.model.js";
 
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 class NewsService {
   async listNews(query = {}) {
     const page = parseInt(query.page, 10) || 1;
@@ -13,44 +14,26 @@ class NewsService {
     const offset = (page - 1) * limit;
 
     const search = query.q || "";
-    const author = query.author || query.author_id;
-    const categoryFilter = query.category_title || query.category || query.category_id;
-    const collegeId = query.collegeId || query.college_id;
-    const status = query.status || "published";
-    const visibility = query.visibility || "public";
+    const categoryId = query.category_id;
+    const collegeId = query.college_id;
+    const status = query.status
 
-    let categoryItem;
-    if (categoryFilter && isNaN(categoryFilter)) {
-      categoryItem = await Category.findOne({
-        where: {
-          [Op.or]: [{ title: categoryFilter }, { slugs: categoryFilter }],
-        },
-      });
 
-      if (!categoryItem) {
-        const error = new Error("Category Not Found");
-        error.status = 404;
-        throw error;
-      }
-    }
+
 
     const whereCondition = {
-      status,
-      visibility,
     };
+    if (status) {
+      whereCondition.status = status;
+    }
 
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
-    if (author) {
-      whereCondition.author = author;
-    }
 
-    if (categoryItem) {
-      whereCondition.category = categoryItem.id;
-    } else if (categoryFilter && !isNaN(categoryFilter)) {
-      whereCondition.category = categoryFilter;
+    if (categoryId) {
+      whereCondition.category = categoryId;
     }
 
     if (collegeId) {
@@ -179,7 +162,7 @@ class NewsService {
       author: author || author_id,
       category: category_id || null,
       college_id: college_id || null,
-      slug: slugify(title),
+      slug: generateUniqueSlug(title),
     });
   }
 
@@ -194,7 +177,7 @@ class NewsService {
     const { title, author, author_id, category, category_id, college_id, ...rest } = data;
     let updatedSlug = news.slug;
     if (title && title !== news.title) {
-      updatedSlug = slugify(title);
+      updatedSlug = generateUniqueSlug(title);
     }
 
     await News.update(

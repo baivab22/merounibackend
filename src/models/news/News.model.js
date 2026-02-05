@@ -64,11 +64,6 @@ News.init(
       allowNull: false,
       defaultValue: "draft",
     },
-    visibility: {
-      type: DataTypes.ENUM("public", "private"),
-      allowNull: false,
-      defaultValue: "public",
-    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

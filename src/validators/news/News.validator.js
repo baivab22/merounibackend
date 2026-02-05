@@ -20,7 +20,6 @@ export const createNewsSchema = yup.object({
   featuredImage: yup.string().trim().required("Featured image is required"),
   college_id: yup.number().integer().positive().nullable(),
   status: yup.string().oneOf(["draft", "published", "archived"]).default("draft"),
-  visibility: yup.string().oneOf(["public", "private"]).default("public"),
 });
 
 export const updateNewsParamsSchema = yup.object({
@@ -36,7 +35,6 @@ export const updateNewsBodySchema = yup
     featuredImage: yup.string().trim(),
     college_id: yup.number().integer().positive().nullable(),
     status: yup.string().oneOf(["draft", "published", "archived"]),
-    visibility: yup.string().oneOf(["public", "private"]),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;
