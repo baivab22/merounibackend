@@ -144,7 +144,7 @@ class UniversityService {
         members,
         assets,
         gallery,
-        logo, // Add logo here
+        logo,
       } = payload;
 
       // Validate fullname
@@ -375,7 +375,7 @@ class UniversityService {
         ...member,
       })),
       { transaction }
-    );
+    );    
   }
 
   async upsertAssets(universityId, assets, transaction) {

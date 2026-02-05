@@ -8,7 +8,7 @@ import {
     requestValidatorMultiple,
 } from "../middlewares/RequestValidator.middleware.js";
 import {
-    paginationSchema,
+    blogListQuerySchema,
     blogSlugParamSchema,
     createBlogSchema,
     updateBlogQuerySchema,
@@ -53,7 +53,7 @@ const route = express.Router();
  */
 route.get(
     "/",
-    requestValidator(paginationSchema, "query"),
+    requestValidator(blogListQuerySchema, "query"),
     BlogController.listBlogs
 );
 

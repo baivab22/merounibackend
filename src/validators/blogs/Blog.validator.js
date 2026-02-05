@@ -6,6 +6,13 @@ import {
 
 export { paginationSchema, slugParamSchema };
 
+export const blogListQuerySchema = paginationSchema.shape({
+status: yup
+  .string()
+  .oneOf(["draft", "published", "archived"])
+  .optional(),
+})
+
 export const createBlogSchema = yup.object({
     title: yup.string().required("Title is required"),
     category: yup.number().required("Category is required"),
@@ -17,7 +24,6 @@ export const createBlogSchema = yup.object({
     author: yup.number().optional(),
     reactions: yup.object().optional(),
     status: yup.string().optional(),
-    visibility: yup.string().optional(),
 });
 
 export const updateBlogQuerySchema = yup.object({
@@ -36,7 +42,6 @@ export const updateBlogBodySchema = yup
         author: yup.number(),
         reactions: yup.object(),
         status: yup.string(),
-        visibility: yup.string(),
     })
     .test("at-least-one", "At least one field must be provided", (value) => {
         return value && Object.keys(value).length > 0;

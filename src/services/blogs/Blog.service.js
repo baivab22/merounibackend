@@ -12,46 +12,22 @@ class BlogService {
     const offset = (page - 1) * limit;
 
     const search = query.q || "";
-    const categoryFilter = query.category_title || query.category;
-    const authorId = query.author_id;
-    const is_featured = query.is_featured;
-    const status = query.status || "published";
-    const visibility = query.visibility || "public";
+    const categoryId = query.category_id;
+    const status = query.status;
 
-    let categoryItem;
-    if (categoryFilter) {
-      categoryItem = await Category.findOne({
-        where: {
-          [Op.or]: [{ title: categoryFilter }, { slugs: categoryFilter }],
-        },
-      });
-
-      if (!categoryItem) {
-        const error = new Error("Category Not Found");
-        error.status = 404;
-        throw error;
-      }
-    }
 
     const whereCondition = {
-      status,
-      visibility,
     };
 
+    if (status) {
+      whereCondition.status = status;
+    }
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
-    if (categoryItem) {
-      whereCondition.category = categoryItem.id;
-    }
-
-    if (typeof is_featured !== "undefined") {
-      whereCondition.is_featured = is_featured;
-    }
-
-    if (authorId) {
-      whereCondition.author_id = authorId;
+    if (categoryId) {
+      whereCondition.category = categoryId;
     }
 
     const { count: totalCount, rows: items } = await Blog.findAndCountAll({
