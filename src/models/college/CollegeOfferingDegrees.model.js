@@ -1,11 +1,11 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
-import Program from "../courses/Course.model.js";
+import Degree from "../degree/Degree.model.js";
 
-class CollegeCourse extends Model {}
+class CollegeOfferingDegrees extends Model {}
 
-CollegeCourse.init(
+CollegeOfferingDegrees.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     college_id: {
@@ -14,26 +14,18 @@ CollegeCourse.init(
       references: { model: College, key: "id" },
       onDelete: "CASCADE",
     },
-    course_id: {
+    degree_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: Program, key: "id" },
+      references: { model: Degree, key: "id" },
       onDelete: "CASCADE",
     },
   },
-  { sequelize, modelName: "college_course", timestamps: false }
+  { 
+    sequelize, 
+    modelName: "college_offering_degrees", 
+    timestamps: true 
+  }
 );
 
-College.belongsToMany(Program, {
-  through: CollegeCourse,
-  foreignKey: "college_id",
-  as: "courses",
-});
-Program.belongsToMany(College, {
-  through: CollegeCourse,
-  foreignKey: "course_id",
-  as: "colleges",
-});
-
-
-export default CollegeCourse;
+export default CollegeOfferingDegrees;

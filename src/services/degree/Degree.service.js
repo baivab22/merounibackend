@@ -1,6 +1,8 @@
 import { Op, Sequelize } from "sequelize";
 import Degree from "../../models/degree/Degree.model.js";
 import Program from "../../models/program/Program.model.js";
+import College from "../../models/college/College.model.js";
+import { University, UniversityProgram } from "../../models/university/University.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class DegreeService {
@@ -13,7 +15,10 @@ class DegreeService {
         const whereCondition = {};
 
         if (q) {
-            whereCondition.title = { [Op.like]: `%${q}%` };
+            whereCondition[Op.or] = [
+                { title: { [Op.like]: `%${q}%` } },
+                { short_name: { [Op.like]: `%${q}%` } }
+            ];
         }
 
         const disciplineId = query.discipline_id;
@@ -30,10 +35,21 @@ class DegreeService {
             }
 
             if (disciplineIds.length > 0) {
-                const orConditions = disciplineIds.map(id => 
-                    Sequelize.where(Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(id.toString())), true)
+                const disciplineConditions = disciplineIds.map(id =>
+                    Sequelize.where(Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(Number(id))), true)
                 );
-                whereCondition[Op.or] = orConditions;
+                
+                // If we already have a search query (q), we need to combine it with discipline filters using Op.and
+                if (q) {
+                    const searchOrCondition = whereCondition[Op.or];
+                    delete whereCondition[Op.or];
+                    whereCondition[Op.and] = [
+                        { [Op.or]: searchOrCondition },
+                        { [Op.or]: disciplineConditions }
+                    ];
+                } else {
+                    whereCondition[Op.or] = disciplineConditions;
+                }
             }
         }
 
@@ -77,7 +93,32 @@ class DegreeService {
                     model: Program,
                     as: "programs",
                     attributes: ["id", "title", "slugs", "duration", "fee", "credits"],
+                    include: [
+                        {
+                            model: College,
+                            as: "colleges",
+                            attributes: ["id", "name", "slugs", "college_logo"],
+                            through: { attributes: [] }
+                        },
+                        {
+                            model: UniversityProgram,
+                            as: "university_programs",
+                            include: [
+                                {
+                                    model: University,
+                                    as: "university",
+                                    attributes: ["id", "fullname", "slugs"]
+                                }
+                            ]
+                        }
+                    ]
                 },
+                {
+                    model: College,
+                    as: "colleges",
+                    attributes: ["id", "name", "slugs", "college_logo"],
+                    through: { attributes: [] }
+                }
             ],
         });
 

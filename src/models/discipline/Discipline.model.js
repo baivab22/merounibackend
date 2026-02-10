@@ -20,6 +20,10 @@ Discipline.init(
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        content: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
         slug: {
             type: DataTypes.STRING,
             allowNull: false,

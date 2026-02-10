@@ -19,6 +19,7 @@ import "./models/news/associations.js";
 import "./models/program/associations.js";
 import "./models/scholarship/associations.js";
 import "./models/vacancy/associations.js";
+import "./models/search/SearchTerm.model.js";
 
 const app = express();
 

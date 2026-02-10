@@ -29,6 +29,10 @@ Degree.init(
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        content: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
         featured_image: {
             type: DataTypes.STRING,
             allowNull: true,

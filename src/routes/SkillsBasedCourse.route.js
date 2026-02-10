@@ -177,12 +177,12 @@ router.put(
 
 /**
  * @swagger
- * /skills-based-courses:
+ * /skills-based-courses/{id}:
  *   delete:
  *     summary: Delete a skills based course
  *     tags: [SkillsBasedCourses]
  *     parameters:
- *       - in: query
+ *       - in: path
  *         name: id
  *         required: true
  *         schema:
@@ -193,6 +193,6 @@ router.put(
  *       500:
  *         description: Server error
  */
-router.delete("/", SkillsBasedCourseController.deleteCourse);
+router.delete("/:id", SkillsBasedCourseController.deleteCourse);
 
 export default router;

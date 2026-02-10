@@ -10,6 +10,7 @@ import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
+import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
 import { University } from "../../models/university/University.model.js";
@@ -37,12 +38,11 @@ class CollegeService {
         courses,
         facilities,
         members,
-        is_featured,
-        pinned,
         description,
         content,
         admissions,
         images,
+        degrees,
       } = payload;
 
       let collegeId = id;
@@ -68,19 +68,21 @@ class CollegeService {
       // const slugs = slug(collegeName);
 
       if (!collegeId) {
-        const collageData = await College.findOne({
+        const existingCollege = await College.findOne({
           where: { name: collegeName },
           transaction,
         });
-        if (collageData) {
+        if (existingCollege) {
           const error = new Error("College already exists");
           error.status = 400;
           throw error;
         } 
-        let slugs  = collegeData.slugs;
-        if (collageData.name != collegeName) {
-          slugs = generateUniqueSlug(collegeName);  
-        }
+        
+        const slugs = generateUniqueSlug(collegeName);
+        
+        // Find the maximum order number and increment it
+        const maxOrder = await College.max('order_no_for_website', { transaction });
+        const nextOrder = (maxOrder || 0) + 1;
         
         const newCollege = await College.create(
           {
@@ -89,8 +91,6 @@ class CollegeService {
             institute_type,
             institute_level,
             author_id,
-            is_featured,
-            pinned,
             featured_img,
             college_logo,
             college_broucher,
@@ -99,6 +99,7 @@ class CollegeService {
             university_id,
             google_map_url,
             website_url,
+            order_no_for_website: nextOrder,
           },
           { transaction }
         );
@@ -110,8 +111,6 @@ class CollegeService {
           institute_type,
           institute_level,
           author_id,
-          is_featured,
-          pinned,
           description: description || "",
           content,
           featured_img,
@@ -188,6 +187,21 @@ class CollegeService {
           course_id: courseId,
         }));
         await CollegeCourse.bulkCreate(courseRecords, { transaction });
+      }
+
+      if (Array.isArray(degrees)) {
+        await CollegeOfferingDegrees.destroy({
+          where: { college_id: collegeId },
+          transaction,
+        });
+
+        if (degrees.length > 0) {
+          const degreeRecords = degrees.map((degreeId) => ({
+            college_id: collegeId,
+            degree_id: degreeId,
+          }));
+          await CollegeOfferingDegrees.bulkCreate(degreeRecords, { transaction });
+        }
       }
 
       if (Array.isArray(facilities)) {
@@ -324,7 +338,7 @@ class CollegeService {
     const collegeInclude = {
       model: College,
       as: "collegeAdmissionCollege",
-      attributes: ["name", "slugs"],
+      attributes: ["name", "slugs", "featured_img"],
       include: [],
     };
 
@@ -417,32 +431,62 @@ class CollegeService {
     };
   }
 
+  async getAdmissionById(id) {
+    const admission = await CollegeAdmission.findByPk(id, {
+      attributes: {
+        exclude: ["college_id", "course_id"],
+      },
+      include: [
+        {
+          model: College,
+          as: "collegeAdmissionCollege",
+          attributes: ["name", "slugs", "featured_img"],
+          include: [
+            {
+              model: University,
+              as: "university",
+              attributes: ["fullname", "slugs"],
+            },
+          ],
+        },
+        {
+          model: Program,
+          as: "program",
+          attributes: ["title", "slugs"],
+        },
+      ],
+    });
 
+    if (!admission) {
+      const error = new Error("Admission detail not found!");
+      error.status = 404;
+      throw error;
+    }
 
+    return admission;
+  }
 
   async listColleges(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "asc").toUpperCase();
     const search = query.q || "";
-    const isFeatured = query.is_featured;
-    const pinned = query.pinned;
 
-    const country = query.country || "";
-    const state = query.state || "";
-    const city = query.city || "";
-    const degree = query.degree || query.discipline || "";
-    const university = query.university || "";
-    let programIds = [];
-    if (query.program_id) {
-      if (Array.isArray(query.program_id)) {
-        programIds = query.program_id.map((id) => parseInt(id, 10));
-      } else if (typeof query.program_id === "string") {
-        programIds = query.program_id.split(",").map((id) => parseInt(id.trim(), 10));
-      } else {
-        programIds = [parseInt(query.program_id, 10)];
-      }
-    }
+    // Helper to parse potential array/string/comma-separated params
+    const parseFilter = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string") return val.split(",").map(v => v.trim());
+      return [val];
+    };
+
+    const states = parseFilter(query.state);
+    const cities = parseFilter(query.city);
+    const types = parseFilter(query.type);
+    const degreeIdsInput = parseFilter(query.degree_ids);
+    const programIdsInput = parseFilter(query.program_id);
+    const university = query.university;
+    const programIds = programIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
     const programIdFilter = programIds.length > 0 ? { [Op.in]: programIds } : null;
 
     const offset = (page - 1) * limit;
@@ -454,105 +498,32 @@ class CollegeService {
       };
     }
 
-    if (isFeatured !== undefined) {
-      whereCondition.is_featured = isFeatured === "true" ? 1 : 0;
-    }
-
-    if (pinned !== undefined) {
-      whereCondition.pinned = pinned === "true" ? 1 : 0;
-    }
-
-    const type = query.type || "";
-    if (type && (Array.isArray(type) ? type.length > 0 : type !== "")) {
-      let types = [];
-      if (Array.isArray(type)) {
-        types = type;
-      } else if (typeof type === "string") {
-        types = type.split(",").map((t) => t.trim());
-      }
-      if (types.length > 0) {
-        whereCondition.institute_type = { [Op.in]: types };
-      }
+    if (types.length > 0) {
+      whereCondition.institute_type = { [Op.in]: types };
     }
 
     const addressCondition = {};
-    if (state && (Array.isArray(state) ? state.length > 0 : state !== "")) {
-      let states = [];
-      if (Array.isArray(state)) {
-        states = state;
-      } else if (typeof state === "string") {
-        states = state.split(",").map((s) => s.trim());
-      }
-      
-      if (states.length > 0) {
-        addressCondition.state = {
-          [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
-        };
-      }
+    if (states.length > 0) {
+      addressCondition.state = {
+        [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
+      };
     }
 
-    if (city && (Array.isArray(city) ? city.length > 0 : city !== "")) {
-      let cities = [];
-      if (Array.isArray(city)) {
-        cities = city;
-      } else if (typeof city === "string") {
-        cities = city.split(",").map((c) => c.trim());
-      }
-      
-      if (cities.length > 0) {
-        addressCondition.city = {
-          [Op.or]: cities.map((c) => ({ [Op.like]: `%${c}%` })),
-        };
-      }
+    if (cities.length > 0) {
+      addressCondition.city = {
+        [Op.or]: cities.map((c) => ({ [Op.like]: `%${c}%` })),
+      };
     }
 
     const degreeCondition = {};
-    if (degree && (Array.isArray(degree) ? degree.length > 0 : degree !== "")) {
-      let degrees = [];
-      if (Array.isArray(degree)) {
-        degrees = degree;
-      } else if (typeof degree === "string") {
-        degrees = degree.split(",").map((d) => d.trim());
-      }
+    const orConditions = [];
 
-      if (degrees.length > 0) {
-        const ids = degrees
-          .filter((d) => d && !isNaN(d))
-          .map((d) => parseInt(d, 10));
-        const titles = degrees.filter((d) => d && isNaN(d));
-
-        const orConditions = [];
-        if (ids.length > 0) {
-          // Find Degree IDs that have any of these Discipline IDs in their disciplines JSON
-          const matchingDegrees = await Degree.findAll({
-            where: {
-              [Op.or]: ids.map(id => 
-                Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(id.toString()))
-              )
-            },
-            attributes: ['id'],
-            raw: true
-          });
-          const degreeIds = matchingDegrees.map(d => d.id);
-          
-          if (degreeIds.length > 0) {
-            orConditions.push({ degree_id: { [Op.in]: degreeIds } });
-          } else {
-            // If no degrees match, we ensure no programs are found
-            orConditions.push({ degree_id: -1 });
-          }
-        }
-        if (titles.length > 0) {
-          orConditions.push(
-            ...titles.map((t) => ({ title: { [Op.like]: `%${t}%` } }))
-          );
-        }
-
-        if (orConditions.length > 0) {
-          degreeCondition[Op.or] = orConditions;
-        }
-      }
+    // 1. Handle direct Degree IDs (degree_ids)
+    const directDegreeIds = degreeIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    if (directDegreeIds.length > 0) {
+      orConditions.push({ degree_id: { [Op.in]: directDegreeIds } });
     }
+
 
     const { count: totalCount, rows: items } = await College.findAndCountAll({
       where: whereCondition,
@@ -560,6 +531,7 @@ class CollegeService {
       offset,
       distinct: true,
       order: [
+        [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
         ["order_no_for_website", "ASC"],
         ["id", sort],
       ],
@@ -577,6 +549,7 @@ class CollegeService {
           as: "collegeCourses",
           attributes: { exclude: ["college_id"] }, // Include course_id for filtering
           required: !!programIdFilter || Object.keys(degreeCondition).length > 0, // Make required when filtering by program_id or degree
+          duplicating: !!programIdFilter || Object.keys(degreeCondition).length > 0,
           include: [
             {
               model: Program,
@@ -683,7 +656,7 @@ class CollegeService {
     const college = await College.findOne({
       where: { slugs },
       attributes: {
-        exclude: ["author_id", "university_id"],
+        exclude: ["author_id"],
       },
       include: [
         {
@@ -747,6 +720,12 @@ class CollegeService {
           model: UserModel,
           as: "authorDetails",
           attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: Degree,
+          as: "degrees",
+          attributes: ["id", "title", "slug"],
+          through: { attributes: [] }
         },
       ],
     });
@@ -792,7 +771,7 @@ class CollegeService {
     const college = await College.findOne({
       where: { id: collegeId },
       attributes: {
-        exclude: ["author_id", "university_id"],
+        exclude: ["author_id"],
       },
       include: [
         {
@@ -856,6 +835,12 @@ class CollegeService {
           model: UserModel,
           as: "authorDetails",
           attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: Degree,
+          as: "degrees",
+          attributes: ["id", "title", "slug"],
+          through: { attributes: [] }
         },
       ],
     });

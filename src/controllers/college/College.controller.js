@@ -40,6 +40,22 @@ class CollegeController {
     }
   }
 
+  static async getAdmissionById(req, res) {
+    try {
+      const admission = await collegeService.getAdmissionById(req.params.id);
+
+      return res.status(200).json({
+        message: "success",
+        item: admission,
+      });
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        status: error.status || 500,
+        message: `Error: ${error.message}`,
+      });
+    }
+  }
+
   static async listColleges(req, res) {
     try {
       const { items, pagination } = await collegeService.listColleges(

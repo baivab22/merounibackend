@@ -19,6 +19,22 @@ class HomeController {
       });
     }
   }
+
+  static async getPopularSearches(req, res) {
+    try {
+      const results = await homeService.getPopularSearches();
+      return res.status(200).json({
+        message: "Popular searches retrieved",
+        data: results,
+      });
+    } catch (error) {
+      console.error("Error fetching popular searches:", error);
+      return res.status(500).json({
+        message: "Server error",
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default HomeController;

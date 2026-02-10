@@ -10,6 +10,8 @@ import { University } from "../university/University.model.js";
 import Program from "../program/Program.model.js";
 import User from "../users/User.model.js";
 import CollegeFacility from "./CollegeFacility.model.js";
+import Degree from "../degree/Degree.model.js";
+import CollegeOfferingDegrees from "./CollegeOfferingDegrees.model.js";
 
 // College Associations
 College.belongsTo(User, { foreignKey: "author_id", as: "authorDetails" });
@@ -106,6 +108,18 @@ College.hasMany(CollegeRanking, {
 Program.hasMany(CollegeRanking, {
   foreignKey: "program_id",
   as: "programRankings",
+});
+
+// College Degree Many-to-Many
+College.belongsToMany(Degree, {
+  through: CollegeOfferingDegrees,
+  foreignKey: "college_id",
+  as: "degrees",
+});
+Degree.belongsToMany(College, {
+  through: CollegeOfferingDegrees,
+  foreignKey: "degree_id",
+  as: "colleges",
 });
 
 export {

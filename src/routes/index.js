@@ -32,6 +32,20 @@ import HomeController from "../controllers/home/Home.controller.js";
  */
 router.get("/search", HomeController.search);
 
+/**
+ * @swagger
+ * /popular-searches:
+ *   get:
+ *     summary: Get popular search terms
+ *     tags: [Search]
+ *     responses:
+ *       200:
+ *         description: List of popular search terms
+ *       500:
+ *         description: Server error
+ */
+router.get("/popular-searches", HomeController.getPopularSearches);
+
 // import user-defined components
 import userRoute from "./User.route.js";
 router.use("/users", userRoute);

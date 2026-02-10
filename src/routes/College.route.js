@@ -86,6 +86,29 @@ router.get(
 
 /**
  * @swagger
+ * /college/admission/{id}:
+ *   get:
+ *     summary: Get admission detail by id
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Admission details
+ *       404:
+ *         description: Admission detail not found
+ */
+router.get(
+  "/admission/:id",
+  CollegeController.getAdmissionById
+);
+
+/**
+ * @swagger
  * /college:
  *   get:
  *     summary: List all colleges with pagination

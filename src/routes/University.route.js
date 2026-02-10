@@ -116,6 +116,41 @@ route.post(
 /**
  * @swagger
  * /university:
+ *   put:
+ *     summary: Update a university
+ *     tags: [Universities]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/University'
+ *     responses:
+ *       200:
+ *         description: University updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: University not found
+ */
+route.put(
+  "/",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(createOrUpdateUniversitySchema, "body"),
+  UniversityController.createOrUpdateUniversity
+);
+
+/**
+ * @swagger
+ * /university:
  *   delete:
  *     summary: Delete a university
  *     tags: [Universities]

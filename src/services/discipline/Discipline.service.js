@@ -1,5 +1,6 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import Discipline from "../../models/discipline/Discipline.model.js";
+import Degree from "../../models/degree/Degree.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class DisciplineService {
@@ -47,7 +48,7 @@ class DisciplineService {
 
     async getDisciplineBySlug(slugs) {
         const discipline = await Discipline.findOne({
-            where: { slugs },
+            where: { slug: slugs },
         });
 
         if (!discipline) {
@@ -56,7 +57,18 @@ class DisciplineService {
             throw error;
         }
 
-        return discipline;
+        const degrees = await Degree.findAll({
+            where: Sequelize.where(
+                Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(Number(discipline.id))),
+                true
+            ),
+            order: [["createdAt", "DESC"]],
+        });
+
+        return {
+            ...discipline.toJSON(),
+            degrees,
+        };
     }
 
     async createDiscipline(payload) {

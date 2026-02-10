@@ -18,17 +18,6 @@ College.init(
       defaultValue: [],
       field: "institute_level",
     },
-    is_featured: {
-      type: DataTypes.TINYINT,
-      allowNull: true,
-      field: "is_featured",
-      defaultValue: 0,
-    },
-    pinned: {
-      type: DataTypes.TINYINT,
-      allowNull: true,
-      defaultValue: 0,
-    },
     website_url: {
       type: DataTypes.STRING,
       allowNull: true,

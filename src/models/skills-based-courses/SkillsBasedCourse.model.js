@@ -28,11 +28,7 @@ SkillsBasedCourse.init(
             type: DataTypes.STRING,
             allowNull: true,
         },
-        status: {
-            type: DataTypes.ENUM("active", "inactive"),
-            defaultValue: "active",
-            allowNull: false,
-        },
+
         price: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: true,
@@ -49,6 +45,15 @@ SkillsBasedCourse.init(
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },
+        institution_name: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        content: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
+
     },
     {
         sequelize,

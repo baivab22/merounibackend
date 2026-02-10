@@ -13,7 +13,7 @@ CollegeMember.init(
       references: { model: College, key: "id" },
       onDelete: "CASCADE",
     },
-    name: { type: DataTypes.STRING, allowNull: false },
+    name: { type: DataTypes.STRING, allowNull: true },
     contact_number: { type: DataTypes.STRING },
     role: {
       type: DataTypes.ENUM(
@@ -23,7 +23,7 @@ CollegeMember.init(
         "Admin",
         "Staff"
       ),
-      allowNull: false,
+      allowNull: true,
     },
     description: { type: DataTypes.TEXT },
   },

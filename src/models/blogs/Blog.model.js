@@ -65,6 +65,11 @@ Blog.init(
       allowNull: false,
       defaultValue: "draft",
     },
+    is_featured: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
 
     createdAt: {
       type: DataTypes.DATE,

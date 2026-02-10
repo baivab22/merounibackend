@@ -43,8 +43,6 @@ export const createOrUpdateCollegeSchema = yup
     featured_img: yup.string().nullable().optional(),
     college_logo: yup.string().nullable().optional(),
     college_broucher: yup.string().nullable().optional(),
-    is_featured: yup.number().oneOf([0, 1]).optional(),
-    pinned: yup.number().oneOf([0, 1]).optional(),
     description: yup.string().nullable().optional(),
     content: yup.string().nullable().optional(),
     address: yup
@@ -58,6 +56,7 @@ export const createOrUpdateCollegeSchema = yup
       .nullable()
       .optional(),
     contacts: yup.array().of(yup.string().nullable()).optional(),
+    degrees: yup.array().of(yup.number().integer().positive()).optional(),
     courses: yup.array().of(yup.number().integer().positive()).optional(),
     facilities: yup
       .array()

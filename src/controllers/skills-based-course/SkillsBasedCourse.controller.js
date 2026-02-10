@@ -72,7 +72,7 @@ class SkillsBasedCourseController {
 
     static async deleteCourse(req, res) {
         try {
-            await skillsBasedCourseService.deleteCourse(req.query.id);
+            await skillsBasedCourseService.deleteCourse(req.params.id);
             return res.status(200).json({ message: "Skills Based Course deleted" });
         } catch (error) {
             console.error("Error deleting Skills Based Course:", error);
