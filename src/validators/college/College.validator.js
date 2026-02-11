@@ -107,6 +107,16 @@ export const createOrUpdateCollegeSchema = yup
   })
   .required();
 
+export const createOrUpdateAdmissionSchema = yup.object({
+  id: yup.number().integer().positive().optional(),
+  college_id: yup.number().integer().positive().required(),
+  course_id: yup.number().integer().positive().required(),
+  eligibility_criteria: yup.string().nullable().optional(),
+  admission_process: yup.string().nullable().optional(),
+  fee_details: yup.string().nullable().optional(),
+  description: yup.string().nullable().optional(),
+}).required();
+
 export const updateCollegeOrderSchema = yup
   .object({
     colleges: yup

@@ -40,7 +40,7 @@ class CollegeService {
         members,
         description,
         content,
-        admissions,
+
         images,
         degrees,
       } = payload;
@@ -249,60 +249,7 @@ class CollegeService {
         await CollegeMember.bulkCreate(memberRecords, { transaction });
       }
 
-      if (Array.isArray(admissions) && admissions.length > 0) {
-        // Filter out admissions without course_id and validate course IDs
-        const validAdmissions = admissions.filter(
-          (admission) => admission.course_id
-        );
 
-        if (validAdmissions.length > 0) {
-          const programIds = validAdmissions.map(
-            (admission) => admission.course_id
-          );
-
-          // Validate that all program IDs exist in the programs table
-          const existingPrograms = await Program.findAll({
-            where: { id: programIds },
-            attributes: ["id"],
-            transaction,
-          });
-
-          const existingProgramIds = existingPrograms.map(
-            (program) => program.id
-          );
-          const invalidProgramIds = programIds.filter(
-            (programId) => !existingProgramIds.includes(programId)
-          );
-
-          if (invalidProgramIds.length > 0) {
-            const error = new Error(
-              `Invalid program IDs in admissions: ${invalidProgramIds.join(
-                ", "
-              )}. These program IDs do not exist in the programs table.`
-            );
-            error.status = 400;
-            throw error;
-          }
-        }
-
-        await CollegeAdmission.destroy({
-          where: { college_id: collegeId },
-          transaction,
-        });
-
-        const admissionRecords = validAdmissions.map((admission) => ({
-          college_id: collegeId,
-          course_id: admission.course_id,
-          eligibility_criteria: admission.eligibility_criteria,
-          admission_process: admission.admission_process,
-          fee_details: admission.fee_details,
-          description: admission.description,
-        }));
-
-        if (admissionRecords.length > 0) {
-          await CollegeAdmission.bulkCreate(admissionRecords, { transaction });
-        }
-      }
 
       await transaction.commit();
 

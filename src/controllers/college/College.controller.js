@@ -132,6 +132,35 @@ class CollegeController {
         .json({ error: error.message || "Server error" });
     }
   }
+
+  static async createOrUpdateAdmission(req, res) {
+    try {
+      const { id, isNew } = await collegeService.createOrUpdateAdmission(
+        req.body
+      );
+      return res.status(200).json({
+        message: isNew
+          ? "Admission created successfully!"
+          : "Admission updated successfully!",
+        id,
+      });
+    } catch (error) {
+      return res
+        .status(error.status || 500)
+        .json({ status: error.status || 500, message: error.message || "Server error" });
+    }
+  }
+
+  static async deleteAdmission(req, res) {
+    try {
+      await collegeService.deleteAdmission(req.params.id);
+      return res.status(200).json({ message: "Admission deleted successfully!" });
+    } catch (error) {
+      return res
+        .status(error.status || 500)
+        .json({ status: error.status || 500, message: error.message || "Server error" });
+    }
+  }
 }
 
 export default CollegeController;

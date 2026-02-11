@@ -10,6 +10,7 @@ import {
   collegeIdParamSchema,
   createOrUpdateCollegeSchema,
   updateCollegeOrderSchema,
+  createOrUpdateAdmissionSchema,
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
@@ -105,6 +106,62 @@ router.get(
 router.get(
   "/admission/:id",
   CollegeController.getAdmissionById
+);
+
+/**
+ * @swagger
+ * /college/admission:
+ *   post:
+ *     summary: Create or update an admission
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Admission'
+ *     responses:
+ *       200:
+ *         description: Admission created/updated successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.post(
+  "/admission",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(createOrUpdateAdmissionSchema, "body"),
+  CollegeController.createOrUpdateAdmission
+);
+
+/**
+ * @swagger
+ * /college/admission/{id}:
+ *   delete:
+ *     summary: Delete an admission
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Admission deleted successfully
+ */
+router.delete(
+  "/admission/:id",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  // requestValidator(collegeIdParamSchema, "params"),
+  CollegeController.deleteAdmission
 );
 
 /**
