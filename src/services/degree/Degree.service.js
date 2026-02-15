@@ -150,7 +150,6 @@ class DegreeService {
 
         if (title && title !== degree.title) {
             updateData.title = title;
-            updateData.slug = generateUniqueSlug(title);
         }
 
         await degree.update(updateData);

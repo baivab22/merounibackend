@@ -16,6 +16,9 @@ class CategoryService {
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
+    if (query.type) {
+      whereCondition.type = query.type;
+    }
 
     const { count: totalCount, rows: items } = await Category.findAndCountAll({
       where: whereCondition,
@@ -47,13 +50,14 @@ class CategoryService {
   }
 
   async createCategory(data) {
-    const { title, description, author } = data;
+    const { title, description, author, type } = data;
 
     await Category.create({
       title,
       slugs: generateUniqueSlug(title),
       description,
       author,
+      type,
     });
   }
 
@@ -66,13 +70,8 @@ class CategoryService {
       throw error;
     }
 
-    let updatedSlug = category.slugs;
-    if (data.title && data.title !== category.title) {
-      updatedSlug = generateUniqueSlug(data.title);
-    }
-
     const [updatedCount] = await Category.update(
-      { ...data, slugs: updatedSlug },
+      { ...data },
       {
         where: { id: category_id },
       }

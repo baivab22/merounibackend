@@ -10,6 +10,7 @@ import {
 import {
   paginationSchema,
   categorySlugParamSchema,
+  categoryListQuerySchema,
   createCategorySchema,
   updateCategoryQuerySchema,
   updateCategoryBodySchema,
@@ -48,7 +49,7 @@ const route = express.Router();
  */
 route.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(categoryListQuerySchema, "query"),
   CategoryController.listCategories
 );
 

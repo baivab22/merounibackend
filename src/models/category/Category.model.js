@@ -34,6 +34,10 @@ Category.init(
       },
       onDelete: "CASCADE",
     },
+    type: {
+      type: DataTypes.ENUM("BLOG", "EVENT", "NEWS", "MATERIAL"),
+      allowNull: true,
+    },
   },
   {
     sequelize,

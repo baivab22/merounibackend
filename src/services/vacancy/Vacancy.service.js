@@ -98,13 +98,8 @@ class VacancyService {
       throw error;
     }
 
-    if (vacancy.title !== data.title) {
-      data.slugs = generateUniqueSlug(data.title);
-    }
-
     await vacancy.update({
       title: data.title || vacancy.title,
-      slugs: data.slugs || vacancy.slugs,
       author_id: data.author_id || vacancy.author_id,
       associated_organization_name:
         data.associated_organization_name !== undefined

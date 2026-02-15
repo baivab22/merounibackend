@@ -48,7 +48,6 @@ export const createMaterialSchema = yup
     title: yup.string().required("Title is required"),
     category_id: yup.number().integer().positive().nullable().optional(),
     tags: yup.array().of(yup.number().integer().positive()).optional(),
-    visibility: yup.string().oneOf(["public", "private"]).optional(),
     image: yup
       .mixed()
       .nullable()
@@ -77,7 +76,30 @@ export const updateMaterialQuerySchema = idQuerySchema;
 
 export const updateMaterialBodySchema = yup
   .object({
-    // Add fields based on your Material model
+    title: yup.string().optional(),
+    category_id: yup.number().integer().positive().nullable().optional(),
+    tags: yup.array().of(yup.number().integer().positive()).optional(),
+    image: yup
+      .mixed()
+      .nullable()
+      .optional()
+      .test(
+        "is-url-or-null",
+        "Image must be a valid URL string or null",
+        (value) => {
+          if (value === null || value === undefined) return true;
+          if (typeof value === "string") {
+            try {
+              new URL(value);
+              return true;
+            } catch {
+              return false;
+            }
+          }
+          return false;
+        }
+      ),
+    file: yup.string().url().optional(),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;

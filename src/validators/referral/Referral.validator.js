@@ -16,10 +16,7 @@ export const createReferredApplicationSchema = yup
               .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
               .required(),
             student_email: yup.string().email().required(),
-            student_description: yup
-              .string()
-              .min(10, "Description must be at least 10 characters")
-              .optional(),
+            student_description: yup.string().optional(),
             course_id: yup.number().integer().positive().nullable(),
           })
         )
@@ -37,12 +34,7 @@ export const createSelfApplicationSchema = yup
     college_id: yup.number().integer().positive().required(),
     course_id: yup.number().integer().positive().nullable(),
     // description is optional; only validate length if provided
-    description: yup
-      .string()
-      .trim()
-      .min(10, "Description must be at least 10 characters")
-      .notRequired()
-      .nullable(),
+    description: yup.string().trim().notRequired().nullable(),
   })
   .required();
 

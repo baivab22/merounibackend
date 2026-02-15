@@ -91,13 +91,8 @@ class CareerService {
       error.status = 404;
       throw error;
     }
-    if (data.title && data.title !== career.title) {
-      data.slugs = generateUniqueSlug(data.title);
-    }
-
     await career.update({
       title: data.title || career.title,
-      slugs: data.slugs || career.slugs,
       author_id: data.author_id || career.author_id,
       description: data.description || career.description,
       content: data.content || career.content,

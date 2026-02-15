@@ -66,13 +66,8 @@ class TagService {
       throw error;
     }
 
-    let updatedSlug = tag.slugs;
-    if (data.title && data.title !== tag.title) {
-      updatedSlug = slug(data.title);
-    }
-
     const [updatedCount] = await Tag.update(
-      { ...data, slugs: updatedSlug },
+      { ...data },
       {
         where: { id: tag_id },
       }

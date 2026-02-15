@@ -234,15 +234,11 @@ class ProgramService {
           throw error;
         }
 
-        if (existingProgram.title !== title) {
-          existingProgram.slugs = generateUniqueSlug(title);
-        }
 
         await Program.update(
           {
             title,
             code,
-            slugs: generateUniqueSlug(title),
             author,
             duration,
             credits,

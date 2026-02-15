@@ -62,13 +62,8 @@ class LevelService {
       throw error;
     }
 
-    let updatedSlug = level.slugs;
-    if (data.title && data.title !== level.title) {
-      updatedSlug = slug(data.title);
-    }
-
     const [updatedCount] = await Level.update(
-      { ...data, slugs: updatedSlug },
+      { ...data },
       {
         where: { id: levelId },
       }

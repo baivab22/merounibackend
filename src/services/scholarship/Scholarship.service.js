@@ -166,12 +166,7 @@ class ScholarshipService {
   }
 
   async updateScholarship(id, data) {
-    // If title or name is being updated, regenerate the slug
     const updateData = { ...data };
-    if (data.title || data.name) {
-      const titleOrName = data.title || data.name;
-      updateData.slugs = slug(titleOrName);
-    }
 
     // Ensure category_id from API is mapped to category if needed
     if (data.categoryId) {

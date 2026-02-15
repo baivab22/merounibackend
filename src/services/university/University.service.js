@@ -165,9 +165,6 @@ class UniversityService {
           throw error;
         }
 
-        if (university.fullname !== fullname) {
-          university.slugs = await generateUniqueSlug(fullname);
-        }
 
         university.fullname = fullname;
         university.country = country;

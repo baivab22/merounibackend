@@ -7,10 +7,12 @@ import {
 export { paginationSchema, slugParamSchema };
 
 export const blogListQuerySchema = paginationSchema.shape({
-status: yup
-  .string()
-  .oneOf(["draft", "published", "archived"])
-  .optional(),
+  status: yup
+    .string()
+    .oneOf(["draft", "published", "archived"])
+    .optional(),
+  category_id: yup.string().optional(),
+  category: yup.string().optional(),
 })
 
 export const createBlogSchema = yup.object({

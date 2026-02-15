@@ -78,7 +78,6 @@ class EventService {
         // Update existing event - only update provided fields
         const updateData = {};
         if (title !== undefined) updateData.title = title;
-        if (slugs !== undefined) updateData.slugs = slugs;
         if (description !== undefined) updateData.description = description;
         if (content !== undefined) updateData.content = content;
         if (image !== undefined) updateData.image = image;

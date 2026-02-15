@@ -74,9 +74,6 @@ router.use("/faculty", facultyRoute);
 import materialRoute from "./Material.route.js";
 router.use("/material", materialRoute);
 
-import materialCategoryRoute from "./MaterialCategory.route.js";
-router.use("/material-category", materialCategoryRoute);
-
 import scholarshipRoute from "./Scholarship.route.js";
 router.use("/scholarship", scholarshipRoute);
 

@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import Blog from "../../models/blogs/Blog.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
+import Tag from "../../models/tags/Tag.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class BlogService {
@@ -12,12 +13,10 @@ class BlogService {
     const offset = (page - 1) * limit;
 
     const search = query.q || "";
-    const categoryId = query.category_id;
-    const status = query.status;
+    const categoryId = query.category_id || query.category;
+    const status = query.status || "published";
 
-
-    const whereCondition = {
-    };
+    const whereCondition = {};
 
     if (status) {
       whereCondition.status = status;
@@ -26,7 +25,7 @@ class BlogService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
-    if (categoryId) {
+    if (categoryId && categoryId !== "all") {
       whereCondition.category = categoryId;
     }
 
@@ -50,8 +49,38 @@ class BlogService {
       ],
     });
 
+    // Populate tag details for each blog
+    const itemsWithTags = await Promise.all(
+      items.map(async (blog) => {
+        const blogData = blog.toJSON();
+        
+        // Parse tags if they're stored as a JSON string
+        let tagIds = blogData.tags;
+        if (typeof tagIds === 'string') {
+          try {
+            tagIds = JSON.parse(tagIds);
+          } catch (e) {
+            tagIds = [];
+          }
+        }
+        
+        // Fetch tag details if we have tag IDs
+        if (tagIds && Array.isArray(tagIds) && tagIds.length > 0) {
+          const tagDetails = await Tag.findAll({
+            where: { id: tagIds },
+            attributes: ["id", "title"],
+          });
+          blogData.tags = tagDetails.map(tag => tag.toJSON());
+        } else {
+          blogData.tags = [];
+        }
+        
+        return blogData;
+      })
+    );
+
     return {
-      items,
+      items: itemsWithTags,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
@@ -136,15 +165,9 @@ class BlogService {
       throw error;
     }
 
-    let updatedSlug = blog.slug;
-    if (data.title && data.title !== blog.title) {
-      updatedSlug = generateUniqueSlug(data.title);
-    }
-
     const [updatedRows] = await Blog.update(
       {
         ...data,
-        slug: updatedSlug,
       },
       { where: { id } },
     );

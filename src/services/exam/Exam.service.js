@@ -239,7 +239,6 @@ class ExamService {
         await Exam.update(
           {
             title,
-            slugs,
             description,
             author,
             level_id,

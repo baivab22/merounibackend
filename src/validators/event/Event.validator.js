@@ -24,12 +24,12 @@ export const deleteEventQuerySchema = yup.object({
 
 // Event host schema
 const eventHostSchema = yup.object({
-  host: yup.string().trim().required("Host is required"),
+  host: yup.string().transform((value) => value?.trim()).required("Host is required"),
   start_date: yup.string().required("Start date is required"),
   end_date: yup.string().required("End date is required"),
-  time: yup.string().required("Time is required"),
+  time: yup.string().optional(),
   location: yup.string().optional(),
-  map_url: yup.string().url("Map URL must be a valid URL").optional(),
+  map_url: yup.string().optional(),
 });
 
 // Create/Update Event schema

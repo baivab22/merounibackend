@@ -3,7 +3,7 @@ import slug from "slug";
 
 import Material from "../../models/materials/Material.model.js";
 import Tag from "../../models/tags/Tag.model.js";
-import MaterialCategory from "../../models/materials/MaterialCategory.model.js";
+import Category from "../../models/category/Category.model.js";
 
 class MaterialService {
   async listMaterials(query = {}) {
@@ -38,9 +38,9 @@ class MaterialService {
         order: [["createdAt", "DESC"]],
         include: [
           {
-            model: MaterialCategory,
+            model: Category,
             as: "category",
-            attributes: ["id", "name"],
+            attributes: ["id", "title"],
             required: false,
           },
         ],
@@ -61,9 +61,9 @@ class MaterialService {
     const material = await Material.findByPk(id, {
       include: [
         {
-          model: MaterialCategory,
+          model: Category,
           as: "category",
-          attributes: ["id", "name"],
+          attributes: ["id", "title"],
           required: false,
         },
       ],
@@ -109,9 +109,9 @@ class MaterialService {
 
     // If category is provided, fetch it and add to slug
     if (category_id) {
-      const category = await MaterialCategory.findByPk(category_id);
+      const category = await Category.findByPk(category_id);
       if (category) {
-        slugValue = `${slug(category.name)}-${slugValue}`;
+        slugValue = `${slug(category.title)}-${slugValue}`;
       }
     }
 
@@ -125,9 +125,9 @@ class MaterialService {
     const material = await Material.findByPk(id, {
       include: [
         {
-          model: MaterialCategory,
+          model: Category,
           as: "category",
-          attributes: ["id", "name"],
+          attributes: ["id", "title"],
           required: false,
         },
       ],
@@ -148,39 +148,9 @@ class MaterialService {
       }
     }
 
-    // Determine if slug needs to be regenerated
-    const titleChanged = data.title && data.title !== material.title;
-    const categoryChanged =
-      data.category_id !== undefined &&
-      data.category_id !== material.category_id;
-
-    let updatedSlug = material.slug;
-
-    if (titleChanged || categoryChanged) {
-      const title = data.title || material.title;
-      const categoryId =
-        data.category_id !== undefined
-          ? data.category_id
-          : material.category_id;
-
-      // Build slug from title and category
-      let slugValue = slug(title);
-
-      // If category is provided, fetch it and add to slug
-      if (categoryId) {
-        const category = await MaterialCategory.findByPk(categoryId);
-        if (category) {
-          slugValue = `${slug(category.name)}-${slugValue}`;
-        }
-      }
-
-      updatedSlug = slugValue;
-    }
-
     const [updatedRows] = await Material.update(
       {
         ...data,
-        slug: updatedSlug,
       },
       { where: { id } }
     );

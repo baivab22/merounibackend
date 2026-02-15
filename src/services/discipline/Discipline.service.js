@@ -90,7 +90,6 @@ class DisciplineService {
 
         if (title && title !== discipline.title) {
             updateData.title = title;
-            updateData.slug = generateUniqueSlug(title);
         }
 
         await discipline.update(updateData);

@@ -84,19 +84,8 @@ class FacultyService {
       throw error;
     }
 
-    let updatedSlug = faculty.slugs;
-    if (data.title && data.title !== faculty.title) {
-      // Validate title
-      if (data.title.trim() === "") {
-        const error = new Error("Title cannot be empty");
-        error.status = 400;
-        throw error;
-      }
-      updatedSlug = slug(data.title);
-    }
-
     const [updatedCount] = await Faculty.update(
-      { ...data, slugs: updatedSlug },
+      { ...data },
       {
         where: { id: faculty_id },
       }

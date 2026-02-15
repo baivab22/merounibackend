@@ -230,7 +230,6 @@ class ConsultancyService {
       // Build update object, include all fields (handle empty strings as null for optional fields)
       const updateData = {};
       if (title !== undefined) updateData.title = title;
-      if (slugs !== null && slugs !== undefined) updateData.slugs = slugs;
       if (destination !== undefined) updateData.destination = destination;
       if (address !== undefined) updateData.address = address;
       if (featured_image !== undefined)

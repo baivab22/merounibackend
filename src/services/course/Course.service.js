@@ -175,7 +175,6 @@ class CourseService {
     const updateData = { ...rest };
     if (title) {
       updateData.title = title;
-      updateData.slugs = slugs;
     }
 
     await Course.update(updateData, { where: { id } });

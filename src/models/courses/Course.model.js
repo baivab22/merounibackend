@@ -33,7 +33,7 @@ Course.init(
     },
     credits: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     duration: {
       type: DataTypes.INTEGER,
@@ -60,7 +60,7 @@ Course.init(
     },
     facultyId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "faculty",
         key: "id",

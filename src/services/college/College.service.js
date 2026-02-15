@@ -105,9 +105,7 @@ class CollegeService {
         );
         collegeId = newCollege.id;
       } else {
-        const slugs = generateUniqueSlug(collegeName);
         const updateData = {
-          slugs,
           institute_type,
           institute_level,
           author_id,
@@ -278,7 +276,10 @@ class CollegeService {
     const include = [];
 
     if (q) {
-      whereCondition[Op.or] = [{ name: { [Op.like]: `%${q}%` } }];
+      whereCondition[Op.or] = [
+        { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
+        { "$program.title$": { [Op.like]: `%${q}%` } },
+      ];
     }
 
     // College and Affiliation (University) filter
