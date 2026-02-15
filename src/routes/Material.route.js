@@ -47,7 +47,7 @@ const route = express.Router();
  */
 route.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(materialCategoryQuerySchema, "query"),
   MaterialController.listMaterials
 );
 
