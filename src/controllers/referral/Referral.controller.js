@@ -19,6 +19,23 @@ class ReferralController {
     }
   }
 
+  static async checkIfAlreadyAppliedForCollage(req, res) {
+    try {
+      const { college_id, student_id } = req.query;
+      const result = await referralService.checkIfAlreadyAppliedForCollage(
+        college_id,
+        student_id,
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+
   static async createSelfApplication(req, res) {
     try {
       const student = await referralService.createSelfApplication(req.body);
