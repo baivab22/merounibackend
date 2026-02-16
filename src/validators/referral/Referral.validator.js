@@ -17,7 +17,6 @@ export const createReferredApplicationSchema = yup
               .required(),
             student_email: yup.string().email().required(),
             student_description: yup.string().optional(),
-            course_id: yup.number().integer().positive().nullable(),
           })
         )
         .min(1, "At least one student is required")
@@ -33,12 +32,10 @@ export const createSelfApplicationSchema = yup
     referral_type: yup.string().oneOf(["self"]).default("self").required(),
     college_id: yup.number().integer().positive().required(),
     course_id: yup.number().integer().positive().nullable(),
-    // description is optional; only validate length if provided
     description: yup.string().trim().notRequired().nullable(),
   })
   .required();
 
-  // Schema for self applications (student applies themselves)
 export const checkIfAlreadyAppliedForCollageQuerySchema = yup
   .object({
     college_id: yup.number().integer().positive().required(),

@@ -53,6 +53,60 @@ class ConsultancyApplicationService {
     });
   }
 
+  async agentApplyToConsultancy(payload, agent) {
+    const { consultancy_id, student_id, student_description } = payload;
+
+    if (!consultancy_id) {
+      const error = new Error("Consultancy ID is required");
+      error.status = 400;
+      throw error;
+    }
+
+    if (!student_id) {
+      const error = new Error("Student ID is required");
+      error.status = 400;
+      throw error;
+    }
+
+    if (!agent || !agent.id) {
+      const error = new Error("Authentication required");
+      error.status = 401;
+      throw error;
+    }
+
+    // Check if already applied
+    const existing = await ConsultancyApplication.findOne({
+      where: {
+        consultancy_id,
+        student_id,
+      },
+    });
+
+    if (existing) {
+      const error = new Error("This student has already applied to this consultancy.");
+      error.status = 400;
+      throw error;
+    }
+
+    // Fetch student info
+    const student = await User.findByPk(student_id);
+    if (!student) {
+      const error = new Error("Student not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return await ConsultancyApplication.create({
+      consultancy_id,
+      student_id,
+      agent_id: agent.id,
+      student_name: `${student.firstName} ${student.middleName || ""} ${student.lastName}`.trim(),
+      student_phone_no: student.phoneNo,
+      student_email: student.email,
+      student_description,
+      status: "IN_PROGRESS",
+    });
+  }
 
   async checkIfStudentAppliedToConsultancy(consultancyId, studentId) {
     const existing = await ConsultancyApplication.findOne({

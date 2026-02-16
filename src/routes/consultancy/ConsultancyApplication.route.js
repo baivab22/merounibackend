@@ -19,6 +19,13 @@ router.post(
   ConsultancyApplicationController.apply
 );
 
+router.post(
+  "/apply-agent",
+  authenticateUser,
+  authorizeRole(["agent"]),
+  ConsultancyApplicationController.agentApply
+);
+
 // Check if student has already applied to a consultancy
 router.get(
   "/check/:consultancyId",

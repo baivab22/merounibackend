@@ -21,11 +21,12 @@ export const createBlogSchema = yup.object({
     tags: yup.array().required("Tags are required"),
     description: yup.string().optional(),
     content: yup.string().optional(),
-    featuredImage: yup.string().optional(),
+    featured_image: yup.string().optional(),
     is_featured: yup.boolean().default(false),
     author: yup.number().optional(),
     reactions: yup.object().optional(),
     status: yup.string().optional(),
+    pdf_file: yup.string().optional(),
 });
 
 export const updateBlogQuerySchema = yup.object({
@@ -39,7 +40,7 @@ export const updateBlogBodySchema = yup
         tags: yup.array(),
         description: yup.string(),
         content: yup.string(),
-        featuredImage: yup.string(),
+        featured_image: yup.string(),
         is_featured: yup.boolean(),
         author: yup.number(),
         reactions: yup.object(),

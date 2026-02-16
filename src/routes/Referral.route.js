@@ -139,6 +139,52 @@ router.post(
 
 /**
  * @swagger
+ * /referral/apply-agent:
+ *   post:
+ *     summary: Agent applies on behalf of a student (alternative endpoint)
+ *     tags: [Referrals]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - student_id
+ *               - college_id
+ *               - course_id
+ *             properties:
+ *               student_id:
+ *                 type: integer
+ *               college_id:
+ *                 type: integer
+ *               course_id:
+ *                 type: integer
+ *               student_description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Application submitted successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.post(
+  "/apply-agent",
+  authenticateUser,
+  authorizeRole([ "agent"]),
+  requestValidator(createReferredApplicationSchema, "body"),
+  ReferralController.agentApply,
+);
+
+/**
+ * @swagger
  * /referral:
  *   get:
  *     summary: Get all applications (Admin/Editor/Agent only)

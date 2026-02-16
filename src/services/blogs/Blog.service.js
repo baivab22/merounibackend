@@ -165,6 +165,10 @@ class BlogService {
       throw error;
     }
 
+    if (blog.title !== data.title) {
+      data.slug = generateUniqueSlug(data.title);
+    }
+
     const [updatedRows] = await Blog.update(
       {
         ...data,

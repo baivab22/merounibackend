@@ -42,7 +42,7 @@ Blog.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    featuredImage: {
+    featured_image: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -71,6 +71,10 @@ Blog.init(
       defaultValue: false,
     },
 
+    pdf_file: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

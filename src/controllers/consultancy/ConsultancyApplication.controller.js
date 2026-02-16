@@ -20,6 +20,22 @@ class ConsultancyApplicationController {
     }
   }
 
+  static async agentApply(req, res) {
+    try {
+      const application = await applicationService.agentApplyToConsultancy(req.body, req.user);
+      return res.status(201).json({
+        message: "Agent application submitted successfully",
+        application,
+      });
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+
   static async checkIfStudentAppliedToConsultancy(req, res) {
     const userId = req.user.id;
     try {

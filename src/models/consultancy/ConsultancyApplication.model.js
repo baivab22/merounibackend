@@ -3,7 +3,7 @@ import { sequelize } from "../../config/database.config.js";
 import Consultancy from "./Consultancy.model.js";
 import User from "../users/User.model.js";
 
-class ConsultancyApplication extends Model {}
+class ConsultancyApplication extends Model { }
 
 ConsultancyApplication.init(
   {
@@ -21,6 +21,14 @@ ConsultancyApplication.init(
       },
     },
     student_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    agent_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -76,6 +84,11 @@ Consultancy.hasMany(ConsultancyApplication, {
 ConsultancyApplication.belongsTo(User, {
   foreignKey: "student_id",
   as: "student",
+});
+
+ConsultancyApplication.belongsTo(User, {
+  foreignKey: "agent_id",
+  as: "agent",
 });
 
 export default ConsultancyApplication;
