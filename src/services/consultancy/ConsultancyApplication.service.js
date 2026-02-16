@@ -1,6 +1,7 @@
 import ConsultancyApplication from "../../models/consultancy/ConsultancyApplication.model.js";
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
 import User from "../../models/users/User.model.js";
+import { sequelize } from "../../config/database.config.js";
 import { roleHelper } from "../../utils/RoleHelper.js";
 import { Op } from "sequelize";
 
@@ -53,58 +54,72 @@ class ConsultancyApplicationService {
     });
   }
 
-  async agentApplyToConsultancy(payload, agent) {
-    const { consultancy_id, student_id, student_description } = payload;
-
-    if (!consultancy_id) {
-      const error = new Error("Consultancy ID is required");
-      error.status = 400;
-      throw error;
-    }
-
-    if (!student_id) {
-      const error = new Error("Student ID is required");
-      error.status = 400;
-      throw error;
-    }
-
+  async agentApplyToConsultancy(data, agent) {
     if (!agent || !agent.id) {
       const error = new Error("Authentication required");
       error.status = 401;
       throw error;
     }
 
-    // Check if already applied
-    const existing = await ConsultancyApplication.findOne({
-      where: {
-        consultancy_id,
-        student_id,
-      },
-    });
-
-    if (existing) {
-      const error = new Error("This student has already applied to this consultancy.");
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      const error = new Error("Data array is required and cannot be empty");
       error.status = 400;
       throw error;
     }
 
-    // Fetch student info
-    const student = await User.findByPk(student_id);
-    if (!student) {
-      const error = new Error("Student not found");
-      error.status = 404;
-      throw error;
-    }
+    return await sequelize.transaction(async (t) => {
+      const allResults = [];
 
-    return await ConsultancyApplication.create({
-      consultancy_id,
-      student_id,
-      agent_id: agent.id,
-      student_name: `${student.firstName} ${student.middleName || ""} ${student.lastName}`.trim(),
-      student_phone_no: student.phoneNo,
-      student_email: student.email,
-      student_description,
-      status: "IN_PROGRESS",
+      for (const payload of data) {
+        const { consultancy_id, students } = payload;
+
+        if (!consultancy_id) {
+          const error = new Error("Consultancy ID is required for each application batch");
+          error.status = 400;
+          throw error;
+        }
+
+        if (!students || !Array.isArray(students) || students.length === 0) {
+          const error = new Error(`At least one student is required for consultancy ID ${consultancy_id}`);
+          error.status = 400;
+          throw error;
+        }
+
+        for (const studentData of students) {
+          const { student_email, student_description, student_name, student_phone_no } = studentData;
+
+
+          // 2. Check if already applied
+          const existing = await ConsultancyApplication.findOne({
+            where: {
+              consultancy_id,
+              student_email,
+            },
+            transaction: t
+          });
+
+          if (existing) {
+            const error = new Error(`Student ${student_email} has already applied to consultancy ID ${consultancy_id}`);
+            error.status = 400;
+            throw error;
+          }
+
+          // 3. Create application
+          const application = await ConsultancyApplication.create({
+            consultancy_id,
+            agent_id: agent.id,
+            student_name: student_name || `${student.firstName} ${student.lastName}`.trim(),
+            student_phone_no: student_phone_no || student.phoneNo,
+            student_email: student_email,
+            student_description,
+            status: "IN_PROGRESS",
+          }, { transaction: t });
+
+          allResults.push(application);
+        }
+      }
+
+      return allResults;
     });
   }
 
@@ -135,6 +150,7 @@ class ConsultancyApplicationService {
       whereCondition.student_id = user.id;
     }
 
+    console.log(whereCondition, "whereConditionwhereConditionwhereCondition")
     return await ConsultancyApplication.findAll({
       where: whereCondition,
       include: [

@@ -88,7 +88,7 @@ class UniversityService {
         {
           model: UniversityContact,
           as: "contact",
-          required: false, // Make it a LEFT JOIN so it's included even if no contact exists
+          required: false, 
         },
         {
           model: UniversityLevel,
