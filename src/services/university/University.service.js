@@ -1,4 +1,4 @@
-import { QueryTypes } from "sequelize";
+import { QueryTypes, Op } from "sequelize";
 import slug from "slug";
 
 import { sequelize } from "../../config/database.config.js";
@@ -27,21 +27,35 @@ class UniversityService {
     let sqlQuery = `SELECT * FROM university`;
     let countQuery = `SELECT COUNT(*) as total FROM university`;
 
+    const replacements = { limit, offset };
+    
     if (searchQuery) {
-      const searchCondition = ` WHERE fullname LIKE :searchQuery`;
-      sqlQuery += searchCondition;
-      countQuery += searchCondition;
+      sqlQuery += ` WHERE fullname LIKE :searchQuery`;
+      countQuery += ` WHERE fullname LIKE :searchQuery`;
+      replacements.searchQuery = `%${searchQuery}%`;
     }
 
-    sqlQuery += ` ORDER BY createdAt DESC LIMIT :limit OFFSET :offset`;
+    if (query.type) {
+      const typeCondition = searchQuery
+        ? ` AND type_of_institute = :type`
+        : ` WHERE type_of_institute = :type`;
+        
+      sqlQuery += typeCondition;
+      countQuery += typeCondition;
+      replacements.type = query.type;
+    }
+
+    sqlQuery += ` ORDER BY order_no_for_website ASC, id DESC LIMIT :limit OFFSET :offset`;
+
+
 
     const items = await sequelize.query(sqlQuery, {
-      replacements: { limit, offset, searchQuery: `%${searchQuery}%` },
+      replacements,
       type: QueryTypes.SELECT,
     });
 
     const totalCountResult = await sequelize.query(countQuery, {
-      replacements: { searchQuery: `%${searchQuery}%` },
+      replacements,
       type: QueryTypes.SELECT,
     });
 
@@ -197,7 +211,9 @@ class UniversityService {
             date_of_establish,
             type_of_institute,
             description,
+            description,
             logo, // Add logo
+            order_no_for_website: await this.getNextOrderNo(),
           },
           { transaction }
         );
@@ -399,6 +415,48 @@ class UniversityService {
       })),
       { transaction }
     );
+  }
+
+  async getNextOrderNo() {
+    const maxOrder = await University.max("order_no_for_website");
+    return (maxOrder || 0) + 1;
+  }
+
+  async updateUniversityOrder(universities) {
+    const transaction = await sequelize.transaction();
+    try {
+      // Validate all university IDs exist
+      const universityIds = universities.map((u) => u.id);
+      const existingUniversities = await University.findAll({
+        where: {
+          id: { [Op.in]: universityIds },
+        },
+        transaction,
+      });
+
+      if (existingUniversities.length !== universityIds.length) {
+        const error = new Error("Invalid university IDs");
+        error.status = 400;
+        throw error;
+      }
+
+      // Update order_no_for_website for each university
+      const updates = universities.map((university) =>
+        University.update(
+          { order_no_for_website: university.order_no },
+          { where: { id: university.id }, transaction }
+        )
+      );
+
+      await Promise.all(updates);
+      await transaction.commit();
+
+      return { message: "University order updated successfully" };
+    } catch (error) {
+      console.error("Error in updateUniversityOrder service:", error);
+      await transaction.rollback();
+      throw error;
+    }
   }
 }
 

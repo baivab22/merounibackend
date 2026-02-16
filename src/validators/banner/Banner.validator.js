@@ -24,7 +24,7 @@ export const galleryIdParamSchema = yup.object({
 });
 
 export const createBannerSchema = yup.object({
-  collegeId: yup.number().integer().positive().required(),
+  collegeId: yup.number().integer().positive().nullable().optional(),
   website_url: yup.string().url().nullable().optional(),
   display_position: yup.number().integer().min(1).required(),
   priority: yup.number().integer().optional(),

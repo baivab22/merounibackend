@@ -9,6 +9,7 @@ import {
   universitySlugParamSchema,
   createOrUpdateUniversitySchema,
   deleteUniversityQuerySchema,
+  universityListSchema,
 } from "../validators/university/University.validator.js";
 
 const route = express.Router();
@@ -41,7 +42,7 @@ const route = express.Router();
  */
 route.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(universityListSchema, "query"),
   UniversityController.listUniversities
 );
 
@@ -179,6 +180,14 @@ route.delete(
   authorizeRole(["admin", "editor"]),
   requestValidator(deleteUniversityQuerySchema, "query"),
   UniversityController.deleteUniversity
+);
+
+// Update university order
+route.put(
+  "/order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  UniversityController.updateUniversityOrder
 );
 
 export default route;

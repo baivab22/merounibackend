@@ -7,6 +7,10 @@ export const universitySlugParamSchema = yup.object({
   slug: yup.string().trim().required(),
 });
 
+export const universityListSchema = paginationSchema.shape({
+  type: yup.string().oneOf(["Public", "Private"]).optional(),
+});
+
 // Create/Update University schema - adjust based on actual requirements
 export const createOrUpdateUniversitySchema = yup
   .object({

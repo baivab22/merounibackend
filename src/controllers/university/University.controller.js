@@ -62,6 +62,21 @@ class UniversityController {
         .json({ error: status === 500 ? "Server error" : error.message });
     }
   }
+
+  static async updateUniversityOrder(req, res) {
+    try {
+      const result = await universityService.updateUniversityOrder(
+        req.body.universities
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error in updateUniversityOrder controller:", error);
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
 }
 
 export default UniversityController;

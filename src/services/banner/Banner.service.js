@@ -15,12 +15,14 @@ class BannerService {
       date_of_expiry,
     } = payload;
 
-    const college = await College.findByPk(collegeId);
-    if (!college) {
-      const error = new Error("College not found");
+    if (collegeId) {
+      const college = await College.findByPk(collegeId);
+      if (!college) {
+        const error = new Error("College not found");
 
-      error.status = 404;
-      throw error;
+        error.status = 404;
+        throw error;
+      }
     }
 
     for (const banner of bannerImage) {

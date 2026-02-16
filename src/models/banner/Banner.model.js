@@ -13,7 +13,7 @@ const Banner = sequelize.define(
     },
     college_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     title: {
       type: DataTypes.STRING,
