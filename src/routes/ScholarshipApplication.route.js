@@ -47,6 +47,15 @@ route.post(
   ScholarshipApplicationController.applyForScholarship
 );
 
+
+
+route.get(
+  "/check/:scholarshipId",
+  authenticateUser,
+  authorizeRole(["student"]),
+  ScholarshipApplicationController.checkIfScholarshipApplied
+);
+
 /**
  * @swagger
  * /scholarship-application/my-applications:

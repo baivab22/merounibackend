@@ -20,6 +20,21 @@ class ConsultancyApplicationController {
     }
   }
 
+  static async checkIfStudentAppliedToConsultancy(req, res) {
+    const userId = req.user.id;
+    try {
+      const { consultancyId } = req.params;
+      const result = await applicationService.checkIfStudentAppliedToConsultancy(consultancyId, userId);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+
   static async getUserApplications(req, res) {
     try {
       const applications = await applicationService.getUserApplications(req.user.id);

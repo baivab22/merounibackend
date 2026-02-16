@@ -37,6 +37,27 @@ class ScholarshipApplicationController {
       });
     }
   }
+  static async checkIfScholarshipApplied(req, res) {
+    try {
+      const studentId = req.user.id;
+      const {  scholarshipId} = req.params;
+
+  
+      const application = await scholarshipApplicationService.checkIfScholarshipIsApplied(
+        studentId,
+        scholarshipId
+      );
+
+      return res.status(200).json(application);
+    } catch (error) {
+      console.error("Error checking scholarship application:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
 
   static async getStudentApplications(req, res) {
     try {

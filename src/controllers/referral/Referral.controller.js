@@ -41,7 +41,6 @@ class ReferralController {
 
   static async createSelfApplication(req, res) {
     const userId = req.user.id;
-    console.log(userId,"userId")
     try {
       const student = await referralService.createSelfApplication(req.body,userId);
 

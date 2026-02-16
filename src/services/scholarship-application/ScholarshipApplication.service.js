@@ -55,6 +55,27 @@ class ScholarshipApplicationService {
     return application;
   }
 
+  async checkIfScholarshipIsApplied(studentId, scholarshipId) {
+    const existingApplication = await ScholarshipApplication.findOne({
+      where: {
+        scholarship_id: scholarshipId,
+        student_id: studentId,
+      },
+    });
+
+    if (existingApplication) {
+      return {
+        hasApplied: true,
+        application_id: existingApplication.id,
+      }
+    }
+
+    return {
+      hasApplied: false,
+      application_id: null,
+    };
+  }
+
   async getStudentApplications(studentId, query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;

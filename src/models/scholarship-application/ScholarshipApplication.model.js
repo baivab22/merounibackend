@@ -36,6 +36,7 @@ ScholarshipApplication.init(
       allowNull: false,
       defaultValue: "PENDING",
     },
+    
     remarks: {
       type: DataTypes.TEXT,
       allowNull: true,

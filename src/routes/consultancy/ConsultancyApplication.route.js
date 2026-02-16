@@ -14,9 +14,17 @@ const router = express.Router();
 router.post(
   "/apply",
   authenticateUser,
-  authorizeRole(["admin", "editor", "student", "agent"]),
+  authorizeRole(["student"]),
   // requestValidator(applyConsultancySchema, "body"),
   ConsultancyApplicationController.apply
+);
+
+// Check if student has already applied to a consultancy
+router.get(
+  "/check/:consultancyId",
+  authenticateUser,
+  authorizeRole(["student"]),
+  ConsultancyApplicationController.checkIfStudentAppliedToConsultancy
 );
 
 // Get all applications (Admin/Editor only)

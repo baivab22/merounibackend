@@ -14,6 +14,8 @@ export const paginationSchema = basePaginationSchema.shape({
 
 export const applyForScholarshipSchema = yup.object({
   scholarshipId: yup.number().integer().positive().required("Scholarship ID is required"),
+  remarks: yup.string().optional(),
+  
 });
 
 export const updateApplicationStatusSchema = yup.object({

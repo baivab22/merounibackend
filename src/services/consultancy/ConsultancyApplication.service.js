@@ -53,6 +53,24 @@ class ConsultancyApplicationService {
     });
   }
 
+
+  async checkIfStudentAppliedToConsultancy(consultancyId, studentId) {
+    const existing = await ConsultancyApplication.findOne({
+      where: {
+        consultancy_id: consultancyId,
+        student_id: studentId,
+      },
+    });
+    if (existing) {
+      return {
+        hasApplied: true,
+        applicationId: existing.id,
+      }
+    }
+    return {
+      hasApplied: false,
+    }
+  }
   async getUserApplications(userId) {
     return await ConsultancyApplication.findAll({
       where: { student_id: userId },
