@@ -15,7 +15,6 @@ export const authenticateUser = async (req, res, next) => {
         req.user = decoded.data;
         return next();
       } catch (error) {
-        console.log("Access token verification failed:", error.message);
         if (!(error instanceof jwt.TokenExpiredError)) {
           return res
             .status(403)

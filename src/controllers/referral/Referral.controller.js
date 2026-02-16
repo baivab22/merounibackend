@@ -21,10 +21,11 @@ class ReferralController {
 
   static async checkIfAlreadyAppliedForCollage(req, res) {
     try {
-      const { college_id, student_id } = req.query;
+      const user = req.user;
+      console.log(user,"useruser")
+      const { college_id } = req.query;
       const result = await referralService.checkIfAlreadyAppliedForCollage(
         college_id,
-        student_id,
       );
       return res.status(200).json(result);
     } catch (error) {
@@ -37,8 +38,10 @@ class ReferralController {
   }
 
   static async createSelfApplication(req, res) {
+    const userId = req.user.id;
+    console.log(userId,"userId")
     try {
-      const student = await referralService.createSelfApplication(req.body);
+      const student = await referralService.createSelfApplication(req.body,userId);
 
       return res.status(201).json({
         message: "Self-application submitted successfully",

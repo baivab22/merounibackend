@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class College extends Model {}
+class College extends Model { }
 
 College.init(
   {
@@ -45,7 +45,13 @@ College.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    // This is for the order of the college in the website; for showing the colleges first with whom the organization (merouni) is mostly working with.
+    faqs: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+      field: "faqs",
+    },
+
     order_no_for_website: {
       type: DataTypes.INTEGER,
       allowNull: true,

@@ -8,6 +8,7 @@ class UniversityController {
       const data = await universityService.listUniversities(req.query);
       return res.status(200).json(data);
     } catch (error) {
+      console.log(error,"yoyo")
       const status = error.status || 500;
       return res
         .status(status)

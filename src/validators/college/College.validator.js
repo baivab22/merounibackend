@@ -45,6 +45,10 @@ export const createOrUpdateCollegeSchema = yup
     college_broucher: yup.string().nullable().optional(),
     description: yup.string().nullable().optional(),
     content: yup.string().nullable().optional(),
+    faqs: yup.array().of(yup.object({
+      question: yup.string().nullable().optional(),
+      answer: yup.string().nullable().optional(),
+    })).optional(),
     address: yup
       .object({
         country: yup.string().nullable().optional(),

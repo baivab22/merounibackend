@@ -40,7 +40,7 @@ class CollegeService {
         members,
         description,
         content,
-
+        faqs,
         images,
         degrees,
       } = payload;
@@ -99,6 +99,7 @@ class CollegeService {
             university_id,
             google_map_url,
             website_url,
+            faqs,
             order_no_for_website: nextOrder,
           },
           { transaction }
@@ -117,6 +118,7 @@ class CollegeService {
           university_id,
           google_map_url,
           website_url,
+          
         };
 
         // Only update name if it was provided
@@ -128,6 +130,10 @@ class CollegeService {
           where: { id: collegeId },
           transaction,
         });
+      }
+
+      if (faqs) {
+        await College.update({ faqs }, { where: { id: collegeId }, transaction });
       }
 
       if (address) {

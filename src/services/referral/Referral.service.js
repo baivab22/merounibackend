@@ -83,18 +83,11 @@ class ReferralService {
     }
   }
 
-  async createSelfApplication(payload) {
-    const { student_id, referral_type, college_id, course_id, description } =
+  async createSelfApplication(payload,student_id) {
+    const { referral_type, college_id, course_id, description } =
       payload;
 
-    // Ensure user exists
-    const user = await UserModel.findByPk(student_id);
 
-    if (!user) {
-      const error = new Error("Student not found");
-      error.status = 404;
-      throw error;
-    }
 
     // Optional: prevent duplicate self applications for same college & student
     const existing = await Referral.findOne({
@@ -113,7 +106,7 @@ class ReferralService {
 
     return Referral.create({
       college_id,
-      student_id,
+      student_id: student_id,
       student_name: `${user.firstName} ${user.middleName || ""} ${
         user.lastName || ""
       }`.trim(),

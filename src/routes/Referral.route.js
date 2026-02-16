@@ -15,6 +15,7 @@ import {
   collegeIdAndTypeParamSchema,
   referralIdParamSchema,
   updateReferralStatusSchema,
+  checkIfAlreadyAppliedForCollageQuerySchema,
 } from "../validators/referral/Referral.validator.js";
 
 const router = express.Router();
@@ -52,6 +53,7 @@ const router = express.Router();
  */
 router.post(
   "/self-apply",
+  authenticateUser,
   requestValidator(createSelfApplicationSchema, "body"),
   ReferralController.createSelfApplication,
 );
@@ -84,7 +86,8 @@ router.post(
  */
 router.get(
   "/check-if-already-applied-for-collage",
-  requestValidator(createSelfApplicationSchema, "query"),
+  authenticateUser,
+  requestValidator(checkIfAlreadyAppliedForCollageQuerySchema, "query"),
   ReferralController.checkIfAlreadyAppliedForCollage,
 );
 

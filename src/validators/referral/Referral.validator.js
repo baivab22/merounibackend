@@ -38,6 +38,14 @@ export const createSelfApplicationSchema = yup
   })
   .required();
 
+  // Schema for self applications (student applies themselves)
+export const checkIfAlreadyAppliedForCollageQuerySchema = yup
+  .object({
+    college_id: yup.number().integer().positive().required(),
+  })
+  .required();
+
+
 export const applicationTypeParamSchema = yup.object({
   type: yup.string().trim().required(),
 });
