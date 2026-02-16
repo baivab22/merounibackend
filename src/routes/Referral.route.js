@@ -58,6 +58,38 @@ router.post(
 
 /**
  * @swagger
+ * /referral/check-if-already-applied-for-collage:
+ *   post:
+ *     summary: Check if user has already applied for a college
+ *     tags: [Referrals]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - user_id
+ *               - college_id
+ *             properties:
+ *               user_id:
+ *                 type: integer
+ *               college_id:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Returns true if user has already applied, false otherwise
+ *       400:
+ *         description: Bad request
+ */
+router.get(
+  "/check-if-already-applied-for-collage",
+  requestValidator(createSelfApplicationSchema, "query"),
+  ReferralController.checkIfAlreadyAppliedForCollage,
+);
+
+/**
+ * @swagger
  * /referral/agent-apply:
  *   post:
  *     summary: Create a referred application (agent refers a student)

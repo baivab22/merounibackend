@@ -60,10 +60,7 @@ export const University = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
-    featured_img: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+
     logo: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -158,10 +155,9 @@ export const UniversityProgram = sequelize.define(
       onDelete: "CASCADE",
     },
     program_id: {
-      // Assuming you have a 'levels' table
       type: DataTypes.INTEGER,
       references: {
-        model: Program, // Your Levels model
+        model: Program,
         key: "id",
       },
     },

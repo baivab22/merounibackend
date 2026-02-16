@@ -61,6 +61,28 @@ class ReferralService {
     }
   }
 
+
+  async checkIfAlreadyAppliedForCollage(student_id, college_id) {
+    console.log(student_id, college_id,"TEST 111111111111");
+    const existing = await Referral.findOne({
+      where: {
+        college_id,
+        student_id,
+        application_type: "self",
+      },
+    });
+    console.log(existing,"TEST TEST");
+    if (existing) {
+      return {
+        hasApplied: true,
+        application_id: existing.id,
+      }
+    }
+    return {
+      hasApplied: false,
+    }
+  }
+
   async createSelfApplication(payload) {
     const { student_id, referral_type, college_id, course_id, description } =
       payload;
