@@ -147,7 +147,6 @@ class UniversityService {
         logo,
       } = payload;
 
-      // Validate fullname
       if (!fullname || fullname.trim() === "") {
         const error = new Error("University name (fullname) is required");
         error.status = 400;

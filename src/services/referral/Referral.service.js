@@ -63,6 +63,7 @@ class ReferralService {
 
 
   async checkIfAlreadyAppliedForCollage(student_id, college_id) {
+    console.log(student_id, college_id,"TEST 111111111111");
     const existing = await Referral.findOne({
       where: {
         college_id,
@@ -70,12 +71,16 @@ class ReferralService {
         application_type: "self",
       },
     });
+    console.log(existing,"TEST TEST");
     if (existing) {
-      const error = new Error("You have already applied to this college.");
-      error.status = 400;
-      throw error;
+      return {
+        hasApplied: true,
+        application_id: existing.id,
+      }
     }
-    return true;
+    return {
+      hasApplied: false,
+    }
   }
 
   async createSelfApplication(payload) {
