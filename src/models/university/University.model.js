@@ -65,6 +65,14 @@ export const University = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    featured_image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    videos: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "university",
@@ -124,10 +132,9 @@ export const UniversityLevel = sequelize.define(
       onDelete: "CASCADE",
     },
     level_id: {
-      // Assuming you have a 'levels' table
       type: DataTypes.INTEGER,
       references: {
-        model: Level, // Your Levels model
+        model: Level,
         key: "id",
       },
     },
@@ -206,34 +213,6 @@ export const UniversityMember = sequelize.define(
   }
 );
 
-export const UniversityAsset = sequelize.define(
-  "UniversityAsset",
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    featured_image: {
-      type: DataTypes.STRING,
-    },
-    videos: {
-      type: DataTypes.STRING,
-    },
-    university_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: University,
-        key: "id",
-      },
-      onDelete: "CASCADE",
-    },
-  },
-  {
-    tableName: "university_assets",
-    timestamps: false,
-  }
-);
 
 export const UniversityGallery = sequelize.define(
   "UniversityGallery",
@@ -304,14 +283,6 @@ UniversityMember.belongsTo(University, {
   foreignKey: "university_id",
 });
 
-University.hasOne(UniversityAsset, {
-  as: "asset",
-  foreignKey: "university_id",
-});
-UniversityAsset.belongsTo(University, {
-  as: "university",
-  foreignKey: "university_id",
-});
 
 University.hasMany(UniversityGallery, {
   as: "gallery",

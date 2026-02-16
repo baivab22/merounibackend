@@ -165,6 +165,7 @@ class ConsultancyService {
       courses,
       status,
       visibility,
+      map_type,
     } = payload;
 
     console.log("ConsultancyService - Extracted fields:", {
@@ -259,6 +260,7 @@ class ConsultancyService {
       if (pinned !== undefined) updateData.pinned = pinned;
       if (status !== undefined) updateData.status = status;
       if (visibility !== undefined) updateData.visibility = visibility;
+      if (map_type !== undefined) updateData.map_type = map_type;
 
       await consultancy.update(updateData);
     } else {
@@ -270,6 +272,7 @@ class ConsultancyService {
         address: address || {},
         featured_image: featured_image || "",
         logo: logo === "" || logo === null || logo === undefined ? null : logo,
+        map_type,
         description:
           description === "" ||
             description === null ||

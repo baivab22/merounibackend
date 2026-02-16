@@ -112,6 +112,11 @@ export const createOrUpdateConsultancySchema = yup.object({
         return typeof value === "string";
       },
     ),
+  map_type: yup
+    .string()
+    .oneOf(["embed_map_url", "google_map_url"])
+    .optional()
+    .default("google_map_url"),
   video_url: yup
     .string()
     .url("Video URL must be a valid URL")

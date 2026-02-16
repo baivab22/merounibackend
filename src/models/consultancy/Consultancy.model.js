@@ -57,6 +57,11 @@ Consultancy.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+
+    map_type: {
+      type: DataTypes.ENUM("embed_map_url", "google_map_url"),
+      allowNull: true,
+    },
     video_url: {
       type: DataTypes.STRING,
       allowNull: true,

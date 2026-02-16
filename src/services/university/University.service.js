@@ -7,7 +7,6 @@ import {
   UniversityContact,
   UniversityLevel,
   UniversityMember,
-  UniversityAsset,
   UniversityGallery,
   UniversityProgram,
 } from "../../models/university/University.model.js";
@@ -100,10 +99,6 @@ class UniversityService {
           as: "members",
         },
         {
-          model: UniversityAsset,
-          as: "asset",
-        },
-        {
           model: UniversityGallery,
           as: "gallery",
           attributes: ["image_url"],
@@ -131,7 +126,8 @@ class UniversityService {
       levels: (universityData.levels || []).map((level) => level.level_id),
       programs: universityData.university_programs || [],
       members: universityData.members || [],
-      assets: universityData.asset || null,
+      featured_image: universityData.featured_image || null,
+      videos: universityData.videos || null,
       gallery: (universityData.gallery || []).map((img) => img.image_url),
     };
   }
@@ -156,7 +152,8 @@ class UniversityService {
         programs,
         author_id,
         members,
-        assets,
+        featured_image,
+        videos,
         gallery,
         logo,
       } = payload;
@@ -190,6 +187,8 @@ class UniversityService {
         university.type_of_institute = type_of_institute;
         university.description = description;
         university.logo = logo; // Update logo
+        university.featured_image = featured_image;
+        university.videos = videos;
 
         await university.save({ transaction });
 
@@ -210,9 +209,10 @@ class UniversityService {
             date_of_establish,
             type_of_institute,
             description,
-            description,
-            logo, // Add logo
+            logo,
             order_no_for_website: await this.getNextOrderNo(),
+            featured_image,
+            videos,
           },
           { transaction }
         );
@@ -223,7 +223,6 @@ class UniversityService {
       await this.syncLevels(university.id, levels, transaction);
       await this.syncPrograms(university.id, programs, transaction);
       await this.syncMembers(university.id, members, transaction);
-      await this.upsertAssets(university.id, assets, transaction);
       await this.syncGallery(university.id, gallery, transaction);
 
       await transaction.commit();
@@ -387,19 +386,9 @@ class UniversityService {
         ...member,
       })),
       { transaction }
-    );    
-  }
-
-  async upsertAssets(universityId, assets, transaction) {
-    if (!assets) return;
-    await UniversityAsset.upsert(
-      {
-        university_id: universityId,
-        ...assets,
-      },
-      { transaction }
     );
   }
+
 
   async syncGallery(universityId, gallery, transaction) {
     if (!Array.isArray(gallery)) return;
