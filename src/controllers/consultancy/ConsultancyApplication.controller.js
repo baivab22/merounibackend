@@ -53,7 +53,7 @@ class ConsultancyApplicationController {
 
   static async getUserApplications(req, res) {
     try {
-      const applications = await applicationService.getUserApplications(req.user.id);
+      const applications = await applicationService.getUserApplications(req.user);
       return res.status(200).json(applications);
     } catch (error) {
       console.error(error);

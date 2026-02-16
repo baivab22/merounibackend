@@ -125,14 +125,28 @@ class ConsultancyApplicationService {
       hasApplied: false,
     }
   }
-  async getUserApplications(userId) {
+  async getUserApplications(user) {
+    const whereCondition = {};
+    const userRoles = roleHelper(user?.roles || user?.role);
+
+    if (userRoles?.agent) {
+      whereCondition.agent_id = user.id;
+    } else {
+      whereCondition.student_id = user.id;
+    }
+
     return await ConsultancyApplication.findAll({
-      where: { student_id: userId },
+      where: whereCondition,
       include: [
         {
           model: Consultancy,
           as: "consultancy",
           attributes: ["title", "slugs", "logo", "address", "contact"],
+        },
+        {
+          model: User,
+          as: "student",
+          attributes: ["firstName", "lastName", "email", "phoneNo"],
         },
       ],
       order: [["createdAt", "DESC"]],
