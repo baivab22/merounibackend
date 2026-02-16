@@ -24,8 +24,10 @@ class ReferralController {
       const user = req.user;
       console.log(user,"useruser")
       const { college_id } = req.query;
+      console.log(college_id,"college_id")
       const result = await referralService.checkIfAlreadyAppliedForCollage(
         college_id,
+        user.id
       );
       return res.status(200).json(result);
     } catch (error) {

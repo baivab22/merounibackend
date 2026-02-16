@@ -159,7 +159,7 @@ class CollegeService {
       if (Array.isArray(courses) && courses.length > 0) {
         // Validate that all program IDs exist in the programs table
         const existingPrograms = await Program.findAll({
-          where: { id: courses },
+          where: { id: { [Op.in]: courses } },
           attributes: ["id"],
           transaction,
         });

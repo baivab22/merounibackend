@@ -62,7 +62,7 @@ class ReferralService {
   }
 
 
-  async checkIfAlreadyAppliedForCollage(student_id, college_id) {
+  async checkIfAlreadyAppliedForCollage(college_id,student_id) {
     console.log(student_id, college_id,"TEST 111111111111");
     const existing = await Referral.findOne({
       where: {
@@ -87,7 +87,17 @@ class ReferralService {
     const { referral_type, college_id, course_id, description } =
       payload;
 
+      const user = await UserModel.findOne({
+        where: {
+          id: student_id,
+        },
+      });
 
+      if (!user) {
+        const error = new Error("User not found");
+        error.status = 404;
+        throw error;
+      }
 
     // Optional: prevent duplicate self applications for same college & student
     const existing = await Referral.findOne({
