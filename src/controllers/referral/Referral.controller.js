@@ -58,11 +58,11 @@ class ReferralController {
   static async createSelfApplication(req, res) {
     const userId = req.user.id;
     try {
-      const student = await referralService.createSelfApplication(req.body, userId);
+      const result = await referralService.createSelfApplication(req.body, userId);
 
       return res.status(201).json({
         message: "Self-application submitted successfully",
-        student,
+        result,
       });
     } catch (error) {
       console.error(error);

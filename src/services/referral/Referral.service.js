@@ -104,14 +104,17 @@ class ReferralService {
       where: {
         college_id,
         student_id,
+        course_id,
         application_type: "self",
       },
     });
 
     if (existing) {
-      const error = new Error("You have already applied to this college.");
-      error.status = 400;
-      throw error;
+      return {
+        hasApplied: true,
+        message: "You have already applied for this college",
+        application_id: existing.id,
+      }
     }
 
     return Referral.create({

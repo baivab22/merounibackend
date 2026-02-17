@@ -28,7 +28,6 @@ export const createReferredApplicationSchema = yup
 // Schema for self applications (student applies themselves)
 export const createSelfApplicationSchema = yup
   .object({
-    student_id: yup.number().integer().positive().required(),
     referral_type: yup.string().oneOf(["self"]).default("self").required(),
     college_id: yup.number().integer().positive().required(),
     course_id: yup.number().integer().positive().nullable(),
