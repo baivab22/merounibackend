@@ -245,7 +245,7 @@ class ReferralService {
     }
 
     // Handle both camelCase (collegeId) and snake_case (college_id) field names
-    const collegeId = fullUser.collegeId || fullUser.college_id;
+    const collegeId = fullUser.collegeId
 
     if (!collegeId) {
       const error = new Error("User is not associated with a college");

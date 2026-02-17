@@ -570,8 +570,6 @@ class CollegeService {
     // Check if each college has a user account (institution user)
     const collegeIds = items.map((college) => college.id);
 
-    // Find all users with institution role and matching collegeId
-    // Since roles is JSON, we need to check for institution:true in the JSON
     const usersWithCollegeId = await UserModel.findAll({
       where: {
         collegeId: { [Op.in]: collegeIds },
