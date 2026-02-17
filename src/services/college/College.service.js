@@ -578,7 +578,6 @@ class CollegeService {
       raw: true,
     });
 
-    // Filter users that have institution role and create a Set of college IDs
     const collegesWithAccounts = new Set(
       usersWithCollegeId
         .filter((user) => {

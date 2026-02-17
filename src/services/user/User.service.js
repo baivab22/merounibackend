@@ -180,6 +180,47 @@ class UserService {
     await user.update(updates);
   }
 
+    async updateUserDetails(userId, updates) {
+    if (!userId) {
+      const error = new Error("User ID is required");
+      error.status = 400;
+      throw error;
+    }
+
+    const user = await UserModel.findByPk(userId);
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.status = 404;
+      throw error;
+    }
+    const changedValues = {}
+    if (updates.firstName) {
+      changedValues.firstName = updates.firstName
+    }
+    if (updates.middleName) {
+      changedValues.middleName = updates.middleName
+    }
+    if (updates.lastName) {
+      changedValues.lastName = updates.lastName
+    }
+    if (updates.phoneNo) {
+      changedValues.phoneNo = updates.phoneNo
+    }
+    if (updates.profileImageUrl) {
+      changedValues.profileImageUrl = updates.profileImageUrl
+    }
+    if (updates.cvUrl) {
+      changedValues.cvUrl = updates.cvUrl
+    }
+
+    console.log(changedValues,"changedValueschangedValueschangedValues")
+
+      await UserModel.update(changedValues, { where: { id: userId } })
+      return true
+  }
+
+
   async listPendingAgentRole(query = {}) {
     const role = query.role || "agent";
     let page = parseInt(query.page, 10) || 1;

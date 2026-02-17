@@ -1,6 +1,8 @@
 import UserService from "../../services/user/User.service.js";
+import PasswordService from "../../services/user/Password.service.js";
 
 const userService = new UserService();
+const passwordService = new PasswordService();
 
 class UserController {
   static async listUsers(req, res) {
@@ -78,6 +80,23 @@ class UserController {
       return res.status(200).json({ message: "Profile updated successfully" });
     } catch (error) {
       console.error("Error updating profile:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message:
+          status === 500 ? `Server Error: ${error.message}` : error.message,
+      });
+    }
+  }
+
+
+
+  static async updateUserDetails(req, res) {
+    try {
+      await userService.updateUserDetails(req.user.id, req.body);
+
+      return res.status(200).json({ message: "User details updated successfully" });
+    } catch (error) {
+      console.error("Error updating user details:", error);
       const status = error.status || 500;
       return res.status(status).json({
         message:
@@ -190,6 +209,18 @@ class UserController {
       return res.status(status).json({
         message:
           status === 500 ? `Server Error: ${error.message}` : error.message,
+      });
+    }
+  }
+  static async changePassword(req, res) {
+    try {
+      await passwordService.changePassword(req.user.id, req.body);
+      return res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error in changePassword:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? `Server Error: ${error.message}` : error.message,
       });
     }
   }

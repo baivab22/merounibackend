@@ -46,6 +46,18 @@ export const updateUserProfileBodySchema = yup
     return value && Object.keys(value).length > 0;
   });
 
+  export const updateUserDetailsBodySchema = yup
+  .object({
+    firstName: yup.string().trim().min(2),
+    middleName: yup.string().trim().nullable(),
+    lastName: yup.string().trim().min(2),
+    phoneNo: yup.string().trim(),
+    profileImageUrl: yup.string().url().nullable().optional(),
+    cvUrl: yup.string().url().nullable().optional(),
+  })
+
+
+
 export const applyForAgentRoleSchema = yup
   .object({
     // Add required fields based on your agent role application

@@ -18,8 +18,10 @@ import {
   applyForAgentRoleSchema,
   reviewAgentRequestSchema,
   createCollegeCredentialsSchema,
-  createConsultancyCredentialsSchema
+  createConsultancyCredentialsSchema,
+  updateUserDetailsBodySchema
 } from "../validators/user/User.validator.js";
+import { changePasswordSchema } from "../validators/user/Password.validator.js";
 
 const route = express.Router();
 
@@ -206,6 +208,52 @@ route.put(
     { schema: updateUserProfileBodySchema, property: "body" },
   ]),
   UserController.updateUserProfile
+);
+
+/**
+ * @swagger
+ * /users/edit-profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               phoneNo:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: User not found
+ */
+route.put(
+  "/edit-userdetails",
+  authenticateUser,
+  requestValidatorMultiple([
+    { schema: updateUserDetailsBodySchema, property: "body" },
+  ]),
+
+  UserController.updateUserDetails
 );
 
 /**
@@ -403,5 +451,46 @@ route.post(
   UserController.createConsultancyCredentials
 );
 
+
+/**
+ * @swagger
+ * /users/change-password:
+ *   put:
+ *     summary: Change user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - oldPassword
+ *               - newPassword
+ *               - confirmPassword
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+route.put(
+  "/change-password",
+  authenticateUser,
+  requestValidator(changePasswordSchema, "body"),
+  UserController.changePassword
+);
 
 export default route;
