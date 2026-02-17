@@ -39,6 +39,8 @@ export const updateUserProfileBodySchema = yup
       institution: yup.boolean(),
     }),
     pendingRoles: yup.mixed(), // optional, handled in service
+    profileImageUrl: yup.string().url().nullable().optional(),
+    cvUrl: yup.string().url().nullable().optional(),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;

@@ -80,6 +80,16 @@ UserModel.init(
       allowNull: true,
       field: "otp_expiry_time",
     },
+    profileImageUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "profile_image_url",
+    },
+    cvUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "cv_url",
+    },
     createdByAdmin: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
