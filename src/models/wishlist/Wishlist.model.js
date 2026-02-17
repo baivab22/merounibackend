@@ -23,9 +23,18 @@ const Wishlist = sequelize.define(
     },
     college_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: College,
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    consultancy_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "consultancies", // Using string based on other models usually, or import Consultancy
         key: "id",
       },
       onDelete: "CASCADE",
@@ -38,9 +47,14 @@ const Wishlist = sequelize.define(
   }
 );
 
+import Consultancy from "../consultancy/Consultancy.model.js";
+
 User.hasMany(Wishlist, { foreignKey: "user_id" });
 College.hasMany(Wishlist, { foreignKey: "college_id" });
+Consultancy.hasMany(Wishlist, { foreignKey: "consultancy_id" });
+
 Wishlist.belongsTo(User, { foreignKey: "user_id" });
 Wishlist.belongsTo(College, { as: "college", foreignKey: "college_id" });
+Wishlist.belongsTo(Consultancy, { as: "consultancy", foreignKey: "consultancy_id" });
 
 export default Wishlist;

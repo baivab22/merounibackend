@@ -4,8 +4,6 @@ import { Op } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import {
   Exam,
-  ExamDetail,
-  ApplicationDetail,
 } from "../../models/exams/Exam.model.js";
 import Level from "../../models/level/Level.model.js";
 import { University } from "../../models/university/University.model.js";
@@ -29,8 +27,6 @@ class ExamService {
       sortOrder,
     } = query;
 
-    console.log(query,"queryqueryqueryqueryqueryqueryqueryqueryquery")
-
     const whereCondition = {};
     const include = [];
 
@@ -41,22 +37,6 @@ class ExamService {
         { description: { [Op.like]: `%${q}%` } },
       ];
     }
-
-    // // Level filter (ID or Slug)
-    // if (level) {
-    //   if (!isNaN(level)) {
-    //     whereCondition.level_id = parseInt(level, 10);
-    //   } else {
-    //     include.push({
-    //       model: Level,
-    //       as: "level",
-    //       where: { slugs: level },
-    //       attributes: ["id", "title"],
-    //     });
-    //   }
-    // } else {
-    //   include.push({ model: Level, attributes: ["id", "title"], as: "level" });
-    // }
 
     // Affiliation filter (ID or Slug)
     if (affiliation) {
@@ -79,17 +59,9 @@ class ExamService {
     }
 
     // Exam Type filter
-    const examDetailWhere = {};
     if (examType) {
-      examDetailWhere.exam_type = examType;
+      whereCondition.exam_type = examType;
     }
-
-    include.push({
-      model: ExamDetail,
-      as: "exam_details",
-      where: Object.keys(examDetailWhere).length > 0 ? examDetailWhere : undefined,
-      required: !!examType,
-    });
 
     // Discipline filter (ID or Slug) - Joined via Program
     if (discipline) {
@@ -115,28 +87,17 @@ class ExamService {
       });
     }
 
-    // Application Detail filters (Date based)
-    const applicationWhere = {};
+    // Date based filters
     const now = new Date();
 
     if (isOpen === "true") {
-      applicationWhere.opening_date = { [Op.lte]: now };
-      applicationWhere.closing_date = { [Op.gte]: now };
+      whereCondition.opening_date = { [Op.lte]: now };
+      whereCondition.closing_date = { [Op.gte]: now };
     }
 
     if (isUpcoming === "true") {
-      applicationWhere.exam_date = { [Op.gt]: now };
+      whereCondition.exam_date = { [Op.gt]: now };
     }
-
-    include.push({
-      model: ApplicationDetail,
-      as: "application_details",
-      where:
-        Object.keys(applicationWhere).length > 0
-          ? applicationWhere
-          : undefined,
-      required: Object.keys(applicationWhere).length > 0,
-    });
 
     // Author Details
     include.push({
@@ -187,8 +148,6 @@ class ExamService {
           attributes: ["id", "firstName"],
           as: "authorDetails",
         },
-        { model: ExamDetail, as: "exam_details" },
-        { model: ApplicationDetail, as: "application_details" },
       ],
     });
 
@@ -211,8 +170,18 @@ class ExamService {
       affiliation,
       syllabus,
       pastQuestion,
-      examDetails,
-      applicationDetails,
+      // Flattened fields
+      exam_type,
+      full_marks,
+      pass_marks,
+      questions_count,
+      question_type,
+      duration,
+      normal_fee,
+      late_fee,
+      exam_date,
+      opening_date,
+      closing_date,
     } = payload;
 
     const transaction = await sequelize.transaction();
@@ -220,59 +189,37 @@ class ExamService {
       let examId = id;
       const slugs = slug(title);
 
+      const examData = {
+        title,
+        description,
+        author,
+        level_id,
+        affiliation,
+        syllabus,
+        pastQuestion,
+        exam_type,
+        full_marks,
+        pass_marks,
+        questions_count,
+        question_type,
+        duration,
+        normal_fee,
+        late_fee,
+        exam_date,
+        opening_date,
+        closing_date,
+      };
+
       if (!examId) {
-        const exam = await Exam.create(
-          {
-            title,
-            slugs,
-            description,
-            author,
-            level_id,
-            affiliation,
-            syllabus,
-            pastQuestion,
-          },
-          { transaction }
-        );
+        // Create
+        examData.slugs = slugs;
+        const exam = await Exam.create(examData, { transaction });
         examId = exam.id;
       } else {
-        await Exam.update(
-          {
-            title,
-            description,
-            author,
-            level_id,
-            affiliation,
-            syllabus,
-            pastQuestion,
-          },
-          { where: { id: examId }, transaction }
-        );
-      }
-
-      if (Array.isArray(examDetails) && examDetails.length > 0) {
-        await ExamDetail.destroy({ where: { exam_id: examId }, transaction });
-        await ExamDetail.bulkCreate(
-          examDetails.map((detail) => ({
-            exam_id: examId,
-            ...detail,
-          })),
-          { transaction }
-        );
-      }
-
-      if (applicationDetails) {
-        await ApplicationDetail.destroy({
-          where: { exam_id: examId },
-          transaction,
-        });
-        await ApplicationDetail.create(
-          {
-            exam_id: examId,
-            ...applicationDetails,
-          },
-          { transaction }
-        );
+        // Update
+        // Check if title changed to update slugs? user might not want slug change valid SEO
+        // For now not updating slug on edit unless explicitly requested logic changes
+        await Exam.update(examData, { where: { id: examId }, transaction });
       }
 
       await transaction.commit();

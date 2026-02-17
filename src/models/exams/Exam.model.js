@@ -64,64 +64,31 @@ Exam.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-  },
-  {
-    sequelize,
-    modelName: "exams",
-    freezeTableName: true,
-    timestamps: true,
-  }
-);
-
-class ExamDetail extends Model {}
-ExamDetail.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-      allowNull: false,
-    },
+    // New flattened fields
     exam_type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     full_marks: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     pass_marks: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
-    number_of_question: {
+    questions_count: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
     },
     question_type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     duration: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    modelName: "exam_details",
-    freezeTableName: true,
-    timestamps: false, // If you don't want timestamps in this table
-  }
-);
-
-class ApplicationDetail extends Model {}
-ApplicationDetail.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-      allowNull: false,
+      allowNull: true,
     },
     normal_fee: {
       type: DataTypes.INTEGER,
@@ -146,20 +113,15 @@ ApplicationDetail.init(
   },
   {
     sequelize,
-    modelName: "application_details",
+    modelName: "exams",
     freezeTableName: true,
-    timestamps: false,
+    timestamps: true,
   }
 );
 
 // Define the relationships:
-Exam.hasMany(ExamDetail, { foreignKey: "exam_id", as: "exam_details" });
-Exam.hasMany(ApplicationDetail, {
-  foreignKey: "exam_id",
-  as: "application_details",
-});
 Exam.belongsTo(User, { foreignKey: "author", as: "authorDetails" });
 Exam.belongsTo(Level, { foreignKey: "level_id", as: "level" });
 Exam.belongsTo(University, { foreignKey: "affiliation", as: "university" });
 
-export { Exam, ExamDetail, ApplicationDetail };
+export { Exam };
