@@ -76,14 +76,14 @@ class CollegeService {
           const error = new Error("College already exists");
           error.status = 400;
           throw error;
-        } 
-        
+        }
+
         const slugs = generateUniqueSlug(collegeName);
-        
+
         // Find the maximum order number and increment it
         const maxOrder = await College.max('order_no_for_website', { transaction });
         const nextOrder = (maxOrder || 0) + 1;
-        
+
         const newCollege = await College.create(
           {
             name: collegeName,
@@ -118,7 +118,7 @@ class CollegeService {
           university_id,
           google_map_url,
           website_url,
-          
+
         };
 
         // Only update name if it was provided
@@ -157,13 +157,13 @@ class CollegeService {
       }
 
       if (Array.isArray(courses) && courses.length > 0) {
-        console.log(courses,"coursescoursescoursescourses")
+        console.log(courses, "coursescoursescoursescourses")
         const existingPrograms = await Program.findAll({
           where: { id: { [Op.in]: courses } },
           attributes: ["id"],
           transaction,
         });
-        console.log(existingPrograms,"existingProgramsexistingProgramsexistingPrograms")
+        console.log(existingPrograms, "existingProgramsexistingProgramsexistingPrograms")
 
         const existingProgramIds = existingPrograms.map(
           (program) => program.id
@@ -247,9 +247,10 @@ class CollegeService {
         const memberRecords = members.map((member) => ({
           college_id: collegeId,
           name: member.name,
-          contact_number: member.contact_number,
+          contact_number: member.contact_info,
           role: member.role,
-          description: member.description,
+          description: member.bio,
+          image_url: member.image_url,
         }));
         await CollegeMember.bulkCreate(memberRecords, { transaction });
       }
@@ -500,10 +501,20 @@ class CollegeService {
             : undefined,
         },
         {
+          model: CollegeFacility,
+          as: "facilities",
+          attributes: ["id", "title", "description", "icon"],
+        },
+        {
+          model: CollegeMember,
+          as: "collegeMembers",
+          attributes: ["id", "name", "contact_number", "role", "description", "image_url"],
+        },
+        {
           model: CollegeCourse,
           as: "collegeCourses",
-          attributes: { exclude: ["college_id"] }, // Include course_id for filtering
-          required: !!programIdFilter || Object.keys(degreeCondition).length > 0, // Make required when filtering by program_id or degree
+          attributes: { exclude: ["college_id"] },
+          required: !!programIdFilter || Object.keys(degreeCondition).length > 0,
           duplicating: !!programIdFilter || Object.keys(degreeCondition).length > 0,
           include: [
             {

@@ -68,6 +68,7 @@ class CollegeController {
         pagination,
       });
     } catch (error) {
+      console.log(error,"DONDONEDONE")
       return res.status(500).json({ error: error.message });
     }
   }
@@ -78,7 +79,6 @@ class CollegeController {
 
       return res.status(200).json({ item: college });
     } catch (error) {
-      console.log(error,"DONEDONE")
       return res.status(500).json({ error: error.message });
     }
   }

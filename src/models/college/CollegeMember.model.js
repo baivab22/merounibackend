@@ -26,6 +26,7 @@ CollegeMember.init(
       allowNull: true,
     },
     description: { type: DataTypes.TEXT },
+    image_url: { type: DataTypes.TEXT, allowNull: true },
   },
   { sequelize, modelName: "college_member", timestamps: false }
 );

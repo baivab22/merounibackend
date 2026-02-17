@@ -149,7 +149,7 @@ class DegreeService {
         const updateData = { ...rest };
 
         if (title && title !== degree.title) {
-            updateData.title = title;
+            updateData.title = generateUniqueSlug(title);
         }
 
         await degree.update(updateData);

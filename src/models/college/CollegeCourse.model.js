@@ -3,7 +3,7 @@ import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
 import Program from "../courses/Course.model.js";
 
-class CollegeCourse extends Model {}
+class CollegeCourse extends Model { }
 
 CollegeCourse.init(
   {
