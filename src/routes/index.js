@@ -143,5 +143,8 @@ router.use("/degree", degreeRoute);
 import consultancyApplicationRoute from "./consultancy/ConsultancyApplication.route.js";
 router.use("/consultancy-application", consultancyApplicationRoute);
 
+import databaseRoute from "./Database.route.js";
+router.use("/database", databaseRoute);
+
 export default router;
 
