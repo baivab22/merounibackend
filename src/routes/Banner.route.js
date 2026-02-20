@@ -7,8 +7,8 @@ import { requestValidator } from "../middlewares/RequestValidator.middleware.js"
 import {
   paginationSchema,
   bannerIdParamSchema,
-  galleryIdParamSchema,
   createBannerSchema,
+  updateBannerSchema,
 } from "../validators/banner/Banner.validator.js";
 
 const router = express.Router();
@@ -30,27 +30,32 @@ const router = express.Router();
  *             type: object
  *             required:
  *               - title
- *               - image
+ *               - banner_image
+ *               - display_position
  *             properties:
  *               title:
  *                 type: string
  *                 example: Summer Sale Banner
- *               image:
+ *               banner_image:
  *                 type: string
  *                 format: uri
  *                 example: https://example.com/banner.jpg
- *               link:
+ *               college_id:
+ *                 type: integer
+ *               website_url:
  *                 type: string
  *                 format: uri
  *                 example: https://example.com/promotion
- *               gallery:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     image:
- *                       type: string
- *                       format: uri
+ *               display_position:
+ *                 type: string
+ *               priority:
+ *                 type: integer
+ *               date_of_expiry:
+ *                 type: string
+ *                 format: date-time
+ *               is_featured:
+ *                 type: integer
+ *                 enum: [0, 1]
  *     responses:
  *       201:
  *         description: Banner created successfully
@@ -125,6 +130,67 @@ router.get(
 /**
  * @swagger
  * /banner/{id}:
+ *   put:
+ *     summary: Update a banner
+ *     tags: [Banners]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               college_id:
+ *                 type: integer
+ *               website_url:
+ *                 type: string
+ *               display_position:
+ *                 type: string
+ *               priority:
+ *                 type: integer
+ *               date_of_expiry:
+ *                 type: string
+ *                 format: date-time
+ *               title:
+ *                 type: string
+ *               banner_image:
+ *                 type: string
+ *               is_featured:
+ *                 type: integer
+ *                 enum: [0, 1]
+ *     responses:
+ *       200:
+ *         description: Banner updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Banner not found
+ */
+router.put(
+  "/:id",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(bannerIdParamSchema, "params"),
+  requestValidator(updateBannerSchema, "body"),
+  BannerController.updateBanner
+);
+
+/**
+ * @swagger
+ * /banner/{id}:
  *   delete:
  *     summary: Delete a banner
  *     tags: [Banners]
@@ -153,39 +219,6 @@ router.delete(
   authorizeRole(["admin", "editor"]),
   requestValidator(bannerIdParamSchema, "params"),
   BannerController.deleteBanner
-);
-
-/**
- * @swagger
- * /banner/{galleryId}/delete:
- *   delete:
- *     summary: Delete a banner gallery item
- *     tags: [Banners]
- *     security:
- *       - bearerAuth: []
- *       - cookieAuth: []
- *     parameters:
- *       - in: path
- *         name: galleryId
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Gallery item deleted successfully
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
- *       404:
- *         description: Gallery item not found
- */
-router.delete(
-  "/:galleryId/delete",
-  authenticateUser,
-  authorizeRole(["admin", "editor"]),
-  requestValidator(galleryIdParamSchema, "params"),
-  BannerController.deleteBannerGalleryItem
 );
 
 export default router;

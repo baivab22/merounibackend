@@ -19,7 +19,7 @@ class DatabaseService {
         const mysqldump = spawn("mysqldump", args, {
             env: {
                 ...process.env,
-                MYSQL_PWD: DB_PASS, 
+                MYSQL_PWD: DB_PASS,
             },
         });
 

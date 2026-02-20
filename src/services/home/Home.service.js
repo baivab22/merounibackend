@@ -46,7 +46,7 @@ class HomeService {
     ] = await Promise.all([
       College.findAll({
         where: { name: searchCondition },
-        attributes: [['id', 'id'], ['name', 'title'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['name', 'title'], ['slugs', 'slugs'],['featured_img','featured_img'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'colleges' }))),
 
@@ -64,7 +64,7 @@ class HomeService {
 
       Blog.findAll({
         where: { title: searchCondition, status: 'published' },
-        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['createdAt', 'createdAt']], // Note: Blog likely uses 'slug' not 'slugs' based on typical patterns, but mapping to 'slugs' for consistency
+        attributes: [['id', 'id'], ['title', 'title'],['featured_image','image'], ['slug', 'slugs'], ['createdAt', 'createdAt']], // Note: Blog likely uses 'slug' not 'slugs' based on typical patterns, but mapping to 'slugs' for consistency
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'blog' }))),
 
@@ -82,7 +82,7 @@ class HomeService {
 
       University.findAll({
         where: { fullname: searchCondition },
-        attributes: [['id', 'id'], ['fullname', 'title'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['fullname', 'title'],['logo','logo'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'university' }))),
 

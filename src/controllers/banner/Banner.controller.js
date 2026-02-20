@@ -7,7 +7,7 @@ class BannerController {
     try {
       await bannerService.createBanners(req.body);
 
-      return res.status(201).json({ message: "Banners added successfully" });
+      return res.status(201).json({ message: "Banner added successfully" });
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
     }
@@ -43,6 +43,18 @@ class BannerController {
     }
   }
 
+  static async updateBanner(req, res) {
+    try {
+      await bannerService.updateBanner(req.params.id, req.body);
+
+      return res.status(200).json({ message: "Banner updated successfully" });
+    } catch (error) {
+      res
+        .status(error.status || 500)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+
   static async deleteBanner(req, res) {
     try {
       await bannerService.deleteBanner(req.params.id);
@@ -52,20 +64,6 @@ class BannerController {
       res
         .status(error.status || 500)
         .json({ message: "Server error", error: error.message });
-    }
-  }
-
-  static async deleteBannerGalleryItem(req, res) {
-    try {
-      await bannerService.deleteGalleryItem(req.params.galleryId);
-
-      return res
-        .status(200)
-        .json({ message: "Banner gallery item deleted successfully" });
-    } catch (error) {
-      res
-        .status(error.status || 500)
-        .json({ error: error.message || "Server error" });
     }
   }
 }

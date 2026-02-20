@@ -11,23 +11,24 @@ import { University } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
 
+const parseFilter = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === "string") return val.split(",").map((v) => v.trim()).filter(Boolean);
+    return [val];
+};
+
 class SchoolService {
     async listSchools(query = {}) {
         const page = parseInt(query.page, 10) || 1;
         const limit = parseInt(query.limit, 10) || 10;
         const sort = (query.sort || "asc").toUpperCase();
         const search = query.q || "";
-        const isFeatured = query.is_featured;
-        const pinned = query.pinned;
 
-        const country = query.country || "";
-        const state = query.state || "";
-        const city = query.city || "";
-        const district = query.district || "";
-        const type = query.type || "";
-        const amenity = query.amenity || "";
-        const university = query.university || "";
-        const programId = query.program_id ? parseInt(query.program_id, 10) : null;
+
+        const types = parseFilter(query.type);
+        const affiliations = parseFilter(query.affiliation || query.university);
+
 
         const offset = (page - 1) * limit;
 
@@ -41,79 +42,20 @@ class SchoolService {
             whereCondition.name = { [Op.like]: `%${search}%` };
         }
 
-        if (isFeatured !== undefined) {
-            whereCondition.is_featured = isFeatured === "true" ? 1 : 0;
+        if (types.length > 0) {
+            whereCondition.institute_type = { [Op.in]: types };
         }
 
-        if (pinned !== undefined) {
-            whereCondition.pinned = pinned === "true" ? 1 : 0;
-        }
-
-        if (type) {
-            whereCondition.institute_type = type;
-        }
-
-        const addressCondition = {};
-        if (country) {
-            addressCondition.country = { [Op.like]: `%${country}%` };
-        }
-        if (state) {
-            addressCondition.state = { [Op.like]: `%${state}%` };
-        }
-        if (city) {
-            addressCondition.city = { [Op.like]: `%${city}%` };
-        }
-        if (district) {
-            addressCondition.city = { [Op.like]: `%${district}%` };
+        if (affiliations.length > 0) {
+            whereCondition.university_id = { [Op.in]: affiliations };
         }
 
         const include = [
             {
-                model: CollegeAddress,
-                as: "address",
-                attributes: ["country", "state", "city"],
-                where: Object.keys(addressCondition).length ? addressCondition : undefined,
+                model: CollegeGallery,
+                as: "collegeGallery",
             },
         ];
-
-        if (amenity) {
-            include.push({
-                model: CollegeFacility,
-                as: "facilities",
-                attributes: [],
-                where: {
-                    title: { [Op.like]: `%${amenity}%` },
-                },
-                required: true,
-            });
-        }
-
-        if (university) {
-            include.push({
-                model: University,
-                as: "university",
-                attributes: ["fullname", "slugs"],
-                where: {
-                    [Op.or]: [
-                        { slugs: { [Op.like]: `%${university}%` } },
-                        { fullname: { [Op.like]: `%${university}%` } },
-                    ],
-                },
-                required: true,
-            });
-        } else {
-            include.push({
-                model: University,
-                as: "university",
-                attributes: ["fullname", "slugs"],
-            });
-        }
-
-        include.push({
-            model: CollegeGallery,
-            as: "collegeGallery",
-        });
-
         const { count: totalCount, rows: items } = await College.findAndCountAll({
             where: whereCondition,
             limit,

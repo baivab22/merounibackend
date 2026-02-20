@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 
 import { sequelize } from "../../config/database.config.js";
-import College from "../college/College.model.js";
 
 const Banner = sequelize.define(
   "Banner",
@@ -24,13 +23,22 @@ const Banner = sequelize.define(
       allowNull: true,
       defaultValue: "https://merouni.com",
     },
+    banner_image: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     display_position: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     priority: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
+    },
+    is_featured: {
+      type: DataTypes.TINYINT,
+      allowNull: true,
       defaultValue: 0,
     },
     date_of_expiry: {
@@ -48,8 +56,5 @@ const Banner = sequelize.define(
     timestamps: true,
   }
 );
-
-Banner.belongsTo(College, { foreignKey: "college_id", onDelete: "CASCADE" });
-College.hasMany(Banner, { foreignKey: "college_id" });
 
 export default Banner;

@@ -3,7 +3,7 @@ import express from "express";
 import SchoolController from "../controllers/school/School.controller.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-    paginationSchema,
+    schoolPaginationSchema,
     collegeSlugParamSchema,
 } from "../validators/college/College.validator.js";
 
@@ -45,7 +45,7 @@ const router = express.Router();
  */
 router.get(
     "/",
-    requestValidator(paginationSchema, "query"),
+    requestValidator(schoolPaginationSchema, "query"),
     SchoolController.listSchools
 );
 

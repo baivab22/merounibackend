@@ -1,49 +1,42 @@
 import { Op } from "sequelize";
 
 import Banner from "../../models/banner/Banner.model.js";
-import BannerGallery from "../../models/banner/BannerGallery.model.js";
 import College from "../../models/college/College.model.js";
 
 class BannerService {
   async createBanners(payload) {
     const {
-      collegeId,
-      bannerImage,
+      college_id,
+      title,
+      banner_image,
       website_url,
       display_position,
       priority,
       date_of_expiry,
+      is_featured,
     } = payload;
 
-    if (collegeId) {
-      const college = await College.findByPk(collegeId);
+    if (college_id) {
+      const college = await College.findByPk(college_id);
       if (!college) {
         const error = new Error("College not found");
-
         error.status = 404;
         throw error;
       }
     }
 
-    for (const banner of bannerImage) {
-      const newBanner = await Banner.create({
-        title: banner.title,
-        college_id: collegeId,
-        website_url,
-        display_position,
-        priority,
-        date_of_expiry,
-      });
+    const newBanner = await Banner.create({
+      title,
+      college_id,
+      banner_image,
+      website_url,
+      display_position,
+      priority,
+      date_of_expiry,
+      is_featured,
+    });
 
-      for (const [size, url] of Object.entries(banner.gallery)) {
-        await BannerGallery.create({
-          banner_id: newBanner.id,
-          size,
-          url,
-          is_featured: banner.is_featured,
-        });
-      }
-    }
+    return newBanner;
   }
 
   async listBanners(query = {}) {
@@ -71,9 +64,6 @@ class BannerService {
       offset,
       distinct: true,
       order: [["id", sort]],
-      include: {
-        model: BannerGallery,
-      },
     });
 
     return {
@@ -91,7 +81,6 @@ class BannerService {
     const college = await College.findByPk(collegeId, {
       include: {
         model: Banner,
-        include: [BannerGallery],
       },
     });
 
@@ -115,16 +104,52 @@ class BannerService {
     }
   }
 
-  async deleteGalleryItem(galleryId) {
-    const bannerGalleryItem = await BannerGallery.findByPk(galleryId);
+  async updateBanner(id, payload) {
+    const {
+      college_id,
+      title,
+      banner_image,
+      website_url,
+      display_position,
+      priority,
+      date_of_expiry,
+      is_featured,
+    } = payload;
 
-    if (!bannerGalleryItem) {
-      const error = new Error("Banner gallery item not found");
+    const banner = await Banner.findByPk(id);
+    if (!banner) {
+      const error = new Error("Banner not found");
       error.status = 404;
       throw error;
     }
 
-    await bannerGalleryItem.destroy();
+    // if (college_id) {
+    //   const college = await College.findByPk(college_id);
+    //   if (!college) {
+    //     const error = new Error("College not found");
+    //     error.status = 404;
+    //     throw error;
+    //   }
+    // }
+
+    await banner.update({
+      title: title !== undefined ? title : banner.title,
+      college_id: college_id !== undefined ? college_id : banner.college_id,
+      banner_image:
+        banner_image !== undefined ? banner_image : banner.banner_image,
+      website_url: website_url !== undefined ? website_url : banner.website_url,
+      display_position:
+        display_position !== undefined
+          ? display_position
+          : banner.display_position,
+      priority: priority !== undefined ? priority : banner.priority,
+      date_of_expiry:
+        date_of_expiry !== undefined ? date_of_expiry : banner.date_of_expiry,
+      is_featured:
+        is_featured !== undefined ? is_featured : banner.is_featured,
+    });
+
+    return banner;
   }
 }
 

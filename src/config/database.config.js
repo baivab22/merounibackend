@@ -27,13 +27,11 @@ export const authenticate = async () => {
     const modelNames = Object.keys(sequelize.models);
     console.log("Models to sync:", modelNames);
 
-
-
     // if (envConfig.NODE_ENV.toLowerCase() === "development") {
-    await sequelize.sync({
+    // await sequelize.sync({
       // alter: true,
       // force: true,
-    });
+    // });
     // }
     console.log("Models synced");
 

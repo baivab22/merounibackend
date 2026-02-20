@@ -19,31 +19,22 @@ export const bannerIdParamSchema = yup.object({
   id: yup.number().integer().positive().required(),
 });
 
-export const galleryIdParamSchema = yup.object({
-  galleryId: yup.number().integer().positive().required(),
-});
-
 export const createBannerSchema = yup.object({
-  collegeId: yup.number().integer().positive().nullable().optional(),
   website_url: yup.string().url().nullable().optional(),
-  display_position: yup.number().integer().min(1).required(),
+  display_position: yup.string().required(),
   priority: yup.number().integer().optional(),
-  date_of_expiry: yup.date().required(),
-  bannerImage: yup
-    .array()
-    .of(
-      yup.object({
-        title: yup.string().required(),
-        gallery: yup
-          .object({
-            small: yup.string().required(),
-            medium: yup.string().required(),
-            large: yup.string().required(),
-          })
-          .required(),
-        is_featured: yup.number().integer().oneOf([0, 1]).default(0),
-      })
-    )
-    .min(1)
-    .required(),
+  date_of_expiry: yup.date().optional(),
+  title: yup.string().required(),
+  banner_image: yup.string().required(),
+  is_featured: yup.number().integer().oneOf([0, 1]).default(0),
+});
+export const updateBannerSchema = yup.object({
+  college_id: yup.number().integer().positive().nullable().optional(),
+  website_url: yup.string().url().nullable().optional(),
+  display_position: yup.number().integer().min(1).optional(),
+  priority: yup.number().integer().optional(),
+  date_of_expiry: yup.date().optional(),
+  title: yup.string().optional(),
+  banner_image: yup.string().optional(),
+  is_featured: yup.number().integer().oneOf([0, 1]).optional(),
 });
