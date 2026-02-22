@@ -51,6 +51,7 @@ export const createOrUpdateCollegeSchema = yup
     author_id: yup.number().integer().positive().optional(),
     university_id: yup.number().integer().positive().optional(),
     google_map_url: yup.string().optional(),
+    map_type: yup.string().optional(),
     website_url: yup
       .string()
       .test("is-valid-url", "website_url must be a valid URL", (value) => {

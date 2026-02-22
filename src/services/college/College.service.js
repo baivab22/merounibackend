@@ -29,6 +29,7 @@ class CollegeService {
         author_id,
         university_id,
         google_map_url,
+        map_type,
         website_url,
         featured_img,
         college_logo,
@@ -45,27 +46,26 @@ class CollegeService {
         degrees,
       } = payload;
 
-      let collegeId = id;
+      let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
+      let existingCollege = null;
 
-      // If updating and name is not provided, fetch existing name
-      let collegeName = name;
-      if (collegeId && !collegeName) {
-        const existingCollege = await College.findByPk(collegeId, {
-          transaction,
-        });
-        if (existingCollege) {
-          collegeName = existingCollege.name;
+      if (collegeId) {
+        existingCollege = await College.findByPk(collegeId, { transaction });
+        if (!existingCollege && id) {
+          // If an ID was provided but no college found, maybe treat as new or error?
+          // The previous code didn't explicitly error here, it just proceeded to update with where: {id: collegeId}
+          // which would do nothing. 
         }
       }
 
-      // Validate that name exists
+      let collegeName = name || existingCollege?.name;
+
       if (!collegeName) {
         const error = new Error("College name is required");
         error.status = 400;
         throw error;
       }
 
-      // const slugs = slug(collegeName);
 
       if (!collegeId) {
         const existingCollege = await College.findOne({
@@ -80,7 +80,6 @@ class CollegeService {
 
         const slugs = generateUniqueSlug(collegeName);
 
-        // Find the maximum order number and increment it
         const maxOrder = await College.max('order_no_for_website', { transaction });
         const nextOrder = (maxOrder || 0) + 1;
 
@@ -98,6 +97,7 @@ class CollegeService {
             content,
             university_id,
             google_map_url,
+            map_type,
             website_url,
             faqs,
             order_no_for_website: nextOrder,
@@ -117,13 +117,18 @@ class CollegeService {
           college_broucher,
           university_id,
           google_map_url,
+          map_type,
           website_url,
-
         };
 
-        // Only update name if it was provided
-        if (name) {
-          updateData.name = collegeName;
+        // Only update name and slugs if name has changed
+        if (name && existingCollege && name !== existingCollege.name) {
+          updateData.name = name;
+          updateData.slugs = generateUniqueSlug(name);
+        } else if (name && !existingCollege) {
+          // This case handles if collegeId was provided but not found in DB
+          updateData.name = name;
+          updateData.slugs = generateUniqueSlug(name);
         }
 
         await College.update(updateData, {
@@ -292,7 +297,7 @@ class CollegeService {
     const collegeInclude = {
       model: College,
       as: "collegeAdmissionCollege",
-      attributes: ["name", "slugs", "featured_img"],
+      attributes: ["name", "slugs", "featured_img", "id"],
       include: [],
     };
 
@@ -314,7 +319,7 @@ class CollegeService {
       collegeInclude.include.push({
         model: University,
         as: "university",
-        attributes: ["fullname", "slugs"],
+        attributes: ["fullname", "slugs", "id"],
       });
     }
     include.push(collegeInclude);
@@ -323,7 +328,7 @@ class CollegeService {
     const programInclude = {
       model: Program,
       as: "program",
-      attributes: ["title", "slugs"],
+      attributes: ["title", "slugs", "id"],
       include: [],
     };
 
