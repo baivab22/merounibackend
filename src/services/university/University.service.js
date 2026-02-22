@@ -63,9 +63,11 @@ class UniversityService {
 
     return {
       message: "success",
-      currentPage: page,
-      totalPages,
-      totalItems: totalCount,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalCount,
+      },
       items,
     };
   }

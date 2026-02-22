@@ -5,11 +5,10 @@ import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  universitySlugParamSchema,
   createOrUpdateUniversitySchema,
   deleteUniversityQuerySchema,
   universityListSchema,
+  universitySlugParamSchema
 } from "../validators/university/University.validator.js";
 
 const route = express.Router();
