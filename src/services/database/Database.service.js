@@ -1,5 +1,9 @@
 import { spawn } from "child_process";
 import envConfig from "../../config/env.config.js";
+import Download from "../../models/downloads/Download.model.js";
+import UserModel from "../../models/users/User.model.js";
+import { sequelize } from "../../config/database.config.js";
+import { QueryTypes } from "sequelize";
 
 class DatabaseService {
     async exportSql() {
@@ -24,6 +28,103 @@ class DatabaseService {
         });
 
         return mysqldump;
+    }
+
+    async trackDownload(data) {
+        return await Download.create({
+            fileName: data.fileName,
+            downloadType: data.downloadType,
+            referenceId: data.referenceId || null,
+            userId: data.userId || null,
+            ipAddress: data.ipAddress,
+            userAgent: data.userAgent,
+        });
+    }
+
+    async listDownloads(query = {}) {
+        const { page = 1, limit = 10, type } = query;
+        const offset = (page - 1) * limit;
+
+        const where = {};
+        if (type) {
+            where.downloadType = type;
+        }
+
+        const { count, rows: downloads } = await Download.findAndCountAll({
+            where,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [["createdAt", "DESC"]],
+            include: [
+                {
+                    model: UserModel,
+                    as: "user",
+                    attributes: ["id", "firstName", "lastName", "email"],
+                    required: false,
+                },
+            ],
+        });
+
+        return {
+            downloads,
+            pagination: {
+                total: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: parseInt(page),
+                limit: parseInt(limit),
+            },
+        };
+    }
+
+    async getDbStatus() {
+        const { DB_NAME } = envConfig;
+
+        try {
+            await sequelize.authenticate();
+
+            // Query for database size
+            const [sizeData] = await sequelize.query(
+                `SELECT SUM(data_length + index_length) / 1024 / 1024 AS size_mb 
+                 FROM information_schema.TABLES 
+                 WHERE table_schema = :dbName`,
+                {
+                    replacements: { dbName: DB_NAME },
+                    type: QueryTypes.SELECT
+                }
+            );
+
+            // Query for uptime
+            const [uptimeData] = await sequelize.query(
+                "SHOW GLOBAL STATUS LIKE 'Uptime'",
+                { type: QueryTypes.SELECT }
+            );
+            console.log(uptimeData, "uptimeDatauptimeData")
+            const uptimeSeconds = parseInt(uptimeData?.Value || 0);
+            const days = Math.floor(uptimeSeconds / (24 * 3600));
+            const hours = Math.floor((uptimeSeconds % (24 * 3600)) / 3600);
+            const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+
+            let uptimeParts = [];
+            if (days > 0) uptimeParts.push(`${days}d`);
+            if (hours > 0 || days > 0) uptimeParts.push(`${hours}h`);
+            uptimeParts.push(`${minutes}m`);
+
+            const uptimeFormatted = uptimeParts.join(" ");
+
+            return {
+                name: DB_NAME,
+                status: "connected",
+                size: `${parseFloat(sizeData?.size_mb || 0).toFixed(2)} MB`,
+                uptime: uptimeFormatted
+            };
+        } catch (error) {
+            return {
+                name: DB_NAME,
+                status: "disconnected",
+                size: "unknown",
+                error: error.message
+            };
+        }
     }
 }
 

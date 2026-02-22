@@ -82,7 +82,7 @@ class HomeService {
 
       University.findAll({
         where: { fullname: searchCondition },
-        attributes: [['id', 'id'], ['fullname', 'title'],['logo','logo'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['fullname', 'title'],['logo','featured_img'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'university' }))),
 

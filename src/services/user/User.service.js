@@ -207,12 +207,10 @@ class UserService {
     if (updates.phoneNo) {
       changedValues.phoneNo = updates.phoneNo
     }
-    if (updates.profileImageUrl) {
-      changedValues.profileImageUrl = updates.profileImageUrl
-    }
-    if (updates.cvUrl) {
-      changedValues.cvUrl = updates.cvUrl
-    }
+    changedValues.profileImageUrl = updates.profileImageUrl
+    
+    changedValues.cvUrl = updates.cvUrl
+    
 
     console.log(changedValues,"changedValueschangedValueschangedValues")
 

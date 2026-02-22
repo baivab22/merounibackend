@@ -17,6 +17,19 @@ class DatabaseController {
                 `attachment; filename=${fileName}`
             );
 
+            // Track the download in the database
+            try {
+                await databaseService.trackDownload({
+                    fileName: fileName,
+                    downloadType: "sql_backup",
+                    userId: req.user?.id || null,
+                    ipAddress: req.ip || req.connection.remoteAddress,
+                    userAgent: req.headers["user-agent"],
+                });
+            } catch (trackError) {
+                console.error("Error tracking SQL export:", trackError);
+            }
+
             // Handle spawn error
             mysqldump.on("error", (err) => {
                 console.error("mysqldump spawn error:", err);
@@ -52,6 +65,49 @@ class DatabaseController {
                     error: error.message,
                 });
             }
+        }
+    }
+
+
+    /**
+     * List all downloads (admin only)
+     */
+    static async listDownloads(req, res) {
+        try {
+            const { downloads, pagination } = await databaseService.listDownloads(req.query);
+
+            return res.status(200).json({
+                message: "Downloads retrieved successfully",
+                data:downloads,
+                pagination,
+            });
+        } catch (error) {
+            console.error("Error listing downloads:", error);
+            return res.status(500).json({
+                message: "Server error",
+                error: error.message,
+            });
+        }
+    }
+
+
+    /**
+     * Get DB status
+     */
+    static async getDbStatus(req, res) {
+        try {
+            const dbStatus = await databaseService.getDbStatus();
+
+            return res.status(200).json({
+                message: "Database status retrieved successfully",
+                data: dbStatus,
+            });
+        } catch (error) {
+            console.error("Error getting database status:", error);
+            return res.status(500).json({
+                message: "Server error",
+                error: error.message,
+            });
         }
     }
 }
