@@ -35,5 +35,4 @@ class EnvConfig {
 
 const envConfig =  new EnvConfig();
 
-console.log(envConfig,"envConfigenvConfig")
 export default envConfig;

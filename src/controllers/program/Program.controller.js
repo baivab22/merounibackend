@@ -27,7 +27,6 @@ class ProgramController {
       const program = await programService.getProgram(req.params.slugs);
       return res.status(200).json(program);
     } catch (error) {
-      console.log(error,"ERORR")
       const status = error.status || 500;
       return res.status(status).json({
         error: status === 500 ? "Server error" : error.message,
@@ -36,14 +35,7 @@ class ProgramController {
   }
 
   static async createOrUpdateProgram(req, res) {
-    try {
-      console.log("Received program data:", JSON.stringify(req.body, null, 2));
-      console.log(
-        "Faculty ID:",
-        req.body.faculty_id,
-        "Type:",
-        typeof req.body.faculty_id
-      );
+    try {    
       const programId = await programService.createOrUpdateProgram(req.body);
       return res.status(200).json({
         message: req.body.id

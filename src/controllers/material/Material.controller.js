@@ -23,7 +23,6 @@ class MaterialController {
 
   static async listMaterialsByCategory(req, res) {
     try {
-      console.log("req.query", req.query);
       const { materials, pagination } = await materialService.listMaterials(
         req.query
       );

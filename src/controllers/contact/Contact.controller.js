@@ -62,7 +62,6 @@ class ContactController {
         data,
       });
     } catch (error) {
-      console.log(error,"YOYOYO")
       return res.status(error.status || 500).json({
         message: error.message || "Internal Server Error",
       });

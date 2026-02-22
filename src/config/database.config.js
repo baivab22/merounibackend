@@ -3,7 +3,6 @@ import { Sequelize } from "sequelize";
 import envConfig from "./env.config.js"
 
 
-console.log(envConfig, "envConfigenvConfig");
 
 
 export const sequelize = new Sequelize(
@@ -24,8 +23,8 @@ export const authenticate = async () => {
     await sequelize.authenticate();
     console.log("Database connected");
 
-    const modelNames = Object.keys(sequelize.models);
-    console.log("Models to sync:", modelNames);
+    // const modelNames = Object.keys(sequelize.models);
+    // console.log("Models to sync:", modelNames);
 
     // if (envConfig.NODE_ENV.toLowerCase() === "development") {
     // await sequelize.sync({
@@ -33,7 +32,7 @@ export const authenticate = async () => {
       // force: true,
     // });
     // }
-    console.log("Models synced");
+    // console.log("Models synced");
 
     console.log("Connection has been established successfully.");
   } catch (error) {

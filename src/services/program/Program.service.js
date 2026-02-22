@@ -4,7 +4,6 @@ import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import Course from "../../models/courses/Course.model.js";
-import Discipline from "../../models/discipline/Discipline.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import { Exam } from "../../models/exams/Exam.model.js";
 import Level from "../../models/level/Level.model.js";
@@ -34,7 +33,6 @@ class ProgramService {
     const whereConditions = {};
     const include = [];
 
-    console.log("[ProgramService] listPrograms query:", JSON.stringify(query, null, 2));
 
     if (levelId) {
       whereConditions.level_id = levelId;
@@ -49,10 +47,6 @@ class ProgramService {
       ];
     }
 
-    console.log(
-      "[ProgramService] whereConditions:",
-      JSON.stringify(whereConditions, null, 2)
-    );
 
     const validSortFields = [
       "title",

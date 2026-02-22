@@ -175,7 +175,6 @@ class AuthController {
 
       await authService.updateUser({ email }, { otp: newOtp, otpExpiresAt });
 
-      console.log(`New OTP for ${email}: ${newOtp}`);
 
       return res.status(200).json({ message: "New OTP sent successfully." });
     } catch (error) {

@@ -20,7 +20,6 @@ class ConsultancyService {
     }
 
 
-    console.log(query,"query.courseIdquery.courseId")
     const includeOptions = [
       {
         model: Course,
@@ -46,7 +45,7 @@ class ConsultancyService {
         order: [["createdAt", sort]],
       });
     const consultancyIds = items.map((consultancy) => consultancy.id);
-      
+
 
     const usersWithConsultancyId = await UserModel.findAll({
       where: {
@@ -95,9 +94,9 @@ class ConsultancyService {
     };
   }
 
-  async getMyConsultancy(userId){
+  async getMyConsultancy(userId) {
     const consultancyUser = await UserModel.findOne({
-      where: { id:userId },
+      where: { id: userId },
 
     });
 
@@ -106,7 +105,6 @@ class ConsultancyService {
       error.status = 404;
       throw error;
     }
-    console.log("consultancyUser",consultancyUser)
 
     const consultancy = await Consultancy.findOne({
       where: { id: consultancyUser.consultancyId },
@@ -144,10 +142,6 @@ class ConsultancyService {
   }
 
   async createOrUpdateConsultancy(payload) {
-    console.log(
-      "ConsultancyService - Received payload:",
-      JSON.stringify(payload, null, 2)
-    );
 
     const {
       id,
@@ -168,16 +162,6 @@ class ConsultancyService {
       map_type,
     } = payload;
 
-    console.log("ConsultancyService - Extracted fields:", {
-      id,
-      title,
-      logo,
-      description,
-      website_url,
-      google_map_url,
-      video_url,
-      contact,
-    });
 
     // Validate title for create operation
     if (!id && !title) {

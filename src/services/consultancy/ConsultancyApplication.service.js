@@ -150,7 +150,6 @@ class ConsultancyApplicationService {
       whereCondition.student_id = user.id;
     }
 
-    console.log(whereCondition, "whereConditionwhereConditionwhereCondition")
     return await ConsultancyApplication.findAll({
       where: whereCondition,
       include: [

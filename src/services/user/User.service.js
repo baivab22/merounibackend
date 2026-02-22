@@ -212,8 +212,6 @@ class UserService {
     changedValues.cvUrl = updates.cvUrl
     
 
-    console.log(changedValues,"changedValueschangedValueschangedValues")
-
       await UserModel.update(changedValues, { where: { id: userId } })
       return true
   }

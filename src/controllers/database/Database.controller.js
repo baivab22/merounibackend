@@ -17,7 +17,6 @@ class DatabaseController {
                 `attachment; filename=${fileName}`
             );
 
-            // Track the download in the database
             try {
                 await databaseService.trackDownload({
                     fileName: fileName,

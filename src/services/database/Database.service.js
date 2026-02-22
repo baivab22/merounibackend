@@ -98,7 +98,6 @@ class DatabaseService {
                 "SHOW GLOBAL STATUS LIKE 'Uptime'",
                 { type: QueryTypes.SELECT }
             );
-            console.log(uptimeData, "uptimeDatauptimeData")
             const uptimeSeconds = parseInt(uptimeData?.Value || 0);
             const days = Math.floor(uptimeSeconds / (24 * 3600));
             const hours = Math.floor((uptimeSeconds % (24 * 3600)) / 3600);

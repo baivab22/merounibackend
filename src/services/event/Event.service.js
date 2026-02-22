@@ -25,20 +25,12 @@ class EventService {
         event_host,
       } = payload;
 
-      console.log(
-        "[EventService] createOrUpdateEvent - Full payload:",
-        JSON.stringify(payload, null, 2)
-      );
-      console.log("[EventService] createOrUpdateEvent - title:", title);
-      console.log("[EventService] createOrUpdateEvent - id:", id);
-
       let eventId = id;
       let slugs;
 
       if (title) {
         // Generate slug from title if title is provided
         slugs = slug(title);
-        console.log("[EventService] Generated slug from title:", slugs);
       } else if (id) {
         // For updates without title, keep existing slug
         const existingEvent = await Event.findByPk(id, { transaction });
@@ -48,7 +40,6 @@ class EventService {
           throw err;
         }
         slugs = existingEvent.slugs;
-        console.log("[EventService] Using existing slug:", slugs);
       } else {
         // For create, title is required
         const err = new Error("Title is required to create an event");
@@ -87,10 +78,7 @@ class EventService {
         if (author_id !== undefined) updateData.author_id = author_id;
         if (event_host !== undefined) updateData.event_host = JSON.stringify(event_host);
 
-        console.log(
-          "[EventService] Update data:",
-          JSON.stringify(updateData, null, 2)
-        );
+     
 
         if (Object.keys(updateData).length > 0) {
           await Event.update(updateData, {
@@ -152,7 +140,6 @@ class EventService {
     if (item.event_host) {
       item.event_host = JSON.parse(JSON.stringify(item.event_host));
     }
-    console.log(item)
 
     return item;
   }
@@ -166,7 +153,6 @@ class EventService {
     const search = query.q || "";
     const collegeId = query.college_id;
 
-    console.log(collegeId,"collegeIdcollegeId")
     const whereCondition = {};
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };

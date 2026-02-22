@@ -34,7 +34,6 @@ class DegreeController {
             const degree = await DegreeService.createDegree(req.body);
             return res.status(201).json(degree);
         } catch (error) {
-            console.log(error);
             next(error);
         }
     }

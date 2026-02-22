@@ -8,7 +8,6 @@ export const authorizeRole = (allowedRoles) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    console.log("Raw user roles:", roles); // Debugging
 
     let userRoles;
     try {
@@ -17,8 +16,6 @@ export const authorizeRole = (allowedRoles) => {
     } catch (error) {
       return res.status(500).json({ message: "Invalid role format" });
     }
-
-    console.log("Parsed user roles:", userRoles); // Debugging
 
     // Check if any of the allowed roles exist and are set to true
     const hasAccess = allowedRoles.some(role => userRoles[role]);

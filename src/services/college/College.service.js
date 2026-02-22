@@ -157,13 +157,11 @@ class CollegeService {
       }
 
       if (Array.isArray(courses) && courses.length > 0) {
-        console.log(courses, "coursescoursescoursescourses")
         const existingPrograms = await Program.findAll({
           where: { id: { [Op.in]: courses } },
           attributes: ["id"],
           transaction,
         });
-        console.log(existingPrograms, "existingProgramsexistingProgramsexistingPrograms")
 
         const existingProgramIds = existingPrograms.map(
           (program) => program.id

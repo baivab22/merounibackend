@@ -34,7 +34,6 @@ class ScholarshipService {
       whereCondition.applicationDeadline = { [Op.gte]: new Date() };
     }
 
-    console.log(whereCondition, "whereConditionwhereCondition");
 
     // Validate sort fields
     const validSortFields = [
@@ -170,10 +169,6 @@ class ScholarshipService {
 
     // Ensure category_id from API is mapped to category if needed
     if (data.categoryId) {
-      console.log(
-        data.categoryId,
-        "data.categoryIddata.categoryIddata.categoryId",
-      );
       updateData.category = data.categoryId;
     }
     if (data.author_id && !data.author) {

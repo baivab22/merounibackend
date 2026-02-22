@@ -23,7 +23,6 @@ async function ensureAdminUser() {
     });
 
     if (existingUser) {
-      console.log(`Admin already exists with email ${SEED_ADMIN_EMAIL}`);
       return;
     }
 

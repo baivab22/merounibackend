@@ -115,10 +115,6 @@ class UniversityService {
     // Convert to plain object to avoid Sequelize instance issues
     const universityData = university.get({ plain: true });
 
-    console.log(
-      "getUniversityProfile: universityData.contact:",
-      universityData.contact
-    );
 
     return {
       ...universityData,
@@ -244,15 +240,10 @@ class UniversityService {
   async upsertContact(universityId, contact, transaction) {
     // Allow empty object but not null/undefined
     if (contact === null || contact === undefined) {
-      console.log("upsertContact: contact is null/undefined, skipping");
       return;
     }
 
-    console.log(
-      "upsertContact: Received contact data:",
-      JSON.stringify(contact)
-    );
-    console.log("upsertContact: universityId:", universityId);
+
 
     // Find existing contact for this university
     const existingContact = await UniversityContact.findOne({
@@ -260,7 +251,6 @@ class UniversityService {
       transaction,
     });
 
-    console.log("upsertContact: existingContact found:", !!existingContact);
 
     // Preserve empty strings - convert empty strings to null for database
     // but keep actual values as they are
@@ -291,19 +281,11 @@ class UniversityService {
           : null,
     };
 
-    console.log(
-      "upsertContact: contactData to save:",
-      JSON.stringify(contactData)
-    );
-
     if (existingContact) {
       // Update existing contact - use set and save to ensure changes are applied
       existingContact.set(contactData);
       await existingContact.save({ transaction });
-      console.log(
-        "upsertContact: Updated contact:",
-        existingContact.get({ plain: true })
-      );
+    
     } else {
       // Create new contact - always create even if all fields are null/empty
       const created = await UniversityContact.create(
@@ -316,10 +298,7 @@ class UniversityService {
         },
         { transaction }
       );
-      console.log(
-        "upsertContact: Created new contact:",
-        created.get({ plain: true })
-      );
+     
     }
   }
 

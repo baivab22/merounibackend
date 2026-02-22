@@ -5,11 +5,6 @@ const eventService = new EventService();
 class EventController {
   static async createOrUpdateEvent(req, res) {
     try {
-      console.log("[EventController] createOrUpdateEvent called");
-      console.log(
-        "[EventController] req.body:",
-        JSON.stringify(req.body, null, 2)
-      );
       const { eventId, isNew } = await eventService.createOrUpdateEvent(
         req.body
       );
@@ -20,7 +15,6 @@ class EventController {
         eventId,
       });
     } catch (error) {
-      console.log("req.body:", JSON.stringify(req.body));
       console.error("Error creating/updating event:", error);
       return res
         .status(error.status || 500)

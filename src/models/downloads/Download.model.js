@@ -20,7 +20,7 @@ Download.init(
         downloadType: {
             type: DataTypes.STRING,
             allowNull: false,
-            field: "download_type", // e.g., 'sql_backup', 'material', 'blog_pdf'
+            field: "download_type",
         },
         userId: {
             type: DataTypes.INTEGER,
