@@ -45,7 +45,7 @@ News.init(
       },
       onDelete: "SET NULL",
     },
-    featuredImage: {
+    featured_image: {
       type: DataTypes.STRING,
       allowNull: false,
     },

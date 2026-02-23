@@ -17,7 +17,7 @@ export const createNewsSchema = yup.object({
     .optional(),
   author: yup.number().integer().positive().required("Author is required"),
   description: yup.string().trim().nullable(),
-  featuredImage: yup.string().trim().required("Featured image is required"),
+  featured_image: yup.string().trim().required("Featured image is required"),
   college_id: yup.number().integer().positive().nullable(),
   status: yup.string().oneOf(["draft", "published", "archived"]).default("draft"),
 });
@@ -32,7 +32,7 @@ export const updateNewsBodySchema = yup
     category: yup.number().integer().positive(),
     author: yup.number().integer().positive(),
     description: yup.string().trim().nullable(),
-    featuredImage: yup.string().trim(),
+    featured_image: yup.string().trim(),
     college_id: yup.number().integer().positive().nullable(),
     status: yup.string().oneOf(["draft", "published", "archived"]),
   })
