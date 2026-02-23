@@ -9,6 +9,7 @@ import Level from "../../models/level/Level.model.js";
 import { University } from "../../models/university/University.model.js";
 import UserModel from "../../models/users/User.model.js";
 
+import {generateUniqueSlug} from "../../utils/SlugHelper.js"
 class ExamService {
   async listExams(query = {}) {
     const page = parseInt(query.page, 10) || 1;
@@ -17,8 +18,8 @@ class ExamService {
 
     const {
       q,
-      level,
-      affiliation,
+      levelId,
+      universityId,
       discipline,
       examType,
       isOpen,
@@ -38,25 +39,16 @@ class ExamService {
       ];
     }
 
-    // Affiliation filter (ID or Slug)
-    if (affiliation) {
-      if (!isNaN(affiliation)) {
-        whereCondition.affiliation = parseInt(affiliation, 10);
-      } else {
-        include.push({
-          model: University,
-          as: "university",
-          where: { slugs: affiliation },
-          attributes: ["id", "fullname"],
-        });
-      }
-    } else {
-      include.push({
-        model: University,
-        attributes: ["id", "fullname"],
-        as: "university",
-      });
+    // University/Affiliation filter
+    if (universityId) {
+      whereCondition.affiliation = universityId;
     }
+
+    include.push({
+      model: University,
+      attributes: ["id", "fullname"],
+      as: "university",
+    });
 
     // Exam Type filter
     if (examType) {
@@ -73,12 +65,12 @@ class ExamService {
       }
 
       include.push({
-        association: "programs", // Exam.hasMany(Program)
+        association: "programs",
         required: true,
         attributes: [],
         include: [
           {
-            association: "programfaculty", // Program.belongsTo(Faculty)
+            association: "programfaculty",
             where: facultyWhere,
             required: true,
             attributes: [],
@@ -90,14 +82,26 @@ class ExamService {
     // Date based filters
     const now = new Date();
 
-    if (isOpen === "true") {
+    if (isOpen === true || isOpen === "true") {
       whereCondition.opening_date = { [Op.lte]: now };
       whereCondition.closing_date = { [Op.gte]: now };
     }
 
-    if (isUpcoming === "true") {
+    if (isUpcoming === true || isUpcoming === "true") {
       whereCondition.exam_date = { [Op.gt]: now };
     }
+
+    // Level Filter
+    if (levelId) {
+      whereCondition.level_id = levelId;
+    }
+
+    // Include Level Details
+    include.push({
+      model: Level,
+      attributes: ["id", "title"],
+      as: "level",
+    });
 
     // Author Details
     include.push({
@@ -161,6 +165,7 @@ class ExamService {
   }
 
   async createOrUpdateExam(payload) {
+    console.log(payload, "payloadpayload")
     const {
       id,
       title,
@@ -170,7 +175,7 @@ class ExamService {
       affiliation,
       syllabus,
       pastQuestion,
-      // Flattened fields
+
       exam_type,
       full_marks,
       pass_marks,
@@ -187,7 +192,6 @@ class ExamService {
     const transaction = await sequelize.transaction();
     try {
       let examId = id;
-      const slugs = slug(title);
 
       const examData = {
         title,
@@ -212,13 +216,14 @@ class ExamService {
 
       if (!examId) {
         // Create
+      const slugs = generateUniqueSlug(title);
         examData.slugs = slugs;
         const exam = await Exam.create(examData, { transaction });
         examId = exam.id;
       } else {
-        // Update
-        // Check if title changed to update slugs? user might not want slug change valid SEO
-        // For now not updating slug on edit unless explicitly requested logic changes
+        if (examData.title !== title) {
+          examData.slugs = generateUniqueSlug(title);
+        }
         await Exam.update(examData, { where: { id: examId }, transaction });
       }
 

@@ -8,13 +8,12 @@ import {
   requestValidatorMultiple,
 } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  materialIdParamSchema,
   createMaterialSchema,
-  updateMaterialQuerySchema,
-  updateMaterialBodySchema,
   deleteMaterialQuerySchema,
   materialCategoryQuerySchema,
+  materialIdParamSchema,
+  updateMaterialBodySchema,
+  updateMaterialQuerySchema
 } from "../validators/material/Material.validator.js";
 
 const route = express.Router();
