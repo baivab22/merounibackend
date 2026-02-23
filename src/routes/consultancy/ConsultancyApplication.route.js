@@ -46,7 +46,7 @@ router.get(
 router.get(
   "/user/applications",
   authenticateUser,
-  authorizeRole(["admin", "editor", "student", "agent"]),
+  // authorizeRole(["admin", "editor", "student", "agent"]),
   ConsultancyApplicationController.getUserApplications
 );
 
