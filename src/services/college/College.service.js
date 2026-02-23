@@ -389,7 +389,6 @@ class CollegeService {
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
-        // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
       ],
     });
 
@@ -401,7 +400,6 @@ class CollegeService {
     const items = rawItems.map((item) => {
       const itemData = item.toJSON();
       itemData.program = programsMap[item.course_id] || null;
-      // Remove sensitive or unnecessary fields if needed, matching original behavior
       delete itemData.course_id;
       delete itemData.college_id;
       return itemData;
@@ -687,7 +685,7 @@ class CollegeService {
           },
           include: [
             {
-              model: Course,
+              model: Program,
               as: "program",
               attributes: ["title", "slugs"],
             },
