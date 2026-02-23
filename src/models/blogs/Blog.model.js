@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Blog extends Model {}
+class Blog extends Model { }
 
 Blog.init(
   {
@@ -54,11 +54,6 @@ Blog.init(
         key: "id",
       },
       onDelete: "CASCADE",
-    },
-    reactions: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: {},
     },
     status: {
       type: DataTypes.ENUM("draft", "published", "archived"),

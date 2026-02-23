@@ -24,7 +24,6 @@ export const createBlogSchema = yup.object({
     featured_image: yup.string().optional(),
     is_featured: yup.boolean().default(false),
     author: yup.number().optional(),
-    reactions: yup.object().optional(),
     status: yup.string().optional(),
     pdf_file: yup.string().optional(),
 });
@@ -43,7 +42,6 @@ export const updateBlogBodySchema = yup
         featured_image: yup.string(),
         is_featured: yup.boolean(),
         author: yup.number(),
-        reactions: yup.object(),
         status: yup.string(),
     })
     .test("at-least-one", "At least one field must be provided", (value) => {
