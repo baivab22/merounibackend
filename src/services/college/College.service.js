@@ -11,10 +11,14 @@ import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
+import Course from "../../models/courses/Course.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
 import { University } from "../../models/university/University.model.js";
 import Degree from "../../models/degree/Degree.model.js";
+import Level from "../../models/level/Level.model.js";
+import FacultyModel from "../../models/faculty/Faculty.model.js";
+
 
 class CollegeService {
   async createOrUpdateCollege(payload) {
@@ -52,9 +56,6 @@ class CollegeService {
       if (collegeId) {
         existingCollege = await College.findByPk(collegeId, { transaction });
         if (!existingCollege && id) {
-          // If an ID was provided but no college found, maybe treat as new or error?
-          // The previous code didn't explicitly error here, it just proceeded to update with where: {id: collegeId}
-          // which would do nothing. 
         }
       }
 
@@ -286,13 +287,6 @@ class CollegeService {
     const whereCondition = {};
     const include = [];
 
-    if (q) {
-      whereCondition[Op.or] = [
-        { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
-        { "$program.title$": { [Op.like]: `%${q}%` } },
-      ];
-    }
-
     // College and Affiliation (University) filter
     const collegeInclude = {
       model: College,
@@ -324,60 +318,94 @@ class CollegeService {
     }
     include.push(collegeInclude);
 
-    // Program, Level, and Discipline filter
-    const programInclude = {
-      model: Program,
-      as: "program",
-      attributes: ["title", "slugs", "id"],
-      include: [],
-    };
+    // Handle Program filtering manually because there's no relationship defined
+    let filteredCourseIds = null;
+    if (q || level || discipline) {
+      const programWhere = {};
+      const programInclude = [];
 
-    if (level) {
-      const levelWhere = {};
-      if (!isNaN(level)) {
-        levelWhere.id = parseInt(level, 10);
-      } else {
-        levelWhere.slugs = level;
+      if (q) {
+        programWhere.title = { [Op.like]: `%${q}%` };
       }
-      programInclude.include.push({
-        model: Level,
-        as: "programlevel",
-        where: levelWhere,
-        required: true,
+
+      if (level) {
+        const levelWhere = {};
+        if (!isNaN(level)) levelWhere.id = parseInt(level, 10);
+        else levelWhere.slugs = level;
+        programInclude.push({
+          model: Level,
+          as: "programlevel",
+          where: levelWhere,
+          required: true,
+        });
+      }
+
+      if (discipline) {
+        const facultyWhere = {};
+        if (!isNaN(discipline)) facultyWhere.id = parseInt(discipline, 10);
+        else facultyWhere.slugs = discipline;
+        programInclude.push({
+          model: FacultyModel,
+          as: "programfaculty",
+          where: facultyWhere,
+          required: true,
+        });
+      }
+
+      const matchingPrograms = await Program.findAll({
+        where: programWhere,
+        include: programInclude,
+        attributes: ["id"],
       });
-      programInclude.required = true;
+      filteredCourseIds = matchingPrograms.map((p) => p.id);
     }
 
-    if (discipline) {
-      const facultyWhere = {};
-      if (!isNaN(discipline)) {
-        facultyWhere.id = parseInt(discipline, 10);
-      } else {
-        facultyWhere.slugs = discipline;
+    if (q) {
+      // If searching, we match either college name or the filtered program IDs
+      whereCondition[Op.or] = [
+        { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
+      ];
+      if (filteredCourseIds) {
+        whereCondition[Op.or].push({ course_id: { [Op.in]: filteredCourseIds } });
       }
-      programInclude.include.push({
-        model: FacultyModel,
-        as: "programfaculty",
-        where: facultyWhere,
-        required: true,
-      });
-      programInclude.required = true;
+    } else if (filteredCourseIds !== null) {
+      whereCondition.course_id = { [Op.in]: filteredCourseIds };
     }
 
-    include.push(programInclude);
-
-    const { count: totalCount, rows: items } =
+    const { count: totalCount, rows: rawItems } =
       await CollegeAdmission.findAndCountAll({
         where: whereCondition,
         limit,
         offset,
         distinct: true,
         order: [["id", sort]],
-        attributes: {
-          exclude: ["college_id", "course_id"],
-        },
         include,
       });
+
+    // Manually fetch program details for the returned items
+    const courseIdsToFetch = rawItems.map((item) => item.course_id);
+    const programs = await Program.findAll({
+      where: { id: { [Op.in]: courseIdsToFetch } },
+      attributes: ["id", "title", "slugs"],
+      include: [
+        { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
+        { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
+      ],
+    });
+
+    const programsMap = programs.reduce((acc, p) => {
+      acc[p.id] = p;
+      return acc;
+    }, {});
+
+    const items = rawItems.map((item) => {
+      const itemData = item.toJSON();
+      itemData.program = programsMap[item.course_id] || null;
+      // Remove sensitive or unnecessary fields if needed, matching original behavior
+      delete itemData.course_id;
+      delete itemData.college_id;
+      return itemData;
+    });
 
     return {
       items,
@@ -390,11 +418,9 @@ class CollegeService {
     };
   }
 
+
   async getAdmissionById(id) {
     const admission = await CollegeAdmission.findByPk(id, {
-      attributes: {
-        exclude: ["college_id", "course_id"],
-      },
       include: [
         {
           model: College,
@@ -408,11 +434,6 @@ class CollegeService {
             },
           ],
         },
-        {
-          model: Program,
-          as: "program",
-          attributes: ["title", "slugs"],
-        },
       ],
     });
 
@@ -422,7 +443,21 @@ class CollegeService {
       throw error;
     }
 
-    return admission;
+    const program = await Program.findOne({
+      where: { id: admission.course_id },
+      attributes: ["id", "title", "slugs"],
+      include: [
+        { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
+        { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
+      ],
+    });
+
+    const admissionData = admission.toJSON();
+    admissionData.program = program;
+    delete admissionData.course_id;
+    delete admissionData.college_id;
+
+    return admissionData;
   }
 
   async listColleges(query = {}) {
@@ -652,7 +687,7 @@ class CollegeService {
           },
           include: [
             {
-              model: Program,
+              model: Course,
               as: "program",
               attributes: ["title", "slugs"],
             },
@@ -669,14 +704,8 @@ class CollegeService {
           attributes: {
             exclude: ["id", "college_id", "course_id"],
           },
-          include: [
-            {
-              model: Program,
-              as: "program",
-              attributes: ["title", "slugs"],
-            },
-          ],
         },
+
         {
           model: University,
           as: "university",
@@ -767,7 +796,7 @@ class CollegeService {
           },
           include: [
             {
-              model: Program,
+              model: Course,
               as: "program",
               attributes: ["title", "slugs"],
             },
@@ -784,13 +813,6 @@ class CollegeService {
           attributes: {
             exclude: ["id", "college_id", "course_id"],
           },
-          include: [
-            {
-              model: Program,
-              as: "program",
-              attributes: ["title", "slugs"],
-            },
-          ],
         },
         {
           model: University,
@@ -889,6 +911,61 @@ class CollegeService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async createOrUpdateAdmission(payload) {
+    const {
+      id,
+      college_id,
+      course_id,
+      eligibility_criteria,
+      admission_process,
+      fee_details,
+      description,
+    } = payload;
+
+    let admission;
+    let isNew = false;
+    const admissionId = (id === "null" || id === "undefined" || id === "") ? null : id;
+
+    if (admissionId) {
+      admission = await CollegeAdmission.findByPk(admissionId);
+      if (!admission) {
+        const error = new Error("Admission detail not found");
+        error.status = 404;
+        throw error;
+      }
+      await admission.update({
+        college_id,
+        course_id,
+        eligibility_criteria,
+        admission_process,
+        fee_details,
+        description,
+      });
+    } else {
+      admission = await CollegeAdmission.create({
+        college_id,
+        course_id,
+        eligibility_criteria,
+        admission_process,
+        fee_details,
+        description,
+      });
+      isNew = true;
+    }
+
+    return { id: admission.id, isNew };
+  }
+
+  async deleteAdmission(id) {
+    const admission = await CollegeAdmission.findByPk(id);
+    if (!admission) {
+      const error = new Error("Admission detail not found");
+      error.status = 404;
+      throw error;
+    }
+    await admission.destroy();
   }
 }
 

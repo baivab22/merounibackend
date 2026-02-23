@@ -33,8 +33,10 @@ class CollegeController {
         pagination,
       });
     } catch (error) {
-      return res.status(500).json({
-        status: 500,
+      console.log(error,"THank")
+      const status = error.status || 500;
+      return res.status(status).json({
+        status,
         message: `Error: ${error.message}`,
       });
     }

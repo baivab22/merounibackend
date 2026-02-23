@@ -3,7 +3,7 @@ import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
 import Program from "../courses/Course.model.js";
 
-class CollegeAdmission extends Model {}
+class CollegeAdmission extends Model { }
 
 CollegeAdmission.init(
   {
@@ -17,8 +17,6 @@ CollegeAdmission.init(
     course_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: Program, key: "id" },
-      onDelete: "CASCADE",
     },
     eligibility_criteria: { type: DataTypes.TEXT },
     admission_process: { type: DataTypes.TEXT },

@@ -18,7 +18,6 @@ export const categoryListQuerySchema = paginationSchema.shape({
 export const createCategorySchema = yup.object({
   title: yup.string().trim().min(1).required("Title is required"),
   description: yup.string().nullable().optional(),
-  author: yup.number().integer().positive().optional(),
   type: yup.string().oneOf(["BLOG", "EVENT", "NEWS", "MATERIAL"]).optional().nullable(),
 });
 

@@ -49,14 +49,14 @@ class CategoryService {
     return category;
   }
 
-  async createCategory(data) {
-    const { title, description, author, type } = data;
+  async createCategory(data, userId) {
+    const { title, description, type } = data;
 
     await Category.create({
       title,
       slugs: generateUniqueSlug(title),
       description,
-      author,
+      author: userId,
       type,
     });
   }
