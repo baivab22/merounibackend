@@ -22,7 +22,6 @@ class ProgramService {
     const offset = (page - 1) * limit;
 
     const {
-      facultyId,
       levelId,
       disciplineId,
       q,
@@ -68,12 +67,21 @@ class ProgramService {
     const { count: totalCount, rows: items } =
       await Program.findAndCountAll({
         where: whereConditions,
-        include: include.length ? include : undefined,
+        include: [
+          { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
+          {
+            model: Degree,
+            as: "programdegree",
+            attributes: ["id", "title", "short_name", "slug"],
+            required: false,
+          },
+        ],
         limit,
         offset,
         distinct: true,
         order,
       });
+
 
     return {
       items,
@@ -110,7 +118,7 @@ class ProgramService {
             },
           ],
         },
-        { model: Level, as: "programlevel", attributes: ["title", "slugs","id"] },
+        { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
         {
           model: Degree,
           as: "programdegree",
@@ -120,9 +128,9 @@ class ProgramService {
         {
           model: Scholarship,
           as: "programscholarship",
-          attributes: ["name", "slugs","id"],
+          attributes: ["name", "slugs", "id"],
         },
-        { model: Exam, as: "programexam", attributes: ["title", "slugs","id"] },
+        { model: Exam, as: "programexam", attributes: ["title", "slugs", "id"] },
         {
           model: UserModel,
           as: "programauthorDetails",
@@ -131,12 +139,12 @@ class ProgramService {
         {
           model: College,
           as: "colleges",
-          attributes: ["name", "slugs","id"],
+          attributes: ["name", "slugs", "id"],
         },
         {
           model: CollegeAddress,
           as: "collegesAddress",
-          attributes: ["country", "city", "state","id"],
+          attributes: ["country", "city", "state", "id"],
         },
       ],
     });
@@ -262,12 +270,12 @@ class ProgramService {
         const syllabusData = syllabus
           .filter(item => item.course_id)
           .map((item) => ({
-          year: item.year,
-          semester: item.semester,
-          is_elective: item.is_elective || false,
-          program_id: programId,
-          course_id: item.course_id,
-        }));
+            year: item.year,
+            semester: item.semester,
+            is_elective: item.is_elective || false,
+            program_id: programId,
+            course_id: item.course_id,
+          }));
 
         await ProgramSyllabus.bulkCreate(syllabusData, { transaction });
       }
