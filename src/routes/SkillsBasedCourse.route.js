@@ -87,7 +87,7 @@ router.get("/:id", SkillsBasedCourseController.getCourseById);
  *       500:
  *         description: Server error
  */
-router.get("/slug/:slug",     SkillsBasedCourseController.getCourseBySlug);
+router.get("/slug/:slug", SkillsBasedCourseController.getCourseBySlug);
 
 /**
  * @swagger
