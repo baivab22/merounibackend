@@ -27,7 +27,7 @@ class UniversityService {
     let countQuery = `SELECT COUNT(*) as total FROM university`;
 
     const replacements = { limit, offset };
-    
+
     if (searchQuery) {
       sqlQuery += ` WHERE fullname LIKE :searchQuery`;
       countQuery += ` WHERE fullname LIKE :searchQuery`;
@@ -38,7 +38,7 @@ class UniversityService {
       const typeCondition = searchQuery
         ? ` AND type_of_institute = :type`
         : ` WHERE type_of_institute = :type`;
-        
+
       sqlQuery += typeCondition;
       countQuery += typeCondition;
       replacements.type = query.type;
@@ -90,7 +90,7 @@ class UniversityService {
         {
           model: UniversityContact,
           as: "contact",
-          required: false, 
+          required: false,
         },
         {
           model: UniversityLevel,
@@ -152,6 +152,7 @@ class UniversityService {
         members,
         featured_image,
         videos,
+        map,
         gallery,
         logo,
       } = payload;
@@ -187,6 +188,7 @@ class UniversityService {
         university.logo = logo; // Update logo
         university.featured_image = featured_image;
         university.videos = videos;
+        university.map = map;
 
         if (university.fullname !== fullname) {
           university.slugs = generateUniqueSlug(fullname);
@@ -215,6 +217,7 @@ class UniversityService {
             order_no_for_website: await this.getNextOrderNo(),
             featured_image,
             videos,
+            map,
           },
           { transaction }
         );
@@ -291,7 +294,7 @@ class UniversityService {
       // Update existing contact - use set and save to ensure changes are applied
       existingContact.set(contactData);
       await existingContact.save({ transaction });
-    
+
     } else {
       // Create new contact - always create even if all fields are null/empty
       const created = await UniversityContact.create(
@@ -304,7 +307,7 @@ class UniversityService {
         },
         { transaction }
       );
-     
+
     }
   }
 
@@ -324,22 +327,16 @@ class UniversityService {
   }
 
   async syncPrograms(universityId, programs, transaction) {
-    // If programs is not provided (undefined/null), skip updating programs
-    // If programs is an empty array, clear all programs
-    // If programs is an array with values, replace all programs
     if (programs === undefined || programs === null) return;
 
     if (!Array.isArray(programs)) return;
 
-    // Always destroy existing programs first
     await UniversityProgram.destroy({
       where: { university_id: universityId },
       transaction,
     });
 
-    // Only create new programs if the array is not empty
     if (programs.length > 0) {
-      // Filter out invalid program IDs and ensure they are integers
       const validPrograms = programs
         .map((program_id) => {
           const id = parseInt(program_id, 10);

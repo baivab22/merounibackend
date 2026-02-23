@@ -73,6 +73,10 @@ export const University = sequelize.define(
       type: DataTypes.JSON,
       allowNull: true,
     },
+    map: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
   {
     tableName: "university",
