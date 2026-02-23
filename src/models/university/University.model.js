@@ -70,7 +70,7 @@ export const University = sequelize.define(
       allowNull: true,
     },
     videos: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: true,
     },
   },

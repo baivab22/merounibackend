@@ -188,11 +188,15 @@ class UniversityService {
         university.featured_image = featured_image;
         university.videos = videos;
 
+        if (university.fullname !== fullname) {
+          university.slugs = generateUniqueSlug(fullname);
+        }
+
         await university.save({ transaction });
 
       } else {
         // 🔹 CREATE
-        const slugs = await generateUniqueSlug(fullname);
+        const slugs = generateUniqueSlug(fullname);
 
         university = await University.create(
           {

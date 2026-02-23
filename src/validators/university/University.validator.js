@@ -39,7 +39,7 @@ export const createOrUpdateUniversitySchema = yup
     members: yup.array().optional(),
     logo: yup.string().nullable().optional(),
     featured_image: yup.string().nullable().optional(),
-    videos: yup.string().nullable().optional(),
+    videos: yup.mixed().nullable().optional(),
     gallery: yup.array().of(yup.string()).optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
