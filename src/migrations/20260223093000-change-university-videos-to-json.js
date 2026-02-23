@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 export async function up(queryInterface, Sequelize) {
     await queryInterface.changeColumn('university', 'videos', {
-        type: Sequelize.JSON,
+        type: Sequelize.JSONB,
         allowNull: true,
     });
 }

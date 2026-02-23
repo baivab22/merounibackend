@@ -126,6 +126,7 @@ class UniversityService {
       members: universityData.members || [],
       featured_image: universityData.featured_image || null,
       videos: universityData.videos || null,
+      map: universityData.map || null,
       gallery: (universityData.gallery || []).map((img) => img.image_url),
     };
   }
