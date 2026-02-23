@@ -389,7 +389,7 @@ class CollegeService {
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
-        { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
+        // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
       ],
     });
 
@@ -843,7 +843,6 @@ class CollegeService {
   }
 
   async updateCollegeByInstitutionUser(user, payload) {
-    // Fetch the full user from database to get college_id
     const fullUser = await UserModel.findByPk(user?.id || user?.user_id);
 
     if (!fullUser) {
@@ -870,7 +869,6 @@ class CollegeService {
     // Set the college ID from user's college_id
     payload.id = collegeId;
 
-    // Call the existing createOrUpdateCollege method
     const { collegeId: updatedCollegeId, isNew } =
       await this.createOrUpdateCollege(payload);
 
