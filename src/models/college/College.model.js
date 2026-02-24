@@ -63,6 +63,11 @@ College.init(
       defaultValue: null,
       field: "order_no_for_website",
     },
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      allowNull: false,
+      defaultValue: "published",
+    },
   },
   {
     sequelize,

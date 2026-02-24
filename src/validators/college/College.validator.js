@@ -132,6 +132,11 @@ export const createOrUpdateCollegeSchema = yup
         })
       )
       .optional(),
+    status: yup
+      .string()
+      .oneOf(["draft", "published", "archived"])
+      .optional()
+      .default("published"),
   })
   .required();
 

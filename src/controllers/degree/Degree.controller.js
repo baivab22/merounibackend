@@ -7,6 +7,7 @@ class DegreeController {
             const result = await DegreeService.listDegrees(req.query);
             return res.status(200).json(result);
         } catch (error) {
+            console.log(error,"DONEDONE")
             next(error);
         }
     }
@@ -57,6 +58,7 @@ class DegreeController {
     }
     static async updateDegreeOrder(req, res, next) {
         try {
+            console.log(req.body.degrees,"req.body.degreesreq.body.degreesreq.body.degrees")
             const result = await DegreeService.updateDegreeOrder(req.body.degrees);
             return res.status(200).json(result);
         } catch (error) {

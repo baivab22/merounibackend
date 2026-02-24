@@ -48,6 +48,7 @@ class CollegeService {
         faqs,
         images,
         degrees,
+        status,
       } = payload;
 
       let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
@@ -102,6 +103,7 @@ class CollegeService {
             website_url,
             faqs,
             order_no_for_website: nextOrder,
+            status: status || "published",
           },
           { transaction }
         );
@@ -120,6 +122,7 @@ class CollegeService {
           google_map_url,
           map_type,
           website_url,
+          status: status || existingCollege.status,
         };
 
         // Only update name and slugs if name has changed
@@ -486,6 +489,13 @@ class CollegeService {
       whereCondition.institute_type = { [Op.in]: types };
     }
 
+    if (query.status) {
+      whereCondition.status = query.status;
+    } else {
+      // Default to published if not explicitly requested (e.g., for public list)
+      whereCondition.status = "published";
+    }
+
     const addressCondition = {};
     if (states.length > 0) {
       addressCondition.state = {
@@ -515,8 +525,8 @@ class CollegeService {
       offset,
       distinct: true,
       order: [
-        [Sequelize.literal("`colleges`.`order_no_for_website` IS NULL"), "ASC"],
-        [Sequelize.literal("`colleges`.`order_no_for_website`"), "ASC"],
+        // [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
+        // [Sequelize.literal("order_no_for_website"), "ASC"],
         ["id", sort],
       ],
       include: [

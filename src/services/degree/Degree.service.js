@@ -60,7 +60,7 @@ class DegreeService {
             offset,
             distinct: true,
             order: [
-                [Sequelize.literal("`degrees`.`order_no_for_website` IS NULL"), "ASC"],
+                [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
                 ["order_no_for_website", "ASC"],
                 ["createdAt", "DESC"]
             ],
@@ -181,6 +181,7 @@ class DegreeService {
                 transaction,
             });
 
+            console.log(existingDegrees,"existingDegrees")
             if (existingDegrees.length !== degreeIds.length) {
                 throw new Error("Invalid degree IDs");
             }

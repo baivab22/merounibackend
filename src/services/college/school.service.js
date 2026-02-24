@@ -10,6 +10,7 @@ import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import { University } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
+import { sequelize } from "../../config/database.config.js";
 
 const parseFilter = (val) => {
     if (!val) return [];
@@ -62,7 +63,7 @@ class SchoolService {
             offset,
             distinct: true,
             order: [
-                [Sequelize.literal("`colleges`.`order_no_for_website` IS NULL"), "ASC"],
+                [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
                 ["order_no_for_website", "ASC"],
                 ["id", sort],
             ],

@@ -21,6 +21,25 @@ class CollegeController {
     }
   }
 
+  static async saveAsDraft(req, res) {
+    try {
+      const { collegeId, isNew } = await collegeService.createOrUpdateCollege({
+        ...req.body,
+        status: "draft",
+      });
+      return res.status(200).json({
+        message: isNew
+          ? "College saved as draft successfully!"
+          : "College updated as draft successfully!",
+        collegeId,
+      });
+    } catch (error) {
+      return res
+        .status(error.status || 500)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+
   static async listAdmissions(req, res) {
     try {
       const { items, pagination } = await collegeService.listAdmissions(
@@ -33,7 +52,7 @@ class CollegeController {
         pagination,
       });
     } catch (error) {
-      console.log(error,"THank")
+      console.log(error, "THank")
       const status = error.status || 500;
       return res.status(status).json({
         status,

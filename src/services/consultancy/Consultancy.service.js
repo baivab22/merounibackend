@@ -44,7 +44,7 @@ class ConsultancyService {
         limit,
         offset,
         order: [
-          [Sequelize.literal("`consultancies`.`order_no_for_website` IS NULL"), "ASC"],
+          [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
           ["order_no_for_website", "ASC"],
           ["createdAt", sort],
         ],

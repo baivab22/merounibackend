@@ -61,6 +61,35 @@ router.post(
 
 /**
  * @swagger
+ * /college/save-as-draft:
+ *   post:
+ *     summary: Save a college as draft
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *     responses:
+ *       200:
+ *         description: College saved as draft
+ */
+router.post(
+  "/save-as-draft",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(createOrUpdateCollegeSchema, "body"),
+  CollegeController.saveAsDraft
+);
+
+/**
+ * @swagger
  * /college/admission:
  *   get:
  *     summary: List college admissions
