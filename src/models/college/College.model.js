@@ -35,8 +35,8 @@ College.init(
       allowNull: false,
     },
     author_id: { type: DataTypes.INTEGER, allowNull: false },
-    university_id: { type: DataTypes.INTEGER, allowNull: false },
     google_map_url: { type: DataTypes.TEXT },
+
     map_type: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -62,6 +62,11 @@ College.init(
       allowNull: true,
       defaultValue: null,
       field: "order_no_for_website",
+    },
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      allowNull: false,
+      defaultValue: "published",
     },
   },
   {

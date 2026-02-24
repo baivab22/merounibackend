@@ -12,13 +12,24 @@ import User from "../users/User.model.js";
 import CollegeFacility from "./CollegeFacility.model.js";
 import Degree from "../degree/Degree.model.js";
 import CollegeOfferingDegrees from "./CollegeOfferingDegrees.model.js";
+import CollegeUniversity from "./CollegeUniversity.model.js";
+
 
 // College Associations
 College.belongsTo(User, { foreignKey: "author_id", as: "authorDetails" });
-College.belongsTo(University, {
-  foreignKey: "university_id",
-  as: "university",
+// One-to-many relationship (Backwards compatibility or main university if needed, but the user wants multiple)
+// For now, removing the belongsTo and replacing with belongsToMany
+College.belongsToMany(University, {
+  through: CollegeUniversity,
+  foreignKey: "college_id",
+  as: "universities",
 });
+University.belongsToMany(College, {
+  through: CollegeUniversity,
+  foreignKey: "university_id",
+  as: "colleges",
+});
+
 College.hasOne(CollegeAddress, {
   foreignKey: "college_id",
   as: "collegeAddress",
@@ -131,7 +142,9 @@ export {
   CollegeMember,
   CollegeFacility,
   CollegeRanking,
+  CollegeUniversity,
   Program,
+
   University,
   User,
 };

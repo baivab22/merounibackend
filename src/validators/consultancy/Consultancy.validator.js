@@ -57,7 +57,9 @@ export const createOrUpdateConsultancySchema = yup.object({
       if (value === null || value === undefined) return true;
       return typeof value === "object" && !Array.isArray(value);
     }),
+  location: yup.string().trim().nullable().optional(),
   featured_image: yup
+
     .string()
     .url()
     .when("id", {
@@ -143,3 +145,18 @@ export const createOrUpdateConsultancySchema = yup.object({
 });
 
 export const deleteConsultancyQuerySchema = idQuerySchema;
+
+export const updateConsultancyOrderSchema = yup
+  .object({
+    consultancies: yup
+      .array()
+      .of(
+        yup.object({
+          id: yup.number().integer().positive().required(),
+          order_no: yup.number().integer().min(0).required(),
+        })
+      )
+      .min(1)
+      .required(),
+  })
+  .required();

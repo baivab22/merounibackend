@@ -10,6 +10,9 @@ import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import { University } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
+import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
+
+import { sequelize } from "../../config/database.config.js";
 
 const parseFilter = (val) => {
     if (!val) return [];
@@ -47,8 +50,16 @@ class SchoolService {
         }
 
         if (affiliations.length > 0) {
-            whereCondition.university_id = { [Op.in]: affiliations };
+            // Need to filter colleges that have any of the provided universities
+            const collegeWithUniversities = await CollegeUniversity.findAll({
+                where: { university_id: { [Op.in]: affiliations } },
+                attributes: ["college_id"],
+                raw: true,
+            });
+            const collegeIds = collegeWithUniversities.map((cu) => cu.college_id);
+            whereCondition.id = { [Op.in]: collegeIds };
         }
+
 
         const include = [
             {
@@ -62,6 +73,7 @@ class SchoolService {
             offset,
             distinct: true,
             order: [
+                [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
                 ["order_no_for_website", "ASC"],
                 ["id", sort],
             ],
@@ -120,8 +132,9 @@ class SchoolService {
                 ],
             },
             attributes: {
-                exclude: ["author_id", "university_id"],
+                exclude: ["author_id"],
             },
+
             include: [
                 {
                     model: CollegeFacility,
@@ -171,9 +184,10 @@ class SchoolService {
                 },
                 {
                     model: University,
-                    as: "university",
+                    as: "universities",
                     attributes: ["fullname", "slugs"],
                 },
+
                 {
                     model: UserModel,
                     as: "authorDetails",
@@ -189,6 +203,45 @@ class SchoolService {
         }
 
         return school;
+    }
+
+    async updateSchoolOrder(schools) {
+        const transaction = await sequelize.transaction();
+        try {
+            // Validate all school IDs exist and are actually schools
+            const schoolIds = schools.map((s) => s.id);
+            const existingSchools = await College.findAll({
+                where: {
+                    id: { [Op.in]: schoolIds },
+                    [Op.and]: [
+                        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
+                    ],
+                },
+                transaction,
+            });
+
+            if (existingSchools.length !== schoolIds.length) {
+                const error = new Error("Invalid school IDs or some items are not schools");
+                error.status = 400;
+                throw error;
+            }
+
+            // Update order_no_for_website for each school
+            const updates = schools.map((school) =>
+                College.update(
+                    { order_no_for_website: school.order_no },
+                    { where: { id: school.id }, transaction }
+                )
+            );
+
+            await Promise.all(updates);
+            await transaction.commit();
+
+            return { message: "School order updated successfully" };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 }
 

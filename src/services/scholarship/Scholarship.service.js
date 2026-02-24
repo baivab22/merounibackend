@@ -1,9 +1,9 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class ScholarshipService {
   async listScholarships(query = {}) {
@@ -12,7 +12,7 @@ class ScholarshipService {
     const offset = (page - 1) * limit;
 
     const searchQuery = query.q || "";
-    const categoryId = query.category || query.categoryId;
+    const categoryId = query.category;
     const activeOnly = query.activeOnly === "true";
     const sortBy = query.sortBy || "createdAt";
     const sortOrder = query.sortOrder || "DESC";
@@ -150,7 +150,7 @@ class ScholarshipService {
 
     const createData = {
       ...data,
-      slugs: slug(titleOrName),
+      slugs: generateUniqueSlug(titleOrName),
     };
 
     // Ensure category_id from API is mapped to category if needed
@@ -174,7 +174,18 @@ class ScholarshipService {
     if (data.author_id && !data.author) {
       updateData.author = data.author_id;
     }
+ 
+    // first check the title of db & comming name is same or not
+    const scholarship = await Scholarship.findByPk(id);
+    if (!scholarship) {
+      const error = new Error("Scholarship not found");
+      error.status = 404;
+      throw error;
+    }
 
+    if (scholarship.name !== data.name) {
+      updateData.slugs = generateUniqueSlug(data.name);
+    }
     const [updatedRows] = await Scholarship.update(updateData, {
       where: { id },
     });

@@ -1,23 +1,24 @@
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
+import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
 import CollegeCourse from "../../models/college/CollegeCourse.model.js";
-import CollegeMember from "../../models/college/CollegeMember.model.js";
-import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
-import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
+import CollegeGallery from "../../models/college/CollegeGallery.model.js";
+import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
+import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
 import Course from "../../models/courses/Course.model.js";
-import Program from "../../models/program/Program.model.js";
-import UserModel from "../../models/users/User.model.js";
-import { University } from "../../models/university/University.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import Level from "../../models/level/Level.model.js";
-import FacultyModel from "../../models/faculty/Faculty.model.js";
+import Program from "../../models/program/Program.model.js";
+import { University } from "../../models/university/University.model.js";
+import UserModel from "../../models/users/User.model.js";
+
 
 
 class CollegeService {
@@ -31,8 +32,9 @@ class CollegeService {
         institute_type,
         institute_level,
         author_id,
-        university_id,
+        university_ids,
         google_map_url,
+
         map_type,
         website_url,
         featured_img,
@@ -48,6 +50,7 @@ class CollegeService {
         faqs,
         images,
         degrees,
+        status,
       } = payload;
 
       let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
@@ -96,12 +99,13 @@ class CollegeService {
             college_broucher,
             description: description || "",
             content,
-            university_id,
             google_map_url,
+
             map_type,
             website_url,
             faqs,
             order_no_for_website: nextOrder,
+            status: status || "published",
           },
           { transaction }
         );
@@ -116,10 +120,11 @@ class CollegeService {
           featured_img,
           college_logo,
           college_broucher,
-          university_id,
           google_map_url,
+
           map_type,
           website_url,
+          status: status || existingCollege.status,
         };
 
         // Only update name and slugs if name has changed
@@ -161,6 +166,22 @@ class CollegeService {
         }));
         await CollegeContact.bulkCreate(contactRecords, { transaction });
       }
+
+      if (Array.isArray(university_ids)) {
+        await CollegeUniversity.destroy({
+          where: { college_id: collegeId },
+          transaction,
+        });
+
+        if (university_ids.length > 0) {
+          const universityRecords = university_ids.map((unId) => ({
+            college_id: collegeId,
+            university_id: unId,
+          }));
+          await CollegeUniversity.bulkCreate(universityRecords, { transaction });
+        }
+      }
+
 
       if (Array.isArray(courses) && courses.length > 0) {
         const existingPrograms = await Program.findAll({
@@ -280,7 +301,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const { q, level, affiliation, discipline } = query;
+    const { q, level_id, university_id, course_id } = query;
 
     const offset = (page - 1) * limit;
 
@@ -295,16 +316,16 @@ class CollegeService {
       include: [],
     };
 
-    if (affiliation) {
+    if (university_id) {
       const universityWhere = {};
-      if (!isNaN(affiliation)) {
-        universityWhere.id = parseInt(affiliation, 10);
+      if (!isNaN(university_id)) {
+        universityWhere.id = parseInt(university_id, 10);
       } else {
-        universityWhere.slugs = affiliation;
+        universityWhere.slugs = university_id;
       }
       collegeInclude.include.push({
         model: University,
-        as: "university",
+        as: "universities",
         where: universityWhere,
         required: true,
       });
@@ -312,15 +333,16 @@ class CollegeService {
     } else {
       collegeInclude.include.push({
         model: University,
-        as: "university",
+        as: "universities",
         attributes: ["fullname", "slugs", "id"],
       });
     }
+
     include.push(collegeInclude);
 
     // Handle Program filtering manually because there's no relationship defined
     let filteredCourseIds = null;
-    if (q || level || discipline) {
+    if (q || level_id || course_id) {
       const programWhere = {};
       const programInclude = [];
 
@@ -328,10 +350,10 @@ class CollegeService {
         programWhere.title = { [Op.like]: `%${q}%` };
       }
 
-      if (level) {
+      if (level_id) {
         const levelWhere = {};
-        if (!isNaN(level)) levelWhere.id = parseInt(level, 10);
-        else levelWhere.slugs = level;
+        if (!isNaN(level_id)) levelWhere.id = parseInt(level_id, 10);
+        else levelWhere.slugs = level_id;
         programInclude.push({
           model: Level,
           as: "programlevel",
@@ -340,16 +362,8 @@ class CollegeService {
         });
       }
 
-      if (discipline) {
-        const facultyWhere = {};
-        if (!isNaN(discipline)) facultyWhere.id = parseInt(discipline, 10);
-        else facultyWhere.slugs = discipline;
-        programInclude.push({
-          model: FacultyModel,
-          as: "programfaculty",
-          where: facultyWhere,
-          required: true,
-        });
+      if (course_id) {
+        programWhere.id = course_id;
       }
 
       const matchingPrograms = await Program.findAll({
@@ -427,9 +441,10 @@ class CollegeService {
           include: [
             {
               model: University,
-              as: "university",
+              as: "universities",
               attributes: ["fullname", "slugs"],
             },
+
           ],
         },
       ],
@@ -446,7 +461,7 @@ class CollegeService {
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
-        { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
+        // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
       ],
     });
 
@@ -494,6 +509,13 @@ class CollegeService {
       whereCondition.institute_type = { [Op.in]: types };
     }
 
+    if (query.status) {
+      whereCondition.status = query.status;
+    } else {
+      // Default to published if not explicitly requested (e.g., for public list)
+      whereCondition.status = "published";
+    }
+
     const addressCondition = {};
     if (states.length > 0) {
       addressCondition.state = {
@@ -523,8 +545,8 @@ class CollegeService {
       offset,
       distinct: true,
       order: [
-        [Sequelize.literal("`colleges`.`order_no_for_website` IS NULL"), "ASC"],
-        [Sequelize.literal("`colleges`.`order_no_for_website`"), "ASC"],
+        // [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
+        // [Sequelize.literal("order_no_for_website"), "ASC"],
         ["id", sort],
       ],
       include: [
@@ -577,7 +599,8 @@ class CollegeService {
         },
         {
           model: University,
-          as: "university",
+          as: "universities",
+
           attributes: ["fullname", "slugs"],
           where: (() => {
             if (!university || (Array.isArray(university) && university.length === 0)) return undefined;
@@ -706,7 +729,8 @@ class CollegeService {
 
         {
           model: University,
-          as: "university",
+          as: "universities",
+
           attributes: ["fullname", "slugs"],
         },
         {
@@ -814,7 +838,8 @@ class CollegeService {
         },
         {
           model: University,
-          as: "university",
+          as: "universities",
+
           attributes: ["fullname", "slugs"],
         },
         {

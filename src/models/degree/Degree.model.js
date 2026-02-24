@@ -41,6 +41,11 @@ Degree.init(
             type: DataTypes.JSON,
             allowNull: true,
         },
+        order_no_for_website: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: null,
+        },
         createdAt: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,

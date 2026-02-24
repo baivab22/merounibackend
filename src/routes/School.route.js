@@ -5,6 +5,7 @@ import { requestValidator } from "../middlewares/RequestValidator.middleware.js"
 import {
     schoolPaginationSchema,
     collegeSlugParamSchema,
+    updateSchoolOrderSchema,
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
@@ -71,6 +72,12 @@ router.get(
     "/:slugs",
     requestValidator(collegeSlugParamSchema, "params"),
     SchoolController.getSchoolBySlug
+);
+
+router.patch(
+    "/update-order",
+    requestValidator(updateSchoolOrderSchema, "body"),
+    SchoolController.updateSchoolOrder
 );
 
 export default router;

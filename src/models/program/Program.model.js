@@ -1,6 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
-import Discipline from "../discipline/Discipline.model.js";
 
 class Program extends Model { }
 
@@ -13,35 +12,44 @@ Program.init(
     },
     code: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
     slugs: {
       type: DataTypes.STRING,
+      allowNull: true,
       unique: true,
     },
+
     author: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
+
     duration: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     credits: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
     },
     level_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
+
     language: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     eligibility_criteria: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     fee: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     scholarship_id: {
       type: DataTypes.INTEGER,
@@ -49,20 +57,25 @@ Program.init(
     },
     curriculum: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     learning_outcomes: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     delivery_type: {
       type: DataTypes.ENUM("Full-time", "Part-time", "Online", "Hybrid"),
-      allowNull: false,
+      allowNull: true,
     },
+
     delivery_mode: {
       type: DataTypes.ENUM("On-campus", "Remote", "Blended"),
-      allowNull: false,
+      allowNull: true,
     },
+
     careers: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     exam_id: {
       type: DataTypes.INTEGER,
@@ -78,6 +91,7 @@ Program.init(
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     },
+
   },
   {
     sequelize,

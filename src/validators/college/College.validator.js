@@ -5,7 +5,7 @@ import {
   idParamSchema,
 } from "../common/common.validator.js";
 
-export {  paginationSchema,slugParamSchema, idParamSchema };
+export { paginationSchema, slugParamSchema, idParamSchema };
 
 
 // Shared pagination schema
@@ -49,8 +49,9 @@ export const createOrUpdateCollegeSchema = yup
       .optional(),
     institute_level: yup.array().optional(),
     author_id: yup.number().integer().positive().optional(),
-    university_id: yup.number().integer().positive().optional(),
+    university_ids: yup.array().of(yup.number().integer().positive()).optional(),
     google_map_url: yup.string().optional(),
+
     map_type: yup.string().optional(),
     website_url: yup
       .string()
@@ -132,6 +133,11 @@ export const createOrUpdateCollegeSchema = yup
         })
       )
       .optional(),
+    status: yup
+      .string()
+      .oneOf(["draft", "published", "archived"])
+      .optional()
+      .default("published"),
   })
   .required();
 
@@ -159,3 +165,46 @@ export const updateCollegeOrderSchema = yup
       .required(),
   })
   .required();
+
+export const updateSchoolOrderSchema = yup
+  .object({
+    schools: yup
+      .array()
+      .of(
+        yup.object({
+          id: yup.number().integer().positive().required(),
+          order_no: yup.number().integer().min(0).required(),
+        })
+      )
+      .min(1)
+      .required(),
+  })
+  .required();
+
+
+
+export const admissionPaginationSchema = yup.object({
+  page: yup.number().integer().min(1).default(1),
+  limit: yup.number().integer().min(1).max(1000).default(10),
+  sort: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "ASC"))
+    .default("ASC"),
+  q: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  course_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  level_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  university_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+});

@@ -1,4 +1,5 @@
 import { Op, Sequelize } from "sequelize";
+import { sequelize } from "../../config/database.config.js";
 import Degree from "../../models/degree/Degree.model.js";
 import Program from "../../models/program/Program.model.js";
 import College from "../../models/college/College.model.js";
@@ -38,7 +39,7 @@ class DegreeService {
                 const disciplineConditions = disciplineIds.map(id =>
                     Sequelize.where(Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(Number(id))), true)
                 );
-                
+
                 // If we already have a search query (q), we need to combine it with discipline filters using Op.and
                 if (q) {
                     const searchOrCondition = whereCondition[Op.or];
@@ -58,7 +59,11 @@ class DegreeService {
             limit,
             offset,
             distinct: true,
-            order: [["createdAt", "DESC"]],
+            order: [
+                [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
+                ["order_no_for_website", "ASC"],
+                ["createdAt", "DESC"]
+            ],
             include: include.length ? include : undefined,
         });
 
@@ -149,7 +154,7 @@ class DegreeService {
         const updateData = { ...rest };
 
         if (title && title !== degree.title) {
-            updateData.title = generateUniqueSlug(title);
+            updateData.slug = generateUniqueSlug(title);
         }
 
         await degree.update(updateData);
@@ -163,6 +168,36 @@ class DegreeService {
         if (deletedRows === 0) {
             const error = new Error("Degree not found");
             error.status = 404;
+            throw error;
+        }
+    }
+
+    async updateDegreeOrder(degrees) {
+        const transaction = await sequelize.transaction();
+        try {
+            const degreeIds = degrees.map((d) => d.id);
+            const existingDegrees = await Degree.findAll({
+                where: { id: { [Op.in]: degreeIds } },
+                transaction,
+            });
+
+            console.log(existingDegrees,"existingDegrees")
+            if (existingDegrees.length !== degreeIds.length) {
+                throw new Error("Invalid degree IDs");
+            }
+
+            const updates = degrees.map((d) =>
+                Degree.update(
+                    { order_no_for_website: d.order_no },
+                    { where: { id: d.id }, transaction }
+                )
+            );
+
+            await Promise.all(updates);
+            await transaction.commit();
+            return { message: "Degree order updated successfully" };
+        } catch (error) {
+            await transaction.rollback();
             throw error;
         }
     }

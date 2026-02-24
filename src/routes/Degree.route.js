@@ -5,6 +5,7 @@ import { requestValidator } from "../middlewares/RequestValidator.middleware.js"
 import {
     createDegreeSchema,
     updateDegreeSchema,
+    updateDegreeOrderSchema,
 } from "../validators/degree/Degree.validator.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
@@ -203,6 +204,14 @@ router.delete(
     authenticateUser,
     authorizeRole(["admin", "editor"]),
     DegreeController.deleteDegree
+);
+
+router.patch(
+    "/update-order",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidator(updateDegreeOrderSchema, "body"),
+    DegreeController.updateDegreeOrder
 );
 
 export default router;

@@ -8,7 +8,7 @@ export { paginationSchema, slugParamSchema };
 
 export const createNewsSchema = yup.object({
   title: yup.string().trim().min(3).required("Title is required"),
-  category_id: yup
+  category: yup
     .number()
     .integer()
     .positive()

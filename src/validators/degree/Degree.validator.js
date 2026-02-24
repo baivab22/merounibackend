@@ -18,3 +18,18 @@ export const updateDegreeSchema = yup.object({
     featured_image: yup.string().url("Must be a valid URL").nullable().optional(),
     disciplines: yup.array().nullable().optional(),
 });
+
+export const updateDegreeOrderSchema = yup
+    .object({
+        degrees: yup
+            .array()
+            .of(
+                yup.object({
+                    id: yup.number().integer().positive().required(),
+                    order_no: yup.number().integer().min(0).required(),
+                })
+            )
+            .min(1)
+            .required(),
+    })
+    .required();

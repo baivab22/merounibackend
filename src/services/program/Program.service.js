@@ -319,21 +319,18 @@ class ProgramService {
     author,
   }) {
     // Validate level_id
-    if (!level_id) {
-      const error = new Error("level_id is required");
-      error.status = 400;
-      throw error;
+    if (level_id) {
+      const levelExists = await Level.findByPk(Number(level_id));
+      if (!levelExists) {
+        console.error(`Level with ID ${level_id} not found`);
+        const error = new Error(
+          `Invalid level_id: ${level_id}. Level does not exist.`
+        );
+        error.status = 400;
+        throw error;
+      }
     }
 
-    const levelExists = await Level.findByPk(Number(level_id));
-    if (!levelExists) {
-      console.error(`Level with ID ${level_id} not found`);
-      const error = new Error(
-        `Invalid level_id: ${level_id}. Level does not exist.`
-      );
-      error.status = 400;
-      throw error;
-    }
 
     // Validate degree_id (optional)
     if (degree_id) {
@@ -376,21 +373,18 @@ class ProgramService {
     }
 
     // Validate author
-    if (!author) {
-      const error = new Error("author is required");
-      error.status = 400;
-      throw error;
+    if (author) {
+      const authorExists = await UserModel.findByPk(Number(author));
+      if (!authorExists) {
+        console.error(`User with ID ${author} not found`);
+        const error = new Error(
+          `Invalid author ID: ${author}. User does not exist.`
+        );
+        error.status = 400;
+        throw error;
+      }
     }
 
-    const authorExists = await UserModel.findByPk(Number(author));
-    if (!authorExists) {
-      console.error(`User with ID ${author} not found`);
-      const error = new Error(
-        `Invalid author ID: ${author}. User does not exist.`
-      );
-      error.status = 400;
-      throw error;
-    }
 
   }
 }

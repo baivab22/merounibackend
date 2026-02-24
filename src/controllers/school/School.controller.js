@@ -34,6 +34,18 @@ class SchoolController {
             });
         }
     }
+    static async updateSchoolOrder(req, res) {
+        try {
+            const result = await schoolService.updateSchoolOrder(req.body.schools);
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error("Error in updateSchoolOrder:", error);
+            const status = error.status || 500;
+            return res.status(status).json({
+                message: status === 500 ? "Server error" : error.message,
+            });
+        }
+    }
 }
 
 export default SchoolController;

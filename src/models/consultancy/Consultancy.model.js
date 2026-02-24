@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import Course from "../courses/Course.model.js";
 
-class Consultancy extends Model {}
+class Consultancy extends Model { }
 
 Consultancy.init(
   {
@@ -27,11 +27,32 @@ Consultancy.init(
       allowNull: true,
       defaultValue: [],
     },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    street: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    country: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     address: {
       type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
+      allowNull: true,
+      defaultValue: {},
     },
+
     featured_image: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -77,6 +98,11 @@ Consultancy.init(
     visibility: {
       type: DataTypes.ENUM("public", "private"),
       defaultValue: "public",
+    },
+    order_no_for_website: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {
