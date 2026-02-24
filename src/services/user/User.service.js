@@ -26,13 +26,16 @@ class UserService {
 
     // Filter by role if provided
     if (role) {
-      // For MySQL JSON fields, use JSON_EXTRACT to query nested JSON properties
-      whereConditions.push(
-        Sequelize.where(
-          Sequelize.literal(`JSON_EXTRACT(roles, '$.${role}')`),
-          true
-        )
-      );
+      const rolesArray = role.split(',');
+      if (rolesArray.length > 0) {
+        const roleConditions = rolesArray.map(r => 
+          Sequelize.where(
+            Sequelize.literal(`JSON_EXTRACT(roles, '$.${r.trim()}')`),
+            true
+          )
+        );
+        whereConditions.push({ [Op.or]: roleConditions });
+      }
     }
 
     const whereCondition =
@@ -97,11 +100,15 @@ class UserService {
     }
 
     if (roleFilter) {
-      whereCondition[Op.and] = [
-        Sequelize.literal(
-          `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.${roleFilter}')) = 'true'`
-        ),
-      ];
+      const rolesArray = roleFilter.split(',');
+      if (rolesArray.length > 0) {
+        const roleConditions = rolesArray.map(r => 
+          Sequelize.literal(
+            `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.${r.trim()}')) = 'true'`
+          )
+        );
+        whereCondition[Op.and] = [{ [Op.or]: roleConditions }];
+      }
     }
 
     const users = await UserModel.findAll({
