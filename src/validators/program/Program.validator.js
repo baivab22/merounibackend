@@ -24,31 +24,10 @@ export const createOrUpdateProgramSchema = yup
       then: (schema) => schema.required("Title is required for new programs"),
       otherwise: (schema) => schema.optional(),
     }),
-    code: yup.string().when("id", {
-      is: (id) => !id,
-      then: (schema) => schema.required("Code is required for new programs"),
-      otherwise: (schema) => schema.optional(),
-    }),
-    author: yup
-      .number()
-      .integer()
-      .positive()
-      .when("id", {
-        is: (id) => !id,
-        then: (schema) =>
-          schema.required("Author is required for new programs"),
-        otherwise: (schema) => schema.optional(),
-      }),
-    level_id: yup
-      .number()
-      .integer()
-      .positive()
-      .when("id", {
-        is: (id) => !id,
-        then: (schema) =>
-          schema.required("Level ID is required for new programs"),
-        otherwise: (schema) => schema.optional(),
-      }),
+    code: yup.string().optional(),
+    author: yup.number().integer().positive().optional(),
+    level_id: yup.number().integer().positive().optional(),
+
     degree_id: yup.number().integer().positive().nullable().optional(),
     duration: yup.string().optional(),
     credits: yup.number().integer().positive().optional(),

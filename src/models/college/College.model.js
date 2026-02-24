@@ -35,8 +35,8 @@ College.init(
       allowNull: false,
     },
     author_id: { type: DataTypes.INTEGER, allowNull: false },
-    university_id: { type: DataTypes.INTEGER, allowNull: false },
     google_map_url: { type: DataTypes.TEXT },
+
     map_type: {
       type: DataTypes.STRING,
       allowNull: true,

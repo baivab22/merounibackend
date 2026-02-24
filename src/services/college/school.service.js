@@ -10,6 +10,8 @@ import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import { University } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
+import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
+
 import { sequelize } from "../../config/database.config.js";
 
 const parseFilter = (val) => {
@@ -48,8 +50,16 @@ class SchoolService {
         }
 
         if (affiliations.length > 0) {
-            whereCondition.university_id = { [Op.in]: affiliations };
+            // Need to filter colleges that have any of the provided universities
+            const collegeWithUniversities = await CollegeUniversity.findAll({
+                where: { university_id: { [Op.in]: affiliations } },
+                attributes: ["college_id"],
+                raw: true,
+            });
+            const collegeIds = collegeWithUniversities.map((cu) => cu.college_id);
+            whereCondition.id = { [Op.in]: collegeIds };
         }
+
 
         const include = [
             {
@@ -122,8 +132,9 @@ class SchoolService {
                 ],
             },
             attributes: {
-                exclude: ["author_id", "university_id"],
+                exclude: ["author_id"],
             },
+
             include: [
                 {
                     model: CollegeFacility,
@@ -173,9 +184,10 @@ class SchoolService {
                 },
                 {
                     model: University,
-                    as: "university",
+                    as: "universities",
                     attributes: ["fullname", "slugs"],
                 },
+
                 {
                     model: UserModel,
                     as: "authorDetails",

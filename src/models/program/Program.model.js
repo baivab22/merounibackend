@@ -13,17 +13,19 @@ Program.init(
     },
     code: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       unique: true,
     },
+
     slugs: {
       type: DataTypes.STRING,
       unique: true,
     },
     author: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
+
     duration: {
       type: DataTypes.STRING,
     },
@@ -32,8 +34,9 @@ Program.init(
     },
     level_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
+
     language: {
       type: DataTypes.STRING,
     },
@@ -55,12 +58,14 @@ Program.init(
     },
     delivery_type: {
       type: DataTypes.ENUM("Full-time", "Part-time", "Online", "Hybrid"),
-      allowNull: false,
+      allowNull: true,
     },
+
     delivery_mode: {
       type: DataTypes.ENUM("On-campus", "Remote", "Blended"),
-      allowNull: false,
+      allowNull: true,
     },
+
     careers: {
       type: DataTypes.TEXT,
     },

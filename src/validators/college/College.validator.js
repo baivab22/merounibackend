@@ -49,8 +49,9 @@ export const createOrUpdateCollegeSchema = yup
       .optional(),
     institute_level: yup.array().optional(),
     author_id: yup.number().integer().positive().optional(),
-    university_id: yup.number().integer().positive().optional(),
+    university_ids: yup.array().of(yup.number().integer().positive()).optional(),
     google_map_url: yup.string().optional(),
+
     map_type: yup.string().optional(),
     website_url: yup
       .string()
