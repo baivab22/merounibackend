@@ -55,6 +55,14 @@ class DegreeController {
             next(error);
         }
     }
+    static async updateDegreeOrder(req, res, next) {
+        try {
+            const result = await DegreeService.updateDegreeOrder(req.body.degrees);
+            return res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default DegreeController;

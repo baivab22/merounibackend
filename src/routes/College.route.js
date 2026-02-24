@@ -11,6 +11,7 @@ import {
   createOrUpdateCollegeSchema,
   updateCollegeOrderSchema,
   createOrUpdateAdmissionSchema,
+  admissionPaginationSchema
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
@@ -81,7 +82,7 @@ router.post(
  */
 router.get(
   "/admission",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(admissionPaginationSchema, "query"),
   CollegeController.listAdmissions
 );
 

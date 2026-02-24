@@ -62,6 +62,7 @@ class SchoolService {
             offset,
             distinct: true,
             order: [
+                [Sequelize.literal("`colleges`.`order_no_for_website` IS NULL"), "ASC"],
                 ["order_no_for_website", "ASC"],
                 ["id", sort],
             ],
@@ -189,6 +190,45 @@ class SchoolService {
         }
 
         return school;
+    }
+
+    async updateSchoolOrder(schools) {
+        const transaction = await sequelize.transaction();
+        try {
+            // Validate all school IDs exist and are actually schools
+            const schoolIds = schools.map((s) => s.id);
+            const existingSchools = await College.findAll({
+                where: {
+                    id: { [Op.in]: schoolIds },
+                    [Op.and]: [
+                        Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
+                    ],
+                },
+                transaction,
+            });
+
+            if (existingSchools.length !== schoolIds.length) {
+                const error = new Error("Invalid school IDs or some items are not schools");
+                error.status = 400;
+                throw error;
+            }
+
+            // Update order_no_for_website for each school
+            const updates = schools.map((school) =>
+                College.update(
+                    { order_no_for_website: school.order_no },
+                    { where: { id: school.id }, transaction }
+                )
+            );
+
+            await Promise.all(updates);
+            await transaction.commit();
+
+            return { message: "School order updated successfully" };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
     }
 }
 

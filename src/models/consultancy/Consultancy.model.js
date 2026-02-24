@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import Course from "../courses/Course.model.js";
 
-class Consultancy extends Model {}
+class Consultancy extends Model { }
 
 Consultancy.init(
   {
@@ -77,6 +77,11 @@ Consultancy.init(
     visibility: {
       type: DataTypes.ENUM("public", "private"),
       defaultValue: "public",
+    },
+    order_no_for_website: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {

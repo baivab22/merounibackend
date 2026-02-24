@@ -1,4 +1,5 @@
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
+import { sequelize } from "../../config/database.config.js";
 import slug from "slug";
 
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
@@ -42,7 +43,11 @@ class ConsultancyService {
         include: includeOptions,
         limit,
         offset,
-        order: [["createdAt", sort]],
+        order: [
+          [Sequelize.literal("`consultancies`.`order_no_for_website` IS NULL"), "ASC"],
+          ["order_no_for_website", "ASC"],
+          ["createdAt", sort],
+        ],
       });
     const consultancyIds = items.map((consultancy) => consultancy.id);
 
@@ -300,6 +305,35 @@ class ConsultancyService {
     }
 
     await consultancy.destroy();
+  }
+
+  async updateConsultancyOrder(consultancies) {
+    const transaction = await sequelize.transaction();
+    try {
+      const consultancyIds = consultancies.map((c) => c.id);
+      const existingConsultancies = await Consultancy.findAll({
+        where: { id: { [Op.in]: consultancyIds } },
+        transaction,
+      });
+
+      if (existingConsultancies.length !== consultancyIds.length) {
+        throw new Error("Invalid consultancy IDs");
+      }
+
+      const updates = consultancies.map((c) =>
+        Consultancy.update(
+          { order_no_for_website: c.order_no },
+          { where: { id: c.id }, transaction }
+        )
+      );
+
+      await Promise.all(updates);
+      await transaction.commit();
+      return { message: "Consultancy order updated successfully" };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 }
 

@@ -23,7 +23,7 @@ class ConsultancyController {
     }
   }
 
-  static async getMyConsultancy (req,res){
+  static async getMyConsultancy(req, res) {
     try {
       const consultancy = await consultancyService.getMyConsultancy(
         req.user.id
@@ -85,6 +85,17 @@ class ConsultancyController {
       console.error("Error deleting consultancy:", error);
       return res.status(status).json({
         error: status === 500 ? "Internal Server Error" : error.message,
+      });
+    }
+  }
+  static async updateConsultancyOrder(req, res) {
+    try {
+      const result = await consultancyService.updateConsultancyOrder(req.body.consultancies);
+      return res.status(200).json(result);
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
       });
     }
   }

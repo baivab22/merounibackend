@@ -14,7 +14,7 @@ class NewsService {
     const offset = (page - 1) * limit;
 
     const search = query.q || "";
-    const categoryId = query.category_id;
+    const categoryId = query.category;
     const collegeId = query.college_id;
     const status = query.status
 

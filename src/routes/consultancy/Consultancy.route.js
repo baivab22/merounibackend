@@ -9,6 +9,7 @@ import {
   consultancySlugParamSchema,
   createOrUpdateConsultancySchema,
   deleteConsultancyQuerySchema,
+  updateConsultancyOrderSchema,
 } from "../../validators/consultancy/Consultancy.validator.js";
 
 const route = express.Router();
@@ -63,7 +64,7 @@ route.get(
 route.get(
   "/me",
   authenticateUser,
-  authorizeRole(["admin", "editor","consultancy"]),
+  authorizeRole(["admin", "editor", "consultancy"]),
   ConsultancyController.getMyConsultancy,
 );
 
@@ -140,7 +141,7 @@ route.get(
 route.post(
   "/",
   authenticateUser,
-  authorizeRole(["admin", "editor","consultancy"]),
+  authorizeRole(["admin", "editor", "consultancy"]),
   requestValidator(createOrUpdateConsultancySchema, "body"),
   ConsultancyController.createOrUpdateConsultancy,
 );
@@ -176,6 +177,14 @@ route.delete(
   authorizeRole(["admin"]),
   requestValidator(deleteConsultancyQuerySchema, "query"),
   ConsultancyController.deleteConsultancy,
+);
+
+route.patch(
+  "/update-order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(updateConsultancyOrderSchema, "body"),
+  ConsultancyController.updateConsultancyOrder,
 );
 
 export default route;

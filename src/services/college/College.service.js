@@ -280,7 +280,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const { q, level, affiliation, discipline } = query;
+    const { q, level_id, university_id, course_id } = query;
 
     const offset = (page - 1) * limit;
 
@@ -295,12 +295,12 @@ class CollegeService {
       include: [],
     };
 
-    if (affiliation) {
+    if (university_id) {
       const universityWhere = {};
-      if (!isNaN(affiliation)) {
-        universityWhere.id = parseInt(affiliation, 10);
+      if (!isNaN(university_id)) {
+        universityWhere.id = parseInt(university_id, 10);
       } else {
-        universityWhere.slugs = affiliation;
+        universityWhere.slugs = university_id;
       }
       collegeInclude.include.push({
         model: University,
@@ -320,7 +320,7 @@ class CollegeService {
 
     // Handle Program filtering manually because there's no relationship defined
     let filteredCourseIds = null;
-    if (q || level || discipline) {
+    if (q || level_id || course_id) {
       const programWhere = {};
       const programInclude = [];
 
@@ -328,10 +328,10 @@ class CollegeService {
         programWhere.title = { [Op.like]: `%${q}%` };
       }
 
-      if (level) {
+      if (level_id) {
         const levelWhere = {};
-        if (!isNaN(level)) levelWhere.id = parseInt(level, 10);
-        else levelWhere.slugs = level;
+        if (!isNaN(level_id)) levelWhere.id = parseInt(level_id, 10);
+        else levelWhere.slugs = level_id;
         programInclude.push({
           model: Level,
           as: "programlevel",
@@ -340,16 +340,8 @@ class CollegeService {
         });
       }
 
-      if (discipline) {
-        const facultyWhere = {};
-        if (!isNaN(discipline)) facultyWhere.id = parseInt(discipline, 10);
-        else facultyWhere.slugs = discipline;
-        programInclude.push({
-          model: FacultyModel,
-          as: "programfaculty",
-          where: facultyWhere,
-          required: true,
-        });
+      if (course_id) {
+        programWhere.id = course_id;
       }
 
       const matchingPrograms = await Program.findAll({
