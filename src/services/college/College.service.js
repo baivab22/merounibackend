@@ -438,7 +438,7 @@ class CollegeService {
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
-        { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
+        // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
       ],
     });
 
