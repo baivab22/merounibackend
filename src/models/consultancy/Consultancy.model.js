@@ -27,11 +27,32 @@ Consultancy.init(
       allowNull: true,
       defaultValue: [],
     },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    street: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    country: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     address: {
       type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
+      allowNull: true,
+      defaultValue: {},
     },
+
     featured_image: {
       type: DataTypes.STRING,
       allowNull: false,

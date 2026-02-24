@@ -221,7 +221,18 @@ class ConsultancyService {
       const updateData = {};
       if (title !== undefined) updateData.title = title;
       if (destination !== undefined) updateData.destination = destination;
-      if (address !== undefined) updateData.address = address;
+      // Map address fields if provided
+      if (address !== undefined && typeof address === "object" && address !== null) {
+        updateData.address = address;
+        if (address.city) updateData.city = address.city;
+        if (address.state) updateData.state = address.state;
+        if (address.street) updateData.street = address.street;
+        if (address.country) updateData.country = address.country;
+        // Update location summary string
+        updateData.location = [address.city, address.state, address.country]
+          .filter(Boolean)
+          .join(", ");
+      }
       if (featured_image !== undefined)
         updateData.featured_image = featured_image;
       // Handle logo - empty string or null becomes null
@@ -252,13 +263,26 @@ class ConsultancyService {
       if (map_type !== undefined) updateData.map_type = map_type;
 
       await consultancy.update(updateData);
+
     } else {
+      // Extract individual address components for creation
+      const city = address?.city || null;
+      const state = address?.state || null;
+      const street = address?.street || null;
+      const country_field = address?.country || null;
+      const location_summary = [city, state, country_field].filter(Boolean).join(", ");
+
       // For create, handle empty strings and undefined as null for optional fields
       consultancy = await Consultancy.create({
         title,
         slugs,
         destination: destination || [],
         address: address || {},
+        location: location_summary,
+        city,
+        state,
+        street,
+        country: country_field,
         featured_image: featured_image || "",
         logo: logo === "" || logo === null || logo === undefined ? null : logo,
         map_type,

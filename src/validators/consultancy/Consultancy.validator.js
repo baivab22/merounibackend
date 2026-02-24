@@ -57,7 +57,9 @@ export const createOrUpdateConsultancySchema = yup.object({
       if (value === null || value === undefined) return true;
       return typeof value === "object" && !Array.isArray(value);
     }),
+  location: yup.string().trim().nullable().optional(),
   featured_image: yup
+
     .string()
     .url()
     .when("id", {
