@@ -8,7 +8,7 @@ import {
 export { idParamSchema };
 
 export const paginationSchema = basePaginationSchema.shape({
-  categoryId: yup.number().integer().positive().optional(),
+  category: yup.number().integer().positive().optional(),
 });
 
 export const scholarshipIdParamSchema = yup.object({

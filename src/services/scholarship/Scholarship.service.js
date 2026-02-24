@@ -12,7 +12,7 @@ class ScholarshipService {
     const offset = (page - 1) * limit;
 
     const searchQuery = query.q || "";
-    const categoryId = query.category || query.categoryId;
+    const categoryId = query.category;
     const activeOnly = query.activeOnly === "true";
     const sortBy = query.sortBy || "createdAt";
     const sortOrder = query.sortOrder || "DESC";
