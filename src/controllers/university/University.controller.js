@@ -49,6 +49,27 @@ class UniversityController {
     }
   }
 
+  static async saveAsDraft(req, res) {
+    try {
+      const universityId = await universityService.createOrUpdateUniversity({
+        ...req.body,
+        status: "draft",
+      });
+      return res.status(200).json({
+        message: req.body.id
+          ? "University updated as draft successfully!"
+          : "University saved as draft successfully!",
+        universityId,
+      });
+    } catch (error) {
+      console.error("Transaction error:", error);
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
+
   static async deleteUniversity(req, res) {
     try {
       await universityService.deleteUniversity(req.query.id);

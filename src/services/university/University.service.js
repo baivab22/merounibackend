@@ -156,6 +156,7 @@ class UniversityService {
         map,
         gallery,
         logo,
+        status,
       } = payload;
 
       if (!fullname || fullname.trim() === "") {
@@ -190,6 +191,7 @@ class UniversityService {
         university.featured_image = featured_image;
         university.videos = videos;
         university.map = map;
+        if (status) university.status = status;
 
         if (university.fullname !== fullname) {
           university.slugs = generateUniqueSlug(fullname);
@@ -219,6 +221,7 @@ class UniversityService {
             featured_image,
             videos,
             map,
+            status: status || "published",
           },
           { transaction }
         );

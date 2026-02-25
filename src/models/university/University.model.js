@@ -77,6 +77,11 @@ export const University = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      allowNull: false,
+      defaultValue: "published",
+    },
   },
   {
     tableName: "university",
