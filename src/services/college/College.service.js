@@ -32,7 +32,7 @@ class CollegeService {
         institute_type,
         institute_level,
         author_id,
-        university_ids,
+        university_id,
         google_map_url,
 
         map_type,
@@ -167,14 +167,14 @@ class CollegeService {
         await CollegeContact.bulkCreate(contactRecords, { transaction });
       }
 
-      if (Array.isArray(university_ids)) {
+      if (Array.isArray(university_id)) {
         await CollegeUniversity.destroy({
           where: { college_id: collegeId },
           transaction,
         });
 
-        if (university_ids.length > 0) {
-          const universityRecords = university_ids.map((unId) => ({
+        if (university_id.length > 0) {
+          const universityRecords = university_id.map((unId) => ({
             college_id: collegeId,
             university_id: unId,
           }));

@@ -5,14 +5,13 @@ import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  collegeSlugParamSchema,
-  collegeIdParamSchema,
-  createOrUpdateCollegeSchema,
-  updateCollegeOrderSchema,
-  createOrUpdateAdmissionSchema,
   admissionPaginationSchema,
-  collegePaginationSchema
+  collegeIdParamSchema,
+  collegePaginationSchema,
+  collegeSlugParamSchema,
+  createOrUpdateAdmissionSchema,
+  createOrUpdateCollegeSchema,
+  updateCollegeOrderSchema
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
