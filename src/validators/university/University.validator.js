@@ -15,7 +15,7 @@ export const universityListSchema = paginationSchema.shape({
 export const createOrUpdateUniversitySchema = yup
   .object({
     id: yup.number().integer().positive().optional(),
-    fullname: yup.string().trim().optional(),
+    fullname: yup.string().trim().required("University name is required"),
     country: yup.string().trim().optional(),
     state: yup.string().trim().optional(),
     city: yup.string().trim().optional(),
@@ -40,12 +40,18 @@ export const createOrUpdateUniversitySchema = yup
     logo: yup.string().nullable().optional(),
     featured_image: yup.string().nullable().optional(),
     videos: yup.mixed().nullable().optional(),
-    map: yup.string().required(),
+    map: yup.string().required("Map is required"),
     gallery: yup.array().of(yup.string()).optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && value.id) return true; // Update case
     return true; // Adjust based on actual requirements
   });
+
+// Schema for saving as draft - only fullname is required
+export const draftUniversitySchema = createOrUpdateUniversitySchema.shape({
+  fullname: yup.string().trim().required("University name is required"),
+  map: yup.string().optional(), // Map is optional for drafts
+});
 
 export const deleteUniversityQuerySchema = idQuerySchema;

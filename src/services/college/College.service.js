@@ -477,6 +477,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "asc").toUpperCase();
+    const status = query.status || "published";
     const search = query.q || "";
 
     // Helper to parse potential array/string/comma-separated params
@@ -509,12 +510,8 @@ class CollegeService {
       whereCondition.institute_type = { [Op.in]: types };
     }
 
-    if (query.status) {
-      whereCondition.status = query.status;
-    } else {
-      // Default to published if not explicitly requested (e.g., for public list)
-      whereCondition.status = "published";
-    }
+      whereCondition.status = status;
+   
 
     const addressCondition = {};
     if (states.length > 0) {

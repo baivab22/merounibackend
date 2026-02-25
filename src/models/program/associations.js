@@ -9,6 +9,7 @@ import Course from "../courses/Course.model.js";
 import { Exam } from "../exams/Exam.model.js";
 import User from "../users/User.model.js";
 import CollegeAddress from "../college/CollegeAddress.model.js";
+import { University, UniversityProgram } from "../university/University.model.js";
 
 
 // Program belongs to Level
@@ -54,28 +55,42 @@ Course.hasMany(ProgramSyllabus, {
 });
 
 // Associations for Program
-Program.belongsToMany(College, { 
-  through: ProgramCollege, 
-  foreignKey: "program_id", 
+Program.belongsToMany(College, {
+  through: ProgramCollege,
+  foreignKey: "program_id",
   as: "colleges" // Alias for the association
 });
-College.belongsToMany(Program, { 
-  through: ProgramCollege, 
-  foreignKey: "college_id", 
-  as: "programs" 
+College.belongsToMany(Program, {
+  through: ProgramCollege,
+  foreignKey: "college_id",
+  as: "programs"
 });
 
 // Assoociations for College Address
-Program.belongsToMany(CollegeAddress, { 
-  through: ProgramCollege, 
-  foreignKey: "program_id", 
+Program.belongsToMany(CollegeAddress, {
+  through: ProgramCollege,
+  foreignKey: "program_id",
   as: "collegesAddress" // Alias for the association
 });
-CollegeAddress.belongsToMany(Program, { 
-  through: ProgramCollege, 
-  foreignKey: "college_id", 
-  as: "programs" 
+CollegeAddress.belongsToMany(Program, {
+  through: ProgramCollege,
+  foreignKey: "college_id",
+  as: "programs"
+});
+
+// Program <-> University (many-to-many through existing university_programs junction table)
+Program.belongsToMany(University, {
+  through: UniversityProgram,
+  foreignKey: "program_id",
+  otherKey: "university_id",
+  as: "universities",
+});
+University.belongsToMany(Program, {
+  through: UniversityProgram,
+  foreignKey: "university_id",
+  otherKey: "program_id",
+  as: "programs",
 });
 
 
-export { Program, Scholarship, Level, Degree, Exam, User };
+export { Program, Scholarship, Level, Degree, Exam, User, University, UniversityProgram };

@@ -6,6 +6,7 @@ import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
   createOrUpdateUniversitySchema,
+  draftUniversitySchema,
   deleteUniversityQuerySchema,
   universityListSchema,
   universitySlugParamSchema
@@ -144,7 +145,7 @@ route.post(
   "/save-as-draft",
   authenticateUser,
   authorizeRole(["admin", "editor"]),
-  requestValidator(createOrUpdateUniversitySchema, "body"),
+  requestValidator(draftUniversitySchema, "body"),
   UniversityController.saveAsDraft
 );
 

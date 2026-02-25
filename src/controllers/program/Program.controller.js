@@ -5,9 +5,10 @@ const programService = new ProgramService();
 class ProgramController {
   static async listPrograms(req, res) {
     try {
-      const { items, pagination } = await programService.listPrograms(
-        req.query
-      );
+      const { items, pagination } = await programService.listPrograms({
+        ...req.query,
+        ...req.body,
+      });
 
       return res.status(200).json({
         message: "success",
@@ -35,7 +36,7 @@ class ProgramController {
   }
 
   static async createOrUpdateProgram(req, res) {
-    try {    
+    try {
       const programId = await programService.createOrUpdateProgram(req.body);
       return res.status(200).json({
         message: req.body.id

@@ -12,6 +12,7 @@ import ProgramCollege from "../../models/program/ProgramCollege.model.js";
 import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import UserModel from "../../models/users/User.model.js";
+import { University, UniversityProgram } from "../../models/university/University.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class ProgramService {
@@ -24,6 +25,7 @@ class ProgramService {
     const {
       levelId,
       disciplineId,
+      universityId,
       q,
       sortBy,
       sortOrder,
@@ -39,6 +41,23 @@ class ProgramService {
     if (disciplineId) {
       whereConditions.discipline_id = disciplineId;
     }
+    if (universityId) {
+      const universityIds = Array.isArray(universityId)
+        ? universityId
+        : typeof universityId === "string"
+          ? universityId.split(",").map((id) => id.trim())
+          : [universityId];
+
+      include.push({
+        model: University,
+        as: "universities",
+        where: { id: { [Op.in]: universityIds } },
+        attributes: [], // Just filtering
+        through: { attributes: [] },
+        required: true,
+      });
+    }
+
     if (q) {
       whereConditions[Op.or] = [
         { title: { [Op.like]: `%${q}%` } },
@@ -67,15 +86,7 @@ class ProgramService {
     const { count: totalCount, rows: items } =
       await Program.findAndCountAll({
         where: whereConditions,
-        include: [
-          { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
-          {
-            model: Degree,
-            as: "programdegree",
-            attributes: ["id", "title", "short_name", "slug"],
-            required: false,
-          },
-        ],
+        include,
         limit,
         offset,
         distinct: true,
@@ -146,6 +157,12 @@ class ProgramService {
           as: "collegesAddress",
           attributes: ["country", "city", "state", "id"],
         },
+        {
+          model: University,
+          as: "universities",
+          attributes: ["id", "fullname", "slugs", "logo"],
+          through: { attributes: [] },
+        },
       ],
     });
 
@@ -183,6 +200,7 @@ class ProgramService {
         exam_id,
         syllabus,
         colleges,
+        universities,
       } = payload;
 
       let programId = id;
@@ -193,6 +211,7 @@ class ProgramService {
         scholarship_id,
         exam_id,
         author,
+        universities,
       });
 
       if (!programId) {
@@ -294,6 +313,22 @@ class ProgramService {
         await ProgramCollege.bulkCreate(programCollegeData, { transaction });
       }
 
+      // Sync universities
+      if (Array.isArray(universities)) {
+        await UniversityProgram.destroy({
+          where: { program_id: programId },
+          transaction,
+        });
+
+        if (universities.length > 0) {
+          const universityProgramData = universities.map((universityId) => ({
+            program_id: programId,
+            university_id: universityId,
+          }));
+          await UniversityProgram.bulkCreate(universityProgramData, { transaction });
+        }
+      }
+
       await transaction.commit();
       return programId;
     } catch (error) {
@@ -317,6 +352,7 @@ class ProgramService {
     scholarship_id,
     exam_id,
     author,
+    universities,
   }) {
     // Validate level_id
     if (level_id) {
@@ -385,6 +421,22 @@ class ProgramService {
       }
     }
 
+    // Validate university IDs (optional)
+    if (Array.isArray(universities) && universities.length > 0) {
+      const found = await University.findAll({
+        where: { id: universities },
+        attributes: ["id"],
+      });
+      if (found.length !== universities.length) {
+        const foundIds = found.map((u) => u.id);
+        const invalid = universities.filter((uid) => !foundIds.includes(uid));
+        const error = new Error(
+          `Invalid university IDs: ${invalid.join(", ")}. Universities do not exist.`
+        );
+        error.status = 400;
+        throw error;
+      }
+    }
 
   }
 }

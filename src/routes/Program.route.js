@@ -34,6 +34,11 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Search query
+ *       - in: query
+ *         name: universityId
+ *         schema:
+ *           type: string
+ *         description: Filter by university ID (can be multiple IDs comma separated)
  *     responses:
  *       200:
  *         description: List of programs
@@ -43,6 +48,28 @@ router.get(
   // requestValidator(paginationSchema, "query"),
   ProgramController.listPrograms
 );
+
+/**
+ * @swagger
+ * /program/filter:
+ *   post:
+ *     summary: List all programs with filtering via body
+ *     tags: [Programs]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               universityId:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: List of programs
+ */
+router.post("/filter", ProgramController.listPrograms);
 
 /**
  * @swagger
@@ -96,6 +123,11 @@ router.get(
  *                 type: integer
  *               course_ids:
  *                 type: array
+ *                 items:
+ *                   type: integer
+ *               universities:
+ *                 type: array
+ *                 description: List of university IDs to associate with this program
  *                 items:
  *                   type: integer
  *     responses:

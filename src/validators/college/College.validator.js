@@ -7,6 +7,23 @@ import {
 
 export { paginationSchema, slugParamSchema, idParamSchema };
 
+export const collegePaginationSchema = yup.object({
+  page: yup.number().integer().min(1).default(1),
+  limit: yup.number().integer().min(1).max(1000).default(10),
+  sort: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "ASC"))
+    .default("ASC"),
+  q: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+status : yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+});
 
 // Shared pagination schema
 export const schoolPaginationSchema = yup.object({

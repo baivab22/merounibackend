@@ -103,6 +103,7 @@ export const createOrUpdateProgramSchema = yup
       )
       .optional(),
     colleges: yup.array().of(yup.number().integer().positive()).optional(),
+    universities: yup.array().of(yup.number().integer().positive()).optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && value.id) return true; // Update case
