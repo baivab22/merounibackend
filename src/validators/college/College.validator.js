@@ -19,7 +19,7 @@ export const collegePaginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
-status : yup
+  status: yup
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
@@ -101,7 +101,7 @@ export const createOrUpdateCollegeSchema = yup
       .optional(),
     contacts: yup.array().of(yup.string().nullable()).optional(),
     degrees: yup.array().of(yup.number().integer().positive()).optional(),
-    courses: yup.array().of(yup.number().integer().positive()).optional(),
+    programs: yup.array().of(yup.number().integer().positive()).optional(),
     facilities: yup
       .array()
       .of(
@@ -118,6 +118,7 @@ export const createOrUpdateCollegeSchema = yup
         yup.object({
           name: yup.string().nullable().optional(),
           contact_number: yup.string().nullable().optional(),
+          image_url: yup.string().nullable().optional(),
           role: yup
             .string()
             .oneOf(["Principal", "Professor", "Lecturer", "Admin", "Staff"])
@@ -131,7 +132,7 @@ export const createOrUpdateCollegeSchema = yup
       .array()
       .of(
         yup.object({
-          course_id: yup.number().integer().positive().optional(),
+          program_id: yup.number().integer().positive().optional(),
           eligibility_criteria: yup.string().nullable().optional(),
           admission_process: yup.string().nullable().optional(),
           fee_details: yup.string().nullable().optional(),
@@ -159,7 +160,7 @@ export const createOrUpdateCollegeSchema = yup
 export const createOrUpdateAdmissionSchema = yup.object({
   id: yup.number().integer().positive().optional(),
   college_id: yup.number().integer().positive().required(),
-  course_id: yup.number().integer().positive().required(),
+  program_id: yup.number().integer().positive().required(),
   eligibility_criteria: yup.string().nullable().optional(),
   admission_process: yup.string().nullable().optional(),
   fee_details: yup.string().nullable().optional(),
@@ -210,7 +211,7 @@ export const admissionPaginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
-  course_id: yup
+  program_id: yup
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),

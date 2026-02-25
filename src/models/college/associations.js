@@ -1,7 +1,7 @@
 import College from "./College.model.js";
 import CollegeAddress from "./CollegeAddress.model.js";
 import CollegeContact from "./CollegeContact.model.js";
-import CollegeCourse from "./CollegeCourse.model.js";
+import CollegeProgram from "./CollegeProgram.model.js";
 import CollegeMember from "./CollegeMember.model.js";
 import CollegeAdmission from "./CollegeAdmission.model.js";
 import CollegeGallery from "./CollegeGallery.model.js";
@@ -42,9 +42,9 @@ College.hasMany(CollegeContact, {
   foreignKey: "college_id",
   as: "collegeContacts",
 });
-College.hasMany(CollegeCourse, {
+College.hasMany(CollegeProgram, {
   foreignKey: "college_id",
-  as: "collegeCourses",
+  as: "collegePrograms",
 });
 College.hasMany(CollegeMember, {
   foreignKey: "college_id",
@@ -57,6 +57,16 @@ College.hasMany(CollegeGallery, {
 College.hasMany(CollegeAdmission, {
   foreignKey: "college_id",
   as: "collegeAdmissions",
+});
+College.belongsToMany(Program, {
+  through: CollegeProgram,
+  foreignKey: "college_id",
+  as: "programs",
+});
+Program.belongsToMany(College, {
+  through: CollegeProgram,
+  foreignKey: "program_id",
+  as: "colleges",
 });
 
 // CollegeAddress Associations
@@ -83,12 +93,12 @@ CollegeGallery.belongsTo(College, {
   as: "collegeGalleryCollege",
 });
 
-// CollegeCourse Associations
-CollegeCourse.belongsTo(College, {
+// CollegeProgram Associations
+CollegeProgram.belongsTo(College, {
   foreignKey: "college_id",
-  as: "collegeCourseCollege",
+  as: "collegeProgramCollege",
 });
-CollegeCourse.belongsTo(Program, { foreignKey: "course_id", as: "program" });
+CollegeProgram.belongsTo(Program, { foreignKey: "program_id", as: "program" });
 
 // CollegeMember Associations
 CollegeMember.belongsTo(College, {
@@ -101,7 +111,7 @@ CollegeAdmission.belongsTo(College, {
   foreignKey: "college_id",
   as: "collegeAdmissionCollege",
 });
-CollegeAdmission.belongsTo(Program, { foreignKey: "course_id", as: "program" });
+CollegeAdmission.belongsTo(Program, { foreignKey: "program_id", as: "program" });
 
 // CollegeRanking Associations
 CollegeRanking.belongsTo(College, {
@@ -138,7 +148,7 @@ export {
   CollegeAddress,
   CollegeAdmission,
   CollegeContact,
-  CollegeCourse,
+  CollegeProgram,
   CollegeMember,
   CollegeFacility,
   CollegeRanking,

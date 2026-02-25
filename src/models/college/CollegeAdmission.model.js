@@ -13,7 +13,7 @@ CollegeAdmission.init(
       references: { model: College, key: "id" },
       onDelete: "CASCADE",
     },
-    course_id: {
+    program_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },

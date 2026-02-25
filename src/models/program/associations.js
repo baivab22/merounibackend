@@ -54,17 +54,8 @@ Course.hasMany(ProgramSyllabus, {
   as: "syllabusEntries",
 });
 
-// Associations for Program
-Program.belongsToMany(College, {
-  through: ProgramCollege,
-  foreignKey: "program_id",
-  as: "colleges" // Alias for the association
-});
-College.belongsToMany(Program, {
-  through: ProgramCollege,
-  foreignKey: "college_id",
-  as: "programs"
-});
+// Associations for Program (Moved to CollegeProgram.model.js)
+
 
 // Assoociations for College Address
 Program.belongsToMany(CollegeAddress, {
