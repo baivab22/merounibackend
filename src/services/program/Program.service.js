@@ -32,7 +32,15 @@ class ProgramService {
     } = query;
 
     const whereConditions = {};
-    const include = [];
+    const include = [
+         { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
+        {
+          model: Degree,
+          as: "programdegree",
+          attributes: ["id", "title", "short_name", "slug"],
+          required: false,
+        },
+    ];
 
 
     if (levelId) {
@@ -52,7 +60,7 @@ class ProgramService {
         model: University,
         as: "universities",
         where: { id: { [Op.in]: universityIdsList } },
-        attributes: [], // Just filtering
+        attributes: [],
         through: { attributes: [] },
         required: true,
       });

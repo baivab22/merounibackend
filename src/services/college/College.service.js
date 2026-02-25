@@ -52,7 +52,7 @@ class CollegeService {
         status,
       } = payload;
 
-      console.log(programs,"programsprogramsprograms")
+      console.log(programs, "programsprogramsprograms")
       let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
       let existingCollege = null;
 
@@ -182,7 +182,7 @@ class CollegeService {
         }
       }
 
-
+console.log(programs,"programsprogramsprograms")
       if (Array.isArray(programs) && programs.length > 0) {
         const existingPrograms = await Program.findAll({
           where: { id: { [Op.in]: programs } },
@@ -249,6 +249,7 @@ class CollegeService {
         await CollegeFacility.bulkCreate(facilityRecords, { transaction });
       }
 
+      console.log(images,"imagesimagesimagesimages")
       if (Array.isArray(images)) {
         await CollegeGallery.destroy({
           where: { college_id: collegeId },
@@ -565,12 +566,17 @@ class CollegeService {
           attributes: ["id", "name", "contact_number", "role", "description", "image_url"],
         },
         {
-          model: Program,
-          as: "programs",
-          attributes: ["id", "title", "slugs"],
-          through: { attributes: [] },
+          model: CollegeProgram,
+          as: "collegePrograms",
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["id", "title", "slugs"],
+            },
+          ],
           required: !!programIdFilter,
-          where: programIdFilter ? { id: programIdFilter } : undefined,
+          where: programIdFilter ? { program_id: programIdFilter } : undefined,
         },
         {
           model: CollegeGallery,
@@ -680,10 +686,15 @@ class CollegeService {
           as: "collegeGallery",
         },
         {
-          model: Program,
-          as: "programs",
-          attributes: ["id", "title", "slugs"],
-          through: { attributes: [] },
+          model: CollegeProgram,
+          as: "collegePrograms",
+          include: [
+            {
+              model: Program,
+              as: "program",
+              attributes: ["id", "title", "slugs"],
+            },
+          ],
         },
         {
           model: CollegeMember,
