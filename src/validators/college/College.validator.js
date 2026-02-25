@@ -73,10 +73,8 @@ export const createOrUpdateCollegeSchema = yup
     website_url: yup
       .string()
       .test("is-valid-url", "website_url must be a valid URL", (value) => {
-        if (!value || value.trim() === "") return true; // Allow empty/null values
+        if (!value || value.trim() === "") return true;
         const trimmedValue = value.trim();
-        // Accept URLs with or without protocol (http://, https://)
-        // Pattern matches: www.example.com, example.com, https://example.com, http://www.example.com/path
         const urlPattern = /^(https?:\/\/)?([\da-z\.-]+\.)+[a-z]{2,}(\/.*)?$/i;
         return urlPattern.test(trimmedValue);
       })

@@ -272,9 +272,9 @@ class CollegeService {
         const memberRecords = members.map((member) => ({
           college_id: collegeId,
           name: member.name,
-          contact_number: member.contact_info,
+          contact_number: member.contact_number,
           role: member.role,
-          description: member.bio,
+          description: member.description,
           image_url: member.image_url,
         }));
         await CollegeMember.bulkCreate(memberRecords, { transaction });
@@ -477,7 +477,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "asc").toUpperCase();
-    const status = query.status || "published";
+    const status = query.status
     const search = query.q || "";
 
     // Helper to parse potential array/string/comma-separated params
@@ -509,9 +509,10 @@ class CollegeService {
     if (types.length > 0) {
       whereCondition.institute_type = { [Op.in]: types };
     }
-
+    if (status) {
       whereCondition.status = status;
-   
+    }
+
 
     const addressCondition = {};
     if (states.length > 0) {

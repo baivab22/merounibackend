@@ -25,7 +25,7 @@ class ProgramService {
     const {
       levelId,
       disciplineId,
-      universityId,
+      universityIds,
       q,
       sortBy,
       sortOrder,
@@ -41,17 +41,17 @@ class ProgramService {
     if (disciplineId) {
       whereConditions.discipline_id = disciplineId;
     }
-    if (universityId) {
-      const universityIds = Array.isArray(universityId)
-        ? universityId
-        : typeof universityId === "string"
-          ? universityId.split(",").map((id) => id.trim())
-          : [universityId];
+    if (universityIds) {
+      const universityIdsList = Array.isArray(universityIds)
+        ? universityIds
+        : typeof universityIds === "string"
+          ? universityIds.split(",").map((id) => id.trim())
+          : [universityIds];
 
       include.push({
         model: University,
         as: "universities",
-        where: { id: { [Op.in]: universityIds } },
+        where: { id: { [Op.in]: universityIdsList } },
         attributes: [], // Just filtering
         through: { attributes: [] },
         required: true,
