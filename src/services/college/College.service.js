@@ -268,7 +268,6 @@ class CollegeService {
           where: { college_id: collegeId },
           transaction,
         });
-        console.log(members, "membersmembersmembers")
         const memberRecords = members.map((member) => ({
           college_id: collegeId,
           name: member.name,

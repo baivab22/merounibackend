@@ -1,13 +1,13 @@
-import Referral from "../../models/referral/Referral.model.js";
+import { Op, QueryTypes } from "sequelize";
+import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
-import UserModel from "../../models/users/User.model.js";
-import Course from "../../models/courses/Course.model.js";
-import { roleHelper } from "../../utils/RoleHelper.js";
 import Config from "../../models/config/Config.model.js";
-import { Sequelize, Op, QueryTypes } from "sequelize";
-import { sequelize } from "../../config/database.config.js";
+import Course from "../../models/courses/Course.model.js";
+import Referral from "../../models/referral/Referral.model.js";
+import UserModel from "../../models/users/User.model.js";
+import { roleHelper } from "../../utils/RoleHelper.js";
 
 class ReferralService {
   async createReferredApplication(payload, user) {
