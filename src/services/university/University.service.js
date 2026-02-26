@@ -19,7 +19,7 @@ class UniversityService {
 
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 10;
-    const status = query.status || "published";
+    const status = query.status;
     
     const searchQuery = q || "";
 
