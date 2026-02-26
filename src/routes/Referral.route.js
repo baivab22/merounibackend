@@ -35,13 +35,13 @@ const router = express.Router();
  *             required:
  *               - user_id
  *               - college_id
- *               - course_id
+ *               - program_id
  *             properties:
  *               user_id:
  *                 type: integer
  *               college_id:
  *                 type: integer
- *               course_id:
+ *               program_id:
  *                 type: integer
  *               student_description:
  *                 type: string
@@ -109,13 +109,13 @@ router.get(
  *             required:
  *               - student_id
  *               - college_id
- *               - course_id
+ *               - program_id
  *             properties:
  *               student_id:
  *                 type: integer
  *               college_id:
  *                 type: integer
- *               course_id:
+ *               program_id:
  *                 type: integer
  *               student_description:
  *                 type: string
@@ -155,13 +155,13 @@ router.post(
  *             required:
  *               - student_id
  *               - college_id
- *               - course_id
+ *               - program_id
  *             properties:
  *               student_id:
  *                 type: integer
  *               college_id:
  *                 type: integer
- *               course_id:
+ *               program_id:
  *                 type: integer
  *               student_description:
  *                 type: string
@@ -178,7 +178,7 @@ router.post(
 router.post(
   "/apply-agent",
   authenticateUser,
-  authorizeRole([ "agent"]),
+  authorizeRole(["agent"]),
   requestValidator(createReferredApplicationSchema, "body"),
   ReferralController.agentApply,
 );

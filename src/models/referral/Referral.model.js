@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import College from "../college/College.model.js";
 import User from "../users/User.model.js";
-import Course from "../courses/Course.model.js";
+import Program from "../program/Program.model.js";
 
 class Referral extends Model { }
 
@@ -61,11 +61,11 @@ Referral.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    course_id: {
+    program_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: Course,
+        model: Program,
         key: "id",
       },
     },
@@ -98,9 +98,9 @@ Referral.belongsTo(User, {
   as: "referralAgent",
 });
 
-Referral.belongsTo(Course, {
-  foreignKey: "course_id",
-  as: "course",
+Referral.belongsTo(Program, {
+  foreignKey: "program_id",
+  as: "program",
 });
 
 export default Referral;

@@ -30,7 +30,7 @@ export const createSelfApplicationSchema = yup
   .object({
     referral_type: yup.string().oneOf(["self"]).default("self").required(),
     college_id: yup.number().integer().positive().required(),
-    course_id: yup.number().integer().positive().nullable(),
+    program_id: yup.number().integer().positive().nullable(),
     description: yup.string().trim().notRequired().nullable(),
   })
   .required();
