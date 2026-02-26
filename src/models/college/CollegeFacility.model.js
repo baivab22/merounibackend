@@ -22,7 +22,7 @@ CollegeFacility.init(
       allowNull: true,
     },
     icon: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   },

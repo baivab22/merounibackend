@@ -5,13 +5,13 @@ import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
-  collegeSlugParamSchema,
+  admissionPaginationSchema,
   collegeIdParamSchema,
-  createOrUpdateCollegeSchema,
-  updateCollegeOrderSchema,
+  collegePaginationSchema,
+  collegeSlugParamSchema,
   createOrUpdateAdmissionSchema,
-  admissionPaginationSchema
+  createOrUpdateCollegeSchema,
+  updateCollegeOrderSchema
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
@@ -230,7 +230,7 @@ router.delete(
  */
 router.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(collegePaginationSchema, "query"),
   CollegeController.listColleges
 );
 
@@ -251,6 +251,7 @@ router.get(
  */
 router.post(
   "/filter",
+  requestValidator(collegePaginationSchema, "body"),
   CollegeController.listColleges
 );
 

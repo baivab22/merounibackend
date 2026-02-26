@@ -15,6 +15,7 @@ class CollegeController {
         collegeId,
       });
     } catch (error) {
+      console.log(error, "THank")
       return res
         .status(error.status || 500)
         .json({ error: error.message || "Server error" });
@@ -99,6 +100,7 @@ class CollegeController {
 
       return res.status(200).json({ item: college });
     } catch (error) {
+      console.log(error, "THank")
       return res.status(500).json({ error: error.message });
     }
   }

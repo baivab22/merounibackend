@@ -19,6 +19,8 @@ class UniversityService {
 
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 10;
+    const status = query.status || "published";
+    
     const searchQuery = q || "";
 
     const offset = (page - 1) * limit;
@@ -42,6 +44,16 @@ class UniversityService {
       sqlQuery += typeCondition;
       countQuery += typeCondition;
       replacements.type = query.type;
+    }
+
+    if (status) {
+      const statusCondition = searchQuery
+        ? ` AND status = :status`
+        : ` WHERE status = :status`;
+
+      sqlQuery += statusCondition;
+      countQuery += statusCondition;
+      replacements.status = status;
     }
 
     sqlQuery += ` ORDER BY order_no_for_website ASC, id DESC LIMIT :limit OFFSET :offset`;
@@ -156,6 +168,7 @@ class UniversityService {
         map,
         gallery,
         logo,
+        status,
       } = payload;
 
       if (!fullname || fullname.trim() === "") {
@@ -190,6 +203,7 @@ class UniversityService {
         university.featured_image = featured_image;
         university.videos = videos;
         university.map = map;
+        if (status) university.status = status;
 
         if (university.fullname !== fullname) {
           university.slugs = generateUniqueSlug(fullname);
@@ -219,6 +233,7 @@ class UniversityService {
             featured_image,
             videos,
             map,
+            status: status || "published",
           },
           { transaction }
         );

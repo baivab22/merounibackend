@@ -2,7 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
-import CollegeCourse from "../../models/college/CollegeCourse.model.js";
+import CollegeProgram from "../../models/college/CollegeProgram.model.js";
 import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
@@ -156,8 +156,8 @@ class SchoolService {
                     as: "collegeGallery",
                 },
                 {
-                    model: CollegeCourse,
-                    as: "collegeCourses",
+                    model: CollegeProgram,
+                    as: "collegePrograms",
                     include: [
                         {
                             model: Program,

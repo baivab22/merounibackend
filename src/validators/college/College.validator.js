@@ -7,6 +7,23 @@ import {
 
 export { paginationSchema, slugParamSchema, idParamSchema };
 
+export const collegePaginationSchema = yup.object({
+  page: yup.number().integer().min(1).default(1),
+  limit: yup.number().integer().min(1).max(1000).default(10),
+  sort: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "ASC"))
+    .default("ASC"),
+  q: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  status: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+});
 
 // Shared pagination schema
 export const schoolPaginationSchema = yup.object({
@@ -49,17 +66,15 @@ export const createOrUpdateCollegeSchema = yup
       .optional(),
     institute_level: yup.array().optional(),
     author_id: yup.number().integer().positive().optional(),
-    university_ids: yup.array().of(yup.number().integer().positive()).optional(),
+    university_id: yup.array().of(yup.number().integer().positive()).optional(),
     google_map_url: yup.string().optional(),
 
     map_type: yup.string().optional(),
     website_url: yup
       .string()
       .test("is-valid-url", "website_url must be a valid URL", (value) => {
-        if (!value || value.trim() === "") return true; // Allow empty/null values
+        if (!value || value.trim() === "") return true;
         const trimmedValue = value.trim();
-        // Accept URLs with or without protocol (http://, https://)
-        // Pattern matches: www.example.com, example.com, https://example.com, http://www.example.com/path
         const urlPattern = /^(https?:\/\/)?([\da-z\.-]+\.)+[a-z]{2,}(\/.*)?$/i;
         return urlPattern.test(trimmedValue);
       })
@@ -86,7 +101,7 @@ export const createOrUpdateCollegeSchema = yup
       .optional(),
     contacts: yup.array().of(yup.string().nullable()).optional(),
     degrees: yup.array().of(yup.number().integer().positive()).optional(),
-    courses: yup.array().of(yup.number().integer().positive()).optional(),
+    programs: yup.array().of(yup.number().integer().positive()).optional(),
     facilities: yup
       .array()
       .of(
@@ -103,6 +118,7 @@ export const createOrUpdateCollegeSchema = yup
         yup.object({
           name: yup.string().nullable().optional(),
           contact_number: yup.string().nullable().optional(),
+          image_url: yup.string().nullable().optional(),
           role: yup
             .string()
             .oneOf(["Principal", "Professor", "Lecturer", "Admin", "Staff"])
@@ -116,7 +132,7 @@ export const createOrUpdateCollegeSchema = yup
       .array()
       .of(
         yup.object({
-          course_id: yup.number().integer().positive().optional(),
+          program_id: yup.number().integer().positive().optional(),
           eligibility_criteria: yup.string().nullable().optional(),
           admission_process: yup.string().nullable().optional(),
           fee_details: yup.string().nullable().optional(),
@@ -144,7 +160,7 @@ export const createOrUpdateCollegeSchema = yup
 export const createOrUpdateAdmissionSchema = yup.object({
   id: yup.number().integer().positive().optional(),
   college_id: yup.number().integer().positive().required(),
-  course_id: yup.number().integer().positive().required(),
+  program_id: yup.number().integer().positive().required(),
   eligibility_criteria: yup.string().nullable().optional(),
   admission_process: yup.string().nullable().optional(),
   fee_details: yup.string().nullable().optional(),
@@ -195,7 +211,7 @@ export const admissionPaginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
-  course_id: yup
+  program_id: yup
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),

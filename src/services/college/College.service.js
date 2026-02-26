@@ -6,16 +6,15 @@ import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
-import CollegeCourse from "../../models/college/CollegeCourse.model.js";
+import CollegeProgram from "../../models/college/CollegeProgram.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
 import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
-import Course from "../../models/courses/Course.model.js";
+import Program from "../../models/program/Program.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import Level from "../../models/level/Level.model.js";
-import Program from "../../models/program/Program.model.js";
 import { University } from "../../models/university/University.model.js";
 import UserModel from "../../models/users/User.model.js";
 
@@ -32,7 +31,7 @@ class CollegeService {
         institute_type,
         institute_level,
         author_id,
-        university_ids,
+        university_id,
         google_map_url,
 
         map_type,
@@ -42,7 +41,7 @@ class CollegeService {
         college_broucher,
         address,
         contacts,
-        courses,
+        programs,
         facilities,
         members,
         description,
@@ -53,6 +52,7 @@ class CollegeService {
         status,
       } = payload;
 
+      console.log(programs, "programsprogramsprograms")
       let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
       let existingCollege = null;
 
@@ -167,14 +167,14 @@ class CollegeService {
         await CollegeContact.bulkCreate(contactRecords, { transaction });
       }
 
-      if (Array.isArray(university_ids)) {
+      if (Array.isArray(university_id)) {
         await CollegeUniversity.destroy({
           where: { college_id: collegeId },
           transaction,
         });
 
-        if (university_ids.length > 0) {
-          const universityRecords = university_ids.map((unId) => ({
+        if (university_id.length > 0) {
+          const universityRecords = university_id.map((unId) => ({
             college_id: collegeId,
             university_id: unId,
           }));
@@ -182,10 +182,10 @@ class CollegeService {
         }
       }
 
-
-      if (Array.isArray(courses) && courses.length > 0) {
+console.log(programs,"programsprogramsprograms")
+      if (Array.isArray(programs) && programs.length > 0) {
         const existingPrograms = await Program.findAll({
-          where: { id: { [Op.in]: courses } },
+          where: { id: { [Op.in]: programs } },
           attributes: ["id"],
           transaction,
         });
@@ -193,7 +193,7 @@ class CollegeService {
         const existingProgramIds = existingPrograms.map(
           (program) => program.id
         );
-        const invalidProgramIds = courses.filter(
+        const invalidProgramIds = programs.filter(
           (programId) => !existingProgramIds.includes(programId)
         );
 
@@ -207,16 +207,16 @@ class CollegeService {
           throw error;
         }
 
-        await CollegeCourse.destroy({
+        await CollegeProgram.destroy({
           where: { college_id: collegeId },
           transaction,
         });
 
-        const courseRecords = courses.map((courseId) => ({
+        const programRecords = programs.map((programId) => ({
           college_id: collegeId,
-          course_id: courseId,
+          program_id: programId,
         }));
-        await CollegeCourse.bulkCreate(courseRecords, { transaction });
+        await CollegeProgram.bulkCreate(programRecords, { transaction });
       }
 
       if (Array.isArray(degrees)) {
@@ -249,6 +249,7 @@ class CollegeService {
         await CollegeFacility.bulkCreate(facilityRecords, { transaction });
       }
 
+      console.log(images,"imagesimagesimagesimages")
       if (Array.isArray(images)) {
         await CollegeGallery.destroy({
           where: { college_id: collegeId },
@@ -268,13 +269,12 @@ class CollegeService {
           where: { college_id: collegeId },
           transaction,
         });
-
         const memberRecords = members.map((member) => ({
           college_id: collegeId,
           name: member.name,
-          contact_number: member.contact_info,
+          contact_number: member.contact_number,
           role: member.role,
-          description: member.bio,
+          description: member.description,
           image_url: member.image_url,
         }));
         await CollegeMember.bulkCreate(memberRecords, { transaction });
@@ -301,7 +301,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const { q, level_id, university_id, course_id } = query;
+    const { q, level_id, university_id, program_id } = query;
 
     const offset = (page - 1) * limit;
 
@@ -341,8 +341,8 @@ class CollegeService {
     include.push(collegeInclude);
 
     // Handle Program filtering manually because there's no relationship defined
-    let filteredCourseIds = null;
-    if (q || level_id || course_id) {
+    let filteredProgramIds = null;
+    if (q || level_id || program_id) {
       const programWhere = {};
       const programInclude = [];
 
@@ -362,8 +362,8 @@ class CollegeService {
         });
       }
 
-      if (course_id) {
-        programWhere.id = course_id;
+      if (program_id) {
+        programWhere.id = program_id;
       }
 
       const matchingPrograms = await Program.findAll({
@@ -371,7 +371,7 @@ class CollegeService {
         include: programInclude,
         attributes: ["id"],
       });
-      filteredCourseIds = matchingPrograms.map((p) => p.id);
+      filteredProgramIds = matchingPrograms.map((p) => p.id);
     }
 
     if (q) {
@@ -379,11 +379,11 @@ class CollegeService {
       whereCondition[Op.or] = [
         { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
       ];
-      if (filteredCourseIds) {
-        whereCondition[Op.or].push({ course_id: { [Op.in]: filteredCourseIds } });
+      if (filteredProgramIds) {
+        whereCondition[Op.or].push({ program_id: { [Op.in]: filteredProgramIds } });
       }
-    } else if (filteredCourseIds !== null) {
-      whereCondition.course_id = { [Op.in]: filteredCourseIds };
+    } else if (filteredProgramIds !== null) {
+      whereCondition.program_id = { [Op.in]: filteredProgramIds };
     }
 
     const { count: totalCount, rows: rawItems } =
@@ -397,9 +397,9 @@ class CollegeService {
       });
 
     // Manually fetch program details for the returned items
-    const courseIdsToFetch = rawItems.map((item) => item.course_id);
+    const programIdsToFetch = rawItems.map((item) => item.program_id);
     const programs = await Program.findAll({
-      where: { id: { [Op.in]: courseIdsToFetch } },
+      where: { id: { [Op.in]: programIdsToFetch } },
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
@@ -413,8 +413,8 @@ class CollegeService {
 
     const items = rawItems.map((item) => {
       const itemData = item.toJSON();
-      itemData.program = programsMap[item.course_id] || null;
-      delete itemData.course_id;
+      itemData.program = programsMap[item.program_id] || null;
+      delete itemData.program_id;
       delete itemData.college_id;
       return itemData;
     });
@@ -457,7 +457,7 @@ class CollegeService {
     }
 
     const program = await Program.findOne({
-      where: { id: admission.course_id },
+      where: { id: admission.program_id },
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
@@ -467,7 +467,7 @@ class CollegeService {
 
     const admissionData = admission.toJSON();
     admissionData.program = program;
-    delete admissionData.course_id;
+    delete admissionData.program_id;
     delete admissionData.college_id;
 
     return admissionData;
@@ -477,6 +477,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "asc").toUpperCase();
+    const status = query.status
     const search = query.q || "";
 
     // Helper to parse potential array/string/comma-separated params
@@ -508,13 +509,10 @@ class CollegeService {
     if (types.length > 0) {
       whereCondition.institute_type = { [Op.in]: types };
     }
-
-    if (query.status) {
-      whereCondition.status = query.status;
-    } else {
-      // Default to published if not explicitly requested (e.g., for public list)
-      whereCondition.status = "published";
+    if (status) {
+      whereCondition.status = status;
     }
+
 
     const addressCondition = {};
     if (states.length > 0) {
@@ -529,7 +527,6 @@ class CollegeService {
       };
     }
 
-    const degreeCondition = {};
     const orConditions = [];
 
     // 1. Handle direct Degree IDs (degree_ids)
@@ -569,29 +566,17 @@ class CollegeService {
           attributes: ["id", "name", "contact_number", "role", "description", "image_url"],
         },
         {
-          model: CollegeCourse,
-          as: "collegeCourses",
-          attributes: { exclude: ["college_id"] },
-          required: !!programIdFilter || Object.keys(degreeCondition).length > 0,
-          duplicating: !!programIdFilter || Object.keys(degreeCondition).length > 0,
+          model: CollegeProgram,
+          as: "collegePrograms",
           include: [
             {
               model: Program,
               as: "program",
               attributes: ["id", "title", "slugs"],
-              where: (() => {
-                const conditions = {};
-                if (Object.keys(degreeCondition).length) {
-                  Object.assign(conditions, degreeCondition);
-                }
-                // Filter by program_id if provided
-                if (programIdFilter) {
-                  conditions.id = programIdFilter;
-                }
-                return Object.keys(conditions).length ? conditions : undefined;
-              })(),
             },
           ],
+          required: !!programIdFilter,
+          where: programIdFilter ? { program_id: programIdFilter } : undefined,
         },
         {
           model: CollegeGallery,
@@ -701,29 +686,26 @@ class CollegeService {
           as: "collegeGallery",
         },
         {
-          model: CollegeCourse,
-          as: "collegeCourses",
-          attributes: {
-            exclude: ["college_id", "course_id"],
-          },
+          model: CollegeProgram,
+          as: "collegePrograms",
           include: [
             {
               model: Program,
               as: "program",
-              attributes: ["title", "slugs"],
+              attributes: ["id", "title", "slugs"],
             },
           ],
         },
         {
           model: CollegeMember,
           as: "collegeMembers",
-          attributes: ["name", "contact_number", "role", "description"],
+          attributes: ["name", "contact_number", "role", "description", "image_url", "id"],
         },
         {
           model: CollegeAdmission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "course_id"],
+            exclude: ["id", "college_id", "program_id"],
           },
         },
 
@@ -731,7 +713,7 @@ class CollegeService {
           model: University,
           as: "universities",
 
-          attributes: ["fullname", "slugs"],
+          attributes: ["fullname", "slugs", "id"],
         },
         {
           model: UserModel,
@@ -811,18 +793,10 @@ class CollegeService {
           as: "collegeGallery",
         },
         {
-          model: CollegeCourse,
-          as: "collegeCourses",
-          attributes: {
-            exclude: ["college_id", "course_id"],
-          },
-          include: [
-            {
-              model: Course,
-              as: "program",
-              attributes: ["title", "slugs"],
-            },
-          ],
+          model: Program,
+          as: "programs",
+          attributes: ["id", "title", "slugs"],
+          through: { attributes: [] },
         },
         {
           model: CollegeMember,
@@ -833,7 +807,7 @@ class CollegeService {
           model: CollegeAdmission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "course_id"],
+            exclude: ["id", "college_id", "program_id"],
           },
         },
         {
@@ -938,7 +912,7 @@ class CollegeService {
     const {
       id,
       college_id,
-      course_id,
+      program_id,
       eligibility_criteria,
       admission_process,
       fee_details,
@@ -958,7 +932,7 @@ class CollegeService {
       }
       await admission.update({
         college_id,
-        course_id,
+        program_id,
         eligibility_criteria,
         admission_process,
         fee_details,
@@ -967,7 +941,7 @@ class CollegeService {
     } else {
       admission = await CollegeAdmission.create({
         college_id,
-        course_id,
+        program_id,
         eligibility_criteria,
         admission_process,
         fee_details,

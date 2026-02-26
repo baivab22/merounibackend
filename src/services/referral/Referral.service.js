@@ -1,13 +1,13 @@
-import Referral from "../../models/referral/Referral.model.js";
+import { Op, QueryTypes } from "sequelize";
+import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
-import UserModel from "../../models/users/User.model.js";
-import Course from "../../models/courses/Course.model.js";
-import { roleHelper } from "../../utils/RoleHelper.js";
 import Config from "../../models/config/Config.model.js";
-import { Sequelize, Op, QueryTypes } from "sequelize";
-import { sequelize } from "../../config/database.config.js";
+import Course from "../../models/courses/Course.model.js";
+import Referral from "../../models/referral/Referral.model.js";
+import UserModel from "../../models/users/User.model.js";
+import { roleHelper } from "../../utils/RoleHelper.js";
 
 class ReferralService {
   async createReferredApplication(payload, user) {
@@ -62,7 +62,7 @@ class ReferralService {
   }
 
 
-  async checkIfAlreadyAppliedForCollage(college_id,student_id) {
+  async checkIfAlreadyAppliedForCollage(college_id, student_id) {
     const existing = await Referral.findOne({
       where: {
         college_id,
@@ -81,21 +81,21 @@ class ReferralService {
     }
   }
 
-  async createSelfApplication(payload,student_id) {
+  async createSelfApplication(payload, student_id) {
     const { referral_type, college_id, course_id, description } =
       payload;
 
-      const user = await UserModel.findOne({
-        where: {
-          id: student_id,
-        },
-      });
+    const user = await UserModel.findOne({
+      where: {
+        id: student_id,
+      },
+    });
 
-      if (!user) {
-        const error = new Error("User not found");
-        error.status = 404;
-        throw error;
-      }
+    if (!user) {
+      const error = new Error("User not found");
+      error.status = 404;
+      throw error;
+    }
 
     // Optional: prevent duplicate self applications for same college & student
     const existing = await Referral.findOne({
@@ -118,9 +118,8 @@ class ReferralService {
     return Referral.create({
       college_id,
       student_id: student_id,
-      student_name: `${user.firstName} ${user.middleName || ""} ${
-        user.lastName || ""
-      }`.trim(),
+      student_name: `${user.firstName} ${user.middleName || ""} ${user.lastName || ""
+        }`.trim(),
       student_phone_no: user.phoneNo,
       student_email: user.email,
       student_description: description,
@@ -395,12 +394,12 @@ class ReferralService {
         agent_id: stat.agent_id,
         agent: agent
           ? {
-              id: agent.id,
-              firstName: agent.firstName,
-              lastName: agent.lastName,
-              email: agent.email,
-              fullName: `${agent.firstName || ""} ${agent.lastName || ""}`.trim(),
-            }
+            id: agent.id,
+            firstName: agent.firstName,
+            lastName: agent.lastName,
+            email: agent.email,
+            fullName: `${agent.firstName || ""} ${agent.lastName || ""}`.trim(),
+          }
           : null,
         referralCount,
         totalScore,

@@ -6,6 +6,7 @@ import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
   createOrUpdateUniversitySchema,
+  draftUniversitySchema,
   deleteUniversityQuerySchema,
   universityListSchema,
   universitySlugParamSchema
@@ -111,6 +112,41 @@ route.post(
   authorizeRole(["admin", "editor"]),
   requestValidator(createOrUpdateUniversitySchema, "body"),
   UniversityController.createOrUpdateUniversity
+);
+
+/**
+ * @swagger
+ * /university/save-as-draft:
+ *   post:
+ *     summary: Save a university as draft
+ *     tags: [Universities]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullname
+ *     responses:
+ *       200:
+ *         description: University saved as draft
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+route.post(
+  "/save-as-draft",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(draftUniversitySchema, "body"),
+  UniversityController.saveAsDraft
 );
 
 /**

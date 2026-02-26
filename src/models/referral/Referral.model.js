@@ -4,7 +4,7 @@ import College from "../college/College.model.js";
 import User from "../users/User.model.js";
 import Course from "../courses/Course.model.js";
 
-class Referral extends Model {}
+class Referral extends Model { }
 
 Referral.init(
   {
