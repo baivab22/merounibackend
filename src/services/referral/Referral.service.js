@@ -4,10 +4,10 @@ import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
 import Config from "../../models/config/Config.model.js";
-import Course from "../../models/courses/Course.model.js";
 import Referral from "../../models/referral/Referral.model.js";
 import UserModel from "../../models/users/User.model.js";
 import { roleHelper } from "../../utils/RoleHelper.js";
+import Program from "../../models/program/Program.model.js";
 
 class ReferralService {
   async createReferredApplication(payload, user) {
@@ -54,7 +54,7 @@ class ReferralService {
           student_phone_no: student.student_phone_no,
           student_email: student.student_email,
           student_description: student.student_description,
-          course_id: student.course_id || null,
+          program_id: student.program_id || null,
           status: "IN_PROGRESS",
         });
       }
@@ -82,7 +82,7 @@ class ReferralService {
   }
 
   async createSelfApplication(payload, student_id) {
-    const { referral_type, college_id, course_id, description } =
+    const { referral_type, college_id, program_id, description } =
       payload;
 
     const user = await UserModel.findOne({
@@ -102,7 +102,7 @@ class ReferralService {
       where: {
         college_id,
         student_id,
-        course_id,
+        program_id,
         application_type: "self",
       },
     });
@@ -123,22 +123,49 @@ class ReferralService {
       student_phone_no: user.phoneNo,
       student_email: user.email,
       student_description: description,
-      course_id,
+      program_id,
       application_type: referral_type || "self",
       status: "IN_PROGRESS",
     });
   }
 
-  async getApplications(user) {
+  async getApplications(user, query) {
+    const {
+      q,
+      limit = 10,
+      page = 1,
+      status,
+      college_id
+    } = query;
+
+    const limitNum = parseInt(limit, 10);
+    const pageNum = parseInt(page, 10);
+    const offset = (pageNum - 1) * limitNum;
     const whereCondition = {};
 
     const userRoles = roleHelper(user?.role);
 
-    if (userRoles?.agent) {
+    if (userRoles?.agent && !userRoles?.admin && !userRoles?.editor) {
       whereCondition.agent_id = user.id;
     }
 
-    return Referral.findAll({
+    if (status) {
+      whereCondition.status = status;
+    }
+
+    if (college_id) {
+      whereCondition.college_id = college_id;
+    }
+
+    if (q) {
+      whereCondition[Op.or] = [
+        { student_name: { [Op.substring]: q } },
+        { student_email: { [Op.substring]: q } },
+        { student_phone_no: { [Op.substring]: q } },
+      ];
+    }
+
+    const { count, rows: referrals } = await Referral.findAndCountAll({
       where: whereCondition,
       include: [
         {
@@ -152,12 +179,25 @@ class ReferralService {
           attributes: ["name", "slugs"],
         },
         {
-          model: Course,
-          as: "course",
+          model: Program,
+          as: "program",
           attributes: ["id", "title"],
         },
       ],
+      limit: limitNum,
+      offset: offset,
+      order: [["createdAt", "DESC"]],
     });
+
+    return {
+      items: referrals,
+      pagination: {
+        total: count,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(count / limitNum),
+      },
+    };
   }
 
   async getUserReferrals(user) {
@@ -195,8 +235,8 @@ class ReferralService {
           ],
         },
         {
-          model: Course,
-          as: "course",
+          model: Program,
+          as: "program",
           attributes: ["id", "title"],
         },
       ],
@@ -222,8 +262,8 @@ class ReferralService {
           attributes: ["name", "slugs"],
         },
         {
-          model: Course,
-          as: "course",
+          model: Program,
+          as: "program",
           attributes: ["id", "title"],
         },
       ],
@@ -259,8 +299,8 @@ class ReferralService {
           attributes: ["name", "slugs"],
         },
         {
-          model: Course,
-          as: "course",
+          model: Program,
+          as: "program",
           attributes: ["id", "title"],
         },
       ],

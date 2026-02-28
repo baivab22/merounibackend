@@ -73,7 +73,7 @@ class ReferralController {
 
   static async getApplications(req, res) {
     try {
-      const applications = await referralService.getApplications(req.user);
+      const applications = await referralService.getApplications(req.user, req.query);
       return res.status(200).json(applications);
     } catch (error) {
       console.error(error);

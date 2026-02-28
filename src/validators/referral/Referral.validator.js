@@ -1,5 +1,13 @@
 import * as yup from "yup";
 
+export const listReferralQuerySchema = yup.object({
+  page: yup.number().integer().positive().default(1),
+  limit: yup.number().integer().positive().default(10),
+  q: yup.string().trim().optional(),
+  status: yup.string().trim().oneOf(["IN_PROGRESS", "ACCEPTED", "REJECTED"]).optional(),
+  college_id: yup.number().integer().positive().optional(),
+});
+
 // Schema for agent referred applications
 export const createReferredApplicationSchema = yup
   .array()
@@ -30,7 +38,7 @@ export const createSelfApplicationSchema = yup
   .object({
     referral_type: yup.string().oneOf(["self"]).default("self").required(),
     college_id: yup.number().integer().positive().required(),
-    course_id: yup.number().integer().positive().nullable(),
+    program_id: yup.number().integer().positive().nullable(),
     description: yup.string().trim().notRequired().nullable(),
   })
   .required();
