@@ -16,6 +16,7 @@ import {
   referralIdParamSchema,
   updateReferralStatusSchema,
   checkIfAlreadyAppliedForCollageQuerySchema,
+  listReferralQuerySchema
 } from "../validators/referral/Referral.validator.js";
 
 const router = express.Router();
@@ -204,6 +205,7 @@ router.get(
   "/",
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(listReferralQuerySchema, "query"),
   ReferralController.getApplications,
 );
 

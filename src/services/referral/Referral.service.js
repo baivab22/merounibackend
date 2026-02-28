@@ -129,16 +129,43 @@ class ReferralService {
     });
   }
 
-  async getApplications(user) {
+  async getApplications(user, query) {
+    const {
+      q,
+      limit = 10,
+      page = 1,
+      status,
+      college_id
+    } = query;
+
+    const limitNum = parseInt(limit, 10);
+    const pageNum = parseInt(page, 10);
+    const offset = (pageNum - 1) * limitNum;
     const whereCondition = {};
 
     const userRoles = roleHelper(user?.role);
 
-    if (userRoles?.agent) {
+    if (userRoles?.agent && !userRoles?.admin && !userRoles?.editor) {
       whereCondition.agent_id = user.id;
     }
 
-    return Referral.findAll({
+    if (status) {
+      whereCondition.status = status;
+    }
+
+    if (college_id) {
+      whereCondition.college_id = college_id;
+    }
+
+    if (q) {
+      whereCondition[Op.or] = [
+        { student_name: { [Op.substring]: q } },
+        { student_email: { [Op.substring]: q } },
+        { student_phone_no: { [Op.substring]: q } },
+      ];
+    }
+
+    const { count, rows: referrals } = await Referral.findAndCountAll({
       where: whereCondition,
       include: [
         {
@@ -157,7 +184,20 @@ class ReferralService {
           attributes: ["id", "title"],
         },
       ],
+      limit: limitNum,
+      offset: offset,
+      order: [["createdAt", "DESC"]],
     });
+
+    return {
+      items: referrals,
+      pagination: {
+        total: count,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(count / limitNum),
+      },
+    };
   }
 
   async getUserReferrals(user) {
