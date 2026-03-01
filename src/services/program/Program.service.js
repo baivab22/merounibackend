@@ -32,38 +32,40 @@ class ProgramService {
     } = query;
 
     const whereConditions = {};
-    const include = [
-         { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
-        {
-          model: Degree,
-          as: "programdegree",
-          attributes: ["id", "title", "short_name", "slug"],
-          required: false,
-        },
-    ];
+    const universityInclude = {
+      model: University,
+      as: "universities",
+      attributes: ["id", "fullname"],
+      through: { attributes: [] },
+      required: false,
+    };
 
-
-    if (levelId) {
-      whereConditions.level_id = levelId;
-    }
-    if (disciplineId) {
-      whereConditions.discipline_id = disciplineId;
-    }
     if (universityIds) {
       const universityIdsList = Array.isArray(universityIds)
         ? universityIds
         : typeof universityIds === "string"
           ? universityIds.split(",").map((id) => id.trim())
           : [universityIds];
+      universityInclude.where = { id: { [Op.in]: universityIdsList } };
+      universityInclude.required = true;
+    }
 
-      include.push({
-        model: University,
-        as: "universities",
-        where: { id: { [Op.in]: universityIdsList } },
-        attributes: [],
-        through: { attributes: [] },
-        required: true,
-      });
+    const include = [
+      { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
+      {
+        model: Degree,
+        as: "programdegree",
+        attributes: ["id", "title", "short_name", "slug"],
+        required: false,
+      },
+      universityInclude,
+    ];
+
+    if (levelId) {
+      whereConditions.level_id = levelId;
+    }
+    if (disciplineId) {
+      whereConditions.discipline_id = disciplineId;
     }
 
     if (q) {
