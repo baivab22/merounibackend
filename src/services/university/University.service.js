@@ -20,7 +20,7 @@ class UniversityService {
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 10;
     const status = query.status;
-    
+
     const searchQuery = q || "";
 
     const offset = (page - 1) * limit;
@@ -57,8 +57,6 @@ class UniversityService {
     }
 
     sqlQuery += ` ORDER BY order_no_for_website ASC, id DESC LIMIT :limit OFFSET :offset`;
-
-
 
     const items = await sequelize.query(sqlQuery, {
       replacements,
@@ -129,7 +127,6 @@ class UniversityService {
     // Convert to plain object to avoid Sequelize instance issues
     const universityData = university.get({ plain: true });
 
-
     return {
       ...universityData,
       contact: universityData.contact || null,
@@ -188,7 +185,6 @@ class UniversityService {
           throw error;
         }
 
-
         university.fullname = fullname;
         university.country = country;
         university.state = state;
@@ -210,7 +206,6 @@ class UniversityService {
         }
 
         await university.save({ transaction });
-
       } else {
         // 🔹 CREATE
         const slugs = generateUniqueSlug(fullname);
@@ -235,7 +230,7 @@ class UniversityService {
             map,
             status: status || "published",
           },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -248,13 +243,11 @@ class UniversityService {
 
       await transaction.commit();
       return university.id;
-
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
   }
-
 
   async deleteUniversity(id) {
     await sequelize.query(`DELETE FROM university WHERE id=?`, {
@@ -268,14 +261,11 @@ class UniversityService {
       return;
     }
 
-
-
     // Find existing contact for this university
     const existingContact = await UniversityContact.findOne({
       where: { university_id: universityId },
       transaction,
     });
-
 
     // Preserve empty strings - convert empty strings to null for database
     // but keep actual values as they are
@@ -304,13 +294,18 @@ class UniversityService {
             ? null
             : contact.phone_number
           : null,
+      website_url:
+        contact.website_url !== undefined
+          ? contact.website_url === ""
+            ? null
+            : contact.website_url
+          : null,
     };
 
     if (existingContact) {
       // Update existing contact - use set and save to ensure changes are applied
       existingContact.set(contactData);
       await existingContact.save({ transaction });
-
     } else {
       // Create new contact - always create even if all fields are null/empty
       const created = await UniversityContact.create(
@@ -320,10 +315,10 @@ class UniversityService {
           poboxes: contactData.poboxes,
           email: contactData.email,
           phone_number: contactData.phone_number,
+          website_url: contactData.website_url,
         },
-        { transaction }
+        { transaction },
       );
-
     }
   }
 
@@ -338,7 +333,7 @@ class UniversityService {
         university_id: universityId,
         level_id,
       })),
-      { transaction }
+      { transaction },
     );
   }
 
@@ -366,7 +361,7 @@ class UniversityService {
             university_id: universityId,
             program_id,
           })),
-          { transaction }
+          { transaction },
         );
       }
     }
@@ -383,10 +378,9 @@ class UniversityService {
         university_id: universityId,
         ...member,
       })),
-      { transaction }
+      { transaction },
     );
   }
-
 
   async syncGallery(universityId, gallery, transaction) {
     if (!Array.isArray(gallery)) return;
@@ -399,7 +393,7 @@ class UniversityService {
         university_id: universityId,
         image_url,
       })),
-      { transaction }
+      { transaction },
     );
   }
 
@@ -430,8 +424,8 @@ class UniversityService {
       const updates = universities.map((university) =>
         University.update(
           { order_no_for_website: university.order_no },
-          { where: { id: university.id }, transaction }
-        )
+          { where: { id: university.id }, transaction },
+        ),
       );
 
       await Promise.all(updates);

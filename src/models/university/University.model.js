@@ -37,7 +37,8 @@ export const University = sequelize.define(
       type: DataTypes.STRING,
     },
     date_of_establish: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     type_of_institute: {
       type: DataTypes.ENUM("Public", "Private"),
@@ -108,6 +109,10 @@ export const UniversityContact = sequelize.define(
     },
     phone_number: {
       type: DataTypes.STRING,
+    },
+    website_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     university_id: {
       type: DataTypes.INTEGER,

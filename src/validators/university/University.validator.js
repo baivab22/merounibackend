@@ -22,7 +22,13 @@ export const createOrUpdateUniversitySchema = yup
     city: yup.string().trim().optional(),
     street: yup.string().trim().optional(),
     postal_code: yup.string().trim().optional(),
-    date_of_establish: yup.date().nullable().optional(),
+    date_of_establish: yup
+      .number()
+      .integer()
+      .min(1000, "Year must be exactly 4 digits (1000-9999)")
+      .max(9999, "Year must be exactly 4 digits (1000-9999)")
+      .nullable()
+      .optional(),
     type_of_institute: yup.string().oneOf(["Public", "Private"]).optional(),
     description: yup.string().nullable().optional(),
     author_id: yup.number().integer().positive().optional(),
@@ -32,6 +38,11 @@ export const createOrUpdateUniversitySchema = yup
         poboxes: yup.string().nullable().optional(),
         email: yup.string().email().nullable().optional(),
         phone_number: yup.string().nullable().optional(),
+        website_url: yup
+          .string()
+          .nullable()
+          .optional()
+          .test("url", "Invalid URL format", (v) => !v || /^https?:\/\/.+/.test(v)),
       })
       .nullable()
       .optional(),
