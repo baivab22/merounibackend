@@ -301,7 +301,8 @@ console.log(programs,"programsprogramsprograms")
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const { q, level_id, university_id, program_id } = query;
+    const programIdOrSlug = query.program_id || query.course_id;
+    const { q, level_id, university_id } = query;
 
     const offset = (page - 1) * limit;
 
@@ -340,9 +341,15 @@ console.log(programs,"programsprogramsprograms")
 
     include.push(collegeInclude);
 
-    // Handle Program filtering manually because there's no relationship defined
+    // Handle Program filtering - course_id/program_id is passed as numeric ID from frontend
+    const programId = programIdOrSlug ? parseInt(programIdOrSlug, 10) : null;
+    if (programId && !isNaN(programId)) {
+      whereCondition.course_id = programId;
+    }
+
+    // Handle Program filtering for q and level_id (requires Program lookup)
     let filteredProgramIds = null;
-    if (q || level_id || program_id) {
+    if (q || level_id) {
       const programWhere = {};
       const programInclude = [];
 
@@ -362,10 +369,6 @@ console.log(programs,"programsprogramsprograms")
         });
       }
 
-      if (program_id) {
-        programWhere.id = program_id;
-      }
-
       const matchingPrograms = await Program.findAll({
         where: programWhere,
         include: programInclude,
@@ -375,15 +378,19 @@ console.log(programs,"programsprogramsprograms")
     }
 
     if (q) {
-      // If searching, we match either college name or the filtered program IDs
-      whereCondition[Op.or] = [
+      const orConditions = [
         { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
       ];
-      if (filteredProgramIds) {
-        whereCondition[Op.or].push({ program_id: { [Op.in]: filteredProgramIds } });
+      if (filteredProgramIds?.length) {
+        orConditions.push({ course_id: { [Op.in]: filteredProgramIds } });
       }
-    } else if (filteredProgramIds !== null) {
-      whereCondition.program_id = { [Op.in]: filteredProgramIds };
+      if (programId && !isNaN(programId)) {
+        whereCondition[Op.and] = [{ [Op.or]: orConditions }];
+      } else {
+        whereCondition[Op.or] = orConditions;
+      }
+    } else if (filteredProgramIds?.length && !programId) {
+      whereCondition.course_id = { [Op.in]: filteredProgramIds };
     }
 
     const { count: totalCount, rows: rawItems } =
@@ -397,7 +404,7 @@ console.log(programs,"programsprogramsprograms")
       });
 
     // Manually fetch program details for the returned items
-    const programIdsToFetch = rawItems.map((item) => item.program_id);
+    const programIdsToFetch = rawItems.map((item) => item.course_id);
     const programs = await Program.findAll({
       where: { id: { [Op.in]: programIdsToFetch } },
       attributes: ["id", "title", "slugs"],
@@ -413,8 +420,8 @@ console.log(programs,"programsprogramsprograms")
 
     const items = rawItems.map((item) => {
       const itemData = item.toJSON();
-      itemData.program = programsMap[item.program_id] || null;
-      delete itemData.program_id;
+      itemData.program = programsMap[item.course_id] || null;
+      delete itemData.course_id;
       delete itemData.college_id;
       return itemData;
     });
@@ -457,7 +464,7 @@ console.log(programs,"programsprogramsprograms")
     }
 
     const program = await Program.findOne({
-      where: { id: admission.program_id },
+      where: { id: admission.course_id },
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
@@ -467,7 +474,7 @@ console.log(programs,"programsprogramsprograms")
 
     const admissionData = admission.toJSON();
     admissionData.program = program;
-    delete admissionData.program_id;
+    delete admissionData.course_id;
     delete admissionData.college_id;
 
     return admissionData;
@@ -705,7 +712,7 @@ console.log(programs,"programsprogramsprograms")
           model: CollegeAdmission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "program_id"],
+            exclude: ["id", "college_id", "course_id"],
           },
         },
 
@@ -807,7 +814,7 @@ console.log(programs,"programsprogramsprograms")
           model: CollegeAdmission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "program_id"],
+            exclude: ["id", "college_id", "course_id"],
           },
         },
         {
@@ -919,6 +926,8 @@ console.log(programs,"programsprogramsprograms")
       description,
     } = payload;
 
+    const course_id = program_id;
+
     let admission;
     let isNew = false;
     const admissionId = (id === "null" || id === "undefined" || id === "") ? null : id;
@@ -932,7 +941,7 @@ console.log(programs,"programsprogramsprograms")
       }
       await admission.update({
         college_id,
-        program_id,
+        course_id,
         eligibility_criteria,
         admission_process,
         fee_details,
@@ -941,7 +950,7 @@ console.log(programs,"programsprogramsprograms")
     } else {
       admission = await CollegeAdmission.create({
         college_id,
-        program_id,
+        course_id,
         eligibility_criteria,
         admission_process,
         fee_details,
