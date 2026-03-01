@@ -2,6 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import Discipline from "../../models/discipline/Discipline.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { sequelize } from "../../config/database.config.js";
 
 class DisciplineService {
     async listDisciplines(query = {}) {
@@ -20,7 +21,11 @@ class DisciplineService {
             where: whereCondition,
             limit,
             offset,
-            order: [["createdAt", "DESC"]],
+            order: [
+                [Sequelize.literal("order_no_for_website IS NULL"), "ASC"],
+                ["order_no_for_website", "ASC"],
+                ["createdAt", "DESC"],
+            ],
         });
 
         return {
@@ -74,7 +79,14 @@ class DisciplineService {
     async createDiscipline(payload) {
         const { title, ...rest } = payload;
         const slug = generateUniqueSlug(title);
-        return Discipline.create({ ...rest, title, slug });
+        const maxOrder = await Discipline.max("order_no_for_website");
+        const orderNo = (maxOrder != null ? maxOrder : 0) + 1;
+        return Discipline.create({
+            ...rest,
+            title,
+            slug,
+            order_no_for_website: orderNo,
+        });
     }
 
     async updateDiscipline(id, payload) {
@@ -103,6 +115,35 @@ class DisciplineService {
         if (deletedRows === 0) {
             const error = new Error("Discipline not found");
             error.status = 404;
+            throw error;
+        }
+    }
+
+    async updateDisciplineOrder(disciplines) {
+        const transaction = await sequelize.transaction();
+        try {
+            const disciplineIds = disciplines.map((d) => d.id);
+            const existing = await Discipline.findAll({
+                where: { id: { [Op.in]: disciplineIds } },
+                transaction,
+            });
+
+            if (existing.length !== disciplineIds.length) {
+                throw new Error("Invalid discipline IDs");
+            }
+
+            const updates = disciplines.map((d) =>
+                Discipline.update(
+                    { order_no_for_website: d.order_no },
+                    { where: { id: d.id }, transaction }
+                )
+            );
+
+            await Promise.all(updates);
+            await transaction.commit();
+            return { message: "Discipline order updated successfully" };
+        } catch (error) {
+            await transaction.rollback();
             throw error;
         }
     }

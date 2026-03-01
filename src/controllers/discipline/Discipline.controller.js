@@ -78,6 +78,15 @@ class DisciplineController {
                 .json({ message: "Server error", error: error.message });
         }
     }
+
+    static async updateDisciplineOrder(req, res) {
+        try {
+            const result = await disciplineService.updateDisciplineOrder(req.body.disciplines);
+            return res.status(200).json(result);
+        } catch (error) {
+            return res.status(500).json({ error: error.message || "Failed to update discipline order" });
+        }
+    }
 }
 
 export default DisciplineController;

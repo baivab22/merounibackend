@@ -3,7 +3,8 @@ import DisciplineController from "../controllers/discipline/Discipline.controlle
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
     createDisciplineSchema,
-    updateDisciplineSchema
+    updateDisciplineSchema,
+    updateDisciplineOrderSchema,
 } from "../validators/discipline/Discipline.validator.js";
 
 const router = express.Router();
@@ -88,6 +89,12 @@ router.get("/:id", DisciplineController.getDisciplineById);
  *         description: Server error
  */
 router.get("/slug/:slugs", DisciplineController.getDisciplineBySlug);
+
+router.patch(
+    "/update-order",
+    requestValidator(updateDisciplineOrderSchema, "body"),
+    DisciplineController.updateDisciplineOrder
+);
 
 /**
  * @swagger
