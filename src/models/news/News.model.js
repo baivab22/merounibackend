@@ -47,7 +47,7 @@ News.init(
     },
     featured_image: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     author: {
       type: DataTypes.INTEGER,
