@@ -199,28 +199,33 @@ export const updateSchoolOrderSchema = yup
 
 
 
-export const admissionPaginationSchema = yup.object({
-  page: yup.number().integer().min(1).default(1),
-  limit: yup.number().integer().min(1).max(1000).default(10),
-  sort: yup
-    .string()
-    .oneOf(["ASC", "DESC", "asc", "desc"])
-    .transform((value) => (value ? value.toUpperCase() : "ASC"))
-    .default("ASC"),
-  q: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value)),
-  program_id: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value)),
-  level_id: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value)),
-  university_id: yup
-    .string()
-    .nullable()
-    .transform((value) => (value === "" ? null : value)),
-});
+export const admissionPaginationSchema = yup
+  .object({
+    page: yup.number().integer().min(1).default(1),
+    limit: yup.number().integer().min(1).max(1000).default(10),
+    sort: yup
+      .string()
+      .oneOf(["ASC", "DESC", "asc", "desc"])
+      .transform((value) => (value ? value.toUpperCase() : "ASC"))
+      .default("ASC"),
+    q: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value)),
+    program_id: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value)),
+    course_id: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value)),
+    level_id: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value)),
+    university_id: yup
+      .string()
+      .nullable()
+      .transform((value) => (value === "" ? null : value)),
+  });
