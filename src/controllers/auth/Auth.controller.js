@@ -63,6 +63,24 @@ class AuthController {
 
       const user = await authService.authenticateCredentials(email, password);
 
+      const pendingRoles =
+        typeof user.pendingRoles === "string"
+          ? JSON.parse(user.pendingRoles)
+          : user.pendingRoles || [];
+      const roles =
+        typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles || {};
+      const isAgentPending =
+        Array.isArray(pendingRoles) &&
+        pendingRoles.includes("agent") &&
+        !roles.agent;
+
+      if (isAgentPending) {
+        return res.status(403).json({
+          message:
+            "Your agent application is pending approval. Please wait for admin approval before accessing the dashboard.",
+        });
+      }
+
       const tokenPayload = {
         data: {
           id: user.id,

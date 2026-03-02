@@ -27,12 +27,21 @@ export const registerSchema = yup.object({
   lastName: yup.string().required(),
   email: yup.string().email().required(),
   password: yup.string().min(6).required(),
+  phoneNo: yup.string().required(),
+  role: yup
+    .string()
+    .oneOf(["student", "agent"])
+    .default("student")
+    .optional(),
+  agent_experience: yup.string().when("role", {
+    is: "agent",
+    then: (schema) => schema.required("Please tell us about yourself and your experiences"),
+    otherwise: (schema) => schema.optional(),
+  }),
   roles: yup
     .string()
     .oneOf(["admin", "editor", "student", "agent", "institution"])
-    .default("student")
     .optional(),
-  phoneNo: yup.number().required(),
   created_by_admin: yup.number().oneOf([0, 1]).optional(),
 });
 

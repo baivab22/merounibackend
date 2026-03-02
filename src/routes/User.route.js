@@ -97,6 +97,13 @@ route.get(
   UserController.exportUsers
 );
 
+route.get(
+  "/pending-agents",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  UserController.listPendingAgents
+);
+
 /**
  * @swagger
  * /users/profile:

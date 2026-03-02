@@ -90,6 +90,11 @@ UserModel.init(
       allowNull: true,
       field: "cv_url",
     },
+    agentExperience: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: "agent_experience",
+    },
     createdByAdmin: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

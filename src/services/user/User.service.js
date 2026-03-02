@@ -63,6 +63,31 @@ class UserService {
     };
   }
 
+  async listPendingAgents(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 20;
+    const offset = (page - 1) * limit;
+
+    const { count: totalCount, rows: items } = await UserModel.findAndCountAll({
+      where: Sequelize.literal(`JSON_CONTAINS(pending_roles, '"agent"') = 1`),
+      order: [["createdAt", "DESC"]],
+      distinct: true,
+      limit,
+      offset,
+      attributes: { exclude: ["password", "otp", "otpExpiresAt"] },
+    });
+
+    return {
+      items,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
+        totalCount,
+      },
+    };
+  }
+
   async getUserProfile(userId) {
     const user = await UserModel.findByPk(userId, {
       attributes: { exclude: ["password"] },

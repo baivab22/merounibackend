@@ -15,60 +15,41 @@ import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class UniversityService {
   async listUniversities(query = {}) {
-    let { page, limit, q } = query;
-
-    page = parseInt(page, 10) || 1;
-    limit = parseInt(limit, 10) || 10;
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
     const status = query.status;
-
-    const searchQuery = q || "";
-
+    const searchQuery = query.q || "";
     const offset = (page - 1) * limit;
 
-    let sqlQuery = `SELECT * FROM university`;
-    let countQuery = `SELECT COUNT(*) as total FROM university`;
-
-    const replacements = { limit, offset };
-
+    const whereCondition = {};
     if (searchQuery) {
-      sqlQuery += ` WHERE fullname LIKE :searchQuery`;
-      countQuery += ` WHERE fullname LIKE :searchQuery`;
-      replacements.searchQuery = `%${searchQuery}%`;
+      whereCondition.fullname = { [Op.like]: `%${searchQuery}%` };
     }
-
     if (query.type) {
-      const typeCondition = searchQuery
-        ? ` AND type_of_institute = :type`
-        : ` WHERE type_of_institute = :type`;
-
-      sqlQuery += typeCondition;
-      countQuery += typeCondition;
-      replacements.type = query.type;
+      whereCondition.type_of_institute = query.type;
     }
-
     if (status) {
-      const statusCondition = searchQuery
-        ? ` AND status = :status`
-        : ` WHERE status = :status`;
-
-      sqlQuery += statusCondition;
-      countQuery += statusCondition;
-      replacements.status = status;
+      whereCondition.status = status;
     }
 
-    sqlQuery += ` ORDER BY order_no_for_website ASC, id DESC LIMIT :limit OFFSET :offset`;
-
-    const items = await sequelize.query(sqlQuery, {
-      replacements,
-      type: QueryTypes.SELECT,
+    const { count: totalCount, rows: items } = await University.findAndCountAll({
+      where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
+      include: [
+        {
+          model: UniversityContact,
+          as: "contact",
+          required: false,
+          attributes: ["website_url"],
+        },
+      ],
+      limit,
+      offset,
+      order: [
+        ["order_no_for_website", "ASC"],
+        ["id", "DESC"],
+      ],
     });
 
-    const totalCountResult = await sequelize.query(countQuery, {
-      replacements,
-      type: QueryTypes.SELECT,
-    });
-
-    const totalCount = totalCountResult[0].total;
     const totalPages = Math.ceil(totalCount / limit);
 
     return {

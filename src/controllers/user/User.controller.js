@@ -23,6 +23,25 @@ class UserController {
     }
   }
 
+  static async listPendingAgents(req, res) {
+    try {
+      const { items, pagination } =
+        await userService.listPendingAgents(req.query);
+      return res.status(200).json({
+        message: "success",
+        items,
+        pagination,
+      });
+    } catch (error) {
+      console.error("Error in listPendingAgents:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message:
+          status === 500 ? `Server Error: ${error.message}` : error.message,
+      });
+    }
+  }
+
   static async getUserProfile(req, res) {
     try {
       const user = await userService.getUserProfile(req.query.id);

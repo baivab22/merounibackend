@@ -13,6 +13,8 @@ class AuthService {
         email,
         phoneNo,
         password,
+        role = "student",
+        agent_experience,
         roles,
         created_by_admin,
       } = payload;
@@ -40,32 +42,44 @@ class AuthService {
       const otp = crypto.randomInt(100000, 999999).toString();
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-      // Convert roles string to object format if it's a string
-      let rolesObject = { student: true }; // default
-      if (roles) {
-        if (typeof roles === "string") {
-          // If roles is a string, convert it to object format
-          rolesObject = { [roles]: true };
-        } else if (typeof roles === "object" && Object.keys(roles).length > 0) {
-          // If roles is already an object, use it
-          rolesObject = roles;
-        }
+      let rolesObject;
+      let pendingRoles = [];
+
+      if (created_by_admin === 1 || created_by_admin === true) {
+        rolesObject = roles
+          ? typeof roles === "string"
+            ? { [roles]: true }
+            : typeof roles === "object" && Object.keys(roles).length > 0
+              ? roles
+              : { student: true }
+          : { student: true };
+        pendingRoles = [];
+      } else if (role === "agent") {
+        rolesObject = {};
+        pendingRoles = ["agent"];
+      } else {
+        rolesObject = { student: true };
+        pendingRoles = [];
       }
 
-      const user = await UserModel.create(
-        {
-          firstName,
-          lastName,
-          email,
-          phoneNo,
-          roles: rolesObject,
-          password: hashedPassword,
-          otp,
-          otpExpiresAt,
-          createdByAdmin: created_by_admin === 1 || created_by_admin === true,
-        },
-        { transaction }
-      );
+      const createData = {
+        firstName,
+        lastName,
+        email,
+        phoneNo,
+        roles: rolesObject,
+        pendingRoles,
+        password: hashedPassword,
+        otp,
+        otpExpiresAt,
+        createdByAdmin: created_by_admin === 1 || created_by_admin === true,
+      };
+
+      if (role === "agent" && agent_experience) {
+        createData.agentExperience = agent_experience;
+      }
+
+      const user = await UserModel.create(createData, { transaction });
 
       await transaction.commit();
 
