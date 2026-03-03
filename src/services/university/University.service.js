@@ -16,7 +16,7 @@ import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 class UniversityService {
   async listUniversities(query = {}) {
     const page = parseInt(query.page, 10) || 1;
-    const limit = parseInt(query.limit, 10) || 10;
+    const limit = parseInt(query.limit, 10) || 25;
     const status = query.status;
     const searchQuery = query.q || "";
     const offset = (page - 1) * limit;
@@ -34,20 +34,30 @@ class UniversityService {
 
     const { count: totalCount, rows: items } = await University.findAndCountAll({
       where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
-      include: [
-        {
-          model: UniversityContact,
-          as: "contact",
-          required: false,
-          attributes: ["website_url"],
-        },
-      ],
       limit,
       offset,
       order: [
         ["order_no_for_website", "ASC"],
         ["id", "DESC"],
       ],
+    });
+
+    // Fetch contacts for these universities separately to avoid row multiplication
+    // and just take the latest contact for each
+    const universityIds = items.map(u => u.id);
+    const contacts = universityIds.length > 0 ? await UniversityContact.findAll({
+      where: { university_id: universityIds },
+      attributes: ["university_id", "website_url"],
+      order: [["id", "DESC"]]
+    }) : [];
+
+    // Map contacts to universities (taking the first/latest one)
+    const itemsWithContact = items.map(university => {
+      const contact = contacts.find(c => c.university_id === university.id);
+      return {
+        ...university.toJSON(),
+        contact: contact ? { website_url: contact.website_url } : null
+      };
     });
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -59,7 +69,7 @@ class UniversityService {
         totalPages,
         totalItems: totalCount,
       },
-      items,
+      items: itemsWithContact,
     };
   }
 

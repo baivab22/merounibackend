@@ -9,7 +9,8 @@ import {
   draftUniversitySchema,
   deleteUniversityQuerySchema,
   universityListSchema,
-  universitySlugParamSchema
+  universitySlugParamSchema,
+  updateUniversityOrderSchema
 } from "../validators/university/University.validator.js";
 
 const route = express.Router();
@@ -218,10 +219,11 @@ route.delete(
 );
 
 // Update university order
-route.put(
-  "/order",
+route.patch(
+  "/update-order",
   authenticateUser,
   authorizeRole(["admin", "editor"]),
+  requestValidator(updateUniversityOrderSchema, "body"),
   UniversityController.updateUniversityOrder
 );
 
