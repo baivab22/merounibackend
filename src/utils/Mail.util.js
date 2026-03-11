@@ -2,9 +2,10 @@ import nodemailer from "nodemailer";
 
 // Configure your transporter
 const transporter = nodemailer.createTransport({
-  host: "mail.merouni.com",
-  port: 465,
-  secure: true,
+  // gmail
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL,
     pass: process.env.PASSWORD,
