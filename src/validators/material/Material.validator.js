@@ -12,7 +12,7 @@ export const materialIdParamSchema = idParamSchema;
 // Schema for category filtering - includes pagination and category_id
 export const materialCategoryQuerySchema = yup.object({
   page: yup.number().integer().min(1).default(1).optional(),
-  limit: yup.number().integer().min(1).max(100).default(10).optional(),
+  limit: yup.number().integer().min(1).max(100).default(24).optional(),
   sort: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])

@@ -2,7 +2,7 @@ import * as yup from "yup";
 
 export const listReferralQuerySchema = yup.object({
   page: yup.number().integer().positive().default(1),
-  limit: yup.number().integer().positive().default(10),
+  limit: yup.number().integer().positive().default(24),
   q: yup.string().trim().optional(),
   status: yup.string().trim().oneOf(["IN_PROGRESS", "ACCEPTED", "REJECTED"]).optional(),
   college_id: yup.number().integer().positive().optional(),

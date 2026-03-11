@@ -297,7 +297,7 @@ class CollegeService {
 
   async listAdmissions(query = {}) {
     const page = parseInt(query.page, 10) || 1;
-    const limit = parseInt(query.limit, 10) || 10;
+    const limit = parseInt(query.limit, 10) || 24;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
     const programIdOrSlug = query.program_id || query.course_id;
     const { q, level_id, university_id } = query;
@@ -480,7 +480,7 @@ class CollegeService {
 
   async listColleges(query = {}) {
     const page = parseInt(query.page, 10) || 1;
-    const limit = parseInt(query.limit, 10) || 10;
+    const limit = parseInt(query.limit, 10) || 24;
     const sort = (query.sort || "asc").toUpperCase();
     const status = query.status
     const search = query.q || "";

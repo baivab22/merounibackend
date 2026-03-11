@@ -17,7 +17,7 @@ export default {
           model: 'colleges',
           key: 'id'
         },
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       },
       program_id: {
@@ -27,7 +27,7 @@ export default {
           model: 'programs',
           key: 'id'
         },
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       }
     });

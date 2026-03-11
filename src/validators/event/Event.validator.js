@@ -11,7 +11,7 @@ export const eventListAllQuerySchema = yup.object({
   q: yup.string().trim().optional(),
   is_featured: yup.number().integer().min(0).max(1).optional().default(0),
   page: yup.number().integer().positive().optional().default(1),
-  limit: yup.number().integer().positive().optional().default(10),
+  limit: yup.number().integer().positive().optional().default(24),
   sort: yup.string().optional().default("asc"),
 });
 export const eventSlugParamSchema = yup.object({

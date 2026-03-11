@@ -9,13 +9,13 @@ import UserModel from "../../models/users/User.model.js";
 class ConsultancyService {
   async listConsultancy(query = {}) {
     const page = parseInt(query.page, 10) || 1;
-    const limit = parseInt(query.limit, 10) || 10;
+    const limit = parseInt(query.limit, 10) || 24;
     const sort = (query.sort || "desc").toUpperCase();
     const search = query.q || "";
 
     const offset = (page - 1) * limit;
 
-    const whereCondition = {};
+    const whereCondition = {}
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
