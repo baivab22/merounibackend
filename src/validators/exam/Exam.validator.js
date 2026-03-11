@@ -18,6 +18,7 @@ export const examIdParamSchema = yup.object({
 export const listExamsSchema = paginationSchema.shape({
   levelId: yup.number().integer().positive().optional(),
   universityId: yup.number().integer().positive().optional(),
+  categoryId: yup.number().integer().positive().optional(),
   isOpen: yup.boolean().optional(),
   isUpcoming: yup.boolean().optional(),
   sortBy: yup
@@ -36,26 +37,48 @@ export const createOrUpdateExamSchema = yup
   .object({
     id: yup.number().integer().positive().nullable().optional(),
     title: yup.string().trim().required("Title is required"),
-    description: yup.string().optional(),
+    description: yup.string().nullable().optional(),
     level_id: yup.number().integer().required("Level ID is required"),
-    affiliation: yup.number().integer().optional(),
-    syllabus: yup.string().optional(),
-    pastQuestion: yup.string().optional(),
+    category_id: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    affiliation: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    syllabus: yup.string().nullable().optional(),
+    pastQuestion: yup.string().nullable().optional(),
     author: yup.number().integer().required("Author is required"),
-    
+
     // Flattened fields
-    exam_type: yup.string().optional(),
-    full_marks: yup.number().optional(),
-    pass_marks: yup.number().optional(),
-    questions_count: yup.number().optional(),
-    question_type: yup.string().optional(),
-    duration: yup.string().optional(),
-    
-    normal_fee: yup.number().nullable().optional(),
-    late_fee: yup.number().nullable().optional(),
-    exam_date: yup.string().optional(), // Date string expected
-    opening_date: yup.string().optional(),
-    closing_date: yup.string().optional(),
+    exam_type: yup.string().nullable().optional(),
+    full_marks: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    pass_marks: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    questions_count: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    question_type: yup.string().nullable().optional(),
+    duration: yup.string().nullable().optional(),
+
+    normal_fee: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    late_fee: yup.number()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .nullable()
+      .optional(),
+    exam_date: yup.string().nullable().optional(), // Date string expected
+    opening_date: yup.string().nullable().optional(),
+    closing_date: yup.string().nullable().optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && (value.title || value.id)) return true;

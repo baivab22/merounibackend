@@ -3,8 +3,9 @@ import { sequelize } from "../../config/database.config.js";
 import User from "../users/User.model.js";
 import Level from "../level/Level.model.js";
 import { University } from "../university/University.model.js";
+import Category from "../category/Category.model.js";
 
-class Exam extends Model {}
+class Exam extends Model { }
 
 Exam.init(
   {
@@ -13,6 +14,15 @@ Exam.init(
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
+    },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Category,
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
     title: {
       type: DataTypes.STRING,
@@ -49,7 +59,7 @@ Exam.init(
     affiliation: {
       // Corrected spelling
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: University, // Use the actual model
         key: "id",
@@ -123,5 +133,6 @@ Exam.init(
 Exam.belongsTo(User, { foreignKey: "author", as: "authorDetails" });
 Exam.belongsTo(Level, { foreignKey: "level_id", as: "level" });
 Exam.belongsTo(University, { foreignKey: "affiliation", as: "university" });
+Exam.belongsTo(Category, { foreignKey: "category_id", as: "category" });
 
 export { Exam };
