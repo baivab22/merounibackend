@@ -16,6 +16,7 @@ class EventService {
         id,
         title,
         description,
+        meta_description,
         content,
         image,
         category_id,
@@ -54,6 +55,7 @@ class EventService {
             title,
             slugs,
             description,
+            meta_description,
             content,
             image,
             is_featured: is_featured ?? 0,
@@ -70,6 +72,7 @@ class EventService {
         const updateData = {};
         if (title !== undefined) updateData.title = title;
         if (description !== undefined) updateData.description = description;
+        if (meta_description !== undefined) updateData.meta_description = meta_description;
         if (content !== undefined) updateData.content = content;
         if (image !== undefined) updateData.image = image;
         if (is_featured !== undefined) updateData.is_featured = is_featured;
@@ -78,7 +81,7 @@ class EventService {
         if (author_id !== undefined) updateData.author_id = author_id;
         if (event_host !== undefined) updateData.event_host = JSON.stringify(event_host);
 
-     
+
 
         if (Object.keys(updateData).length > 0) {
           await Event.update(updateData, {

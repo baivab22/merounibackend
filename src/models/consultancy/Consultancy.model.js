@@ -65,6 +65,10 @@ Consultancy.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     contact: {
       type: DataTypes.JSON,
       allowNull: true,

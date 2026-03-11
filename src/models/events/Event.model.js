@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Event extends Model {}
+class Event extends Model { }
 
 Event.init(
   {
@@ -51,7 +51,11 @@ Event.init(
     },
     description: {
       type: DataTypes.TEXT,
-      
+
+    },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     content: {
       type: DataTypes.TEXT,

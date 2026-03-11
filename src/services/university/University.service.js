@@ -20,7 +20,7 @@ class UniversityService {
     page = parseInt(page, 10) || 1;
     limit = parseInt(limit, 10) || 10;
     const status = query.status;
-    
+
     const searchQuery = q || "";
 
     const offset = (page - 1) * limit;
@@ -158,6 +158,7 @@ class UniversityService {
         date_of_establish,
         type_of_institute,
         description,
+        meta_description,
         contact,
         levels,
         programs,
@@ -199,6 +200,7 @@ class UniversityService {
         university.date_of_establish = date_of_establish;
         university.type_of_institute = type_of_institute;
         university.description = description;
+        university.meta_description = meta_description;
         university.logo = logo; // Update logo
         university.featured_image = featured_image;
         university.videos = videos;
@@ -228,6 +230,7 @@ class UniversityService {
             date_of_establish,
             type_of_institute,
             description,
+            meta_description,
             logo,
             order_no_for_website: await this.getNextOrderNo(),
             featured_image,

@@ -38,6 +38,11 @@ Exam.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
     author: {
       type: DataTypes.INTEGER,
       allowNull: false,

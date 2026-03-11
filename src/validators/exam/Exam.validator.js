@@ -38,6 +38,7 @@ export const createOrUpdateExamSchema = yup
     id: yup.number().integer().positive().nullable().optional(),
     title: yup.string().trim().required("Title is required"),
     description: yup.string().nullable().optional(),
+    meta_description: yup.string().nullable().optional(),
     level_id: yup.number().integer().required("Level ID is required"),
     category_id: yup.number()
       .transform((value, originalValue) => originalValue === "" ? null : value)
