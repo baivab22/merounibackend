@@ -133,6 +133,7 @@ export const createOrUpdateCollegeSchema = yup
       .of(
         yup.object({
           program_id: yup.number().integer().positive().optional(),
+          course_id: yup.number().integer().positive().optional(),
           eligibility_criteria: yup.string().nullable().optional(),
           admission_process: yup.string().nullable().optional(),
           fee_details: yup.string().nullable().optional(),
@@ -160,12 +161,17 @@ export const createOrUpdateCollegeSchema = yup
 export const createOrUpdateAdmissionSchema = yup.object({
   id: yup.number().integer().positive().optional(),
   college_id: yup.number().integer().positive().required(),
-  program_id: yup.number().integer().positive().required(),
+  program_id: yup.number().integer().positive().optional(),
+  course_id: yup.number().integer().positive().optional(),
   eligibility_criteria: yup.string().nullable().optional(),
   admission_process: yup.string().nullable().optional(),
   fee_details: yup.string().nullable().optional(),
   description: yup.string().nullable().optional(),
-}).required();
+}).test(
+  "at-least-one-id",
+  "Either program_id or course_id is required",
+  (value) => !!(value.program_id || value.course_id)
+).required();
 
 export const updateCollegeOrderSchema = yup
   .object({

@@ -299,7 +299,7 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 24;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const programIdOrSlug = query.program_id || query.course_id;
+    const programIdOrSlug = query.program_id || query.course_id || query.programId;
     const { q, level_id, university_id } = query;
 
     const offset = (page - 1) * limit;
@@ -342,7 +342,7 @@ class CollegeService {
     // Handle Program filtering - course_id/program_id is passed as numeric ID from frontend
     const programId = programIdOrSlug ? parseInt(programIdOrSlug, 10) : null;
     if (programId && !isNaN(programId)) {
-      whereCondition.course_id = programId;
+      whereCondition.program_id = programId;
     }
 
     // Handle Program filtering for q and level_id (requires Program lookup)
@@ -380,7 +380,7 @@ class CollegeService {
         { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
       ];
       if (filteredProgramIds?.length) {
-        orConditions.push({ course_id: { [Op.in]: filteredProgramIds } });
+        orConditions.push({ program_id: { [Op.in]: filteredProgramIds } });
       }
       if (programId && !isNaN(programId)) {
         whereCondition[Op.and] = [{ [Op.or]: orConditions }];
@@ -388,7 +388,7 @@ class CollegeService {
         whereCondition[Op.or] = orConditions;
       }
     } else if (filteredProgramIds?.length && !programId) {
-      whereCondition.course_id = { [Op.in]: filteredProgramIds };
+      whereCondition.program_id = { [Op.in]: filteredProgramIds };
     }
 
     const { count: totalCount, rows: rawItems } =
@@ -402,7 +402,7 @@ class CollegeService {
       });
 
     // Manually fetch program details for the returned items
-    const programIdsToFetch = rawItems.map((item) => item.course_id);
+    const programIdsToFetch = rawItems.map((item) => item.program_id);
     const programs = await Program.findAll({
       where: { id: { [Op.in]: programIdsToFetch } },
       attributes: ["id", "title", "slugs"],
@@ -418,8 +418,10 @@ class CollegeService {
 
     const items = rawItems.map((item) => {
       const itemData = item.toJSON();
-      itemData.program = programsMap[item.course_id] || null;
-      delete itemData.course_id;
+      itemData.program = programsMap[item.program_id] || null;
+      // Maintain consistency
+      itemData.course_id = item.program_id;
+      delete itemData.program_id;
       delete itemData.college_id;
       return itemData;
     });
@@ -462,7 +464,7 @@ class CollegeService {
     }
 
     const program = await Program.findOne({
-      where: { id: admission.course_id },
+      where: { id: admission.program_id },
       attributes: ["id", "title", "slugs"],
       include: [
         { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
@@ -472,7 +474,8 @@ class CollegeService {
 
     const admissionData = admission.toJSON();
     admissionData.program = program;
-    delete admissionData.course_id;
+    admissionData.course_id = admission.program_id;
+    delete admissionData.program_id;
     delete admissionData.college_id;
 
     return admissionData;
@@ -710,7 +713,7 @@ class CollegeService {
           model: CollegeAdmission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "course_id"],
+            exclude: ["id", "college_id", "program_id"],
           },
         },
 
@@ -812,7 +815,7 @@ class CollegeService {
           model: CollegeAdmission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "course_id"],
+            exclude: ["id", "college_id", "program_id"],
           },
         },
         {
@@ -918,13 +921,14 @@ class CollegeService {
       id,
       college_id,
       program_id,
+      course_id,
       eligibility_criteria,
       admission_process,
       fee_details,
       description,
     } = payload;
 
-    const course_id = program_id;
+    const final_program_id = program_id || course_id;
 
     let admission;
     let isNew = false;
@@ -939,7 +943,7 @@ class CollegeService {
       }
       await admission.update({
         college_id,
-        course_id,
+        program_id: final_program_id,
         eligibility_criteria,
         admission_process,
         fee_details,
@@ -948,7 +952,7 @@ class CollegeService {
     } else {
       admission = await CollegeAdmission.create({
         college_id,
-        course_id,
+        program_id: final_program_id,
         eligibility_criteria,
         admission_process,
         fee_details,

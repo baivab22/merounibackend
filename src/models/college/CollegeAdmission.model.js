@@ -13,7 +13,7 @@ CollegeAdmission.init(
       references: { model: College, key: "id" },
       onDelete: "CASCADE",
     },
-    course_id: {
+    program_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -26,17 +26,11 @@ CollegeAdmission.init(
   },
   {
     sequelize,
-    modelName: "college_admission",
-    tableName: "college_admission",
+    modelName: "CollegeAdmission",
+    tableName: "college_admissions",
     freezeTableName: true,
     timestamps: false,
   }
 );
-
-College.hasMany(CollegeAdmission, {
-  foreignKey: "college_id",
-  as: "admissions",
-});
-CollegeAdmission.belongsTo(College, { foreignKey: "college_id" });
 
 export default CollegeAdmission;

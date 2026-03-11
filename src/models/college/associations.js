@@ -111,7 +111,7 @@ CollegeAdmission.belongsTo(College, {
   foreignKey: "college_id",
   as: "collegeAdmissionCollege",
 });
-CollegeAdmission.belongsTo(Program, { foreignKey: "course_id", as: "program" });
+CollegeAdmission.belongsTo(Program, { foreignKey: "program_id", as: "program" });
 
 // CollegeRanking Associations
 CollegeRanking.belongsTo(College, {
