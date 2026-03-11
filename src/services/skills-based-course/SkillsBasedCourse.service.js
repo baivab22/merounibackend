@@ -9,15 +9,32 @@ class SkillsBasedCourseService {
         const limit = parseInt(query.limit, 10) || 10;
         const offset = (page - 1) * limit;
 
-        const { q, status } = query;
+        const { q, status, location, duration, type, price } = query;
         const whereCondition = {};
 
         if (q) {
+            // We can search across title, location, etc., but title is standard. Let's keep title.
             whereCondition.title = { [Op.like]: `%${q}%` };
         }
 
         if (status) {
             whereCondition.status = status;
+        }
+
+        if (location) {
+            whereCondition.location = { [Op.like]: `%${location}%` };
+        }
+
+        if (duration) {
+            whereCondition.duration = duration;
+        }
+
+        if (type) {
+            whereCondition.course_type = type;
+        }
+
+        if (price) {
+            whereCondition.price = price;
         }
 
         const { count: totalCount, rows: items } =
@@ -67,7 +84,7 @@ class SkillsBasedCourseService {
 
     async createCourse(payload) {
         const { title, ...rest } = payload;
-        const slug =  generateUniqueSlug(title);
+        const slug = generateUniqueSlug(title);
         return SkillsBasedCourse.create({ ...rest, title, slug });
     }
 
