@@ -16,10 +16,10 @@ import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 class UniversityService {
   async listUniversities(query = {}) {
     const page = parseInt(query.page, 10) || 1;
-    const limit = parseInt(query.limit, 10) || 25;
+    const limit = parseInt(query.limit, 10) || 24;
     const status = query.status;
 
-    const searchQuery = q || "";
+    const searchQuery = query.q || "";
 
     const offset = (page - 1) * limit;
 
