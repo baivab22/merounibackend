@@ -38,6 +38,7 @@ export const createOrUpdateExamSchema = yup
     id: yup.number().integer().positive().nullable().optional(),
     title: yup.string().trim().required("Title is required"),
     description: yup.string().nullable().optional(),
+    meta_description: yup.string().nullable().optional(),
     level_id: yup.number().integer().required("Level ID is required"),
     category_id: yup.number()
       .transform((value, originalValue) => originalValue === "" ? null : value)
@@ -76,9 +77,18 @@ export const createOrUpdateExamSchema = yup
       .transform((value, originalValue) => originalValue === "" ? null : value)
       .nullable()
       .optional(),
-    exam_date: yup.string().nullable().optional(), // Date string expected
-    opening_date: yup.string().nullable().optional(),
-    closing_date: yup.string().nullable().optional(),
+    exam_date: yup.string()
+      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+      .nullable()
+      .optional(),
+    opening_date: yup.string()
+      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+      .nullable()
+      .optional(),
+    closing_date: yup.string()
+      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+      .nullable()
+      .optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && (value.title || value.id)) return true;

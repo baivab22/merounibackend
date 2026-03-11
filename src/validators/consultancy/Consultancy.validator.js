@@ -95,6 +95,7 @@ export const createOrUpdateConsultancySchema = yup.object({
         return typeof value === "string";
       },
     ),
+  meta_description: yup.string().nullable().optional(),
   contact: yup.array().of(yup.string()).nullable().optional().default([]),
   website_url: yup
     .string()

@@ -27,6 +27,10 @@ News.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     college_id: {
       type: DataTypes.INTEGER,
       allowNull: true,

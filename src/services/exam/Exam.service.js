@@ -188,6 +188,7 @@ class ExamService {
       id,
       title,
       description,
+      meta_description,
       author,
       level_id,
       category_id,
@@ -215,6 +216,7 @@ class ExamService {
       const examData = {
         title,
         description,
+        meta_description,
         author,
         level_id,
         category_id,

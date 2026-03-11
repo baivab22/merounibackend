@@ -12,6 +12,8 @@ export const createSkillsBasedCourseSchema = yup.object({
     is_featured: yup.boolean().optional(),
     institution_name: yup.string().optional(),
     likes_count: yup.number().integer().min(0).optional(),
+    location: yup.string().optional(),
+    course_type: yup.mixed().oneOf(["online", "offline","both"]).optional(),
 });
 
 // Update SkillsBasedCourse schema
@@ -26,4 +28,6 @@ export const updateSkillsBasedCourseSchema = yup.object({
     is_featured: yup.boolean().optional(),
     likes_count: yup.number().integer().min(0).optional(),
     institution_name: yup.string().optional(),
+    location: yup.string().optional(),
+    course_type: yup.mixed().oneOf(["online", "offline","both"]).optional(),
 });

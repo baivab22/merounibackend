@@ -24,7 +24,13 @@ CollegeAdmission.init(
       type: DataTypes.TEXT,
     },
   },
-  { sequelize, modelName: "college_admission", timestamps: false }
+  {
+    sequelize,
+    modelName: "college_admission",
+    tableName: "college_admission",
+    freezeTableName: true,
+    timestamps: false,
+  }
 );
 
 College.hasMany(CollegeAdmission, {

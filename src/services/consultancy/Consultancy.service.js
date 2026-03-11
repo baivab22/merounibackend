@@ -156,6 +156,7 @@ class ConsultancyService {
       featured_image,
       logo,
       description,
+      meta_description,
       contact,
       website_url,
       google_map_url,
@@ -242,6 +243,9 @@ class ConsultancyService {
       if (description !== undefined)
         updateData.description =
           description === "" || description === null ? null : description;
+      if (meta_description !== undefined)
+        updateData.meta_description =
+          meta_description === "" || meta_description === null ? null : meta_description;
       if (contact !== undefined) updateData.contact = contact || [];
       // Handle website_url - empty string or null becomes null
       if (website_url !== undefined)
@@ -292,6 +296,12 @@ class ConsultancyService {
             description === undefined
             ? null
             : description,
+        meta_description:
+          meta_description === "" ||
+            meta_description === null ||
+            meta_description === undefined
+            ? null
+            : meta_description,
         contact: contact || [],
         website_url:
           website_url === "" ||

@@ -31,6 +31,7 @@ export const createOrUpdateUniversitySchema = yup
       .optional(),
     type_of_institute: yup.string().oneOf(["Public", "Private"]).optional(),
     description: yup.string().nullable().optional(),
+    meta_description: yup.string().nullable().optional(),
     author_id: yup.number().integer().positive().optional(),
     contact: yup
       .object({

@@ -61,6 +61,10 @@ export const University = sequelize.define(
     description: {
       type: DataTypes.TEXT,
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
 
     logo: {
       type: DataTypes.STRING,

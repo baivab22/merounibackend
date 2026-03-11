@@ -45,6 +45,7 @@ export const createOrUpdateEventSchema = yup
         otherwise: (schema) => schema.optional(),
       }),
     description: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
     content: yup
       .string()
       .trim()
