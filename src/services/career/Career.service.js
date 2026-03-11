@@ -1,8 +1,9 @@
 import { Op } from "sequelize";
 
 import CareerModel from "../../models/career/Career.model.js";
+import CareerApplication from "../../models/career/CareerApplication.model.js";
 import UserModel from "../../models/users/User.model.js";
-import {generateUniqueSlug} from "../../utils/SlugHelper.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class CareerService {
   async listCareers(query = {}) {
@@ -27,8 +28,23 @@ class CareerService {
         offset,
       });
 
+    let finalItems = items;
+    if (query.user_id) {
+      const userApplications = await CareerApplication.findAll({
+        where: { user_id: query.user_id },
+        attributes: ["career_id"],
+      });
+      const appliedCareerIds = new Set(userApplications.map((a) => a.career_id));
+
+      finalItems = items.map((item) => {
+        const itemData = item.toJSON ? item.toJSON() : item;
+        itemData.hasApplied = appliedCareerIds.has(itemData.id);
+        return itemData;
+      });
+    }
+
     return {
-      items,
+      items: finalItems,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
@@ -38,7 +54,7 @@ class CareerService {
     };
   }
 
-  async getCareerBySlug(slugs) {
+  async getCareerBySlug(slugs, userId = null) {
     const careerPost = await CareerModel.findOne({
       where: { slugs },
       attributes: {
@@ -59,7 +75,16 @@ class CareerService {
       throw error;
     }
 
-    return careerPost;
+    const data = careerPost.toJSON ? careerPost.toJSON() : careerPost;
+
+    if (userId) {
+      const application = await CareerApplication.findOne({
+        where: { career_id: data.id, user_id: userId },
+      });
+      data.hasApplied = !!application;
+    }
+
+    return data;
   }
 
   async createCareer(data) {
@@ -91,14 +116,20 @@ class CareerService {
       error.status = 404;
       throw error;
     }
-    await career.update({
+    const updateData = {
       title: data.title || career.title,
       author_id: data.author_id || career.author_id,
       description: data.description || career.description,
       content: data.content || career.content,
       featuredImage: data.featuredImage || career.featuredImage,
       status: data.status !== undefined ? data.status : career.status,
-    });
+    };
+
+    if (data.title && data.title !== career.title) {
+      updateData.slugs = generateUniqueSlug(data.title);
+    }
+
+    await career.update(updateData);
 
     return career;
   }
@@ -112,6 +143,95 @@ class CareerService {
       error.status = 404;
       throw error;
     }
+  }
+
+  async applyForCareer(careerId, data) {
+    const career = await CareerModel.findByPk(careerId);
+    if (!career || career.status !== "active") {
+      const error = new Error("Career post is not active or not found");
+      error.status = 404;
+      throw error;
+    }
+
+    const existingApplication = await CareerApplication.findOne({
+      where: {
+        career_id: career.id,
+        user_id: data.user_id,
+      },
+    });
+
+    if (existingApplication) {
+      const error = new Error("You have already applied for this career post");
+      error.status = 400;
+      throw error;
+    }
+
+    const application = await CareerApplication.create({
+      career_id: career.id,
+      user_id: data.user_id,
+      resume: data.resume,
+      cover_letter: data.cover_letter || null,
+    });
+
+    return application;
+  }
+
+  async listCareerApplications(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const sort = (query.sort || "desc").toUpperCase();
+    const search = query.q || "";
+    const career_id = query.career_id;
+
+    const offset = (page - 1) * limit;
+
+    const whereCondition = {};
+    const userIncludeWhere = {};
+
+    if (search) {
+      userIncludeWhere[Op.or] = [
+        { firstName: { [Op.like]: `%${search}%` } },
+        { middleName: { [Op.like]: `%${search}%` } },
+        { lastName: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    if (career_id) {
+      whereCondition.career_id = parseInt(career_id, 10);
+    }
+
+    const { count: totalCount, rows: items } =
+      await CareerApplication.findAndCountAll({
+        where: whereCondition,
+        include: [
+          {
+            model: CareerModel,
+            as: "career",
+            attributes: ["id", "title", "slugs"],
+          },
+          {
+            model: UserModel,
+            as: "applicant",
+            attributes: ["id", "firstName", "middleName", "lastName", "email", "phoneNo"],
+            where: Object.keys(userIncludeWhere).length > 0 ? userIncludeWhere : undefined,
+          },
+        ],
+        distinct: true,
+        order: [["createdAt", sort]],
+        limit,
+        offset,
+      });
+
+    return {
+      items,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
+        totalCount,
+      },
+    };
   }
 }
 

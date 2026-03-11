@@ -182,7 +182,6 @@ class CollegeService {
         }
       }
 
-console.log(programs,"programsprogramsprograms")
       if (Array.isArray(programs) && programs.length > 0) {
         const existingPrograms = await Program.findAll({
           where: { id: { [Op.in]: programs } },
@@ -249,7 +248,6 @@ console.log(programs,"programsprogramsprograms")
         await CollegeFacility.bulkCreate(facilityRecords, { transaction });
       }
 
-      console.log(images,"imagesimagesimagesimages")
       if (Array.isArray(images)) {
         await CollegeGallery.destroy({
           where: { college_id: collegeId },

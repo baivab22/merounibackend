@@ -64,3 +64,8 @@ export const updateCareerBodySchema = yup
 export const deleteCareerQuerySchema = yup.object({
   id: yup.number().integer().positive().required(),
 });
+
+export const applyForCareerSchema = yup.object({
+  resume: yup.string().trim().required(),
+  cover_letter: yup.string().trim().nullable(),
+}).required();

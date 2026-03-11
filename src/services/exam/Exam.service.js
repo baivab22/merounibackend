@@ -8,8 +8,9 @@ import {
 import Level from "../../models/level/Level.model.js";
 import { University } from "../../models/university/University.model.js";
 import UserModel from "../../models/users/User.model.js";
+import Category from "../../models/category/Category.model.js";
 
-import {generateUniqueSlug} from "../../utils/SlugHelper.js"
+import { generateUniqueSlug } from "../../utils/SlugHelper.js"
 class ExamService {
   async listExams(query = {}) {
     const page = parseInt(query.page, 10) || 1;
@@ -22,6 +23,7 @@ class ExamService {
       universityId,
       discipline,
       examType,
+      categoryId,
       isOpen,
       isUpcoming,
       sortBy,
@@ -48,6 +50,17 @@ class ExamService {
       model: University,
       attributes: ["id", "fullname"],
       as: "university",
+    });
+
+    // Category filter
+    if (categoryId) {
+      whereCondition.category_id = categoryId;
+    }
+
+    include.push({
+      model: Category,
+      attributes: ["id", "title"],
+      as: "category",
     });
 
     // Exam Type filter
@@ -152,6 +165,11 @@ class ExamService {
           attributes: ["id", "firstName"],
           as: "authorDetails",
         },
+        {
+          model: Category,
+          attributes: ["id", "title"],
+          as: "category",
+        },
       ],
     });
 
@@ -172,6 +190,7 @@ class ExamService {
       description,
       author,
       level_id,
+      category_id,
       affiliation,
       syllabus,
       pastQuestion,
@@ -198,6 +217,7 @@ class ExamService {
         description,
         author,
         level_id,
+        category_id,
         affiliation,
         syllabus,
         pastQuestion,
@@ -216,7 +236,7 @@ class ExamService {
 
       if (!examId) {
         // Create
-      const slugs = generateUniqueSlug(title);
+        const slugs = generateUniqueSlug(title);
         examData.slugs = slugs;
         const exam = await Exam.create(examData, { transaction });
         examId = exam.id;

@@ -95,3 +95,55 @@ export const authenticateUser = async (req, res, next) => {
     });
   }
 };
+
+export const optionalAuthenticateUser = async (req, res, next) => {
+  try {
+    req.user = null;
+    const accessToken = req.cookies.token;
+    const refreshToken = req.headers["x-refresh-token"];
+    const { ACCESS_TOKEN, REFRESH_TOKEN } = process.env;
+
+    let userId = null;
+
+    if (accessToken) {
+      try {
+        const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
+        userId = decoded.data?.id;
+      } catch (error) {
+      }
+    }
+    console.log(userId,"userIduserIduserId");
+    
+
+    if (!userId && refreshToken) {
+      try {
+        const decodedRefresh = jwt.verify(refreshToken, REFRESH_TOKEN);
+        userId = decodedRefresh.data?.id;
+      } catch (error) {
+        // Refresh token invalid too
+      }
+    }
+
+    if (userId) {
+      const user = await UserModel.findByPk(userId);
+      if (user) {
+        req.user = {
+          id: user.id,
+          firstName: user.first_name,
+          middleName: user.middle_name,
+          lastName: user.last_name,
+          email: user.email,
+          phoneNo: user.phone_no,
+          roles: user.roles,
+          role: user.roles, // Keep 'role' for backward compatibility
+          collegeId: user.collegeId,
+          consultancyId: user.consultancyId,
+        };
+      }
+    }
+  } catch (error) {
+    req.user = null;
+  }
+
+  return next();
+};
