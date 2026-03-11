@@ -1,7 +1,7 @@
 import express from "express";
 
 import CareerController from "../controllers/career/Career.controller.js";
-import { authenticateUser } from "../middlewares/Auth.middleware.js";
+import { authenticateUser,optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import {
   requestValidator,
@@ -14,6 +14,7 @@ import {
   updateCareerQuerySchema,
   updateCareerBodySchema,
   deleteCareerQuerySchema,
+  applyForCareerSchema,
 } from "../validators/career/Career.validator.js";
 
 const route = express.Router();
@@ -71,8 +72,80 @@ const route = express.Router();
  */
 route.get(
   "/",
+  optionalAuthenticateUser,
   requestValidator(paginationSchema, "query"),
   CareerController.listCareers
+);
+
+/**
+ * @swagger
+ * /career/applications:
+ *   get:
+ *     summary: List all career applications with pagination
+ *     tags: [Careers]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search by name or email
+ *       - in: query
+ *         name: career_id
+ *         schema:
+ *           type: integer
+ *         description: Filter by specific career ID
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Sort order by created date
+ *     responses:
+ *       200:
+ *         description: List of career applications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: success
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 pagination:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Server error
+ */
+route.get(
+  "/applications",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(paginationSchema, "query"),
+  CareerController.listCareerApplications
 );
 
 /**
@@ -108,6 +181,7 @@ route.get(
  */
 route.get(
   "/:slugs",
+  optionalAuthenticateUser,
   requestValidator(slugParamSchema, "params"),
   CareerController.getCareerBySlug
 );
@@ -267,6 +341,52 @@ route.put(
     { schema: updateCareerBodySchema, property: "body" },
   ]),
   CareerController.updateCareer
+);
+
+/**
+ * @swagger
+ * /career/apply/{career_id}:
+ *   post:
+ *     summary: Apply for a career post
+ *     tags: [Careers]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: career_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Career ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - resume
+ *             properties:
+ *               resume:
+ *                 type: string
+ *               cover_letter:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Application submitted successfully
+ *       400:
+ *         description: Bad request (validation error)
+ *       404:
+ *         description: Career not found
+ *       500:
+ *         description: Server error
+ */
+route.post(
+  "/apply/:career_id",
+  authenticateUser,
+  requestValidator(applyForCareerSchema, "body"),
+  CareerController.applyForCareer
 );
 
 export default route;

@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Category extends Model {}
+class Category extends Model { }
 
 Category.init(
   {
@@ -35,7 +35,7 @@ Category.init(
       onDelete: "CASCADE",
     },
     type: {
-      type: DataTypes.ENUM("BLOG", "EVENT", "NEWS", "MATERIAL","SCHOLARSHIP"),
+      type: DataTypes.ENUM("BLOG", "EVENT", "NEWS", "MATERIAL", "SCHOLARSHIP", "EXAM"),
       allowNull: true,
     },
   },

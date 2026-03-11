@@ -14,7 +14,7 @@ class BlogService {
 
     const search = query.q || "";
     const categoryId = query.category_id || query.category;
-    const status = query.status || "published";
+    const status = query.status;
 
     const whereCondition = {};
 
