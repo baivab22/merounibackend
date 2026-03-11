@@ -76,9 +76,18 @@ export const createOrUpdateExamSchema = yup
       .transform((value, originalValue) => originalValue === "" ? null : value)
       .nullable()
       .optional(),
-    exam_date: yup.string().nullable().optional(), // Date string expected
-    opening_date: yup.string().nullable().optional(),
-    closing_date: yup.string().nullable().optional(),
+    exam_date: yup.string()
+      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+      .nullable()
+      .optional(),
+    opening_date: yup.string()
+      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+      .nullable()
+      .optional(),
+    closing_date: yup.string()
+      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+      .nullable()
+      .optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && (value.title || value.id)) return true;
