@@ -10,6 +10,7 @@ import {
   paginationSchema,
   createCollegeRankingSchema,
   updateRankingOrderSchema,
+  deleteRankingQuerySchema,
   deleteDegreeRankingsQuerySchema,
   getRankingsByDegreeQuerySchema,
   updateDegreeDescriptionSchema,
