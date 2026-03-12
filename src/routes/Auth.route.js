@@ -199,7 +199,7 @@ route.post("/logout", AuthController.logoutUser);
  * @swagger
  * /auth/forgot-password:
  *   post:
- *     summary: Request password reset
+ *     summary: Request password reset OTP
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -216,7 +216,7 @@ route.post("/logout", AuthController.logoutUser);
  *                 example: john.doe@example.com
  *     responses:
  *       200:
- *         description: Password reset email sent
+ *         description: OTP sent to email
  *       404:
  *         description: User not found
  *       500:
@@ -228,7 +228,7 @@ route.post("/forgot-password", AuthController.forgotPassword);
  * @swagger
  * /auth/reset-password:
  *   post:
- *     summary: Reset password with token
+ *     summary: Reset password with OTP
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -237,12 +237,17 @@ route.post("/forgot-password", AuthController.forgotPassword);
  *           schema:
  *             type: object
  *             required:
- *               - token
+ *               - email
+ *               - otp
  *               - newPassword
  *             properties:
- *               token:
+ *               email:
  *                 type: string
- *                 example: "reset-token-here"
+ *                 format: email
+ *                 example: john.doe@example.com
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
  *               newPassword:
  *                 type: string
  *                 format: password
@@ -251,7 +256,7 @@ route.post("/forgot-password", AuthController.forgotPassword);
  *       200:
  *         description: Password reset successful
  *       400:
- *         description: Invalid or expired token
+ *         description: Invalid or expired OTP
  *       500:
  *         description: Server error
  */

@@ -1,24 +1,24 @@
 import nodemailer from "nodemailer";
+import envConfig from "../config/env.config.js";
 
 // Configure your transporter
 const transporter = nodemailer.createTransport({
-  // gmail
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  host: envConfig.MAIL_HOST,
+  port: envConfig.MAIL_PORT,
+  secure: true,
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASSWORD,
+    user: envConfig.MAIL_USER,
+    pass: envConfig.MAIL_PASS,
   },
-  debug: true,
-  logger: true,
+  debug: envConfig.NODE_ENV !== "production",
+  logger: envConfig.NODE_ENV !== "production",
 });
 
 // Function to send email
 export const sendMail = async (to, subject, text, html) => {
   try {
     const info = await transporter.sendMail({
-      from: process.env.EMAIL,
+      from: envConfig.MAIL_USER,
       to,
       subject,
       text,
