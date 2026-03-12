@@ -5,7 +5,7 @@ import envConfig from "../config/env.config.js";
 const transporter = nodemailer.createTransport({
   host: envConfig.MAIL_HOST,
   port: envConfig.MAIL_PORT,
-  secure: envConfig.MAIL_SECURE,
+  secure: true,
   auth: {
     user: envConfig.MAIL_USER,
     pass: envConfig.MAIL_PASS,
@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 export const sendMail = async (to, subject, text, html) => {
   try {
     const info = await transporter.sendMail({
-      from: envConfig.MAIL_FROM,
+      from: envConfig.MAIL_USER,
       to,
       subject,
       text,

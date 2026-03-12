@@ -34,10 +34,8 @@ class EnvConfig {
         // mail config
         this.MAIL_HOST = process.env.MAIL_HOST;
         this.MAIL_PORT = parseInt(process.env.MAIL_PORT, 10) || 465;
-        this.MAIL_SECURE = process.env.MAIL_SECURE !== "false"; // default true
         this.MAIL_USER = process.env.MAIL_USER;
         this.MAIL_PASS = process.env.MAIL_PASS;
-        this.MAIL_FROM = process.env.MAIL_FROM || process.env.MAIL_USER;
     }
 }
 

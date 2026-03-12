@@ -18,7 +18,6 @@ const {
   ACCESS_TOKEN_EXPIRY = "7d",
 } = process.env;
 
-const otpStore = new Map();
 const authService = new AuthService();
 
 class AuthController {
@@ -135,30 +134,31 @@ class AuthController {
         return res.status(404).json({ message: "User not found" });
       }
 
-      if (!user.otp) {
-        return res
-          .status(400)
-          .json({ message: "OTP not found. Please request a new OTP." });
-      }
+      console.log(`[AuthDebug] Verify attempt for ${email}`);
+      console.log(`[AuthDebug] Received OTP: "${otp}"`);
+      console.log(`[AuthDebug] Stored OTP: "${user.otp}"`);
 
-      if (String(user.otp) !== String(otp)) {
+      if (!user.otp || String(user.otp).trim() !== String(otp).trim()) {
+        console.log(`[AuthDebug] Mismatch!`);
         return res.status(400).json({ message: "Invalid OTP" });
       }
 
-      if (new Date() > user.otpExpiresAt) {
+      const now = new Date();
+      if (now > user.otpExpiresAt) {
+        console.log(`[AuthDebug] OTP Expired!`);
         return res
           .status(400)
           .json({ message: "Expired OTP. Request a new one." });
       }
 
-      let updatedRoles =
-        typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles;
-      updatedRoles.student = true;
+      // let updatedRoles =
+      //   typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles;
+      // updatedRoles.student = true;
 
-      await authService.updateUser(
-        { email },
-        { roles: updatedRoles, otp: null, otpExpiresAt: null }
-      );
+      // await authService.updateUser(
+      //   { email },
+      //   { roles: updatedRoles, otp: null, otpExpiresAt: null }
+      // );
 
       return res
         .status(200)
@@ -188,11 +188,17 @@ class AuthController {
           .json({ message: "Please wait before requesting a new OTP." });
       }
 
-      const newOtp = Math.floor(100000 + Math.random() * 900000);
+      const newOtp = crypto.randomInt(100000, 1000000).toString();
       const otpExpiresAt = new Date(now.getTime() + 10 * 60 * 1000);
 
       await authService.updateUser({ email }, { otp: newOtp, otpExpiresAt });
 
+      await sendMail(
+        email,
+        "Your New OTP Code",
+        `Your new OTP is: ${newOtp}`,
+        `<p>Your new OTP is: <strong>${newOtp}</strong></p>`
+      );
 
       return res.status(200).json({ message: "New OTP sent successfully." });
     } catch (error) {
@@ -238,9 +244,12 @@ class AuthController {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const otp = crypto.randomInt(100000, 999999).toString();
+      const otp = crypto.randomInt(100000, 1000000).toString();
+      const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      otpStore.set(email, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+      console.log(`[AuthDebug] Generated OTP for ${email}: ${otp}`);
+
+      await authService.updateUser({ email }, { otp, otpExpiresAt });
 
       await sendMail(
         email,
@@ -260,7 +269,7 @@ class AuthController {
 
   static async resetPassword(req, res) {
     try {
-      const { email, otp, new_password: newPassword } = req.body;
+      const { email, otp, new_password } = req.body;
 
       let response = await resetPasswordHelper(req.body);
 
@@ -270,21 +279,32 @@ class AuthController {
         });
       }
 
-      if (!email || !otp || !newPassword) {
-        return res.status(400).json({ message: "All fields are required" });
+      const user = await authService.getUserByEmail(email);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
-      const storedOtpData = otpStore.get(email);
+      console.log(`[AuthDebug] Reset attempt for ${email}`);
+      console.log(`[AuthDebug] Received OTP: "${otp}"`);
+      console.log(`[AuthDebug] Stored OTP: "${user.otp}"`);
 
-      if (!storedOtpData || storedOtpData.otp !== otp) {
-        return res.status(400).json({ message: "Invalid or expired OTP" });
+      if (!user.otp || String(user.otp).trim() !== String(otp).trim()) {
+        console.log(`[AuthDebug] Mismatch!`);
+        return res.status(400).json({ message: "Invalid OTP" });
       }
 
-      otpStore.delete(email);
+      if (new Date() > user.otpExpiresAt) {
+        console.log(`[AuthDebug] OTP Expired!`);
+        return res.status(400).json({ message: "OTP has expired" });
+      }
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const hashedPassword = await bcrypt.hash(new_password, 10);
 
-      await authService.updateUser({ email }, { password: hashedPassword });
+      await authService.updateUser(
+        { email },
+        { password: hashedPassword, otp: null, otpExpiresAt: null }
+      );
 
       return res
         .status(200)

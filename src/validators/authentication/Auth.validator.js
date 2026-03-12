@@ -84,8 +84,8 @@ export const forgotPasswordHelper = async (data) => {
 export const resetPasswordHelper = async (data) => {
   const schema = yup.object({
     email: yup.string().email().required(),
-    otp: yup.number().required(),
-    new_password: yup.string().required(),
+    otp: yup.string().required(),
+    new_password: yup.string().min(6).required(),
   });
 
   try {
