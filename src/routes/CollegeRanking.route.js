@@ -155,7 +155,7 @@ route.post(
 route.put(
   "/order",
   authenticateUser,
-  authorizeRole(["admin"]),
+  authorizeRole(["admin", "editor"]),
   requestValidator(updateRankingOrderSchema, "body"),
   CollegeRankingController.updateRankingOrder
 );
@@ -196,7 +196,7 @@ route.put(
 route.put(
   "/degree-order",
   authenticateUser,
-  authorizeRole(["admin"]),
+  authorizeRole(["admin", "editor"]),
   CollegeRankingController.updateDegreeOrder
 );
 
@@ -231,7 +231,7 @@ route.put(
 route.put(
   "/degree-description",
   authenticateUser,
-  authorizeRole(["admin"]),
+  authorizeRole(["admin", "editor"]),
   requestValidator(updateDegreeDescriptionSchema, "body"),
   CollegeRankingController.updateDegreeDescription
 );
@@ -264,7 +264,7 @@ route.put(
 route.delete(
   "/",
   authenticateUser,
-  authorizeRole(["admin"]),
+  authorizeRole(["admin","editor"]),
   requestValidator(deleteRankingQuerySchema, "query"),
   CollegeRankingController.deleteRanking
 );
@@ -295,7 +295,7 @@ route.delete(
 route.delete(
   "/degree",
   authenticateUser,
-  authorizeRole(["admin"]),
+  authorizeRole(["admin", "editor"]),
   requestValidator(deleteDegreeRankingsQuerySchema, "query"),
   CollegeRankingController.deleteDegreeRankings
 );
