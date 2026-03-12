@@ -10,11 +10,11 @@ CollegeRanking.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    program_id: {
+    degree_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "programs",
+        model: "degrees",
         key: "id",
       },
     },
@@ -26,12 +26,16 @@ CollegeRanking.init(
         key: "id",
       },
     },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     rank: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1,
     },
-    program_list_order: {
+    degree_list_order: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: null,
@@ -46,14 +50,14 @@ CollegeRanking.init(
     indexes: [
       {
         unique: true,
-        fields: ["program_id", "college_id"],
-        name: "unique_program_college",
+        fields: ["degree_id", "college_id"],
+        name: "unique_degree_college",
       },
       {
-        fields: ["program_id", "rank"],
+        fields: ["degree_id", "rank"],
       },
       {
-        fields: ["program_list_order"],
+        fields: ["degree_list_order"],
       },
     ],
   }

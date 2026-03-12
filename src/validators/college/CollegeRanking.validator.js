@@ -5,15 +5,16 @@ export { paginationSchema };
 
 export const createCollegeRankingSchema = yup
   .object({
-    program_id: yup.number().integer().positive().required(),
+    degree_id: yup.number().integer().positive().required(),
     college_id: yup.number().integer().positive().required(),
     rank: yup.number().integer().positive().optional(),
+    description: yup.string().nullable().optional(),
   })
   .required();
 
 export const updateRankingOrderSchema = yup
   .object({
-    program_id: yup.number().integer().positive().required(),
+    degree_id: yup.number().integer().positive().required(),
     rankings: yup
       .array()
       .of(
@@ -31,10 +32,10 @@ export const deleteRankingQuerySchema = yup.object({
   ranking_id: yup.number().integer().positive().required(),
 });
 
-export const deleteProgramRankingsQuerySchema = yup.object({
-  program_id: yup.number().integer().positive().required(),
+export const deleteDegreeRankingsQuerySchema = yup.object({
+  degree_id: yup.number().integer().positive().required(),
 });
 
-export const getRankingsByProgramQuerySchema = yup.object({
-  program_id: yup.number().integer().positive().required(),
+export const getRankingsByDegreeQuerySchema = yup.object({
+  degree_id: yup.number().integer().positive().required(),
 });

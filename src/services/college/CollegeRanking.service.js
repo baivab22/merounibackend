@@ -1,17 +1,17 @@
 import { Op } from "sequelize";
 import CollegeRanking from "../../models/college/CollegeRanking.model.js";
 import College from "../../models/college/College.model.js";
-import Program from "../../models/program/Program.model.js";
+import Degree from "../../models/degree/Degree.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import { sequelize } from "../../config/database.config.js";
 
 class CollegeRankingService {
   async listRankings(query = {}) {
-    const programId = query.program_id ? parseInt(query.program_id, 10) : null;
+    const degreeId = query.degree_id ? parseInt(query.degree_id, 10) : null;
 
     const whereCondition = {};
-    if (programId) {
-      whereCondition.program_id = programId;
+    if (degreeId) {
+      whereCondition.degree_id = degreeId;
     }
 
     // First, get all ranking IDs to avoid duplicates from joins
@@ -19,7 +19,7 @@ class CollegeRankingService {
       where: whereCondition,
       attributes: ["id"],
       order: [
-        ["program_id", "ASC"],
+        ["degree_id", "ASC"],
         ["rank", "ASC"],
       ],
       raw: true,
@@ -52,49 +52,49 @@ class CollegeRankingService {
           ],
         },
         {
-          model: Program,
-          as: "program",
-          attributes: ["id", "title", "slugs"],
+          model: Degree,
+          as: "degree",
+          attributes: ["id", "title", "slugs", "short_name"],
         },
       ],
       order: [
-        ["program_id", "ASC"],
+        ["degree_id", "ASC"],
         ["rank", "ASC"],
       ],
     });
 
-    // Group by program_id and get program_list_order from rankings
+    // Group by degree_id and get degree_list_order from rankings
     const grouped = rankings.reduce((acc, ranking) => {
-      const programId = ranking.program_id;
-      if (!acc[programId]) {
-        acc[programId] = {
-          program: ranking.program,
-          programListOrder: ranking.program_list_order || 9999, // Default high order for programs without order
+      const degreeId = ranking.degree_id;
+      if (!acc[degreeId]) {
+        acc[degreeId] = {
+          degree: ranking.degree,
+          degreeListOrder: ranking.degree_list_order || 9999, // Default high order for degrees without order
           rankings: [],
         };
       }
       // Double-check to prevent duplicates in the array
-      const exists = acc[programId].rankings.some((r) => r.id === ranking.id);
+      const exists = acc[degreeId].rankings.some((r) => r.id === ranking.id);
       if (!exists) {
-        acc[programId].rankings.push(ranking);
+        acc[degreeId].rankings.push(ranking);
       }
       return acc;
     }, {});
 
-    // Sort by program_list_order, then by program_id
+    // Sort by degree_list_order, then by degree_id
     const sortedGroups = Object.values(grouped).sort((a, b) => {
-      if (a.programListOrder !== b.programListOrder) {
-        return a.programListOrder - b.programListOrder;
+      if (a.degreeListOrder !== b.degreeListOrder) {
+        return a.degreeListOrder - b.degreeListOrder;
       }
-      return a.program.id - b.program.id;
+      return a.degree.id - b.degree.id;
     });
 
     return sortedGroups;
   }
 
-  async getRankingsByProgram(programId) {
+  async getRankingsByDegree(degreeId) {
     const rankings = await CollegeRanking.findAll({
-      where: { program_id: programId },
+      where: { degree_id: degreeId },
       include: [
         {
           model: College,
@@ -108,9 +108,9 @@ class CollegeRankingService {
           ],
         },
         {
-          model: Program,
-          as: "program",
-          attributes: ["id", "title", "slugs"],
+          model: Degree,
+          as: "degree",
+          attributes: ["id", "title", "slugs", "short_name"],
         },
       ],
       order: [["rank", "ASC"]],
@@ -120,75 +120,76 @@ class CollegeRankingService {
   }
 
   async createRanking(data) {
-    const { program_id, college_id, rank } = data;
+    const { degree_id, college_id, rank, description } = data;
 
     // Use transaction to prevent race conditions when multiple colleges are added quickly
     const transaction = await sequelize.transaction();
 
     try {
-      // Check if ranking already exists for this program and college
+      // Check if ranking already exists for this degree and college
       const existing = await CollegeRanking.findOne({
         where: {
-          program_id,
+          degree_id,
           college_id,
         },
         transaction,
       });
 
       if (existing) {
-        const error = new Error("College is already ranked for this program");
+        const error = new Error("College is already ranked for this degree");
         error.status = 400;
         throw error;
       }
 
-      // Ensure program has a program_list_order (set if doesn't exist)
+      // Ensure degree has a degree_list_order (set if doesn't exist)
       const existingRankings = await CollegeRanking.findAll({
-        where: { program_id },
-        attributes: ["program_list_order"],
+        where: { degree_id },
+        attributes: ["degree_list_order"],
         limit: 1,
         transaction,
       });
 
-      let programListOrder = null;
+      let degreeListOrder = null;
       if (
         existingRankings.length === 0 ||
-        existingRankings[0].program_list_order === null
+        existingRankings[0].degree_list_order === null
       ) {
-        // Get current max program_list_order
-        const maxProgramOrder =
-          (await CollegeRanking.max("program_list_order", { transaction })) ||
+        // Get current max degree_list_order
+        const maxDegreeOrder =
+          (await CollegeRanking.max("degree_list_order", { transaction })) ||
           0;
-        programListOrder = maxProgramOrder + 1;
+        degreeListOrder = maxDegreeOrder + 1;
       } else {
-        programListOrder = existingRankings[0].program_list_order;
+        degreeListOrder = existingRankings[0].degree_list_order;
       }
 
-      // Get current max rank for this program within transaction to prevent race conditions
+      // Get current max rank for this degree within transaction to prevent race conditions
       const maxRank =
         (await CollegeRanking.max("rank", {
-          where: { program_id },
+          where: { degree_id },
           transaction,
         })) || 0;
       const newRank = rank || maxRank + 1;
 
       const ranking = await CollegeRanking.create(
         {
-          program_id,
+          degree_id,
           college_id,
           rank: newRank,
-          program_list_order: programListOrder,
+          description,
+          degree_list_order: degreeListOrder,
         },
         { transaction }
       );
 
-      // If this is the first ranking for the program, update all existing rankings for this program
+      // If this is the first ranking for the degree, update all existing rankings for this degree
       if (
         existingRankings.length > 0 &&
-        existingRankings[0].program_list_order === null
+        existingRankings[0].degree_list_order === null
       ) {
         await CollegeRanking.update(
-          { program_list_order: programListOrder },
-          { where: { program_id }, transaction }
+          { degree_list_order: degreeListOrder },
+          { where: { degree_id }, transaction }
         );
       }
 
@@ -200,11 +201,11 @@ class CollegeRankingService {
     }
   }
 
-  async updateRankingOrder(programId, rankings) {
-    // Validate all rankings belong to the program
+  async updateRankingOrder(degreeId, rankings) {
+    // Validate all rankings belong to the degree
     const existingRankings = await CollegeRanking.findAll({
       where: {
-        program_id: programId,
+        degree_id: degreeId,
         id: { [Op.in]: rankings.map((r) => r.id) },
       },
     });
@@ -225,7 +226,7 @@ class CollegeRankingService {
 
     await Promise.all(updates);
 
-    return await this.getRankingsByProgram(programId);
+    return await this.getRankingsByDegree(degreeId);
   }
 
   async deleteRanking(rankingId) {
@@ -239,27 +240,27 @@ class CollegeRankingService {
     await ranking.destroy();
   }
 
-  async deleteRankingsByProgram(programId) {
+  async deleteRankingsByDegree(degreeId) {
     await CollegeRanking.destroy({
-      where: { program_id: programId },
+      where: { degree_id: degreeId },
     });
   }
 
-  async updateProgramOrder(programOrders) {
+  async updateDegreeOrder(degreeOrders) {
     const transaction = await sequelize.transaction();
     try {
-      // Update program_list_order for all rankings of each program
-      const updates = programOrders.map((po) =>
+      // Update degree_list_order for all rankings of each degree
+      const updates = degreeOrders.map((do_obj) =>
         CollegeRanking.update(
-          { program_list_order: po.program_list_order },
-          { where: { program_id: po.program_id }, transaction }
+          { degree_list_order: do_obj.degree_list_order },
+          { where: { degree_id: do_obj.degree_id }, transaction }
         )
       );
 
       await Promise.all(updates);
       await transaction.commit();
 
-      return { message: "Program order updated successfully" };
+      return { message: "Degree order updated successfully" };
     } catch (error) {
       await transaction.rollback();
       throw error;

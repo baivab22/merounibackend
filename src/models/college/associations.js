@@ -118,17 +118,17 @@ CollegeRanking.belongsTo(College, {
   foreignKey: "college_id",
   as: "college",
 });
-CollegeRanking.belongsTo(Program, {
-  foreignKey: "program_id",
-  as: "program",
+CollegeRanking.belongsTo(Degree, {
+  foreignKey: "degree_id",
+  as: "degree",
 });
 College.hasMany(CollegeRanking, {
   foreignKey: "college_id",
   as: "collegeRankings",
 });
-Program.hasMany(CollegeRanking, {
-  foreignKey: "program_id",
-  as: "programRankings",
+Degree.hasMany(CollegeRanking, {
+  foreignKey: "degree_id",
+  as: "degreeRankings",
 });
 
 // College Degree Many-to-Many

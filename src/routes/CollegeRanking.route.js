@@ -11,8 +11,8 @@ import {
   createCollegeRankingSchema,
   updateRankingOrderSchema,
   deleteRankingQuerySchema,
-  deleteProgramRankingsQuerySchema,
-  getRankingsByProgramQuerySchema,
+  deleteDegreeRankingsQuerySchema,
+  getRankingsByDegreeQuerySchema,
 } from "../validators/college/CollegeRanking.validator.js";
 
 const route = express.Router();
@@ -51,13 +51,13 @@ route.get(
 
 /**
  * @swagger
- * /college-ranking/program:
+ * /college-ranking/degree:
  *   get:
- *     summary: Get rankings by program
+ *     summary: Get rankings by degree
  *     tags: [College Rankings]
  *     parameters:
  *       - in: query
- *         name: program_id
+ *         name: degree_id
  *         required: true
  *         schema:
  *           type: integer
@@ -67,12 +67,12 @@ route.get(
  *           type: string
  *     responses:
  *       200:
- *         description: Rankings for the specified program
+ *         description: Rankings for the specified degree
  */
 route.get(
-  "/program",
-  requestValidator(getRankingsByProgramQuerySchema, "query"),
-  CollegeRankingController.getRankingsByProgram
+  "/degree",
+  requestValidator(getRankingsByDegreeQuerySchema, "query"),
+  CollegeRankingController.getRankingsByDegree
 );
 
 /**
@@ -92,15 +92,15 @@ route.get(
  *             type: object
  *             required:
  *               - college_id
- *               - program_id
+ *               - degree_id
  *             properties:
  *               college_id:
  *                 type: integer
- *               program_id:
+ *               degree_id:
  *                 type: integer
  *               category_title:
  *                 type: string
- *               program_list_order:
+ *               degree_list_order:
  *                 type: integer
  *     responses:
  *       201:
@@ -115,7 +115,7 @@ route.get(
 route.post(
   "/",
   authenticateUser,
-  authorizeRole(["admin"]),
+  authorizeRole(["admin","editor"]),
   requestValidator(createCollegeRankingSchema, "body"),
   CollegeRankingController.createRanking
 );
@@ -161,9 +161,9 @@ route.put(
 
 /**
  * @swagger
- * /college-ranking/program-order:
+ * /college-ranking/degree-order:
  *   put:
- *     summary: Update program order in rankings (Admin only)
+ *     summary: Update degree order in rankings (Admin only)
  *     tags: [College Rankings]
  *     security:
  *       - bearerAuth: []
@@ -175,28 +175,28 @@ route.put(
  *           schema:
  *             type: object
  *             properties:
- *               rankings:
+ *               degreeOrders:
  *                 type: array
  *                 items:
  *                   type: object
  *                   properties:
- *                     ranking_id:
+ *                     degree_id:
  *                       type: integer
- *                     program_list_order:
+ *                     degree_list_order:
  *                       type: integer
  *     responses:
  *       200:
- *         description: Program order updated successfully
+ *         description: Degree order updated successfully
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  */
 route.put(
-  "/program-order",
+  "/degree-order",
   authenticateUser,
   authorizeRole(["admin"]),
-  CollegeRankingController.updateProgramOrder
+  CollegeRankingController.updateDegreeOrder
 );
 
 /**
@@ -234,33 +234,33 @@ route.delete(
 
 /**
  * @swagger
- * /college-ranking/program:
+ * /college-ranking/degree:
  *   delete:
- *     summary: Delete all rankings for a program (Admin only)
+ *     summary: Delete all rankings for a degree (Admin only)
  *     tags: [College Rankings]
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
  *     parameters:
  *       - in: query
- *         name: program_id
+ *         name: degree_id
  *         required: true
  *         schema:
  *           type: integer
  *     responses:
  *       200:
- *         description: Program rankings deleted successfully
+ *         description: Degree rankings deleted successfully
  *       401:
  *         description: Unauthorized
  *       403:
  *         description: Forbidden
  */
 route.delete(
-  "/program",
+  "/degree",
   authenticateUser,
   authorizeRole(["admin"]),
-  requestValidator(deleteProgramRankingsQuerySchema, "query"),
-  CollegeRankingController.deleteProgramRankings
+  requestValidator(deleteDegreeRankingsQuerySchema, "query"),
+  CollegeRankingController.deleteDegreeRankings
 );
 
 export default route;
