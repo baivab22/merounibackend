@@ -151,14 +151,6 @@ class AuthController {
           .json({ message: "Expired OTP. Request a new one." });
       }
 
-      // let updatedRoles =
-      //   typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles;
-      // updatedRoles.student = true;
-
-      // await authService.updateUser(
-      //   { email },
-      //   { roles: updatedRoles, otp: null, otpExpiresAt: null }
-      // );
 
       return res
         .status(200)
