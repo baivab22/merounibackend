@@ -54,7 +54,7 @@ class CollegeRankingService {
         {
           model: Degree,
           as: "degree",
-          attributes: ["id", "title", "slugs", "short_name"],
+          attributes: ["id", "title", "slug", "short_name"],
         },
       ],
       order: [
@@ -110,7 +110,7 @@ class CollegeRankingService {
         {
           model: Degree,
           as: "degree",
-          attributes: ["id", "title", "slugs", "short_name"],
+          attributes: ["id", "title", "slug", "short_name"],
         },
       ],
       order: [["rank", "ASC"]],
