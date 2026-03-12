@@ -39,3 +39,10 @@ export const deleteDegreeRankingsQuerySchema = yup.object({
 export const getRankingsByDegreeQuerySchema = yup.object({
   degree_id: yup.number().integer().positive().required(),
 });
+
+export const updateDegreeDescriptionSchema = yup
+  .object({
+    degree_id: yup.number().integer().positive().required(),
+    description: yup.string().nullable().optional(),
+  })
+  .required();

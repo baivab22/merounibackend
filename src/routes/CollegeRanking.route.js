@@ -10,9 +10,9 @@ import {
   paginationSchema,
   createCollegeRankingSchema,
   updateRankingOrderSchema,
-  deleteRankingQuerySchema,
   deleteDegreeRankingsQuerySchema,
   getRankingsByDegreeQuerySchema,
+  updateDegreeDescriptionSchema,
 } from "../validators/college/CollegeRanking.validator.js";
 
 const route = express.Router();
@@ -197,6 +197,42 @@ route.put(
   authenticateUser,
   authorizeRole(["admin"]),
   CollegeRankingController.updateDegreeOrder
+);
+
+/**
+ * @swagger
+ * /college-ranking/degree-description:
+ *   put:
+ *     summary: Update description for a degree category (Admin only)
+ *     tags: [College Rankings]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               degree_id:
+ *                 type: integer
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Degree description updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+route.put(
+  "/degree-description",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(updateDegreeDescriptionSchema, "body"),
+  CollegeRankingController.updateDegreeDescription
 );
 
 /**

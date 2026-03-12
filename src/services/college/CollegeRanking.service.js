@@ -54,7 +54,7 @@ class CollegeRankingService {
         {
           model: Degree,
           as: "degree",
-          attributes: ["id", "title", "slug", "short_name"],
+          attributes: ["id", "title", "slug", "short_name", "description"],
         },
       ],
       order: [
@@ -70,6 +70,7 @@ class CollegeRankingService {
         acc[degreeId] = {
           degree: ranking.degree,
           degreeListOrder: ranking.degree_list_order || 9999, // Default high order for degrees without order
+          description: ranking.description || "",
           rankings: [],
         };
       }
@@ -110,7 +111,7 @@ class CollegeRankingService {
         {
           model: Degree,
           as: "degree",
-          attributes: ["id", "title", "slug", "short_name"],
+          attributes: ["id", "title", "slug", "short_name", "description"],
         },
       ],
       order: [["rank", "ASC"]],
@@ -176,7 +177,7 @@ class CollegeRankingService {
           degree_id,
           college_id,
           rank: newRank,
-          description,
+          description: description || existingRankings[0]?.description || null,
           degree_list_order: degreeListOrder,
         },
         { transaction }
@@ -265,6 +266,15 @@ class CollegeRankingService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async updateDegreeDescription(degreeId, description) {
+    // Update the description for all rankings that belong to this degree
+    await CollegeRanking.update(
+      { description },
+      { where: { degree_id: degreeId } }
+    );
+    return { message: "Category description updated successfully" };
   }
 }
 
