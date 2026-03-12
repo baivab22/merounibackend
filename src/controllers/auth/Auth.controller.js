@@ -18,6 +18,8 @@ const {
   ACCESS_TOKEN_EXPIRY = "7d",
 } = process.env;
 
+
+const FORGOT_PASSWORD_EXPIRY = 15
 const authService = new AuthService();
 
 class AuthController {
@@ -237,7 +239,7 @@ class AuthController {
       }
 
       const otp = crypto.randomInt(100000, 1000000).toString();
-      const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      const otpExpiresAt = new Date(Date.now() + FORGOT_PASSWORD_EXPIRY * 60 * 1000);
 
       console.log(`[AuthDebug] Generated OTP for ${email}: ${otp}`);
 
