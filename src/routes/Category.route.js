@@ -201,4 +201,46 @@ route.put(
   CategoryController.updateCategory
 );
 
+/**
+ * @swagger
+ * /category/sub/{parentId}:
+ *   get:
+ *     summary: Get all subcategories of a category
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: parentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of subcategories
+ */
+route.get(
+  "/sub/:parentId",
+  CategoryController.getSubCategories
+);
+
+/**
+ * @swagger
+ * /category/{parentId}/children:
+ *   get:
+ *     summary: Get all children of a category (Topics)
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: parentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of children
+ */
+route.get(
+  "/:parentId/children",
+  CategoryController.getSubCategories
+);
+
 export default route;

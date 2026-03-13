@@ -55,6 +55,7 @@ router.use("/consultancy", consultancyRoute);
 
 import categoryRoute from "./Category.route.js";
 router.use("/category", categoryRoute);
+router.use("/categories", categoryRoute);
 
 import tagRoute from "./Tag.route.js";
 router.use("/tag", tagRoute);
@@ -72,7 +73,7 @@ import facultyRoute from "./Faculty.route.js";
 router.use("/faculty", facultyRoute);
 
 import materialRoute from "./Material.route.js";
-router.use("/material", materialRoute);
+router.use("/materials", materialRoute);
 
 import scholarshipRoute from "./Scholarship.route.js";
 router.use("/scholarship", scholarshipRoute);

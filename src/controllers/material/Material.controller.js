@@ -5,34 +5,44 @@ const materialService = new MaterialService();
 class MaterialController {
   static async listMaterials(req, res) {
     try {
-      const { materials, pagination } = await materialService.listMaterials(
-        req.query
-      );
+      const materials = await materialService.listMaterialsNested(req.query);
       return res.status(200).json({
-        message: "Materials retrieved",
-        materials,
-        pagination,
+        message: "Materials retrieved successfully",
+        data: materials,
       });
     } catch (error) {
-      console.error("Error getting materials:", error);
+      console.error("Error getting hierarchical materials:", error);
       return res
         .status(500)
         .json({ message: "Server error", error: error.message });
     }
   }
 
-  static async listMaterialsByCategory(req, res) {
+  static async listMaterialsFlat(req, res) {
     try {
-      const { materials, pagination } = await materialService.listMaterials(
-        req.query
-      );
+      const { materials, pagination } = await materialService.listMaterialsFlat(req.query);
       return res.status(200).json({
-        message: "Materials retrieved by category",
-        materials,
+        message: "Materials flat list retrieved successfully",
+        data: materials,
         pagination,
       });
     } catch (error) {
-      console.error("Error getting materials by category:", error);
+      console.error("Error getting flat materials:", error);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
+
+  static async listMaterialsByTopic(req, res) {
+    try {
+      const materials = await materialService.listByTopic(req.params.topicId);
+      return res.status(200).json({
+        message: "Topic materials retrieved successfully",
+        data: materials,
+      });
+    } catch (error) {
+      console.error("Error getting materials by topic:", error);
       return res
         .status(500)
         .json({ message: "Server error", error: error.message });
@@ -42,10 +52,9 @@ class MaterialController {
   static async getMaterial(req, res) {
     try {
       const material = await materialService.getMaterial(req.params.id);
-
       return res.status(200).json({
-        message: "Material retrieved",
-        material,
+        message: "Material retrieved successfully",
+        data: material,
       });
     } catch (error) {
       console.error("Error getting material by ID:", error);
@@ -57,7 +66,6 @@ class MaterialController {
 
   static async createMaterial(req, res) {
     try {
-      // Extract author from authenticated user
       const authorId = req.user?.id;
       if (!authorId) {
         return res.status(401).json({
@@ -73,7 +81,7 @@ class MaterialController {
 
       return res
         .status(201)
-        .json({ message: "Material created", material: newMaterial });
+        .json({ message: "Material created successfully", data: newMaterial });
     } catch (error) {
       console.error("Error creating material:", error);
       return res
@@ -90,7 +98,7 @@ class MaterialController {
       );
       return res
         .status(200)
-        .json({ message: "Material updated", material: updatedMaterial });
+        .json({ message: "Material updated successfully", data: updatedMaterial });
     } catch (error) {
       console.error("Error updating material:", error);
       return res
@@ -102,12 +110,24 @@ class MaterialController {
   static async deleteMaterial(req, res) {
     try {
       await materialService.deleteMaterial(req.query.id);
-      return res.status(200).json({ message: "Material deleted" });
+      return res.status(200).json({ message: "Material deleted successfully" });
     } catch (error) {
       console.error("Error deleting material:", error);
       return res
         .status(500)
         .json({ message: "Server error", error: error.message });
+    }
+  }
+
+  static async updateMaterialCategoryOrder(req, res) {
+    try {
+      const result = await materialService.updateCategoryOrder(req.body.categoryOrders);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error updating material category order:", error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || "Server error" });
     }
   }
 }

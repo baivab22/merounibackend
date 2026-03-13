@@ -9,10 +9,9 @@ export { paginationSchema, idParamSchema, idQuerySchema };
 
 export const materialIdParamSchema = idParamSchema;
 
-// Schema for category filtering - includes pagination and category_id
 export const materialCategoryQuerySchema = yup.object({
   page: yup.number().integer().min(1).default(1).optional(),
-  limit: yup.number().integer().min(1).max(100).default(24).optional(),
+  limit: yup.number().integer().min(1).default(10).optional(),
   sort: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])
@@ -41,34 +40,18 @@ export const materialCategoryQuerySchema = yup.object({
     ),
 });
 
-// Create/Update Material schema
-// Note: file and image are URL strings, not file objects
 export const createMaterialSchema = yup
   .object({
-    title: yup.string().required("Title is required"),
+    title: yup.string().trim().min(3).required("Title is required"),
     category_id: yup.number().integer().positive().nullable().optional(),
-    tags: yup.array().of(yup.number().integer().positive()).optional(),
     image: yup
-      .mixed()
+      .string()
+      .trim()
+      .url("Image must be a valid URL")
       .nullable()
-      .optional()
-      .test(
-        "is-url-or-null",
-        "Image must be a valid URL string or null",
-        (value) => {
-          if (value === null || value === undefined) return true;
-          if (typeof value === "string") {
-            try {
-              new URL(value);
-              return true;
-            } catch {
-              return false;
-            }
-          }
-          return false;
-        }
-      ), // Image URL (string) - optional, can be null
-    file: yup.string().url().required("File URL is required"), // File URL (string) - required
+      .optional(),
+    file_url: yup.string().trim().url("File URL must be a valid URL").required("File URL is required"),
+    description: yup.string().trim().nullable().optional(),
   })
   .required();
 
@@ -76,33 +59,36 @@ export const updateMaterialQuerySchema = idQuerySchema;
 
 export const updateMaterialBodySchema = yup
   .object({
-    title: yup.string().optional(),
+    title: yup.string().trim().min(3).optional(),
     category_id: yup.number().integer().positive().nullable().optional(),
-    tags: yup.array().of(yup.number().integer().positive()).optional(),
     image: yup
-      .mixed()
+      .string()
+      .trim()
+      .url("Image must be a valid URL")
       .nullable()
-      .optional()
-      .test(
-        "is-url-or-null",
-        "Image must be a valid URL string or null",
-        (value) => {
-          if (value === null || value === undefined) return true;
-          if (typeof value === "string") {
-            try {
-              new URL(value);
-              return true;
-            } catch {
-              return false;
-            }
-          }
-          return false;
-        }
-      ),
-    file: yup.string().url().optional(),
+      .optional(),
+    file_url: yup.string().trim().url("File URL must be a valid URL").optional(),
+    description: yup.string().trim().nullable().optional(),
   })
-  .test("at-least-one", "At least one field must be provided", (value) => {
-    return value && Object.keys(value).length > 0;
+  .test("at-least-one", "At least one field must be provided for update", (value) => {
+    // Only count keys that are actually present (not just undefined)
+    const keys = Object.keys(value || {}).filter(k => value[k] !== undefined);
+    return keys.length > 0;
   });
 
 export const deleteMaterialQuerySchema = idQuerySchema;
+
+export const updateMaterialCategoryOrderSchema = yup.object({
+  categoryOrders: yup
+    .array()
+    .of(
+      yup.object({
+        category_id: yup.number().integer().positive().required("Category ID is required"),
+        parent_id: yup.number().integer().positive().nullable().optional(),
+        context: yup.string().trim().default("MATERIAL").optional(),
+        position: yup.number().integer().min(0).required("Position is required"),
+      })
+    )
+    .min(1, "At least one category order must be provided")
+    .required(),
+});

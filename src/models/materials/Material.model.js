@@ -1,9 +1,8 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
-import Tag from "../tags/Tag.model.js";
 import Category from "../category/Category.model.js";
 
-class Material extends Model {}
+class Material extends Model { }
 
 Material.init(
   {
@@ -22,18 +21,18 @@ Material.init(
       allowNull: false,
       unique: true,
     },
-    tags: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
-    },
+
     image: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    file: {
+    file_url: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     author: {
       type: DataTypes.INTEGER,
@@ -44,7 +43,6 @@ Material.init(
       },
       onDelete: "CASCADE",
     },
-
     category_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -67,6 +65,11 @@ Material.init(
 Material.belongsTo(Category, {
   foreignKey: "category_id",
   as: "category",
+});
+
+Category.hasMany(Material, {
+  foreignKey: "category_id",
+  as: "materials",
 });
 
 export default Material;

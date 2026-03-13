@@ -1,4 +1,3 @@
-import slug from "slug";
 import { Op } from "sequelize";
 import SkillsBasedCourse from "../../models/skills-based-courses/SkillsBasedCourse.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
@@ -11,9 +10,9 @@ class SkillsBasedCourseService {
 
         const { q, status, location, duration, type, price } = query;
         const whereCondition = {};
+        console.log(query, "DONEDONEDONE");
 
         if (q) {
-            // We can search across title, location, etc., but title is standard. Let's keep title.
             whereCondition.title = { [Op.like]: `%${q}%` };
         }
 

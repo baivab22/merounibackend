@@ -38,6 +38,15 @@ Category.init(
       type: DataTypes.ENUM("BLOG", "EVENT", "NEWS", "MATERIAL", "SCHOLARSHIP", "EXAM"),
       allowNull: true,
     },
+    parent_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "categories",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+    },
   },
   {
     sequelize,
@@ -46,5 +55,15 @@ Category.init(
     timestamps: true,
   }
 );
+
+Category.hasMany(Category, {
+  foreignKey: "parent_id",
+  as: "subcategories",
+});
+
+Category.belongsTo(Category, {
+  foreignKey: "parent_id",
+  as: "parent",
+});
 
 export default Category;

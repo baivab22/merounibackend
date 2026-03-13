@@ -13,7 +13,11 @@ export const createSkillsBasedCourseSchema = yup.object({
     institution_name: yup.string().optional(),
     likes_count: yup.number().integer().min(0).optional(),
     location: yup.string().optional(),
-    course_type: yup.mixed().oneOf(["online", "offline","both"]).optional(),
+    course_type: yup.mixed().oneOf(["online", "offline", "both"]).optional(),
+    class_time: yup.string().optional(),
+    start_date: yup.date().optional(),
+    class_days: yup.string().optional(),
+    seats_available: yup.number().integer().min(0).optional(),
 });
 
 // Update SkillsBasedCourse schema
@@ -29,5 +33,9 @@ export const updateSkillsBasedCourseSchema = yup.object({
     likes_count: yup.number().integer().min(0).optional(),
     institution_name: yup.string().optional(),
     location: yup.string().optional(),
-    course_type: yup.mixed().oneOf(["online", "offline","both"]).optional(),
+    course_type: yup.mixed().oneOf(["online", "offline", "both"]).optional(),
+    class_time: yup.string().optional(),
+    start_date: yup.date().optional(),
+    class_days: yup.string().optional(),
+    seats_available: yup.number().integer().min(0).optional(),
 });

@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 
+import { sequelize } from "../../config/database.config.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 import Category from "../../models/category/Category.model.js";
 
@@ -19,6 +20,9 @@ class CategoryService {
     if (query.type) {
       whereCondition.type = query.type;
     }
+    if (query.parent_id) {
+      whereCondition.parent_id = query.parent_id;
+    }
 
     const { count: totalCount, rows: items } = await Category.findAndCountAll({
       where: whereCondition,
@@ -26,10 +30,31 @@ class CategoryService {
       limit,
       offset,
       order: [["id", sort]],
+      include: [
+        {
+          model: Category,
+          as: "subcategories",
+          attributes: ["id", "title"],
+          // If depth is 2, we include subcategories.
+          // In a simpler way, we just return the first level if no depth, 
+          // or nested if depth is requested.
+          required: false
+        },
+      ],
     });
 
+    let processedItems = items;
+    // If depth is 1, we might want to strip subcategories, but let's keep it flexible.
+    if (query.depth === "1") {
+      processedItems = items.map(item => {
+        const plain = item.get({ plain: true });
+        delete plain.subcategories;
+        return plain;
+      });
+    }
+
     return {
-      items,
+      items: processedItems,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
@@ -40,7 +65,10 @@ class CategoryService {
   }
 
   async getCategory(slugs) {
-    const category = await Category.findOne({ where: { slugs } });
+    const category = await Category.findOne({
+      where: { slugs },
+      include: ["subcategories", "parent"],
+    });
     if (!category) {
       const error = new Error("Category not found");
       error.status = 404;
@@ -49,8 +77,28 @@ class CategoryService {
     return category;
   }
 
+  async listSubCategories(parentId) {
+    const categories = await Category.findAll({
+      where: { parent_id: parentId },
+      include: [
+        {
+          model: sequelize.model("materials"),
+          as: "materials",
+          attributes: ["id"],
+        },
+      ],
+    });
+
+    return categories.map(cat => {
+      const plain = cat.get({ plain: true });
+      plain.materials_count = plain.materials ? plain.materials.length : 0;
+      delete plain.materials;
+      return plain;
+    });
+  }
+
   async createCategory(data, userId) {
-    const { title, description, type } = data;
+    const { title, description, type, parent_id } = data;
 
     await Category.create({
       title,
@@ -58,6 +106,7 @@ class CategoryService {
       description,
       author: userId,
       type,
+      parent_id,
     });
   }
 

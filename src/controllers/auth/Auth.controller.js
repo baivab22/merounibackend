@@ -27,13 +27,6 @@ class AuthController {
     try {
       const { otp, email, user } = await authService.registerUser(req.body);
 
-      // await sendMail(
-      //   email,
-      //   "Your OTP Code",
-      //   `Your OTP is: ${otp}`,
-      //   `<p>Your OTP is: <strong>${otp}</strong></p>`
-      // );
-
       return res.status(201).json({
         message: "User registered successfully. OTP sent to email.",
         user,
@@ -63,6 +56,7 @@ class AuthController {
       }
 
       const user = await authService.authenticateCredentials(email, password);
+      console.log(user,"useruseruseruseruseruser");
 
       const pendingRoles =
         typeof user.pendingRoles === "string"
@@ -70,10 +64,13 @@ class AuthController {
           : user.pendingRoles || [];
       const roles =
         typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles || {};
+
+      console.log(roles,pendingRoles, "rolesrolesroles");
+
       const isAgentPending =
         Array.isArray(pendingRoles) &&
-        pendingRoles.includes("agent") &&
-        !roles.agent;
+        pendingRoles.includes("agent")
+      
 
       if (isAgentPending) {
         return res.status(403).json({

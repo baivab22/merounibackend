@@ -73,6 +73,22 @@ class CategoryController {
         .json({ message: "Server error", error: error.message });
     }
   }
+
+  static async getSubCategories(req, res) {
+    try {
+      const parentId = req.params.parentId;
+      const subcategories = await categoryService.listSubCategories(parentId);
+      return res.status(200).json({
+        message: "Subcategories retrieved",
+        items: subcategories,
+      });
+    } catch (error) {
+      console.error("Error getting subcategories:", error);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
 }
 
 export default CategoryController;

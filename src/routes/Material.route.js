@@ -13,16 +13,39 @@ import {
   materialCategoryQuerySchema,
   materialIdParamSchema,
   updateMaterialBodySchema,
-  updateMaterialQuerySchema
+  updateMaterialQuerySchema,
+  updateMaterialCategoryOrderSchema,
 } from "../validators/material/Material.validator.js";
 
 const route = express.Router();
+
 
 /**
  * @swagger
  * /material:
  *   get:
- *     summary: List all materials with pagination
+ *     summary: Get all materials in hierarchical tree structure (Public)
+ *     tags: [Materials]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *     responses:
+ *       200:
+ *         description: Hierarchical tree of materials
+ */
+route.get(
+  "/",
+  MaterialController.listMaterials
+);
+
+/**
+ * @swagger
+ * /material/list:
+ *   get:
+ *     summary: Get materials in a flat list (Admin/Search)
  *     tags: [Materials]
  *     parameters:
  *       - in: query
@@ -40,51 +63,39 @@ const route = express.Router();
  *         schema:
  *           type: string
  *         description: Search query
- *     responses:
- *       200:
- *         description: List of materials
- */
-route.get(
-  "/",
-  requestValidator(materialCategoryQuerySchema, "query"),
-  MaterialController.listMaterials
-);
-
-/**
- * @swagger
- * /material/category:
- *   get:
- *     summary: List materials by category
- *     tags: [Materials]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 12
  *       - in: query
  *         name: category_id
  *         schema:
  *           type: integer
- *         description: Category ID (use 'unlisted' for materials without category)
- *       - in: query
- *         name: q
- *         schema:
- *           type: string
- *         description: Search query
  *     responses:
  *       200:
- *         description: List of materials by category
+ *         description: Flat list of materials
  */
 route.get(
-  "/category",
+  "/list",
   requestValidator(materialCategoryQuerySchema, "query"),
-  MaterialController.listMaterialsByCategory
+  MaterialController.listMaterialsFlat
+);
+
+/**
+ * @swagger
+ * /material/topic/{topicId}:
+ *   get:
+ *     summary: Get all materials for a specific topic
+ *     tags: [Materials]
+ *     parameters:
+ *       - in: path
+ *         name: topicId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of materials for the topic
+ */
+route.get(
+  "/topic/:topicId",
+  MaterialController.listMaterialsByTopic
 );
 
 /**
@@ -102,8 +113,6 @@ route.get(
  *     responses:
  *       200:
  *         description: Material details
- *       404:
- *         description: Material not found
  */
 route.get(
   "/:id",
@@ -128,31 +137,23 @@ route.get(
  *             type: object
  *             required:
  *               - title
- *               - file
+ *               - file_url
  *             properties:
  *               title:
  *                 type: string
- *                 example: Study Guide PDF
  *               description:
  *                 type: string
- *               file:
+ *               file_url:
  *                 type: string
- *                 format: uri
  *               category_id:
  *                 type: integer
  *               tags:
  *                 type: array
  *                 items:
- *                   type: string
+ *                   type: integer
  *     responses:
  *       201:
  *         description: Material created successfully
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
  */
 route.post(
   "/",
@@ -165,48 +166,16 @@ route.post(
 /**
  * @swagger
  * /material:
- *   delete:
- *     summary: Delete a material (Admin only)
- *     tags: [Materials]
- *     security:
- *       - bearerAuth: []
- *       - cookieAuth: []
- *     parameters:
- *       - in: query
- *         name: material_id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Material deleted successfully
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
- *       404:
- *         description: Material not found
- */
-route.delete(
-  "/",
-  authenticateUser,
-  authorizeRole(["admin"]),
-  requestValidator(deleteMaterialQuerySchema, "query"),
-  MaterialController.deleteMaterial
-);
-
-/**
- * @swagger
- * /material:
  *   put:
  *     summary: Update a material
+ *     description: Provide id in query parameter
  *     tags: [Materials]
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
  *     parameters:
  *       - in: query
- *         name: material_id
+ *         name: id
  *         required: true
  *         schema:
  *           type: integer
@@ -221,26 +190,17 @@ route.delete(
  *                 type: string
  *               description:
  *                 type: string
- *               file:
+ *               file_url:
  *                 type: string
- *                 format: uri
  *               category_id:
  *                 type: integer
  *               tags:
  *                 type: array
  *                 items:
- *                   type: string
+ *                   type: integer
  *     responses:
  *       200:
  *         description: Material updated successfully
- *       400:
- *         description: Bad request
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Forbidden
- *       404:
- *         description: Material not found
  */
 route.put(
   "/",
@@ -251,6 +211,79 @@ route.put(
     { schema: updateMaterialBodySchema, property: "body" },
   ]),
   MaterialController.updateMaterial
+);
+
+/**
+ * @swagger
+ * /material:
+ *   delete:
+ *     summary: Delete a material
+ *     tags: [Materials]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Material deleted successfully
+ */
+route.delete(
+  "/",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(deleteMaterialQuerySchema, "query"),
+  MaterialController.deleteMaterial
+);
+
+/**
+ * @swagger
+ * /material/category-order:
+ *   put:
+ *     summary: Update category ordering
+ *     tags: [Materials]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - categoryOrders
+ *             properties:
+ *               categoryOrders:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - category_id
+ *                     - position
+ *                   properties:
+ *                     category_id:
+ *                       type: integer
+ *                     parent_id:
+ *                       type: integer
+ *                     context:
+ *                       type: string
+ *                     position:
+ *                       type: integer
+ *     responses:
+ *       200:
+ *         description: Order updated successfully
+ */
+route.put(
+  "/category-order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(updateMaterialCategoryOrderSchema, "body"),
+  MaterialController.updateMaterialCategoryOrder
 );
 
 export default route;
