@@ -11,6 +11,7 @@ export const categorySlugParamSchema = yup.object({
 });
 
 export const categoryListQuerySchema = paginationSchema.shape({
+  parent_id: yup.number().integer().positive().nullable().optional(),
   type: yup.string().oneOf(["BLOG", "EVENT", "NEWS", "MATERIAL", "SCHOLARSHIP", "EXAM"]).optional().nullable(),
 });
 

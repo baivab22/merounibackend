@@ -36,10 +36,11 @@ class CategoryController {
   static async createCategory(req, res) {
     const userId = req.user.id;
     try {
-      await categoryService.createCategory(req.body, userId);
+      const data = await categoryService.createCategory(req.body, userId);
 
       return res.status(201).json({
         message: "Category created",
+        data: data 
       });
     } catch (error) {
       console.error("Error creating category:", error);

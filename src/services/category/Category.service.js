@@ -22,6 +22,8 @@ class CategoryService {
     }
     if (query.parent_id) {
       whereCondition.parent_id = query.parent_id;
+    }else {
+      whereCondition.parent_id = null
     }
 
     const { count: totalCount, rows: items } = await Category.findAndCountAll({
@@ -35,16 +37,12 @@ class CategoryService {
           model: Category,
           as: "subcategories",
           attributes: ["id", "title"],
-          // If depth is 2, we include subcategories.
-          // In a simpler way, we just return the first level if no depth, 
-          // or nested if depth is requested.
           required: false
         },
       ],
     });
 
     let processedItems = items;
-    // If depth is 1, we might want to strip subcategories, but let's keep it flexible.
     if (query.depth === "1") {
       processedItems = items.map(item => {
         const plain = item.get({ plain: true });
@@ -100,7 +98,17 @@ class CategoryService {
   async createCategory(data, userId) {
     const { title, description, type, parent_id } = data;
 
-    await Category.create({
+    // check if title alreay exist oor not 
+    const existingCategory = await Category.findOne({
+      where: { title },
+    });
+    if (existingCategory) {
+      const error = new Error("Category already exists");
+      error.status = 400;
+      throw error;
+    }
+
+    const category = await Category.create({
       title,
       slugs: generateUniqueSlug(title),
       description,
@@ -108,6 +116,8 @@ class CategoryService {
       type,
       parent_id,
     });
+
+    return category;
   }
 
   async updateCategory(category_id, data) {
