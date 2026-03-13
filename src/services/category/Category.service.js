@@ -22,7 +22,7 @@ class CategoryService {
     }
     if (query.parent_id) {
       whereCondition.parent_id = query.parent_id;
-    }else {
+    } else {
       whereCondition.parent_id = null
     }
 
@@ -39,7 +39,7 @@ class CategoryService {
           attributes: ["id", "title"],
           required: false
         },
-      ],
+              ],
     });
 
     let processedItems = items;
@@ -141,6 +141,9 @@ class CategoryService {
       error.status = 404;
       throw error;
     }
+
+    const updatedCategory = await Category.findByPk(category_id);
+    return updatedCategory;
   }
 
   async deleteCategory(category_id) {

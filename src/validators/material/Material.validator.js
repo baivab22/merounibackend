@@ -44,13 +44,7 @@ export const createMaterialSchema = yup
   .object({
     title: yup.string().trim().min(3).required("Title is required"),
     category_id: yup.number().integer().positive().nullable().optional(),
-    image: yup
-      .string()
-      .trim()
-      .url("Image must be a valid URL")
-      .nullable()
-      .optional(),
-    file_url: yup.string().trim().url("File URL must be a valid URL").required("File URL is required"),
+    file_url: yup.string().trim().url("File URL must be a valid URL").optional(),
     description: yup.string().trim().nullable().optional(),
   })
   .required();
@@ -61,12 +55,6 @@ export const updateMaterialBodySchema = yup
   .object({
     title: yup.string().trim().min(3).optional(),
     category_id: yup.number().integer().positive().nullable().optional(),
-    image: yup
-      .string()
-      .trim()
-      .url("Image must be a valid URL")
-      .nullable()
-      .optional(),
     file_url: yup.string().trim().url("File URL must be a valid URL").optional(),
     description: yup.string().trim().nullable().optional(),
   })
@@ -78,17 +66,13 @@ export const updateMaterialBodySchema = yup
 
 export const deleteMaterialQuerySchema = idQuerySchema;
 
-export const updateMaterialCategoryOrderSchema = yup.object({
-  categoryOrders: yup
-    .array()
-    .of(
-      yup.object({
-        category_id: yup.number().integer().positive().required("Category ID is required"),
-        parent_id: yup.number().integer().positive().nullable().optional(),
-        context: yup.string().trim().default("MATERIAL").optional(),
-        position: yup.number().integer().min(0).required("Position is required"),
-      })
-    )
-    .min(1, "At least one category order must be provided")
-    .required(),
-});
+export const updateCategoryOrderSchema = yup.object({
+  context: yup.string().trim().default("MATERIAL").optional(),
+  parent_id: yup.number().integer().positive().nullable().optional(),
+  positions: yup.array().of(yup.number().integer().positive()).required("Positions (array of IDs) is required"),
+}).required();
+
+export const updateMaterialOrderSchema = yup.object({
+  parent_id: yup.number().integer().positive().required("Category ID (parent) is required"),
+  positions: yup.array().of(yup.number().integer().positive()).required("Positions (array of Material IDs) is required"),
+}).required();

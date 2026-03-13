@@ -109,7 +109,7 @@ class MaterialController {
 
   static async deleteMaterial(req, res) {
     try {
-      await materialService.deleteMaterial(req.query.id);
+      await materialService.deleteMaterial(req.params.id);
       return res.status(200).json({ message: "Material deleted successfully" });
     } catch (error) {
       console.error("Error deleting material:", error);
@@ -121,10 +121,22 @@ class MaterialController {
 
   static async updateMaterialCategoryOrder(req, res) {
     try {
-      const result = await materialService.updateCategoryOrder(req.body.categoryOrders);
+      const result = await materialService.updateCategoryOrder(req.body);
       return res.status(200).json(result);
     } catch (error) {
       console.error("Error updating material category order:", error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || "Server error" });
+    }
+  }
+
+  static async updateMaterialOrder(req, res) {
+    try {
+      const result = await materialService.updateMaterialOrder(req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error updating material order:", error);
       return res
         .status(error.status || 500)
         .json({ message: error.message || "Server error" });

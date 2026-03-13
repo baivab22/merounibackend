@@ -16,19 +16,9 @@ Material.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    slug: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-
-    image: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     file_url: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     description: {
       type: DataTypes.TEXT,
@@ -51,6 +41,11 @@ Material.init(
         key: "id",
       },
       onDelete: "SET NULL",
+    },
+    position: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
   },
   {

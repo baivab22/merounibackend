@@ -52,9 +52,9 @@ class CategoryController {
 
   static async updateCategory(req, res) {
     try {
-      await categoryService.updateCategory(req.query.category_id, req.body);
+    const data =   await categoryService.updateCategory(req.query.category_id, req.body);
 
-      return res.status(200).json({ message: "Category updated" });
+      return res.status(200).json({ message: "Category updated", data: data  });
     } catch (error) {
       console.error("Error updating category:", error);
       return res

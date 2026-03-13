@@ -14,7 +14,8 @@ import {
   materialIdParamSchema,
   updateMaterialBodySchema,
   updateMaterialQuerySchema,
-  updateMaterialCategoryOrderSchema,
+  updateCategoryOrderSchema,
+  updateMaterialOrderSchema,
 } from "../validators/material/Material.validator.js";
 
 const route = express.Router();
@@ -233,10 +234,9 @@ route.put(
  *         description: Material deleted successfully
  */
 route.delete(
-  "/",
+  "/:id",
   authenticateUser,
   authorizeRole(["admin"]),
-  requestValidator(deleteMaterialQuerySchema, "query"),
   MaterialController.deleteMaterial
 );
 
@@ -244,7 +244,7 @@ route.delete(
  * @swagger
  * /material/category-order:
  *   put:
- *     summary: Update category ordering
+ *     summary: Update category ordering (Classes/Subjects)
  *     tags: [Materials]
  *     security:
  *       - bearerAuth: []
@@ -256,34 +256,68 @@ route.delete(
  *           schema:
  *             type: object
  *             required:
- *               - categoryOrders
+ *               - positions
  *             properties:
- *               categoryOrders:
+ *               parent_id:
+ *                 type: integer
+ *                 description: ID of parent category (null for root classes)
+ *               positions:
  *                 type: array
  *                 items:
- *                   type: object
- *                   required:
- *                     - category_id
- *                     - position
- *                   properties:
- *                     category_id:
- *                       type: integer
- *                     parent_id:
- *                       type: integer
- *                     context:
- *                       type: string
- *                     position:
- *                       type: integer
+ *                   type: integer
+ *                 description: Ordered array of category IDs
+ *               context:
+ *                 type: string
+ *                 default: MATERIAL
  *     responses:
  *       200:
- *         description: Order updated successfully
+ *         description: Category order updated successfully
  */
 route.put(
   "/category-order",
   authenticateUser,
   authorizeRole(["admin", "editor"]),
-  requestValidator(updateMaterialCategoryOrderSchema, "body"),
+  requestValidator(updateCategoryOrderSchema, "body"),
   MaterialController.updateMaterialCategoryOrder
+);
+
+/**
+ * @swagger
+ * /material/material-order:
+ *   put:
+ *     summary: Update material ordering (Chapters/Topics)
+ *     tags: [Materials]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - category_id
+ *               - positions
+ *             properties:
+ *               category_id:
+ *                 type: integer
+ *                 description: ID of the parent topic
+ *               positions:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: Ordered array of material IDs
+ *     responses:
+ *       200:
+ *         description: Material order updated successfully
+ */
+route.put(
+  "/material-order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(updateMaterialOrderSchema, "body"),
+  MaterialController.updateMaterialOrder
 );
 
 export default route;

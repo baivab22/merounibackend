@@ -1,5 +1,4 @@
 import { Op } from "sequelize";
-import slug from "slug";
 
 import { sequelize } from "../../config/database.config.js";
 import Category from "../../models/category/Category.model.js";
@@ -7,12 +6,12 @@ import Material from "../../models/materials/Material.model.js";
 import MaterialCategoryOrder from "../../models/materials/MaterialCategoryOrder.model.js";
 
 class MaterialService {
-  _formatMaterial(material, index = 0) {
+  _formatMaterial(material) {
     const plain = material instanceof Material ? material.get({ plain: true }) : material;
     return {
       title: plain.title,
       id: plain.id,
-      position: index + 1,
+      position: plain.position || 0,
       parent_id: plain.category_id,
       file_url: plain.file_url,
       createdAt: plain.createdAt,
@@ -25,7 +24,7 @@ class MaterialService {
 
     const materials = await Material.findAll({
       where: materialWhere,
-      order: [["createdAt", "DESC"]],
+      order: [["position", "ASC"], ["createdAt", "DESC"]],
     });
 
     const categories = await Category.findAll({
@@ -48,13 +47,15 @@ class MaterialService {
         parent_id: cat.parent_id,
         subcategories: [],
         materials: [],
+        materials_count: 0,
       };
     });
 
     materials.forEach((material) => {
       const catId = material.category_id;
       if (catId && categoryMap[catId]) {
-        categoryMap[catId].materials.push(this._formatMaterial(material, categoryMap[catId].materials.length));
+        categoryMap[catId].materials.push(this._formatMaterial(material));
+        categoryMap[catId].materials_count += 1;
       }
     });
 
@@ -75,27 +76,11 @@ class MaterialService {
         node.subcategories.sort((a, b) => a.position - b.position);
         node.subcategories.forEach(child => polishNode(child, depth + 1));
       }
-
-      // Logic to enforce the "Vibe":
-      // 1. If a node has subcategories, it should NEVER show materials directly at this level (Intermediate level vibe).
-      // 2. If a node has NO subcategories, it's a leaf. If it has materials, show them.
-      // 3. Always clear empty arrays to keep the JSON strictly as requested.
-
-      if (node.subcategories?.length > 0) {
-        delete node.materials;
-      } else {
-        delete node.subcategories;
-      }
-
-      if (node.materials?.length === 0) {
-        delete node.materials;
-      }
     };
 
     tree.sort((a, b) => a.position - b.position).forEach(node => polishNode(node, 1));
 
-    // Filter out empty root branches to keep the response sharp
-    return tree.filter(node => node.subcategories || node.materials);
+    return tree;
   }
 
   async listMaterialsFlat(query = {}) {
@@ -119,7 +104,7 @@ class MaterialService {
     });
 
     return {
-      materials: materials?.map((m, i) => this._formatMaterial(m, i)),
+      materials: materials?.map((m) => this._formatMaterial(m)),
       pagination: { currentPage: page, totalPages: Math.ceil(totalCount / limit), limit, totalCount },
     };
   }
@@ -127,9 +112,9 @@ class MaterialService {
   async listByTopic(topicId) {
     const materials = await Material.findAll({
       where: { category_id: topicId },
-      order: [["createdAt", "DESC"]],
+      order: [["position", "ASC"], ["createdAt", "DESC"]],
     });
-    return materials.map((m, i) => this._formatMaterial(m, i));
+    return materials.map((m) => this._formatMaterial(m));
   }
 
   async getMaterial(id) {
@@ -139,16 +124,8 @@ class MaterialService {
   }
 
   async createMaterial(data) {
-    const { title, category_id, file_url, author, image, description } = data;
+    const { title, category_id, file_url, author, description } = data;
     if (!author) throw Object.assign(new Error("Author is required"), { status: 400 });
-    if (!file_url?.trim()) throw Object.assign(new Error("File URL is required"), { status: 400 });
-
-    let slugParts = [];
-    if (category_id) {
-      const category = await Category.findByPk(category_id);
-      if (category) slugParts.push(slug(category.title));
-    }
-    slugParts.push(slug(title));
 
     const material = await Material.create({
       title,
@@ -156,8 +133,6 @@ class MaterialService {
       file_url,
       author,
       description,
-      image,
-      slug: slugParts.join("-")
     });
     return this.getMaterial(material.id);
   }
@@ -167,28 +142,11 @@ class MaterialService {
     if (!material) throw Object.assign(new Error("Material not found"), { status: 404 });
 
     const updateData = {};
-    const allowedFields = ['title', 'description', 'file_url', 'category_id', 'image'];
+    const allowedFields = ['title', 'description', 'file_url', 'category_id'];
 
     allowedFields.forEach(field => {
       if (data[field] !== undefined) updateData[field] = data[field];
     });
-
-    if (updateData.file_url !== undefined && !updateData.file_url?.trim()) {
-      throw Object.assign(new Error("File URL cannot be empty"), { status: 400 });
-    }
-
-    if (updateData.title || updateData.category_id !== undefined) {
-      const finalTitle = updateData.title || material.title;
-      const finalCatId = updateData.category_id !== undefined ? updateData.category_id : material.category_id;
-
-      let slugParts = [];
-      if (finalCatId) {
-        const cat = await Category.findByPk(finalCatId);
-        if (cat) slugParts.push(slug(cat.title));
-      }
-      slugParts.push(slug(finalTitle));
-      updateData.slug = slugParts.join("-");
-    }
 
     await material.update(updateData);
     return this.getMaterial(id);
@@ -199,18 +157,46 @@ class MaterialService {
     if (!deletedCount) throw Object.assign(new Error("Material not found"), { status: 404 });
   }
 
-  async updateCategoryOrder(categoryOrders) {
+  async updateCategoryOrder(data) {
+    const { parent_id, positions, context = "MATERIAL" } = data;
     const transaction = await sequelize.transaction();
     try {
-      for (const order of categoryOrders) {
-        const { category_id, parent_id, context, position } = order;
+      for (let i = 0; i < positions.length; i++) {
+        const category_id = positions[i];
         await MaterialCategoryOrder.upsert(
-          { category_id, parent_id: parent_id || null, context: context || "MATERIAL", position },
+          {
+            category_id,
+            parent_id: parent_id || null,
+            context,
+            position: i + 1
+          },
           { transaction }
         );
       }
       await transaction.commit();
       return { message: "Category order updated successfully" };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
+  async updateMaterialOrder(data) {
+    const { parent_id, positions } = data;
+    const transaction = await sequelize.transaction();
+    try {
+      for (let i = 0; i < positions.length; i++) {
+        const material_id = positions[i];
+        await Material.update(
+          { position: i + 1 },
+          {
+            where: { id: material_id, category_id: parent_id },
+            transaction
+          }
+        );
+      }
+      await transaction.commit();
+      return { message: "Material order updated successfully" };
     } catch (error) {
       await transaction.rollback();
       throw error;
