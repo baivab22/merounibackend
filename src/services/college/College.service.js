@@ -500,7 +500,7 @@ class CollegeService {
       return [val];
     };
 
-    const states = parseFilter(query.state);
+    const districts = parseFilter(query.district);
     const cities = parseFilter(query.city);
     const types = parseFilter(query.type);
     const degreeIdsInput = parseFilter(query.degree_ids);
@@ -527,9 +527,9 @@ class CollegeService {
 
 
     const addressCondition = {};
-    if (states.length > 0) {
-      addressCondition.state = {
-        [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
+    if (districts.length > 0) {
+      addressCondition.district = {
+        [Op.or]: districts.map((s) => ({ [Op.like]: `%${s}%` })),
       };
     }
 
@@ -562,7 +562,7 @@ class CollegeService {
         {
           model: CollegeAddress,
           as: "address",
-          attributes: ["country", "state", "city"],
+          attributes: ["country", "district", "city"],
           where: Object.keys(addressCondition).length
             ? addressCondition
             : undefined,
@@ -686,7 +686,7 @@ class CollegeService {
         {
           model: CollegeAddress,
           as: "collegeAddress",
-          attributes: ["country", "state", "city", "street", "postal_code"],
+          attributes: ["country", "district", "city", "street", "postal_code"],
         },
         {
           model: CollegeContact,
@@ -793,7 +793,7 @@ class CollegeService {
         {
           model: CollegeAddress,
           as: "collegeAddress",
-          attributes: ["country", "state", "city", "street", "postal_code"],
+          attributes: ["country", "district", "city", "street", "postal_code"],
         },
         {
           model: CollegeContact,

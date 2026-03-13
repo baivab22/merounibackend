@@ -14,7 +14,7 @@ CollegeAddress.init(
       onDelete: "CASCADE",
     },
     country: { type: DataTypes.STRING },
-    state: { type: DataTypes.STRING },
+    district: { type: DataTypes.STRING },
     city: { type: DataTypes.STRING },
     street: { type: DataTypes.STRING },
     postal_code: { type: DataTypes.STRING },

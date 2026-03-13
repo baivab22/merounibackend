@@ -92,7 +92,7 @@ export const createOrUpdateCollegeSchema = yup
     address: yup
       .object({
         country: yup.string().nullable().optional(),
-        state: yup.string().nullable().optional(),
+        district: yup.string().nullable().optional(),
         city: yup.string().nullable().optional(),
         street: yup.string().nullable().optional(),
         postal_code: yup.string().nullable().optional(),
