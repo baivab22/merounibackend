@@ -11,7 +11,8 @@ import {
   collegeSlugParamSchema,
   createOrUpdateAdmissionSchema,
   createOrUpdateCollegeSchema,
-  updateCollegeOrderSchema
+  updateCollegeOrderSchema,
+  updateAdmissionOrderSchema
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
@@ -165,6 +166,49 @@ router.post(
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createOrUpdateAdmissionSchema, "body"),
   CollegeController.createOrUpdateAdmission
+);
+
+/**
+ * @swagger
+ * /college/admission/update-order:
+ *   patch:
+ *     summary: Update admission display order
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - admissions
+ *             properties:
+ *               admissions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     order_no:
+ *                       type: integer
+ *     responses:
+ *       200:
+ *         description: Order updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+router.patch(
+  "/admission/update-order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(updateAdmissionOrderSchema, "body"),
+  CollegeController.updateAdmissionOrder
 );
 
 /**

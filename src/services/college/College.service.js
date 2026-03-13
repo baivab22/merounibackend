@@ -397,7 +397,11 @@ class CollegeService {
         limit,
         offset,
         distinct: true,
-        order: [["id", sort]],
+        order: [
+          [sequelize.literal("order_no IS NULL"), "ASC"],
+          ["order_no", "ASC"],
+          ["id", sort]
+        ],
         include,
       });
 
@@ -973,6 +977,26 @@ class CollegeService {
     }
     await admission.destroy();
   }
+  async updateAdmissionOrder(orders) {
+    const transaction = await sequelize.transaction();
+    try {
+      for (const order of orders) {
+        await CollegeAdmission.update(
+          { order_no: order.order_no },
+          {
+            where: { id: order.id },
+            transaction,
+          }
+        );
+      }
+      await transaction.commit();
+      return { message: "Admission order updated successfully!" };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
 }
 
 export default CollegeService;

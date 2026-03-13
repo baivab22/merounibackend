@@ -156,6 +156,18 @@ class CollegeController {
     }
   }
 
+  static async updateAdmissionOrder(req, res) {
+    try {
+      const result = await collegeService.updateAdmissionOrder(req.body.admissions);
+      return res.status(200).json(result);
+    } catch (error) {
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+
   static async createOrUpdateAdmission(req, res) {
     try {
       const { id, isNew } = await collegeService.createOrUpdateAdmission(

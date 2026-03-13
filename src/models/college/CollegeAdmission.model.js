@@ -23,6 +23,11 @@ CollegeAdmission.init(
     description: {
       type: DataTypes.TEXT,
     },
+    order_no: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     sequelize,
