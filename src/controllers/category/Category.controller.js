@@ -36,10 +36,11 @@ class CategoryController {
   static async createCategory(req, res) {
     const userId = req.user.id;
     try {
-      await categoryService.createCategory(req.body, userId);
+      const data = await categoryService.createCategory(req.body, userId);
 
       return res.status(201).json({
         message: "Category created",
+        data: data 
       });
     } catch (error) {
       console.error("Error creating category:", error);
@@ -51,9 +52,9 @@ class CategoryController {
 
   static async updateCategory(req, res) {
     try {
-      await categoryService.updateCategory(req.query.category_id, req.body);
+    const data =   await categoryService.updateCategory(req.query.category_id, req.body);
 
-      return res.status(200).json({ message: "Category updated" });
+      return res.status(200).json({ message: "Category updated", data: data  });
     } catch (error) {
       console.error("Error updating category:", error);
       return res
@@ -68,6 +69,22 @@ class CategoryController {
       return res.status(200).json({ message: "Category deleted" });
     } catch (error) {
       console.error("Error deleting category:", error);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: error.message });
+    }
+  }
+
+  static async getSubCategories(req, res) {
+    try {
+      const parentId = req.params.parentId;
+      const subcategories = await categoryService.listSubCategories(parentId);
+      return res.status(200).json({
+        message: "Subcategories retrieved",
+        items: subcategories,
+      });
+    } catch (error) {
+      console.error("Error getting subcategories:", error);
       return res
         .status(500)
         .json({ message: "Server error", error: error.message });

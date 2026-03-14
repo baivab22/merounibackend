@@ -54,12 +54,28 @@ SkillsBasedCourse.init(
             allowNull: true,
         },
         course_type: {
-            type: DataTypes.ENUM("online", "offline","both"),
+            type: DataTypes.ENUM("online", "offline", "both"),
             allowNull: true,
             defaultValue: "offline",
         },
         content: {
             type: DataTypes.TEXT,
+            allowNull: true,
+        },
+        class_time: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        start_date: {
+            type: DataTypes.DATEONLY,
+            allowNull: true,
+        },
+        class_days: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        seats_available: {
+            type: DataTypes.INTEGER,
             allowNull: true,
         },
 
