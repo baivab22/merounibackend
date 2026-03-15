@@ -25,7 +25,13 @@ class ConsultancyService {
     }
 
     if (query.destination) {
-      whereCondition.destination = { [Op.like]: `%${query.destination}%` };
+      whereCondition[Op.and] = whereCondition[Op.and] || [];
+      whereCondition[Op.and].push(
+        Sequelize.where(
+          Sequelize.fn('JSON_CONTAINS', Sequelize.col('destination'), JSON.stringify(query.destination)),
+          1
+        )
+      );
     }
 
     const includeOptions = [
@@ -402,7 +408,6 @@ class ConsultancyService {
             parsed.forEach((d) => destinations.add(d));
           }
         } catch (e) {
-          // ignore
         }
       }
     });

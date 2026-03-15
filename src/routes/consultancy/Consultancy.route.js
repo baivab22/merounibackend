@@ -57,7 +57,7 @@ route.get(
  *         description: Unique locations and destinations
  */
 route.get(
-  "/filters",
+  "/locations",
   ConsultancyController.listUniqueLocationsAndDestinations
 );
 
