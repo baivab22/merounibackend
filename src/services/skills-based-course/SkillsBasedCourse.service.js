@@ -10,7 +10,6 @@ class SkillsBasedCourseService {
 
         const { q, status, location, duration, type, price } = query;
         const whereCondition = {};
-        console.log(query, "DONEDONEDONE");
 
         if (q) {
             whereCondition.title = { [Op.like]: `%${q}%` };
@@ -84,6 +83,8 @@ class SkillsBasedCourseService {
     async createCourse(payload) {
         const { title, ...rest } = payload;
         const slug = generateUniqueSlug(title);
+
+        
         return SkillsBasedCourse.create({ ...rest, title, slug });
     }
 

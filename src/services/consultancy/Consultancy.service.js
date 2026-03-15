@@ -20,6 +20,13 @@ class ConsultancyService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
+    if (query.city) {
+      whereCondition.city = query.city;
+    }
+
+    if (query.destination) {
+      whereCondition.destination = { [Op.like]: `%${query.destination}%` };
+    }
 
     const includeOptions = [
       {
@@ -368,6 +375,43 @@ class ConsultancyService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async getUniqueLocationsAndDestinations() {
+    const consultancies = await Consultancy.findAll({
+      attributes: ["city", "destination", "location"],
+      where: {
+        status: "published",
+      },
+    });
+
+    const cities = [...new Set(consultancies.map((c) => c.city).filter(Boolean))];
+    const locations = [
+      ...new Set(consultancies.map((c) => c.location).filter(Boolean)),
+    ];
+
+    const destinations = new Set();
+    consultancies.forEach((c) => {
+      const dest = c.destination;
+      if (Array.isArray(dest)) {
+        dest.forEach((d) => destinations.add(d));
+      } else if (typeof dest === "string" && dest.startsWith("[")) {
+        try {
+          const parsed = JSON.parse(dest);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((d) => destinations.add(d));
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    });
+
+    return {
+      cities,
+      locations,
+      destinations: [...destinations],
+    };
   }
 }
 

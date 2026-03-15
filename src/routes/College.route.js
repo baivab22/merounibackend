@@ -190,7 +190,6 @@ router.delete(
   "/admission/:id",
   authenticateUser,
   authorizeRole(["admin", "editor"]),
-  // requestValidator(collegeIdParamSchema, "params"),
   CollegeController.deleteAdmission
 );
 

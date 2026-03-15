@@ -76,7 +76,7 @@ Course.init(
     sequelize,
     modelName: "course",
     tableName: "courses",
-    timestamps: true,
+    timemps: true,
   }
 );
 

@@ -491,9 +491,9 @@ class CollegeService {
     // Helper to parse potential array/string/comma-separated params
     const parseFilter = (val) => {
       if (!val) return [];
-      if (Array.isArray(val)) return val;
-      if (typeof val === "string") return val.split(",").map(v => v.trim());
-      return [val];
+      if (Array.isArray(val)) return val.map(v => String(v).trim());
+      if (typeof val === "string") return val.split(",").map(v => v.trim()).filter(Boolean);
+      return [String(val).trim()];
     };
 
     const states = parseFilter(query.state);
@@ -525,13 +525,13 @@ class CollegeService {
     const addressCondition = {};
     if (states.length > 0) {
       addressCondition.state = {
-        [Op.or]: states.map((s) => ({ [Op.like]: `%${s}%` })),
+        [Op.in]: states,
       };
     }
 
     if (cities.length > 0) {
       addressCondition.city = {
-        [Op.or]: cities.map((c) => ({ [Op.like]: `%${c}%` })),
+        [Op.in]: cities,
       };
     }
 
@@ -562,6 +562,7 @@ class CollegeService {
           where: Object.keys(addressCondition).length
             ? addressCondition
             : undefined,
+          required: Object.keys(addressCondition).length > 0,
         },
         {
           model: CollegeFacility,
