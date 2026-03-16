@@ -28,6 +28,42 @@ export const collegePaginationSchema = yup.object({
     })
     .nullable()
     .optional(),
+  types: yup
+    .mixed()
+    .transform((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value;
+      return null;
+    })
+    .nullable()
+    .optional(),
+  degree_ids: yup
+    .mixed()
+    .transform((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value;
+      return null;
+    })
+    .nullable()
+    .optional(),
+  program_ids: yup
+    .mixed()
+    .transform((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value;
+      return null;
+    })
+    .nullable()
+    .optional(),
+  university_ids: yup
+    .mixed()
+    .transform((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value;
+      return null;
+    })
+    .nullable()
+    .optional(),
   city: yup
     .mixed()
     .transform((value) => {
@@ -35,6 +71,11 @@ export const collegePaginationSchema = yup.object({
       if (typeof value === "string") return value;
       return null;
     })
+    .nullable()
+    .optional(),
+  status: yup
+    .string()
+    .oneOf(["draft", "published", "archived"])
     .nullable()
     .optional(),
 });

@@ -80,9 +80,10 @@ class CollegeController {
 
   static async listColleges(req, res) {
     try {
-      const { items, pagination } = await collegeService.listColleges(
-        { ...req.query, ...req.body }
-      );
+      const { items, pagination } = await collegeService.listColleges({
+        ...req.query,
+        ...req.body,
+      });
 
       return res.status(200).json({
         message: "success",

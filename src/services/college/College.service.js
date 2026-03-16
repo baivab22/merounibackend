@@ -490,7 +490,7 @@ class CollegeService {
     const limit = parseInt(query.limit, 10) || 24;
     const sort = (query.sort || "asc").toUpperCase();
     const status = query.status
-    const search = query.q || "";
+    const search = query.q
 
     // Helper to parse potential array/string/comma-separated params
     const parseFilter = (val) => {
@@ -500,14 +500,17 @@ class CollegeService {
       return [String(val).trim()];
     };
 
-    const districts = parseFilter(query.district);
-    const cities = parseFilter(query.city);
-    const types = parseFilter(query.type);
+    const districts = parseFilter(query.districts);
+    const types = parseFilter(query.types);
     const degreeIdsInput = parseFilter(query.degree_ids);
-    const programIdsInput = parseFilter(query.program_id);
-    const university = query.university;
+    const programIdsInput = parseFilter(query.program_ids);
+    const universityIds = parseFilter(query.university_ids);
+
     const programIds = programIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
     const programIdFilter = programIds.length > 0 ? { [Op.in]: programIds } : null;
+
+    const directDegreeIds = degreeIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    const degreeIdFilter = directDegreeIds.length > 0 ? { [Op.in]: directDegreeIds } : null;
 
     const offset = (page - 1) * limit;
 
@@ -531,20 +534,6 @@ class CollegeService {
       addressCondition.district = {
         [Op.in]: districts,
       };
-    }
-
-    if (cities.length > 0) {
-      addressCondition.city = {
-        [Op.in]: cities,
-      };
-    }
-
-    const orConditions = [];
-
-    // 1. Handle direct Degree IDs (degree_ids)
-    const directDegreeIds = degreeIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
-    if (directDegreeIds.length > 0) {
-      orConditions.push({ degree_id: { [Op.in]: directDegreeIds } });
     }
 
 
@@ -596,29 +585,34 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-
           attributes: ["fullname", "slugs"],
+          required: universityIds.length > 0,
           where: (() => {
-            if (!university || (Array.isArray(university) && university.length === 0)) return undefined;
-            let universities = [];
-            if (Array.isArray(university)) {
-              universities = university;
-            } else if (typeof university === "string") {
-              universities = university.split(",").map((u) => u.trim());
-            }
-
-            if (universities.length === 0) return undefined;
+            if (universityIds.length === 0) return undefined;
 
             return {
-              [Op.or]: universities.map((u) => ({
-                [Op.or]: [
+              [Op.or]: universityIds.map((u) => {
+                const isId = !isNaN(parseInt(u, 10));
+                const conditions = [
                   { slugs: { [Op.like]: `%${u}%` } },
                   { fullname: { [Op.like]: `%${u}%` } }
-                ]
-              }))
+                ];
+                if (isId) {
+                  conditions.push({ id: parseInt(u, 10) });
+                }
+                return { [Op.or]: conditions };
+              })
             };
           })(),
         },
+        {
+          model: Degree,
+          as: "degrees",
+          attributes: ["id", "title", "slug"],
+          through: { attributes: [] },
+          required: !!degreeIdFilter,
+          where: degreeIdFilter ? { id: degreeIdFilter } : undefined,
+        }
       ],
     });
 
