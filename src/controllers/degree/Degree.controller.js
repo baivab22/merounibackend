@@ -7,7 +7,6 @@ class DegreeController {
             const result = await DegreeService.listDegrees(req.query);
             return res.status(200).json(result);
         } catch (error) {
-            console.log(error,"DONEDONE")
             next(error);
         }
     }

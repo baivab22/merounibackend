@@ -78,7 +78,7 @@ router.get(
  *       200:
  *         description: List of unique universities
  */
-router.get("/universities", SchoolController.listSchoolUniversities);
+router.get("/affiliations", SchoolController.listSchoolAffiliations);
 
 router.get(
     "/:slugs",

@@ -327,6 +327,7 @@ class CollegeService {
         as: "universities",
         where: universityWhere,
         required: true,
+        through: { attributes: [] },
       });
       collegeInclude.required = true;
     } else {
@@ -334,6 +335,7 @@ class CollegeService {
         model: University,
         as: "universities",
         attributes: ["fullname", "slugs", "id"],
+        through: { attributes: [] },
       });
     }
 
@@ -376,16 +378,31 @@ class CollegeService {
     }
 
     if (q) {
-      const orConditions = [
-        { "$collegeAdmissionCollege.name$": { [Op.like]: `%${q}%` } },
-      ];
+      // Fetch college IDs matching the search query to avoid join scope issues in subqueries
+      const matchingColleges = await College.findAll({
+        where: { name: { [Op.like]: `%${q}%` } },
+        attributes: ["id"],
+        raw: true,
+      });
+      const matchingCollegeIds = matchingColleges.map((c) => c.id);
+
+      const orConditions = [];
+      if (matchingCollegeIds.length > 0) {
+        orConditions.push({ college_id: { [Op.in]: matchingCollegeIds } });
+      }
       if (filteredProgramIds?.length) {
         orConditions.push({ program_id: { [Op.in]: filteredProgramIds } });
       }
-      if (programId && !isNaN(programId)) {
-        whereCondition[Op.and] = [{ [Op.or]: orConditions }];
+
+      if (orConditions.length > 0) {
+        if (programId && !isNaN(programId)) {
+          whereCondition[Op.and] = [{ [Op.or]: orConditions }];
+        } else {
+          whereCondition[Op.or] = orConditions;
+        }
       } else {
-        whereCondition[Op.or] = orConditions;
+        // If q is provided but no matching colleges or programs found
+        whereCondition.id = -1;
       }
     } else if (filteredProgramIds?.length && !programId) {
       whereCondition.program_id = { [Op.in]: filteredProgramIds };
@@ -587,6 +604,7 @@ class CollegeService {
           as: "universities",
           attributes: ["fullname", "slugs"],
           required: universityIds.length > 0,
+          through: { attributes: [] },
           where: (() => {
             if (universityIds.length === 0) return undefined;
 

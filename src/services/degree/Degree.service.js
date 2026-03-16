@@ -95,6 +95,12 @@ class DegreeService {
             where: { slug },
             include: [
                 {
+                    model: College,
+                    as: "colleges",
+                    attributes: ["id", "name", "slugs", "college_logo", "order_no_for_website"],
+                    through: { attributes: [] }
+                },
+                {
                     model: Program,
                     as: "programs",
                     attributes: ["id", "title", "slugs", "duration", "fee", "credits"],
@@ -102,7 +108,7 @@ class DegreeService {
                         {
                             model: College,
                             as: "colleges",
-                            attributes: ["id", "name", "slugs", "college_logo"],
+                            attributes: ["id", "name", "slugs", "college_logo", "order_no_for_website"],
                             through: { attributes: [] }
                         },
                         {
@@ -117,14 +123,12 @@ class DegreeService {
                             ]
                         }
                     ]
-                },
-                {
-                    model: College,
-                    as: "colleges",
-                    attributes: ["id", "name", "slugs", "college_logo"],
-                    through: { attributes: [] }
                 }
             ],
+            order: [
+                [{ model: College, as: "colleges" }, "order_no_for_website", "ASC"],
+                ["programs", { model: College, as: "colleges" }, "order_no_for_website", "ASC"]
+            ]
         });
 
         if (!degree) {
@@ -181,7 +185,7 @@ class DegreeService {
                 transaction,
             });
 
-            console.log(existingDegrees,"existingDegrees")
+            console.log(existingDegrees, "existingDegrees")
             if (existingDegrees.length !== degreeIds.length) {
                 throw new Error("Invalid degree IDs");
             }

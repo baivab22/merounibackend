@@ -261,7 +261,7 @@ class SchoolService {
         }
     }
 
-    async listSchoolUniversities() {
+    async listSchoolAffiliations() {
         const universities = await University.findAll({
             include: [
                 {
@@ -274,10 +274,11 @@ class SchoolService {
                         ],
                     },
                     attributes: [],
+                    through: { attributes: [] },
                 }
             ],
             attributes: ["id", "fullname", "slugs"],
-            group: ["University.id"],
+            group: ["University.id", "University.fullname", "University.slugs"],
             order: [["fullname", "ASC"]],
         });
 
