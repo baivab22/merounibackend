@@ -15,6 +15,7 @@ class MaterialService {
       parent_id: plain.category_id,
       file_url: plain.file_url,
       createdAt: plain.createdAt,
+      description: plain.description,
     };
   }
 
@@ -71,7 +72,6 @@ class MaterialService {
     });
 
     const polishNode = (node, depth = 1) => {
-      // Sort subcategories by position
       if (node.subcategories?.length > 0) {
         node.subcategories.sort((a, b) => a.position - b.position);
         node.subcategories.forEach(child => polishNode(child, depth + 1));

@@ -50,7 +50,7 @@ class SchoolController {
     static async listSchoolUniversities(req, res) {
         try {
             const universities = await schoolService.listSchoolUniversities();
-
+            console.log(universities, "universitiesuniversities")
             return res.status(200).json({
                 message: "success",
                 items: universities,
