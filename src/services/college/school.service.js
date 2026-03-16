@@ -50,14 +50,31 @@ class SchoolService {
         }
 
         if (affiliations.length > 0) {
-            // Need to filter colleges that have any of the provided universities
-            const collegeWithUniversities = await CollegeUniversity.findAll({
-                where: { university_id: { [Op.in]: affiliations } },
-                attributes: ["college_id"],
+            const matchedUniversities = await University.findAll({
+                where: {
+                    [Op.or]: [
+                        { id: { [Op.in]: affiliations.filter((a) => !isNaN(a)) } },
+                        { fullname: { [Op.in]: affiliations } },
+                        { slugs: { [Op.in]: affiliations } },
+                    ],
+                },
+                attributes: ["id"],
                 raw: true,
             });
-            const collegeIds = collegeWithUniversities.map((cu) => cu.college_id);
-            whereCondition.id = { [Op.in]: collegeIds };
+
+            const universityIds = matchedUniversities.map((u) => u.id);
+
+            if (universityIds.length > 0) {
+                const collegeWithUniversities = await CollegeUniversity.findAll({
+                    where: { university_id: { [Op.in]: universityIds } },
+                    attributes: ["college_id"],
+                    raw: true,
+                });
+                const collegeIds = collegeWithUniversities.map((cu) => cu.college_id);
+                whereCondition.id = { [Op.in]: collegeIds };
+            } else {
+                whereCondition.id = { [Op.in]: [] };
+            }
         }
 
 
@@ -242,6 +259,29 @@ class SchoolService {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    async listSchoolUniversities() {
+        const universities = await University.findAll({
+            include: [
+                {
+                    model: College,
+                    as: "colleges",
+                    required: true,
+                    where: {
+                        [Op.and]: [
+                            Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
+                        ],
+                    },
+                    attributes: [],
+                }
+            ],
+            attributes: ["id", "fullname", "slugs"],
+            group: ["University.id"],
+            order: [["fullname", "ASC"]],
+        });
+
+        return universities;
     }
 }
 

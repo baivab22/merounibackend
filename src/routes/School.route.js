@@ -68,6 +68,18 @@ router.get(
  *       404:
  *         description: School not found
  */
+/**
+ * @swagger
+ * /school/universities:
+ *   get:
+ *     summary: List unique universities associated with schools
+ *     tags: [Schools]
+ *     responses:
+ *       200:
+ *         description: List of unique universities
+ */
+router.get("/universities", SchoolController.listSchoolUniversities);
+
 router.get(
     "/:slugs",
     requestValidator(collegeSlugParamSchema, "params"),

@@ -60,6 +60,12 @@ export const schoolPaginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
+  university: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  is_featured: yup.boolean().optional(),
+  pinned: yup.boolean().optional(),
 });
 export const collegeSlugParamSchema = yup.object({
   slugs: yup.string().trim().required(),

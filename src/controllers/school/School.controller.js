@@ -46,6 +46,22 @@ class SchoolController {
             });
         }
     }
+
+    static async listSchoolUniversities(req, res) {
+        try {
+            const universities = await schoolService.listSchoolUniversities();
+
+            return res.status(200).json({
+                message: "success",
+                items: universities,
+            });
+        } catch (error) {
+            console.error("Error in listSchoolUniversities:", error);
+            return res.status(500).json({
+                message: `Error: ${error.message}`,
+            });
+        }
+    }
 }
 
 export default SchoolController;
