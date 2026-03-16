@@ -99,6 +99,22 @@ class ConsultancyController {
       });
     }
   }
+
+  static async listUniqueLocationsAndDestinations(req, res) {
+    try {
+      const data = await consultancyService.getUniqueLocationsAndDestinations();
+      return res.status(200).json({
+        message: "success",
+        data,
+      });
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default ConsultancyController;

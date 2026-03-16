@@ -19,10 +19,24 @@ export const collegePaginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
-  status: yup
-    .string()
+  districts: yup
+    .mixed()
+    .transform((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value;
+      return null;
+    })
     .nullable()
-    .transform((value) => (value === "" ? null : value)),
+    .optional(),
+  city: yup
+    .mixed()
+    .transform((value) => {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") return value;
+      return null;
+    })
+    .nullable()
+    .optional(),
 });
 
 // Shared pagination schema

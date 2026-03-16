@@ -67,7 +67,7 @@ SkillsBasedCourse.init(
             allowNull: true,
         },
         start_date: {
-            type: DataTypes.DATEONLY,
+            type: DataTypes.STRING,
             allowNull: true,
         },
         class_days: {
@@ -78,7 +78,6 @@ SkillsBasedCourse.init(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-
     },
     {
         sequelize,

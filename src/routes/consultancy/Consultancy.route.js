@@ -48,6 +48,21 @@ route.get(
 
 /**
  * @swagger
+ * /consultancy/filters:
+ *   get:
+ *     summary: List unique cities and destinations for filtering
+ *     tags: [Consultancy]
+ *     responses:
+ *       200:
+ *         description: Unique locations and destinations
+ */
+route.get(
+  "/locations",
+  ConsultancyController.listUniqueLocationsAndDestinations
+);
+
+/**
+ * @swagger
  * /consultancy
  *   get:
  *     summary: Get my consultancy

@@ -113,7 +113,7 @@ class MaterialController {
       return res.status(200).json({ message: "Material deleted successfully" });
     } catch (error) {
       console.error("Error deleting material:", error);
-      return res
+      return res``
         .status(500)
         .json({ message: "Server error", error: error.message });
     }

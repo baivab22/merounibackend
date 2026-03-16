@@ -46,19 +46,19 @@ class HomeService {
     ] = await Promise.all([
       College.findAll({
         where: { name: searchCondition },
-        attributes: [['id', 'id'], ['name', 'title'], ['slugs', 'slugs'],['featured_img','featured_img'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['name', 'title'], ['slugs', 'slugs'],['featured_img','image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'colleges' }))),
 
       Faculty.findAll({
         where: { title: searchCondition },
-        attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['featured_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'faculty' }))),
 
       Event.findAll({
         where: { title: searchCondition },
-        attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'event' }))),
 
@@ -76,19 +76,19 @@ class HomeService {
 
       Material.findAll({
         where: { title: searchCondition },
-        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'materials' }))),
 
       University.findAll({
         where: { fullname: searchCondition },
-        attributes: [['id', 'id'], ['fullname', 'title'],['logo','featured_img'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['fullname', 'title'],['featured_image','image'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'university' }))),
 
       News.findAll({
         where: { title: searchCondition, status: 'published' },
-        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['featured_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'news' }))),
 
@@ -100,19 +100,19 @@ class HomeService {
 
       Consultancy.findAll({
         where: { title: searchCondition, status: 'published' },
-        attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['featured_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'consultancy' }))),
 
       SkillsBasedCourse.findAll({
         where: { title: searchCondition },
-        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['thumbnail_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'skill_course' }))),
 
       Video.findAll({
         where: { title: searchCondition },
-        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['featured_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'video' }))),
 
@@ -123,7 +123,7 @@ class HomeService {
             { short_name: searchCondition }
           ]
         },
-        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['createdAt', 'createdAt']],
+        attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slugs'], ['featured_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'degree' })))
     ]);
