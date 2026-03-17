@@ -80,6 +80,11 @@ class SchoolService {
 
         const include = [
             {
+                model: CollegeAddress,
+                as: "address",
+                attributes: ["country", "district", "city", "street", "postal_code"],
+            },
+            {
                 model: CollegeGallery,
                 as: "collegeGallery",
             },
