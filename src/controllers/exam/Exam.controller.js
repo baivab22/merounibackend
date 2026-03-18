@@ -44,6 +44,8 @@ class ExamController {
         examId: result.id,
       });
     } catch (error) {
+      console.log(error,"Thanks");
+      
       const status = error.status || 500;
       return res.status(status).json({
         error: status === 500 ? error.message : error.message,

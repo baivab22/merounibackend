@@ -517,17 +517,20 @@ class CollegeService {
       return [String(val).trim()];
     };
 
-    const districts = parseFilter(query.districts);
-    const types = parseFilter(query.types);
-    const degreeIdsInput = parseFilter(query.degree_ids);
-    const programIdsInput = parseFilter(query.program_ids);
-    const universityIds = parseFilter(query.university_ids);
+    const districts = parseFilter(query.districts || query.district);
+    const types = parseFilter(query.types || query.type);
+    const degreeIdsInput = parseFilter(query.degree_ids || query.degree_id);
+    const programIdsInput = parseFilter(query.program_ids || query.program_id);
+    const universityIdsInput = parseFilter(query.university_ids);
 
     const programIds = programIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
     const programIdFilter = programIds.length > 0 ? { [Op.in]: programIds } : null;
 
     const directDegreeIds = degreeIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
     const degreeIdFilter = directDegreeIds.length > 0 ? { [Op.in]: directDegreeIds } : null;
+
+    const universityIds = universityIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    const universityIdFilter = universityIds.length > 0 ? { [Op.in]: universityIds } : null;
 
     const offset = (page - 1) * limit;
 
@@ -560,12 +563,14 @@ class CollegeService {
       offset,
       distinct: true,
       order: [
+        [sequelize.literal('`colleges`.`order_no_for_website` IS NULL'), "ASC"],
+        [sequelize.col('colleges.order_no_for_website'), "ASC"],
         ["id", sort],
       ],
       include: [
         {
           model: CollegeAddress,
-          as: "address",
+          as: "collegeAddress",
           attributes: ["country", "district", "city"],
           where: Object.keys(addressCondition).length
             ? addressCondition
@@ -602,26 +607,10 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-          attributes: ["fullname", "slugs"],
-          required: universityIds.length > 0,
-          through: { attributes: [] },
-          where: (() => {
-            if (universityIds.length === 0) return undefined;
-
-            return {
-              [Op.or]: universityIds.map((u) => {
-                const isId = !isNaN(parseInt(u, 10));
-                const conditions = [
-                  { slugs: { [Op.like]: `%${u}%` } },
-                  { fullname: { [Op.like]: `%${u}%` } }
-                ];
-                if (isId) {
-                  conditions.push({ id: parseInt(u, 10) });
-                }
-                return { [Op.or]: conditions };
-              })
-            };
-          })(),
+          attributes: ["id", "fullname", "slugs"],
+          required: !!universityIdFilter,
+          where: universityIdFilter ? { id: universityIdFilter } : undefined,
+          through: { attributes: [] }
         },
         {
           model: Degree,
@@ -735,8 +724,8 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-
           attributes: ["fullname", "slugs", "id"],
+          through: { attributes: [] },
         },
         {
           model: UserModel,
