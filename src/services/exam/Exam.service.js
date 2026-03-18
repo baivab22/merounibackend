@@ -237,12 +237,19 @@ class ExamService {
       };
 
       if (!examId) {
+        const existingExam = await Exam.findOne({ where: { title } });
+        if (existingExam) {
+          const error = new Error("Exam already exists");
+          error.status = 400;
+          throw error;
+        }
         // Create
         const slugs = generateUniqueSlug(title);
         examData.slugs = slugs;
         const exam = await Exam.create(examData, { transaction });
         examId = exam.id;
       } else {
+        
         if (examData.title !== title) {
           examData.slugs = generateUniqueSlug(title);
         }

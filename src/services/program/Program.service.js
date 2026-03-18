@@ -165,7 +165,7 @@ class ProgramService {
         {
           model: CollegeAddress,
           as: "collegesAddress",
-          attributes: ["country", "city", "state", "id"],
+          attributes: ["country", "city", "district", "id"],
         },
         {
           model: University,
