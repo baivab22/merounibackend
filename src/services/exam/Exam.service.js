@@ -43,7 +43,10 @@ class ExamService {
 
     // University/Affiliation filter
     if (universityId) {
-      whereCondition.affiliation = universityId;
+      const parsedUniversityId = parseInt(universityId, 10);
+      if (!isNaN(parsedUniversityId)) {
+        whereCondition.affiliation = parsedUniversityId;
+      }
     }
 
     include.push({
@@ -54,7 +57,10 @@ class ExamService {
 
     // Category filter
     if (categoryId) {
-      whereCondition.category_id = categoryId;
+      const parsedCategoryId = parseInt(categoryId, 10);
+      if (!isNaN(parsedCategoryId)) {
+        whereCondition.category_id = parsedCategoryId;
+      }
     }
 
     include.push({
@@ -106,7 +112,10 @@ class ExamService {
 
     // Level Filter
     if (levelId) {
-      whereCondition.level_id = levelId;
+      const parsedLevelId = parseInt(levelId, 10);
+      if (!isNaN(parsedLevelId)) {
+        whereCondition.level_id = parsedLevelId;
+      }
     }
 
     // Include Level Details
@@ -249,7 +258,7 @@ class ExamService {
         const exam = await Exam.create(examData, { transaction });
         examId = exam.id;
       } else {
-        
+
         if (examData.title !== title) {
           examData.slugs = generateUniqueSlug(title);
         }
