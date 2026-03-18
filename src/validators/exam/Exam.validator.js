@@ -20,6 +20,7 @@ export const listExamsSchema = paginationSchema.shape({
   universityId: yup.number().integer().positive().optional(),
   categoryId: yup.number().integer().positive().optional(),
   isOpen: yup.boolean().optional(),
+  examType: yup.string().optional(),
   isUpcoming: yup.boolean().optional(),
   sortBy: yup
     .string()
