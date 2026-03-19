@@ -79,7 +79,7 @@ class EventService {
         if (category_id !== undefined) updateData.category_id = category_id;
         if (college_id !== undefined) updateData.college_id = college_id;
         if (author_id !== undefined) updateData.author_id = author_id;
-        if (event_host !== undefined) updateData.event_host = JSON.stringify(event_host);
+        if (event_host !== undefined) updateData.event_host = event_host;
 
 
 

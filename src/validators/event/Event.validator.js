@@ -30,6 +30,7 @@ const eventHostSchema = yup.object({
   time: yup.string().optional(),
   location: yup.string().optional(),
   map_url: yup.string().optional(),
+  event_organizer: yup.string().optional(),
 });
 
 // Create/Update Event schema
