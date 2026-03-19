@@ -25,13 +25,12 @@ Program.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-
     duration: {
       type: DataTypes.STRING,
       allowNull: true,
     },
     credits: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.STRING,
       allowNull: true,
     },
     level_id: {
