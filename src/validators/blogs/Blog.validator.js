@@ -43,6 +43,7 @@ export const updateBlogBodySchema = yup
         is_featured: yup.boolean(),
         author: yup.number(),
         status: yup.string(),
+        pdf_file: yup.string(),
     })
     .test("at-least-one", "At least one field must be provided", (value) => {
         return value && Object.keys(value).length > 0;
