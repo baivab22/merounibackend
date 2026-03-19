@@ -175,6 +175,11 @@ class NewsService {
     }
 
     const { title, author, author_id, category, category_id, college_id, ...rest } = data;
+
+    let slug = news.slug;
+    if (title && news.title !== title) {
+      slug = generateUniqueSlug(title);
+    }
     await News.update(
       {
         ...rest,
@@ -187,6 +192,7 @@ class NewsService {
               ? category_id
               : news.category,
         college_id: college_id !== undefined ? college_id : news.college_id,
+        slug,
       },
       { where: { id } }
     );
