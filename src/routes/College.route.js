@@ -300,6 +300,35 @@ router.post(
 
 /**
  * @swagger
+ * /college/featured:
+ *   get:
+ *     summary: List featured colleges (with name, slugs, and programs)
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 24
+ *     responses:
+ *       200:
+ *         description: List of featured colleges
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/featured",
+  requestValidator(collegePaginationSchema, "query"),
+  CollegeController.getFeaturedColleges
+);
+
+/**
+ * @swagger
  * /college/{slugs}:
  *   get:
  *     summary: Get college by slug

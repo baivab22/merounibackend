@@ -197,6 +197,19 @@ class CollegeController {
         .json({ status: error.status || 500, message: error.message || "Server error" });
     }
   }
+
+  static async getFeaturedColleges(req, res) {
+    try {
+      const result = await collegeService.getFeaturedColleges(req.query);
+      return res.status(200).json({
+        message: "success",
+        items: result.items,
+        pagination: result.pagination,
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default CollegeController;

@@ -997,6 +997,44 @@ class CollegeService {
     }
   }
 
+  async getFeaturedColleges(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 6;
+    const offset = (page - 1) * limit;
+
+    const { count: totalCount, rows: colleges } = await College.findAndCountAll({
+      where: {
+        order_no_for_website: { [Op.ne]: null },
+        status: "published",
+      },
+      attributes: ["id", "name", "slugs", "college_logo", "featured_img", "order_no_for_website"],
+      include: [
+        {
+          model: Program,
+          as: "programs",
+          attributes: ["id", "title", "slugs"],
+          through: { attributes: [] },
+        },
+      ],
+      limit,
+      offset,
+      distinct: true,
+      order: [
+        [sequelize.literal('`colleges`.`order_no_for_website` IS NULL'), "ASC"],
+        [sequelize.col('colleges.order_no_for_website'), "ASC"],
+      ],
+    });
+
+    return {
+      items: colleges,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
+        totalCount,
+      },
+    };
+  }
 }
 
 export default CollegeService;

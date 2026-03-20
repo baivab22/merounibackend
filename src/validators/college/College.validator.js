@@ -9,7 +9,7 @@ export { paginationSchema, slugParamSchema, idParamSchema };
 
 export const collegePaginationSchema = yup.object({
   page: yup.number().integer().min(1).default(1),
-  limit: yup.number().integer().min(1).max(1000).default(24),
+  limit: yup.number().integer().min(1).max(1000).default(6),
   sort: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])
