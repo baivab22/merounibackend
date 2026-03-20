@@ -1035,6 +1035,27 @@ class CollegeService {
       },
     };
   }
+
+  async listProgramsByCollegeId(collegeId) {
+    const college = await College.findByPk(collegeId, {
+      include: [
+        {
+          model: Program,
+          as: "programs",
+          attributes: ["id", "title", "slugs"],
+          through: { attributes: [] },
+        },
+      ],
+    });
+
+    if (!college) {
+      const error = new Error("College not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return college.programs;
+  }
 }
 
 export default CollegeService;

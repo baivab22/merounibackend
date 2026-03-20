@@ -353,6 +353,30 @@ router.get(
 
 /**
  * @swagger
+ * /college/{id}/programs:
+ *   get:
+ *     summary: List all programs associated with a college
+ *     tags: [Colleges]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of programs
+ *       404:
+ *         description: College not found
+ */
+router.get(
+  "/:id/programs",
+  requestValidator(collegeIdParamSchema, "params"),
+  CollegeController.listProgramsByCollegeId
+);
+
+/**
+ * @swagger
  * /college/{id}:
  *   delete:
  *     summary: Delete a college

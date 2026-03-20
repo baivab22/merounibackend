@@ -284,7 +284,7 @@ export const updateSchoolOrderSchema = yup
 export const admissionPaginationSchema = yup
   .object({
     page: yup.number().integer().min(1).default(1),
-    limit: yup.number().integer().min(1).max(1000).default(24),
+    limit: yup.number().integer().min(1).max(1000).default(1000),
     sort: yup
       .string()
       .oneOf(["ASC", "DESC", "asc", "desc"])
