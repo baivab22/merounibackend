@@ -502,7 +502,7 @@ class CollegeService {
     return admissionData;
   }
 
-  async listColleges(query = {}) {
+  async listColleges(query = {}, isAdmin = false) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 24;
     const sort = (query.sort || "asc").toUpperCase();
@@ -546,6 +546,9 @@ class CollegeService {
     }
     if (status) {
       whereCondition.status = status;
+    }
+    if (!isAdmin) {
+      whereCondition.status = "published";
     }
 
 

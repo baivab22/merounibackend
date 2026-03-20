@@ -28,9 +28,10 @@ class ExamService {
       isUpcoming,
       sortBy,
       sortOrder,
+      status,
     } = query;
 
-    const whereCondition = {};
+    const whereCondition = { status: "published" };
     const include = [];
 
     // Search query
@@ -159,6 +160,120 @@ class ExamService {
     };
   }
 
+  async listAdminExams(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const {
+      q,
+      levelId,
+      universityId,
+      examType,
+      categoryId,
+      status,
+      sortBy,
+      sortOrder,
+    } = query;
+
+    const whereCondition = {};
+    const include = [];
+
+    // Search query
+    if (q) {
+      whereCondition[Op.or] = [
+        { title: { [Op.like]: `%${q}%` } },
+        { description: { [Op.like]: `%${q}%` } },
+      ];
+    }
+
+    // Status filter
+    if (status) {
+      whereCondition.status = status;
+    }
+
+    // University/Affiliation filter
+    if (universityId) {
+      const parsedUniversityId = parseInt(universityId, 10);
+      if (!isNaN(parsedUniversityId)) {
+        whereCondition.affiliation = parsedUniversityId;
+      }
+    }
+
+    include.push({
+      model: University,
+      attributes: ["id", "fullname"],
+      as: "university",
+    });
+
+    // Category filter
+    if (categoryId) {
+      const parsedCategoryId = parseInt(categoryId, 10);
+      if (!isNaN(parsedCategoryId)) {
+        whereCondition.category_id = parsedCategoryId;
+      }
+    }
+
+    include.push({
+      model: Category,
+      attributes: ["id", "title"],
+      as: "category",
+    });
+
+    // Exam Type filter
+    if (examType) {
+      whereCondition.exam_type = examType;
+    }
+
+    // Level Filter
+    if (levelId) {
+      const parsedLevelId = parseInt(levelId, 10);
+      if (!isNaN(parsedLevelId)) {
+        whereCondition.level_id = parsedLevelId;
+      }
+    }
+
+    // Include Level Details
+    include.push({
+      model: Level,
+      attributes: ["id", "title"],
+      as: "level",
+    });
+
+    // Author Details
+    include.push({
+      model: UserModel,
+      attributes: ["id", "firstName"],
+      as: "authorDetails",
+    });
+
+    // Sorting
+    const validSortFields = ["title", "createdAt"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const order = [
+      [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
+    ];
+
+    const { count: totalCount, rows: items } = await Exam.findAndCountAll({
+      where: whereCondition,
+      limit,
+      offset,
+      distinct: true,
+      order,
+      include,
+    });
+
+    return {
+      items,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
+        totalCount,
+      },
+    };
+  }
+
   async getExam(slugs) {
     const exam = await Exam.findOne({
       where: { slugs },
@@ -216,6 +331,7 @@ class ExamService {
       exam_date,
       opening_date,
       closing_date,
+      status,
     } = payload;
 
     const transaction = await sequelize.transaction();
@@ -243,6 +359,7 @@ class ExamService {
         exam_date,
         opening_date,
         closing_date,
+        status,
       };
 
       if (!examId) {

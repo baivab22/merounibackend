@@ -16,7 +16,28 @@ class ProgramController {
         pagination,
       });
     } catch (error) {
-      console.log(error,"Thanks a lottttt")
+      console.log(error, "Thanks a lottttt")
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
+
+  static async listAdminPrograms(req, res) {
+    try {
+      const { items, pagination } = await programService.listAdminPrograms({
+        ...req.query,
+        ...req.body,
+      });
+
+      return res.status(200).json({
+        message: "success",
+        items,
+        pagination,
+      });
+    } catch (error) {
+      console.log(error, "Thanks a lottttt")
       const status = error.status || 500;
       return res
         .status(status)
@@ -29,7 +50,7 @@ class ProgramController {
       const program = await programService.getProgram(req.params.slugs);
       return res.status(200).json(program);
     } catch (error) {
-      console.log(error,"Thanks a lottttt")
+      console.log(error, "Thanks a lottttt")
       const status = error.status || 500;
       return res.status(status).json({
         error: status === 500 ? "Server error" : error.message,
@@ -53,6 +74,27 @@ class ProgramController {
         status: error.status,
         stack: error.stack,
       });
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
+
+  static async saveAsDraft(req, res) {
+    try {
+      const programId = await programService.createOrUpdateProgram({
+        ...req.body,
+        status: "draft",
+      });
+      return res.status(200).json({
+        message: req.body.id
+          ? "Program updated as draft successfully!"
+          : "Program saved as draft successfully!",
+        programId,
+      });
+    } catch (error) {
+      console.error("Error saving program as draft:", error);
       const status = error.status || 500;
       return res
         .status(status)

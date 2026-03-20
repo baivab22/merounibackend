@@ -298,6 +298,15 @@ router.post(
   CollegeController.listColleges
 );
 
+
+
+router.get(
+  "/admin/list",
+  requestValidator(collegePaginationSchema, "query"),
+  CollegeController.listCollegesAdmin
+);
+
+
 /**
  * @swagger
  * /college/featured:

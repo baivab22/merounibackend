@@ -31,6 +31,7 @@ export const listExamsSchema = paginationSchema.shape({
     .oneOf(["ASC", "DESC", "asc", "desc"])
     .transform((value) => (value ? value.toUpperCase() : "DESC"))
     .default("DESC"),
+  status: yup.string().oneOf(["published", "draft"]).optional(),
 });
 
 // Create/Update Exam schema - adjust fields based on actual requirements
@@ -90,6 +91,7 @@ export const createOrUpdateExamSchema = yup
       .transform((value) => (value === "" || value === "Invalid date" ? null : value))
       .nullable()
       .optional(),
+    status: yup.string().oneOf(["published", "draft"]).default("published").optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && (value.title || value.id)) return true;

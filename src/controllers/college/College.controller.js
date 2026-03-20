@@ -95,6 +95,24 @@ class CollegeController {
     }
   }
 
+
+  static async listCollegesAdmin(req, res) {
+    try {
+      const { items, pagination } = await collegeService.listColleges({
+        ...req.query,
+        ...req.body,
+      }, true);
+
+      return res.status(200).json({
+        message: "success",
+        items,
+        pagination,
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getCollegeBySlug(req, res) {
     try {
       const college = await collegeService.getCollegeBySlug(req.params.slugs);

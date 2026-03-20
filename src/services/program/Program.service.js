@@ -29,9 +29,10 @@ class ProgramService {
       q,
       sortBy,
       sortOrder,
+      status,
     } = query;
 
-    const whereConditions = {};
+    const whereConditions = { status: "published" };
     const universityInclude = {
       model: University,
       as: "universities",
@@ -103,6 +104,106 @@ class ProgramService {
         order,
       });
 
+
+    return {
+      items,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
+        totalCount,
+      },
+    };
+  }
+
+  async listAdminPrograms(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const {
+      levelId,
+      disciplineId,
+      universityIds,
+      q,
+      sortBy,
+      sortOrder,
+      status,
+    } = query;
+
+    const whereConditions = {};
+    const universityInclude = {
+      model: University,
+      as: "universities",
+      attributes: ["id", "fullname"],
+      through: { attributes: [] },
+      required: false,
+    };
+
+    if (universityIds) {
+      const universityIdsList = Array.isArray(universityIds)
+        ? universityIds
+        : typeof universityIds === "string"
+          ? universityIds.split(",").map((id) => id.trim())
+          : [universityIds];
+      universityInclude.where = { id: { [Op.in]: universityIdsList } };
+      universityInclude.required = true;
+    }
+
+    const include = [
+      { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
+      {
+        model: Degree,
+        as: "programdegree",
+        attributes: ["id", "title", "short_name", "slug"],
+        required: false,
+      },
+      universityInclude,
+    ];
+
+    if (levelId) {
+      whereConditions.level_id = levelId;
+    }
+    if (disciplineId) {
+      whereConditions.discipline_id = disciplineId;
+    }
+    if (status) {
+      whereConditions.status = status;
+    }
+
+    if (q) {
+      whereConditions[Op.or] = [
+        { title: { [Op.like]: `%${q}%` } },
+        { code: { [Op.like]: `%${q}%` } },
+      ];
+    }
+
+    const validSortFields = [
+      "title",
+      "code",
+      "createdAt",
+      "duration",
+      "credits",
+      "fee",
+    ];
+
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : "createdAt";
+
+    const order = [
+      [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
+    ];
+
+    const { count: totalCount, rows: items } =
+      await Program.findAndCountAll({
+        where: whereConditions,
+        include,
+        limit,
+        offset,
+        distinct: true,
+        order,
+      });
 
     return {
       items,
@@ -211,6 +312,7 @@ class ProgramService {
         syllabus,
         colleges,
         universities,
+        status,
       } = payload;
 
       let programId = id;
@@ -252,6 +354,7 @@ class ProgramService {
             delivery_mode,
             careers,
             exam_id: exam_id || null,
+            status: status || "published",
           },
           { transaction }
         );
@@ -264,7 +367,6 @@ class ProgramService {
           error.status = 404;
           throw error;
         }
-
 
         await Program.update(
           {
@@ -285,6 +387,7 @@ class ProgramService {
             delivery_mode,
             careers,
             exam_id: exam_id || null,
+            status: status || existingProgram.status,
           },
           { where: { id: programId }, transaction }
         );

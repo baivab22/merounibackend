@@ -6,6 +6,7 @@ import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
   createOrUpdateProgramSchema,
+  saveAsDraftProgramSchema,
   programIdParamSchema,
   programSlugParamSchema
 } from "../validators/program/Program.validator.js";
@@ -70,6 +71,52 @@ router.get(
  *         description: List of programs
  */
 router.post("/filter", ProgramController.listPrograms);
+
+/**
+ * @swagger
+ * /program/admin/list:
+ *   get:
+ *     summary: List all programs for admin with pagination and status filter
+ *     tags: [Programs]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [published, draft]
+ *     responses:
+ *       200:
+ *         description: List of programs
+ */
+router.get(
+  "/admin/list",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  ProgramController.listAdminPrograms
+);
+
+/**
+ * @swagger
+ * /program/admin/filter:
+ *   post:
+ *     summary: List all programs for admin with filtering via body
+ *     tags: [Programs]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of programs
+ */
+router.post(
+  "/admin/filter",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  ProgramController.listAdminPrograms
+);
 
 /**
  * @swagger
@@ -146,6 +193,38 @@ router.post(
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createOrUpdateProgramSchema, "body"),
   ProgramController.createOrUpdateProgram
+);
+
+/**
+ * @swagger
+ * /program/save-as-draft:
+ *   post:
+ *     summary: Save a program as draft
+ *     tags: [Programs]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *             properties:
+ *               title:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Program saved as draft
+ */
+router.post(
+  "/save-as-draft",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(saveAsDraftProgramSchema, "body"),
+  ProgramController.saveAsDraft
 );
 
 /**

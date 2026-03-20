@@ -90,7 +90,11 @@ Program.init(
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     },
-
+    status: {
+      type: DataTypes.ENUM("draft", "published"),
+      allowNull: false,
+      defaultValue: "published",
+    },
   },
   {
     sequelize,

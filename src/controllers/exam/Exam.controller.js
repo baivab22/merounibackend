@@ -20,6 +20,23 @@ class ExamController {
     }
   }
 
+  static async listAdminExams(req, res) {
+    try {
+      const { items, pagination } = await examService.listAdminExams(req.query);
+
+      return res.status(200).json({
+        message: "success",
+        items,
+        pagination,
+      });
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        error: status === 500 ? error.message : error.message,
+      });
+    }
+  }
+
   static async getExam(req, res) {
     try {
       const item = await examService.getExam(req.params.slugs);
@@ -44,8 +61,8 @@ class ExamController {
         examId: result.id,
       });
     } catch (error) {
-      console.log(error,"Thanks");
-      
+      console.log(error, "Thanks");
+
       const status = error.status || 500;
       return res.status(status).json({
         error: status === 500 ? error.message : error.message,

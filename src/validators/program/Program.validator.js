@@ -34,6 +34,7 @@ export const createOrUpdateProgramSchema = yup
     language: yup.string().optional(),
     eligibility_criteria: yup.string().optional(),
     fee: yup.string().optional(),
+    status: yup.string().oneOf(["published", "draft"]).optional(),
     scholarship_id: yup
       .number()
       .integer()
@@ -110,3 +111,27 @@ export const createOrUpdateProgramSchema = yup
     // For create case, required fields are validated above
     return true;
   });
+
+export const saveAsDraftProgramSchema = yup
+  .object({
+    id: yup.number().integer().positive().optional(),
+    title: yup.string().required("Title is required for draft"),
+    code: yup.string().optional(),
+    author: yup.number().integer().positive().optional(),
+    level_id: yup.number().integer().positive().optional(),
+    degree_id: yup.number().integer().positive().nullable().optional(),
+    duration: yup.string().optional(),
+    credits: yup.number().integer().positive().optional(),
+    language: yup.string().optional(),
+    eligibility_criteria: yup.string().optional(),
+    fee: yup.string().optional(),
+    scholarship_id: yup.number().integer().positive().nullable().optional(),
+    curriculum: yup.string().optional(),
+    learning_outcomes: yup.string().optional(),
+    delivery_type: yup.string().oneOf(["Full-time", "Part-time", "Online", "Hybrid"]).optional(),
+    delivery_mode: yup.string().oneOf(["On-campus", "Remote", "Blended"]).optional(),
+    careers: yup.string().optional(),
+    exam_id: yup.number().integer().positive().nullable().optional(),
+    status: yup.string().oneOf(["published", "draft"]).optional(),
+  })
+  .required();

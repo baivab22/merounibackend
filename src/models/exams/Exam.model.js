@@ -124,6 +124,11 @@ Exam.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    status: {
+      type: DataTypes.ENUM("draft", "published"),
+      allowNull: false,
+      defaultValue: "published",
+    },
   },
   {
     sequelize,

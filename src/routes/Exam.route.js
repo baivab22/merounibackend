@@ -73,6 +73,52 @@ router.get(
 
 /**
  * @swagger
+ * /exam/admin/list:
+ *   get:
+ *     summary: List all exams for admin with pagination and status filter
+ *     tags: [Exams]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [published, draft]
+ *     responses:
+ *       200:
+ *         description: List of exams
+ */
+router.get(
+  "/admin/list",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  ExamController.listAdminExams
+);
+
+/**
+ * @swagger
+ * /exam/admin/filter:
+ *   post:
+ *     summary: List all exams for admin with filtering via body
+ *     tags: [Exams]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of exams
+ */
+router.post(
+  "/admin/filter",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  ExamController.listAdminExams
+);
+
+/**
+ * @swagger
  * /exam:
  *   post:
  *     summary: Create or update an exam
@@ -97,6 +143,9 @@ router.get(
  *                 type: string
  *               level_id:
  *                 type: integer
+ *               status:
+ *                 type: string
+ *                 enum: [published, draft]
  *               examDetails:
  *                 type: array
  *                 items:
