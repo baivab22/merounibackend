@@ -155,6 +155,7 @@ class EventService {
     const isFeatured = query.is_featured;
     const search = query.q || "";
     const collegeId = query.college_id;
+    const categoryId = query.category_id;
 
     const whereCondition = {};
     if (search) {
@@ -167,6 +168,10 @@ class EventService {
 
     if (collegeId) {
       whereCondition.college_id = collegeId;
+    }
+
+    if (categoryId) {
+      whereCondition.category_id = categoryId;
     }
 
     const { count: totalCount, rows: items } = await Event.findAndCountAll({
