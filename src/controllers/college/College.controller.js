@@ -80,28 +80,23 @@ class CollegeController {
 
   static async listColleges(req, res) {
     try {
+      let isAdmin = false;
+      const roles = req.user?.roles || req.user?.role;
+      if (roles) {
+        try {
+          const userRoles = typeof roles === "string" ? JSON.parse(roles) : roles;
+          if (userRoles["admin"] || userRoles["editor"]) {
+            isAdmin = true;
+          }
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
+
       const { items, pagination } = await collegeService.listColleges({
         ...req.query,
         ...req.body,
-      });
-
-      return res.status(200).json({
-        message: "success",
-        items,
-        pagination,
-      });
-    } catch (error) {
-      return res.status(500).json({ error: error.message });
-    }
-  }
-
-
-  static async listCollegesAdmin(req, res) {
-    try {
-      const { items, pagination } = await collegeService.listColleges({
-        ...req.query,
-        ...req.body,
-      }, true);
+      }, isAdmin);
 
       return res.status(200).json({
         message: "success",

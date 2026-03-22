@@ -1,7 +1,7 @@
 import express from "express";
 
 import CollegeController from "../controllers/college/College.controller.js";
-import { authenticateUser } from "../middlewares/Auth.middleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
@@ -16,6 +16,7 @@ import {
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
+
 
 /**
  * @swagger
@@ -273,6 +274,7 @@ router.delete(
  */
 router.get(
   "/",
+  optionalAuthenticateUser,
   requestValidator(collegePaginationSchema, "query"),
   CollegeController.listColleges
 );
@@ -294,16 +296,9 @@ router.get(
  */
 router.post(
   "/filter",
+  optionalAuthenticateUser,
   requestValidator(collegePaginationSchema, "body"),
   CollegeController.listColleges
-);
-
-
-
-router.get(
-  "/admin/list",
-  requestValidator(collegePaginationSchema, "query"),
-  CollegeController.listCollegesAdmin
 );
 
 

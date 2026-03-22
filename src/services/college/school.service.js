@@ -22,16 +22,15 @@ const parseFilter = (val) => {
 };
 
 class SchoolService {
-    async listSchools(query = {}) {
+    async listSchools(query = {}, isAdmin = false) {
         const page = parseInt(query.page, 10) || 1;
         const limit = parseInt(query.limit, 10) || 24;
         const sort = (query.sort || "asc").toUpperCase();
         const search = query.q || "";
 
-
         const types = parseFilter(query.type);
         const affiliations = parseFilter(query.affiliation || query.university);
-
+        const status = query.status;
 
         const offset = (page - 1) * limit;
 
@@ -47,6 +46,14 @@ class SchoolService {
 
         if (types.length > 0) {
             whereCondition.institute_type = { [Op.in]: types };
+        }
+
+        if (isAdmin) {
+            if (status && status !== 'all') {
+                whereCondition.status = status;
+            }
+        } else {
+            whereCondition.status = "published";
         }
 
         if (affiliations.length > 0) {

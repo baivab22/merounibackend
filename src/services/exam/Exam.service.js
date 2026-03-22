@@ -275,8 +275,15 @@ class ExamService {
   }
 
   async getExam(slugs) {
+    const whereCondition = {};
+    if (!isNaN(slugs) && !isNaN(parseFloat(slugs))) {
+      whereCondition[Op.or] = [{ id: parseInt(slugs, 10) }, { slugs }];
+    } else {
+      whereCondition.slugs = slugs;
+    }
+
     const exam = await Exam.findOne({
-      where: { slugs },
+      where: whereCondition,
       include: [
         { model: Level, attributes: ["id", "title"], as: "level" },
         {

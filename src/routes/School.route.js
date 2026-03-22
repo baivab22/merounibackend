@@ -1,6 +1,8 @@
 import express from "express";
 
 import SchoolController from "../controllers/school/School.controller.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
+import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
     schoolPaginationSchema,
@@ -46,6 +48,7 @@ const router = express.Router();
  */
 router.get(
     "/",
+    optionalAuthenticateUser,
     requestValidator(schoolPaginationSchema, "query"),
     SchoolController.listSchools
 );

@@ -5,7 +5,20 @@ const universityService = new UniversityService();
 class UniversityController {
   static async listUniversities(req, res) {
     try {
-      const data = await universityService.listUniversities(req.query);
+      let isAdmin = false;
+      const roles = req.user?.roles || req.user?.role;
+      if (roles) {
+        try {
+          const userRoles = typeof roles === "string" ? JSON.parse(roles) : roles;
+          if (userRoles["admin"] || userRoles["editor"]) {
+            isAdmin = true;
+          }
+        } catch (e) {
+          // ignore parsing error
+        }
+      }
+
+      const data = await universityService.listUniversities(req.query, isAdmin);
       return res.status(200).json(data);
     } catch (error) {
       const status = error.status || 500;

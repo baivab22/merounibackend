@@ -14,24 +14,33 @@ import Program from "../../models/program/Program.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class UniversityService {
-  async listUniversities(query = {}) {
+  async listUniversities(query = {}, isAdmin = false) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 24;
+    const sort = (query.sort || "asc").toUpperCase();
+    const search = query.q || "";
+    const type = query.type;
     const status = query.status;
-
-    const searchQuery = query.q || "";
 
     const offset = (page - 1) * limit;
 
     const whereCondition = {};
-    if (searchQuery) {
-      whereCondition.fullname = { [Op.like]: `%${searchQuery}%` };
+    if (search) {
+      whereCondition.fullname = {
+        [Op.like]: `%${search}%`,
+      };
     }
-    if (query.type) {
-      whereCondition.type_of_institute = query.type;
+    if (type) {
+      whereCondition.type_of_institute = type;
     }
-    if (status) {
-      whereCondition.status = status;
+    
+    // Default to 'published' for public listings, or use common query.status if provided (e.g. from dashboard)
+    if (isAdmin) {
+      if (status && status !== 'all') {
+        whereCondition.status = status;
+      }
+    } else {
+      whereCondition.status = "published";
     }
 
     const { count: totalCount, rows: items } = await University.findAndCountAll({

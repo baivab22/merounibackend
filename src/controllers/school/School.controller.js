@@ -3,7 +3,20 @@ import schoolService from "../../services/college/school.service.js";
 class SchoolController {
     static async listSchools(req, res) {
         try {
-            const { items, pagination } = await schoolService.listSchools(req.query);
+            let isAdmin = false;
+            const roles = req.user?.roles || req.user?.role;
+            if (roles) {
+                try {
+                    const userRoles = typeof roles === "string" ? JSON.parse(roles) : roles;
+                    if (userRoles["admin"] || userRoles["editor"]) {
+                        isAdmin = true;
+                    }
+                } catch (e) {
+                    // ignore parsing error
+                }
+            }
+
+            const { items, pagination } = await schoolService.listSchools(req.query, isAdmin);
 
             return res.status(200).json({
                 message: "success",

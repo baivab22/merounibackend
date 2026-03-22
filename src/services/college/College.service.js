@@ -534,7 +534,11 @@ class CollegeService {
 
     const offset = (page - 1) * limit;
 
-    const whereCondition = {};
+    const whereCondition = {
+      [Op.and]: [
+        sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`)
+      ]
+    };
     if (search) {
       whereCondition.name = {
         [Op.like]: `%${search}%`,
@@ -544,10 +548,11 @@ class CollegeService {
     if (types.length > 0) {
       whereCondition.institute_type = { [Op.in]: types };
     }
-    if (status) {
-      whereCondition.status = status;
-    }
-    if (!isAdmin) {
+    if (isAdmin) {
+      if (status) {
+        whereCondition.status = status;
+      }
+    } else {
       whereCondition.status = "published";
     }
 

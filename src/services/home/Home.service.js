@@ -45,7 +45,7 @@ class HomeService {
       degrees
     ] = await Promise.all([
       College.findAll({
-        where: { name: searchCondition },
+        where: { name: searchCondition, status: 'published' },
         attributes: [['id', 'id'], ['name', 'title'], ['slugs', 'slugs'],['featured_img','image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'colleges' }))),
@@ -69,7 +69,7 @@ class HomeService {
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'blog' }))),
 
       Exam.findAll({
-        where: { title: searchCondition },
+        where: { title: searchCondition, status: 'published' },
         attributes: [['id', 'id'], ['title', 'title'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'exams' }))),
@@ -81,7 +81,7 @@ class HomeService {
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'materials' }))),
 
       University.findAll({
-        where: { fullname: searchCondition },
+        where: { fullname: searchCondition, status: 'published' },
         attributes: [['id', 'id'], ['fullname', 'title'],['featured_image','image'], ['slugs', 'slugs'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'university' }))),

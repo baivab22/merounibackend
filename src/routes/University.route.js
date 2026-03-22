@@ -1,7 +1,7 @@
 import express from "express";
 
 import UniversityController from "../controllers/university/University.controller.js";
-import { authenticateUser } from "../middlewares/Auth.middleware.js";
+import { authenticateUser, optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
@@ -43,6 +43,7 @@ const route = express.Router();
  */
 route.get(
   "/",
+  optionalAuthenticateUser,
   requestValidator(universityListSchema, "query"),
   UniversityController.listUniversities
 );
