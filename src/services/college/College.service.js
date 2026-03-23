@@ -1018,9 +1018,9 @@ class CollegeService {
       attributes: ["id", "name", "slugs", "college_logo", "featured_img", "order_no_for_website"],
       include: [
         {
-          model: Program,
-          as: "programs",
-          attributes: ["id", "title", "slugs"],
+          model: Degree,
+          as: "degrees",
+          attributes: ["id", "title", "slug"],
           through: { attributes: [] },
         },
       ],
