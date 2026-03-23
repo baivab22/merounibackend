@@ -75,7 +75,7 @@ export const University = sequelize.define(
       allowNull: true,
     },
     videos: {
-      type: DataTypes.JSONB,
+      type: DataTypes.JSON,
       allowNull: true,
     },
     map: {

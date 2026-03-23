@@ -42,19 +42,18 @@ class ExamService {
       ];
     }
 
-    // University/Affiliation filter
+    // University/Affiliation filter (JSONB array contains)
     if (universityId) {
       const parsedUniversityId = parseInt(universityId, 10);
       if (!isNaN(parsedUniversityId)) {
-        whereCondition.affiliation = parsedUniversityId;
+        whereCondition.affiliation = { [Op.contains]: [parsedUniversityId] };
       }
     }
 
-    include.push({
-      model: University,
-      attributes: ["id", "fullname"],
-      as: "university",
-    });
+    // Since affiliation is now JSONB, we can't easily use belongsTo include.
+    // We'll return the IDs as is, or fetch details after query if really needed.
+    // For listing, usually IDs are enough or we can expand them if requested.
+    // I will remove the include for University for now as it would fail.
 
     // Category filter
     if (categoryId) {
@@ -149,6 +148,20 @@ class ExamService {
       include,
     });
 
+    // Expand universities to maintain response consistency
+    const allUniversityIds = [...new Set(items.flatMap(exam => exam.affiliation || []))];
+    if (allUniversityIds.length > 0) {
+      const universities = await University.findAll({
+        where: { id: allUniversityIds },
+        attributes: ["id", "fullname", "logo"],
+      });
+      const universityMap = new Map(universities.map(u => [u.id, u]));
+      items.forEach(exam => {
+        const expanded = (exam.affiliation || []).map(id => universityMap.get(id)).filter(Boolean);
+        exam.setDataValue("affiliation", expanded);
+      });
+    }
+
     return {
       items,
       pagination: {
@@ -192,19 +205,15 @@ class ExamService {
       whereCondition.status = status;
     }
 
-    // University/Affiliation filter
+    // University/Affiliation filter (JSONB array contains)
     if (universityId) {
       const parsedUniversityId = parseInt(universityId, 10);
       if (!isNaN(parsedUniversityId)) {
-        whereCondition.affiliation = parsedUniversityId;
+        whereCondition.affiliation = { [Op.contains]: [parsedUniversityId] };
       }
     }
 
-    include.push({
-      model: University,
-      attributes: ["id", "fullname"],
-      as: "university",
-    });
+    // No include for University here since it's JSONB now.
 
     // Category filter
     if (categoryId) {
@@ -263,6 +272,20 @@ class ExamService {
       include,
     });
 
+    // Expand universities to maintain response consistency
+    const allUniversityIds = [...new Set(items.flatMap(exam => exam.affiliation || []))];
+    if (allUniversityIds.length > 0) {
+      const universities = await University.findAll({
+        where: { id: allUniversityIds },
+        attributes: ["id", "fullname", "logo"],
+      });
+      const universityMap = new Map(universities.map(u => [u.id, u]));
+      items.forEach(exam => {
+        const expanded = (exam.affiliation || []).map(id => universityMap.get(id)).filter(Boolean);
+        exam.setDataValue("affiliation", expanded);
+      });
+    }
+
     return {
       items,
       pagination: {
@@ -287,11 +310,6 @@ class ExamService {
       include: [
         { model: Level, attributes: ["id", "title"], as: "level" },
         {
-          model: University,
-          attributes: ["id", "fullname"],
-          as: "university",
-        },
-        {
           model: UserModel,
           attributes: ["id", "firstName"],
           as: "authorDetails",
@@ -308,6 +326,20 @@ class ExamService {
       const error = new Error("Exam not found");
       error.status = 404;
       throw error;
+    }
+
+    // Manually expand universities to maintain response consistency
+    if (exam.affiliation && Array.isArray(exam.affiliation) && exam.affiliation.length > 0) {
+      const universities = await University.findAll({
+        where: { id: exam.affiliation },
+        attributes: ["id", "fullname", "logo"],
+      });
+      // Sort to match the order in affiliation array if desired, or just return all
+      const universityMap = new Map(universities.map(u => [u.id, u]));
+      const expanded = exam.affiliation.map(id => universityMap.get(id)).filter(Boolean);
+      exam.setDataValue("affiliations", expanded);
+    } else {
+      exam.setDataValue("affiliations", []);
     }
 
     return exam;
@@ -339,6 +371,7 @@ class ExamService {
       opening_date,
       closing_date,
       status,
+      conducted_by,
     } = payload;
 
     const transaction = await sequelize.transaction();
@@ -367,6 +400,7 @@ class ExamService {
         opening_date,
         closing_date,
         status,
+        conducted_by,
       };
 
       if (!examId) {

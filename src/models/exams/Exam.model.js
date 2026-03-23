@@ -61,22 +61,22 @@ Exam.init(
       onDelete: "CASCADE",
     },
     affiliation: {
-      // Corrected spelling
-      type: DataTypes.INTEGER,
+      type: DataTypes.JSON,
       allowNull: true,
-      references: {
-        model: University, // Use the actual model
-        key: "id",
-      },
-      onDelete: "CASCADE",
+      defaultValue: [],
+    },
+    conducted_by: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     syllabus: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
     pastQuestion: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: true,
+      defaultValue: [],
     },
     // New flattened fields
     exam_type: {
@@ -141,7 +141,6 @@ Exam.init(
 // Define the relationships:
 Exam.belongsTo(User, { foreignKey: "author", as: "authorDetails" });
 Exam.belongsTo(Level, { foreignKey: "level_id", as: "level" });
-Exam.belongsTo(University, { foreignKey: "affiliation", as: "university" });
 Exam.belongsTo(Category, { foreignKey: "category_id", as: "category" });
 
 export { Exam };

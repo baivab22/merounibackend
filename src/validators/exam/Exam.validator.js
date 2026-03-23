@@ -46,12 +46,20 @@ export const createOrUpdateExamSchema = yup
       .transform((value, originalValue) => originalValue === "" ? null : value)
       .nullable()
       .optional(),
-    affiliation: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    affiliation: yup
+      .array()
+      .of(yup.number().integer().positive())
       .nullable()
-      .optional(),
+      .optional()
+      .default([]),
+    conducted_by: yup.string().nullable().optional(),
     syllabus: yup.string().nullable().optional(),
-    pastQuestion: yup.string().nullable().optional(),
+    pastQuestion: yup
+      .array()
+      .of(yup.string())
+      .nullable()
+      .optional()
+      .default([]),
     author: yup.number().integer().required("Author is required"),
 
     // Flattened fields
