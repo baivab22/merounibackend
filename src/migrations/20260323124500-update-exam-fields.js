@@ -27,6 +27,7 @@ export async function up(queryInterface, Sequelize) {
     await queryInterface.changeColumn('exams', 'pastQuestion', {
       type: Sequelize.JSON,
       allowNull: true,
+      defaultValue: [],
     });
   }
 
@@ -46,13 +47,14 @@ export async function up(queryInterface, Sequelize) {
       await queryInterface.sequelize.query('ALTER TABLE exams DROP INDEX affiliation');
     } catch (e) { /* ignore if not exists */ }
 
-    // Clear data before conversion to avoid JSON syntax errors if any invalid data exists
-    await queryInterface.sequelize.query('UPDATE exams SET affiliation = NULL');
-
     await queryInterface.changeColumn('exams', 'affiliation', {
       type: Sequelize.JSON,
       allowNull: true,
+      defaultValue: [],
     });
+
+    // Clear and convert data after conversion
+    await queryInterface.sequelize.query('UPDATE exams SET affiliation = NULL');
   }
 }
 
