@@ -24,6 +24,10 @@ class ConsultancyService {
       whereCondition.city = query.city;
     }
 
+    if (query.district) {
+      whereCondition.district = query.district;
+    }
+
     if (query.destination) {
       whereCondition[Op.and] = whereCondition[Op.and] || [];
       whereCondition[Op.and].push(
@@ -239,11 +243,11 @@ class ConsultancyService {
       if (address !== undefined && typeof address === "object" && address !== null) {
         updateData.address = address;
         if (address.city) updateData.city = address.city;
-        if (address.state) updateData.state = address.state;
+        if (address.district) updateData.district = address.district;
         if (address.street) updateData.street = address.street;
         if (address.country) updateData.country = address.country;
         // Update location summary string
-        updateData.location = [address.city, address.state, address.country]
+        updateData.location = [address.city, address.district, address.country]
           .filter(Boolean)
           .join(", ");
       }
@@ -284,10 +288,10 @@ class ConsultancyService {
     } else {
       // Extract individual address components for creation
       const city = address?.city || null;
-      const state = address?.state || null;
+      const district = address?.district || null;
       const street = address?.street || null;
       const country_field = address?.country || null;
-      const location_summary = [city, state, country_field].filter(Boolean).join(", ");
+      const location_summary = [city, district, country_field].filter(Boolean).join(", ");
 
       // For create, handle empty strings and undefined as null for optional fields
       consultancy = await Consultancy.create({
@@ -297,7 +301,7 @@ class ConsultancyService {
         address: address || {},
         location: location_summary,
         city,
-        state,
+        district,
         street,
         country: country_field,
         featured_image: featured_image || "",
@@ -385,7 +389,7 @@ class ConsultancyService {
 
   async getUniqueLocationsAndDestinations() {
     const consultancies = await Consultancy.findAll({
-      attributes: ["city", "destination", "location"],
+      attributes: ["city", "district", "destination", "location"],
       where: {
         status: "published",
       },
@@ -394,6 +398,10 @@ class ConsultancyService {
     const cities = [...new Set(consultancies.map((c) => c.city).filter(Boolean))];
     const locations = [
       ...new Set(consultancies.map((c) => c.location).filter(Boolean)),
+    ];
+
+    const districts = [
+      ...new Set(consultancies.map((c) => c.district).filter(Boolean)),
     ];
 
     const destinations = new Set();
@@ -414,6 +422,7 @@ class ConsultancyService {
 
     return {
       cities,
+      districts,
       locations,
       destinations: [...destinations],
     };

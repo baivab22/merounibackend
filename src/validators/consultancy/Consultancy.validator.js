@@ -15,6 +15,7 @@ export const listConsultancyQuerySchema = paginationSchema.shape({
     .default("DESC"),
   courseId: yup.number().integer().positive().optional(),
   city: yup.string().trim().optional(),
+  district: yup.string().trim().optional(),
   destination: yup.string().trim().optional(),
 });
 

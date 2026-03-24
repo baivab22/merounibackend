@@ -35,7 +35,7 @@ Consultancy.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    state: {
+    district: {
       type: DataTypes.STRING,
       allowNull: true,
     },

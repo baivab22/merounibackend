@@ -223,7 +223,7 @@ class ReferralService {
             {
               model: CollegeAddress,
               as: "address",
-              attributes: ["country", "state", "city", "street", "postal_code"],
+              attributes: ["country", "district", "city", "street", "postal_code"],
               required: false,
             },
             {
