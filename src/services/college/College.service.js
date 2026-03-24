@@ -623,7 +623,7 @@ class CollegeService {
         {
           model: Degree,
           as: "degrees",
-          attributes: ["id", "title", "slug"],
+          attributes: ["id", "title", "slug", "short_name"],
           through: { attributes: [] },
           required: !!degreeIdFilter,
           where: degreeIdFilter ? { id: degreeIdFilter } : undefined,
@@ -743,7 +743,7 @@ class CollegeService {
         {
           model: Degree,
           as: "degrees",
-          attributes: ["id", "title", "slug"],
+          attributes: ["id", "title", "slug", "short_name"],
           through: { attributes: [] }
         },
       ],
@@ -1020,7 +1020,7 @@ class CollegeService {
         {
           model: Degree,
           as: "degrees",
-          attributes: ["id", "title", "slug"],
+          attributes: ["id", "title", "slug", "short_name"],
           through: { attributes: [] },
         },
       ],
