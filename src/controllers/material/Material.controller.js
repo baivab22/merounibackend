@@ -5,7 +5,8 @@ const materialService = new MaterialService();
 class MaterialController {
   static async listMaterials(req, res) {
     try {
-      const materials = await materialService.listMaterialsNested(req.query);
+      const userId = req.user?.id;
+      const materials = await materialService.listMaterialsNested({ ...req.query, userId });
       return res.status(200).json({
         message: "Materials retrieved successfully",
         data: materials,
@@ -20,7 +21,8 @@ class MaterialController {
 
   static async listMaterialsFlat(req, res) {
     try {
-      const { materials, pagination } = await materialService.listMaterialsFlat(req.query);
+      const userId = req.user?.id;
+      const { materials, pagination } = await materialService.listMaterialsFlat({ ...req.query, userId });
       return res.status(200).json({
         message: "Materials flat list retrieved successfully",
         data: materials,
@@ -36,7 +38,8 @@ class MaterialController {
 
   static async listMaterialsByTopic(req, res) {
     try {
-      const materials = await materialService.listByTopic(req.params.topicId);
+      const userId = req.user?.id;
+      const materials = await materialService.listByTopic(req.params.topicId, userId);
       return res.status(200).json({
         message: "Topic materials retrieved successfully",
         data: materials,
@@ -137,6 +140,27 @@ class MaterialController {
       return res.status(200).json(result);
     } catch (error) {
       console.error("Error updating material order:", error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.message || "Server error" });
+    }
+  }
+
+  static async toggleHeart(req, res) {
+    try {
+      const materialId = req.params.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const result = await materialService.toggleHeart(materialId, userId);
+      return res.status(200).json({
+        message: "Heart toggled successfully",
+        data: result,
+      });
+    } catch (error) {
+      console.error("Error toggling material heart:", error);
       return res
         .status(error.status || 500)
         .json({ message: error.message || "Server error" });

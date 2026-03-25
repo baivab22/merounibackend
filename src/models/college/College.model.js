@@ -68,6 +68,11 @@ College.init(
       allowNull: false,
       defaultValue: "published",
     },
+    is_referable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,

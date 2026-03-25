@@ -29,6 +29,14 @@ Referral.init(
         key: "id",
       },
     },
+    consultancy_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
     application_type: {
       type: DataTypes.ENUM("self", "referred"),
       allowNull: false,
@@ -96,6 +104,11 @@ Referral.belongsTo(College, {
 Referral.belongsTo(User, {
   foreignKey: "agent_id",
   as: "referralAgent",
+});
+
+Referral.belongsTo(User, {
+  foreignKey: "consultancy_id",
+  as: "referralConsultancy",
 });
 
 Referral.belongsTo(Program, {

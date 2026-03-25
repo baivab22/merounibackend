@@ -3,6 +3,21 @@ import CollegeService from "../../services/college/College.service.js";
 const collegeService = new CollegeService();
 
 class CollegeController {
+  static async updateReferableStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { is_referable } = req.body;
+      await collegeService.updateReferableStatus(id, is_referable);
+      return res.status(200).json({
+        message: "Referable status updated successfully!",
+      });
+    } catch (error) {
+      return res
+        .status(error.status || 500)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+
   static async createOrUpdateCollege(req, res) {
     try {
       const { collegeId, isNew } = await collegeService.createOrUpdateCollege(

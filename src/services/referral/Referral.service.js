@@ -21,13 +21,14 @@ class ReferralService {
     }
 
     const userRoles = roleHelper(user?.role);
-    if (!userRoles?.agent) {
-      const error = new Error("Only agents can create referrals");
+    if (!userRoles?.agent && !userRoles?.consultancy) {
+      const error = new Error("Only agents and consultancies can create referrals");
       error.status = 403;
       throw error;
     }
 
-    const agent_id = user.id;
+    const agent_id = userRoles?.agent ? user.id : null;
+    const consultancy_id = userRoles?.consultancy ? user.id : null;
 
     for (const application of applications) {
       const { college_id, students = [] } = application;
@@ -49,6 +50,7 @@ class ReferralService {
         await Referral.create({
           college_id,
           agent_id,
+          consultancy_id,
           application_type: "referred",
           student_name: student.student_name,
           student_phone_no: student.student_phone_no,
@@ -145,8 +147,12 @@ class ReferralService {
 
     const userRoles = roleHelper(user?.role);
 
-    if (userRoles?.agent && !userRoles?.admin && !userRoles?.editor) {
-      whereCondition.agent_id = user.id;
+    if (!userRoles?.admin && !userRoles?.editor) {
+      if (userRoles?.agent) {
+        whereCondition.agent_id = user.id;
+      } else if (userRoles?.consultancy) {
+        whereCondition.consultancy_id = user.id;
+      }
     }
 
     if (status) {
@@ -171,6 +177,11 @@ class ReferralService {
         {
           model: UserModel,
           as: "referralAgent",
+          attributes: ["firstName", "middleName", "lastName"],
+        },
+        {
+          model: UserModel,
+          as: "referralConsultancy",
           attributes: ["firstName", "middleName", "lastName"],
         },
         {
@@ -207,6 +218,8 @@ class ReferralService {
 
     if (userRoles?.agent) {
       whereCondition.agent_id = user.id;
+    } else if (userRoles?.consultancy) {
+      whereCondition.consultancy_id = user.id;
     } else if (user?.id) {
       // student or other authenticated user
       whereCondition.student_id = user.id;
@@ -371,8 +384,8 @@ class ReferralService {
     // If user is provided, check if they own this referral (for students)
     if (user) {
       const userRoles = roleHelper(user?.role);
-      // If user is a student (not admin/editor/agent), they can only delete their own referrals
-      if (!userRoles?.admin && !userRoles?.editor && !userRoles?.agent) {
+      // If user is a student (not admin/editor/agent/consultancy), they can only delete their own referrals
+      if (!userRoles?.admin && !userRoles?.editor && !userRoles?.agent && !userRoles?.consultancy) {
         if (referral.student_id !== user.id) {
           const error = new Error("You can only delete your own applications");
           error.status = 403;

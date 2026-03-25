@@ -21,6 +21,18 @@ import UserModel from "../../models/users/User.model.js";
 
 
 class CollegeService {
+  async updateReferableStatus(id, is_referable) {
+    const college = await College.findByPk(id);
+    if (!college) {
+      const error = new Error("College not found");
+      error.status = 404;
+      throw error;
+    }
+
+    await college.update({ is_referable });
+    return college;
+  }
+
   async createOrUpdateCollege(payload) {
     const transaction = await sequelize.transaction();
 
@@ -50,6 +62,7 @@ class CollegeService {
         images,
         degrees,
         status,
+        is_referable,
       } = payload;
 
       console.log(programs, "programsprogramsprograms")
@@ -106,6 +119,7 @@ class CollegeService {
             faqs,
             order_no_for_website: nextOrder,
             status: status || "published",
+            is_referable: is_referable ?? false,
           },
           { transaction }
         );
@@ -125,6 +139,7 @@ class CollegeService {
           map_type,
           website_url,
           status: status || existingCollege.status,
+          is_referable: is_referable !== undefined ? is_referable : existingCollege.is_referable,
         };
 
         // Only update name and slugs if name has changed
@@ -508,6 +523,7 @@ class CollegeService {
     const sort = (query.sort || "asc").toUpperCase();
     const status = query.status
     const search = query.q
+    const isReferable = query.is_referable
 
     // Helper to parse potential array/string/comma-separated params
     const parseFilter = (val) => {
@@ -554,6 +570,10 @@ class CollegeService {
       }
     } else {
       whereCondition.status = "published";
+    }
+
+    if (isReferable === 'true' || isReferable === true) {
+      whereCondition.is_referable = true;
     }
 
 

@@ -133,7 +133,7 @@ router.get(
 router.post(
   "/agent-apply",
   authenticateUser,
-  authorizeRole(["admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent", "consultancy"]),
   requestValidator(createReferredApplicationSchema, "body"),
   ReferralController.createReferredApplication,
 );
@@ -179,7 +179,7 @@ router.post(
 router.post(
   "/apply-agent",
   authenticateUser,
-  authorizeRole(["agent"]),
+  authorizeRole(["agent", "consultancy"]),
   requestValidator(createReferredApplicationSchema, "body"),
   ReferralController.agentApply,
 );
@@ -204,7 +204,7 @@ router.post(
 router.get(
   "/",
   authenticateUser,
-  authorizeRole(["admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent", "consultancy"]),
   requestValidator(listReferralQuerySchema, "query"),
   ReferralController.getApplications,
 );
@@ -281,7 +281,7 @@ router.get(
 router.get(
   "/type/:type",
   authenticateUser,
-  authorizeRole(["admin", "editor", "agent"]),
+  authorizeRole(["admin", "editor", "agent", "consultancy"]),
   requestValidator(applicationTypeParamSchema, "params"),
   ReferralController.getApplicationsByType,
 );
@@ -398,7 +398,7 @@ router.get(
 router.patch(
   "/:id/status",
   authenticateUser,
-  authorizeRole(["admin", "editor", "agent", "institution"]),
+  authorizeRole(["admin", "editor", "agent", "consultancy", "institution"]),
   requestValidatorMultiple([
     { schema: referralIdParamSchema, property: "params" },
     { schema: updateReferralStatusSchema, property: "body" },

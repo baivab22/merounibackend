@@ -414,6 +414,46 @@ router.delete(
 
 /**
  * @swagger
+ * /college/{id}/referable:
+ *   patch:
+ *     summary: Update college referable status
+ *     tags: [Colleges]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - is_referable
+ *             properties:
+ *               is_referable:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Referable status updated successfully
+ *       404:
+ *         description: College not found
+ */
+router.patch(
+  "/:id/referable",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(collegeIdParamSchema, "params"),
+  CollegeController.updateReferableStatus
+);
+
+/**
+ * @swagger
  * /college/institution/my-college:
  *   get:
  *     summary: Get college by institution user (Institution only)

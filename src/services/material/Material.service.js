@@ -5,9 +5,16 @@ import Category from "../../models/category/Category.model.js";
 import Material from "../../models/materials/Material.model.js";
 import MaterialCategoryOrder from "../../models/materials/MaterialCategoryOrder.model.js";
 
+import MaterialHeart from "../../models/materials/MaterialHeart.model.js";
+
 class MaterialService {
-  _formatMaterial(material) {
+  _formatMaterial(material, userId = null) {
     const plain = material instanceof Material ? material.get({ plain: true }) : material;
+    
+    // Calculate heart count and user status if relations are included
+    const hearts_count = plain.hearts ? plain.hearts.length : (plain.hearts_count || 0);
+    const is_hearted = userId ? (plain.hearts ? plain.hearts.some(h => h.user_id === userId) : !!plain.is_hearted) : false;
+
     return {
       title: plain.title,
       id: plain.id,
@@ -16,47 +23,54 @@ class MaterialService {
       file_url: plain.file_url,
       createdAt: plain.createdAt,
       description: plain.description,
+      hearts_count,
+      is_hearted,
     };
   }
 
   async listMaterialsNested(query = {}) {
     const searchQuery = query.q || query.search || "";
+    const userId = query.userId;
     const materialWhere = searchQuery ? { title: { [Op.like]: `%${searchQuery}%` } } : {};
 
     const materials = await Material.findAll({
       where: materialWhere,
+      include: [
+        { 
+          model: MaterialHeart, 
+          as: "hearts", 
+          attributes: ["id", "user_id"], 
+          required: false 
+        }
+      ],
       order: [["position", "ASC"], ["createdAt", "DESC"]],
     });
 
     const categories = await Category.findAll({
       where: { type: "MATERIAL" },
-      include: [{
-        model: MaterialCategoryOrder,
-        as: "materialCategoryOrders",
-        where: { context: "MATERIAL" },
-        required: false,
-      }],
     });
 
     const categoryMap = {};
     categories.forEach((cat) => {
-      const orderInfo = cat.materialCategoryOrders?.[0];
       categoryMap[cat.id] = {
         title: cat.title,
         id: cat.id,
-        position: orderInfo ? orderInfo.position : 0,
+        position: cat.order_no || 0, // Fallback to order_no if MaterialCategoryOrder is not used
         parent_id: cat.parent_id,
         subcategories: [],
         materials: [],
         materials_count: 0,
+        hearts_count: 0,
       };
     });
 
     materials.forEach((material) => {
       const catId = material.category_id;
       if (catId && categoryMap[catId]) {
-        categoryMap[catId].materials.push(this._formatMaterial(material));
+        const formatted = this._formatMaterial(material, userId);
+        categoryMap[catId].materials.push(formatted);
         categoryMap[catId].materials_count += 1;
+        categoryMap[catId].hearts_count += formatted.hearts_count || 0;
       }
     });
 
@@ -66,19 +80,27 @@ class MaterialService {
         tree.push(node);
       } else {
         const parent = categoryMap[node.parent_id];
-        if (parent) parent.subcategories.push(node);
-        else tree.push(node);
+        if (parent && parent.id !== node.id) { // Prevent self-circularity
+          parent.subcategories.push(node);
+        } else {
+          tree.push(node);
+        }
       }
     });
 
-    const polishNode = (node, depth = 1) => {
+    const polishNode = (node) => {
+      let totalHearts = node.hearts_count || 0;
       if (node.subcategories?.length > 0) {
         node.subcategories.sort((a, b) => a.position - b.position);
-        node.subcategories.forEach(child => polishNode(child, depth + 1));
+        node.subcategories.forEach(child => {
+          totalHearts += polishNode(child);
+        });
       }
+      node.hearts_count = totalHearts;
+      return totalHearts;
     };
 
-    tree.sort((a, b) => a.position - b.position).forEach(node => polishNode(node, 1));
+    tree.sort((a, b) => a.position - b.position).forEach(node => polishNode(node));
 
     return tree;
   }
@@ -100,21 +122,38 @@ class MaterialService {
       limit,
       offset,
       order: [["createdAt", "DESC"]],
-      include: [{ model: Category, as: "category", attributes: ["id", "title"], required: false }],
+      include: [
+        { model: Category, as: "category", attributes: ["id", "title"], required: false },
+        { 
+          model: MaterialHeart, 
+          as: "hearts", 
+          attributes: ["id", "user_id"], 
+          required: false 
+        }
+      ],
+      distinct: true, // Needed for findAndCountAll with includes
     });
 
     return {
-      materials: materials?.map((m) => this._formatMaterial(m)),
+      materials: materials?.map((m) => this._formatMaterial(m, query.userId)),
       pagination: { currentPage: page, totalPages: Math.ceil(totalCount / limit), limit, totalCount },
     };
   }
 
-  async listByTopic(topicId) {
+  async listByTopic(topicId, userId = null) {
     const materials = await Material.findAll({
       where: { category_id: topicId },
+      include: [
+        { 
+          model: MaterialHeart, 
+          as: "hearts", 
+          attributes: ["id", "user_id"], 
+          required: false 
+        }
+      ],
       order: [["position", "ASC"], ["createdAt", "DESC"]],
     });
-    return materials.map((m) => this._formatMaterial(m));
+    return materials.map((m) => this._formatMaterial(m, userId));
   }
 
   async getMaterial(id) {
@@ -201,6 +240,26 @@ class MaterialService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async toggleHeart(materialId, userId) {
+    const material = await Material.findByPk(materialId);
+    if (!material) throw Object.assign(new Error("Material not found"), { status: 404 });
+
+    const existingHeart = await MaterialHeart.findOne({
+      where: { material_id: materialId, user_id: userId },
+    });
+
+    if (existingHeart) {
+      await existingHeart.destroy();
+    } else {
+      await MaterialHeart.create({ material_id: materialId, user_id: userId });
+    }
+
+    const heartsCount = await MaterialHeart.count({ where: { material_id: materialId } });
+    const isHearted = !existingHeart;
+
+    return { hearts_count: heartsCount, is_hearted: isHearted };
   }
 }
 

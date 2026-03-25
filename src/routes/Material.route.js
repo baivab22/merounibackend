@@ -1,7 +1,10 @@
 import express from "express";
 
 import MaterialController from "../controllers/material/Material.controller.js";
-import { authenticateUser } from "../middlewares/Auth.middleware.js";
+import {
+  authenticateUser,
+  optionalAuthenticateUser,
+} from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import {
   requestValidator,
@@ -39,6 +42,7 @@ const route = express.Router();
  */
 route.get(
   "/",
+  optionalAuthenticateUser,
   MaterialController.listMaterials
 );
 
@@ -74,6 +78,7 @@ route.get(
  */
 route.get(
   "/list",
+  optionalAuthenticateUser,
   requestValidator(materialCategoryQuerySchema, "query"),
   MaterialController.listMaterialsFlat
 );
@@ -96,6 +101,7 @@ route.get(
  */
 route.get(
   "/topic/:topicId",
+  optionalAuthenticateUser,
   MaterialController.listMaterialsByTopic
 );
 
@@ -117,6 +123,7 @@ route.get(
  */
 route.get(
   "/:id",
+  optionalAuthenticateUser,
   requestValidator(materialIdParamSchema, "params"),
   MaterialController.getMaterial
 );
@@ -318,6 +325,32 @@ route.put(
   authorizeRole(["admin", "editor"]),
   requestValidator(updateMaterialOrderSchema, "body"),
   MaterialController.updateMaterialOrder
+);
+
+/**
+ * @swagger
+ * /material/{id}/heart:
+ *   post:
+ *     summary: Toggle heart reaction for a material
+ *     tags: [Materials]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Heart toggled successfully
+ */
+route.post(
+  "/:id/heart",
+  authenticateUser,
+  authorizeRole(["student"]),
+  MaterialController.toggleHeart
 );
 
 export default route;

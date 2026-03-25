@@ -95,7 +95,7 @@ class UniversityService {
             {
               model: Program,
               as: "program",
-              attributes: ["id", "title"],
+              attributes: ["id", "title", "slugs"],
             },
           ],
         },
