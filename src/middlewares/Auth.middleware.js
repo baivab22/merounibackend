@@ -3,7 +3,16 @@ import UserModel from "../models/users/User.model.js";
 
 export const authenticateUser = async (req, res, next) => {
   try {
-    const accessToken = req.cookies.token;
+    let accessToken = req.cookies.token;
+    
+    // Check Authorization header if cookie is missing (for Server Actions)
+    if (!accessToken && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        accessToken = authHeader.substring(7);
+      }
+    }
+
     const refreshToken = req.headers["x-refresh-token"];
     const { ACCESS_TOKEN, REFRESH_TOKEN, NODE_ENV, ACCESS_TOKEN_EXPIRY } =
       process.env;
@@ -99,7 +108,16 @@ export const authenticateUser = async (req, res, next) => {
 export const optionalAuthenticateUser = async (req, res, next) => {
   try {
     req.user = null;
-    const accessToken = req.cookies.token;
+    let accessToken = req.cookies.token;
+
+    // Check Authorization header if cookie is missing
+    if (!accessToken && req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      if (authHeader.startsWith('Bearer ')) {
+        accessToken = authHeader.substring(7);
+      }
+    }
+
     const refreshToken = req.headers["x-refresh-token"];
     const { ACCESS_TOKEN, REFRESH_TOKEN } = process.env;
 

@@ -20,6 +20,7 @@ import "./models/program/associations.js";
 import "./models/scholarship/associations.js";
 import "./models/vacancy/associations.js";
 import "./models/search/SearchTerm.model.js";
+import "./models/materials/MaterialHeart.model.js";
 
 const app = express();
 
@@ -45,7 +46,7 @@ const corsOptions = {
   allowedHeaders: [
     "Content-Type",
     "Authorization",
-    "device-id",
+    "Authorization",
     "x-refresh-token",
   ],
 };

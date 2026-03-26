@@ -1,11 +1,13 @@
 export const authorizeRole = (allowedRoles) => {
   return async (req, res, next) => {
-    const user = req.user;
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
 
-    const roles = user.roles || user.role;
+    const roles = req.user.roles || req.user.role;
 
-    if (!user || !roles) {
-      return res.status(401).json({ message: "Unauthorized" });
+    if (!roles) {
+      return res.status(403).json({ message: "Roles missing" });
     }
 
 
