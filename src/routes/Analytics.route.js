@@ -56,4 +56,11 @@ route.get(
   AnalyticsController.getAdminOverview
 );
 
+route.get(
+  "/enrollment-growth",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  AnalyticsController.getEnrollmentGrowth
+);
+
 export default route;

@@ -4,6 +4,9 @@ import express from "express";
 // instance for route of express
 const router = express.Router();
 
+import activityTracker from "../middlewares/ActivityTracker.middleware.js";
+router.use(activityTracker);
+
 import contactRoute from "./Contact.route.js";
 router.use("/contact-us", contactRoute);
 
@@ -146,6 +149,9 @@ router.use("/consultancy-application", consultancyApplicationRoute);
 
 import databaseRoute from "./Database.route.js";
 router.use("/database", databaseRoute);
+
+import activityLogRoute from "./ActivityLog.route.js";
+router.use("/activity-logs", activityLogRoute);
 
 export default router;
 

@@ -5,6 +5,7 @@ import Referral from "../../models/referral/Referral.model.js";
 import { University } from "../../models/university/University.model.js";
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
 import Blog from "../../models/blogs/Blog.model.js";
+import Material from "../../models/materials/Material.model.js";
 import { Sequelize, QueryTypes } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
@@ -19,6 +20,8 @@ class AnalyticsService {
       totalUniversities,
       totalConsultancies,
       totalBlogs,
+      totalSchools,
+      totalMaterials,
     ] = await Promise.all([
       UserModel.count(),
       College.count(),
@@ -32,6 +35,10 @@ class AnalyticsService {
       University.count(),
       Consultancy.count(),
       Blog.count(),
+      College.count({
+        where: Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
+      }),
+      Material.count(),
     ]);
 
     const educationalInstitutions = [
@@ -40,11 +47,30 @@ class AnalyticsService {
       { name: "Consultancies", value: totalConsultancies },
     ];
 
-    // Get available years (from earliest referral to current year)
+    const enrollmentData = await this.getEnrollmentGrowth(query);
+
+    return {
+      totalUsers,
+      totalColleges,
+      totalEvents,
+      totalReferrals,
+      totalAgents,
+      totalUniversities,
+      totalConsultancies,
+      totalBlogs,
+      totalSchools,
+      totalMaterials,
+      educationalInstitutions,
+      ...enrollmentData,
+    };
+  }
+
+  async getEnrollmentGrowth(query = {}) {
+    // Get available years (from earliest user joined to current year)
     const yearsData = await sequelize.query(
       `
       SELECT DISTINCT YEAR(createdAt) as year
-      FROM referral
+      FROM mu_users
       ORDER BY year DESC
       `,
       {
@@ -82,8 +108,11 @@ class AnalyticsService {
           SELECT 
             DATE_FORMAT(createdAt, '%b') as month_name,
             MONTH(createdAt) as month_num,
-            COUNT(*) as enrolled
-          FROM referral
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(roles, '$.student')) = 'true' THEN 1 ELSE 0 END) as student,
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(roles, '$.institution')) = 'true' THEN 1 ELSE 0 END) as institution,
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(roles, '$.agent')) = 'true' THEN 1 ELSE 0 END) as agent,
+            SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(roles, '$.consultancy')) = 'true' THEN 1 ELSE 0 END) as consultancy
+          FROM mu_users
           WHERE YEAR(createdAt) = :year
           GROUP BY MONTH(createdAt), DATE_FORMAT(createdAt, '%b')
           ORDER BY month_num ASC
@@ -97,52 +126,31 @@ class AnalyticsService {
       })
     );
 
-    // Create a map of month names to their abbreviations
     const monthMap = {
-      1: "Jan",
-      2: "Feb",
-      3: "Mar",
-      4: "Apr",
-      5: "May",
-      6: "Jun",
-      7: "Jul",
-      8: "Aug",
-      9: "Sep",
-      10: "Oct",
-      11: "Nov",
-      12: "Dec",
+      1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+      5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
+      9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec",
     };
 
-    // Create array for all 12 months with enrollment data for each selected year
-    const studentEnrollmentGrowth = Array.from({ length: 12 }, (_, i) => {
+    const enrollmentGrowth = Array.from({ length: 12 }, (_, i) => {
       const monthNum = i + 1;
-      const monthData = {
-        name: monthMap[monthNum],
-      };
+      const monthData = { name: monthMap[monthNum] };
 
       enrollmentDataByYear.forEach(({ year, data }) => {
         const monthEntry = data.find((item) => item.month_num === monthNum);
-        monthData[`enrolled_${year}`] = monthEntry
-          ? parseInt(monthEntry.enrolled, 10)
-          : 0;
+        monthData[`student_${year}`] = monthEntry ? parseInt(monthEntry.student || 0, 10) : 0;
+        monthData[`institution_${year}`] = monthEntry ? parseInt(monthEntry.institution || 0, 10) : 0;
+        monthData[`agent_${year}`] = monthEntry ? parseInt(monthEntry.agent || 0, 10) : 0;
+        monthData[`consultancy_${year}`] = monthEntry ? parseInt(monthEntry.consultancy || 0, 10) : 0;
+        monthData[`enrolled_${year}`] = (monthData[`student_${year}`] + monthData[`institution_${year}`] + monthData[`agent_${year}`] + monthData[`consultancy_${year}`]);
       });
 
       return monthData;
     });
 
     return {
-      totalUsers,
-      totalColleges,
-      totalEvents,
-      totalReferrals,
-      totalAgents,
-      totalUniversities,
-      totalConsultancies,
-      totalBlogs,
-      educationalInstitutions,
-      studentEnrollmentGrowth,
-      availableYears:
-        availableYears.length > 0 ? availableYears : [currentYear],
+      enrollmentGrowth,
+      availableYears: availableYears.length > 0 ? availableYears : [currentYear],
       selectedYears,
     };
   }

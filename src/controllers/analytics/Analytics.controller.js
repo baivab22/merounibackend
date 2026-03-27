@@ -19,6 +19,23 @@ class AnalyticsController {
       });
     }
   }
+
+  static async getEnrollmentGrowth(req, res) {
+    try {
+      const data = await analyticsService.getEnrollmentGrowth(req.query);
+      return res.status(200).json({
+        message: "Enrollment growth data fetched successfully",
+        data,
+      });
+    } catch (error) {
+      console.error("Error fetching enrollment growth:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default AnalyticsController;
