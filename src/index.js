@@ -57,6 +57,10 @@ app.use(express.urlencoded({ extended: true }));
 // Swagger setup
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.config.js";
+import initCrons from "./Cron.loader.js";
+
+// Initialize automated tasks
+initCrons();
 
 app.use(
   "/api-docs",

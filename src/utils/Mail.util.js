@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Function to send email
-export const sendMail = async (to, subject, text, html) => {
+export const sendMail = async (to, subject, text, html, attachments = []) => {
   try {
     const info = await transporter.sendMail({
       from: envConfig.MAIL_USER,
@@ -23,6 +23,7 @@ export const sendMail = async (to, subject, text, html) => {
       subject,
       text,
       html,
+      attachments,
     });
 
     console.log(`Email sent: ${info.messageId}`);

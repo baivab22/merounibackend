@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import fs from "fs";
 import envConfig from "../../config/env.config.js";
 import Download from "../../models/downloads/Download.model.js";
 import UserModel from "../../models/users/User.model.js";
@@ -124,6 +125,43 @@ class DatabaseService {
                 error: error.message
             };
         }
+    }
+
+    async generateBackupFile(outputPath) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const mysqldump = await this.exportSql();
+                const writeStream = fs.createWriteStream(outputPath);
+
+                mysqldump.stdout.pipe(writeStream);
+
+                mysqldump.on("error", (err) => {
+                    console.error("mysqldump spawn error:", err);
+                    reject(err);
+                });
+
+                writeStream.on("finish", () => {
+                    resolve();
+                });
+
+                writeStream.on("error", (err) => {
+                    console.error("writeStream error:", err);
+                    reject(err);
+                });
+
+                mysqldump.stderr.on("data", (data) => {
+                    console.error(`mysqldump stderr: ${data}`);
+                });
+
+                mysqldump.on("close", (code) => {
+                    if (code !== 0) {
+                        reject(new Error(`mysqldump exited with code ${code}`));
+                    }
+                });
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 }
 

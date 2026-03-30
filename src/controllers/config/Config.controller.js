@@ -1,4 +1,5 @@
 import ConfigService from "../../services/config/Config.service.js";
+import BackupService from "../../services/database/Backup.service.js";
 
 const configService = new ConfigService();
 
@@ -37,6 +38,12 @@ class ConfigController {
   static async createOrUpdate(req, res) {
     try {
       const config = await configService.createOrUpdate(req.body);
+
+      // If the backup interval is updated, reschedule the cron job
+      if (req.body.type === "database_backup_interval") {
+        BackupService.scheduleBackup(config.value);
+      }
+
       return res.status(200).json({
         message: "Config saved",
         config,
@@ -70,6 +77,12 @@ class ConfigController {
         req.params.type,
         req.body,
       );
+
+      // If the backup interval is updated, reschedule the cron job
+      if (req.params.type === "database_backup_interval") {
+        BackupService.scheduleBackup(config.value);
+      }
+
       return res.status(200).json({
         message: "Config updated",
         config,
