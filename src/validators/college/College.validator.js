@@ -78,6 +78,7 @@ export const collegePaginationSchema = yup.object({
     .oneOf(["draft", "published", "archived"])
     .nullable()
     .optional(),
+  is_referable: yup.boolean().nullable().optional(),
 });
 
 // Shared pagination schema

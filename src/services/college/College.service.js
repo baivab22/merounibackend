@@ -572,7 +572,7 @@ class CollegeService {
       whereCondition.status = "published";
     }
 
-    if (isReferable === 'true' || isReferable === true) {
+    if (isReferable === 'true' || isReferable === true || isReferable === 1 || isReferable === '1') {
       whereCondition.is_referable = true;
     }
 

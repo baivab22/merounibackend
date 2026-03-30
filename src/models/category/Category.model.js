@@ -35,7 +35,7 @@ Category.init(
       onDelete: "CASCADE",
     },
     type: {
-      type: DataTypes.ENUM("BLOG", "EVENT", "NEWS", "MATERIAL", "SCHOLARSHIP", "EXAM"),
+      type: DataTypes.ENUM("BLOG", "EVENT", "NEWS", "MATERIAL", "SCHOLARSHIP", "EXAM", "VIDEO", "CAREER"),
       allowNull: true,
     },
     parent_id: {

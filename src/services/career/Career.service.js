@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import CareerModel from "../../models/career/Career.model.js";
 import CareerApplication from "../../models/career/CareerApplication.model.js";
 import UserModel from "../../models/users/User.model.js";
+import Category from "../../models/category/Category.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
 class CareerService {
@@ -11,6 +12,7 @@ class CareerService {
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "desc").toUpperCase();
     const search = query.q || "";
+    const category_id = query.category_id || "";
 
     const offset = (page - 1) * limit;
 
@@ -19,11 +21,22 @@ class CareerService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
+    if (category_id) {
+      whereCondition.category_id = category_id;
+    }
+
     const { count: totalCount, rows: items } =
       await CareerModel.findAndCountAll({
         where: whereCondition,
         distinct: true,
         order: [["createdAt", sort]],
+        include: [
+          {
+            model: Category,
+            as: "category",
+            attributes: ["id", "title", "slugs"],
+          },
+        ],
         limit,
         offset,
       });

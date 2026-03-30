@@ -49,6 +49,15 @@ CareerModel.init(
       allowNull: false,
       defaultValue: "active",
     },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "categories",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+    },
   },
   {
     sequelize,
@@ -58,4 +67,11 @@ CareerModel.init(
     timestamps: true,
   }
 );
+import Category from "../category/Category.model.js";
+
+CareerModel.belongsTo(Category, {
+  foreignKey: "category_id",
+  as: "category",
+});
+
 export default CareerModel;

@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import Video from "../../models/video/Video.model.js";
+import Category from "../../models/category/Category.model.js";
 
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 
@@ -10,11 +11,15 @@ class VideoService {
         const limit = parseInt(query.limit, 10) || 10;
         const offset = (page - 1) * limit;
 
-        const { q } = query;
+        const { q, category_id } = query;
         const whereCondition = {};
 
         if (q) {
             whereCondition.title = { [Op.like]: `%${q}%` };
+        }
+
+        if (category_id) {
+            whereCondition.category_id = category_id;
         }
 
         const { count: totalCount, rows: items } = await Video.findAndCountAll({
@@ -22,6 +27,13 @@ class VideoService {
             limit,
             offset,
             order: [["createdAt", "DESC"]],
+            include: [
+                {
+                    model: Category,
+                    as: "category",
+                    attributes: ["id", "title", "slugs"],
+                },
+            ],
         });
 
         return {

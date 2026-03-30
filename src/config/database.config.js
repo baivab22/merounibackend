@@ -13,6 +13,13 @@ export const sequelize = new Sequelize(
     host: envConfig.DB_HOST,
     port: Number(envConfig.DB_PORT) || 3306,
     dialect: "mysql",
+    dialectOptions: {
+      charset: "utf8mb4",
+    },
+    define: {
+      charset: "utf8mb4",
+      collate: "utf8mb4_unicode_ci",
+    },
     // logging: true,
     // sync: true,
   }
