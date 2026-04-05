@@ -13,6 +13,11 @@ import CollegeFacility from "./CollegeFacility.model.js";
 import Degree from "../degree/Degree.model.js";
 import CollegeOfferingDegrees from "./CollegeOfferingDegrees.model.js";
 import CollegeUniversity from "./CollegeUniversity.model.js";
+import Board from "../board/Board.model.js";
+import Stream from "../stream/Stream.model.js";
+import CollegeBoard from "./CollegeBoard.model.js";
+import CollegeStream from "./CollegeStream.model.js";
+
 
 
 // College Associations
@@ -29,6 +34,31 @@ University.belongsToMany(College, {
   foreignKey: "university_id",
   as: "colleges",
 });
+
+// College Board Associations
+College.belongsToMany(Board, {
+  through: CollegeBoard,
+  foreignKey: "college_id",
+  as: "boards",
+});
+Board.belongsToMany(College, {
+  through: CollegeBoard,
+  foreignKey: "board_id",
+  as: "colleges",
+});
+
+// College Stream Associations
+College.belongsToMany(Stream, {
+  through: CollegeStream,
+  foreignKey: "college_id",
+  as: "streams",
+});
+Stream.belongsToMany(College, {
+  through: CollegeStream,
+  foreignKey: "stream_id",
+  as: "colleges",
+});
+
 
 College.hasOne(CollegeAddress, {
   foreignKey: "college_id",
@@ -153,8 +183,13 @@ export {
   CollegeFacility,
   CollegeRanking,
   CollegeUniversity,
+  CollegeBoard,
+  CollegeStream,
   Program,
 
   University,
+  Board,
+  Stream,
   User,
 };
+

@@ -10,6 +10,11 @@ import { Exam } from "../exams/Exam.model.js";
 import User from "../users/User.model.js";
 import CollegeAddress from "../college/CollegeAddress.model.js";
 import { University, UniversityProgram } from "../university/University.model.js";
+import Board from "../board/Board.model.js";
+import Stream from "../stream/Stream.model.js";
+import StreamProgram from "../stream/StreamProgram.model.js";
+
+
 
 
 // Program belongs to Level
@@ -82,6 +87,26 @@ University.belongsToMany(Program, {
   otherKey: "program_id",
   as: "programs",
 });
+
+// Board has many Streams
+Board.hasMany(Stream, { foreignKey: "board_id", as: "streams" });
+Stream.belongsTo(Board, { foreignKey: "board_id", as: "board" });
+
+// Stream <-> Program (many-to-many through stream_programs)
+Stream.belongsToMany(Program, {
+  through: StreamProgram,
+  foreignKey: "stream_id",
+  otherKey: "program_id",
+  as: "programs"
+});
+Program.belongsToMany(Stream, {
+  through: StreamProgram,
+  foreignKey: "program_id",
+  otherKey: "stream_id",
+  as: "streams"
+});
+
+
 
 
 export { Program, Scholarship, Level, Degree, Exam, User, University, UniversityProgram };

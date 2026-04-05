@@ -61,9 +61,12 @@ class CollegeService {
         faqs,
         images,
         degrees,
+        board_ids,
+        stream_ids,
         status,
         is_referable,
       } = payload;
+
 
       console.log(programs, "programsprogramsprograms")
       let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
@@ -196,6 +199,37 @@ class CollegeService {
           await CollegeUniversity.bulkCreate(universityRecords, { transaction });
         }
       }
+
+      if (Array.isArray(board_ids)) {
+        await CollegeBoard.destroy({
+          where: { college_id: collegeId },
+          transaction,
+        });
+
+        if (board_ids.length > 0) {
+          const boardRecords = board_ids.map((bId) => ({
+            college_id: collegeId,
+            board_id: bId,
+          }));
+          await CollegeBoard.bulkCreate(boardRecords, { transaction });
+        }
+      }
+
+      if (Array.isArray(stream_ids)) {
+        await CollegeStream.destroy({
+          where: { college_id: collegeId },
+          transaction,
+        });
+
+        if (stream_ids.length > 0) {
+          const streamRecords = stream_ids.map((sId) => ({
+            college_id: collegeId,
+            stream_id: sId,
+          }));
+          await CollegeStream.bulkCreate(streamRecords, { transaction });
+        }
+      }
+
 
       if (Array.isArray(programs) && programs.length > 0) {
         const existingPrograms = await Program.findAll({
@@ -756,10 +790,23 @@ class CollegeService {
           through: { attributes: [] },
         },
         {
+          model: Board,
+          as: "boards",
+          attributes: ["name", "id"],
+          through: { attributes: [] },
+        },
+        {
+          model: Stream,
+          as: "streams",
+          attributes: ["name", "id"],
+          through: { attributes: [] },
+        },
+        {
           model: UserModel,
           as: "authorDetails",
           attributes: ["firstName", "middleName", "lastName"],
         },
+
         {
           model: Degree,
           as: "degrees",

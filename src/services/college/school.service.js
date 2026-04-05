@@ -11,6 +11,12 @@ import { University } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
 import UserModel from "../../models/users/User.model.js";
 import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
+import Board from "../../models/board/Board.model.js";
+import Stream from "../../models/stream/Stream.model.js";
+import CollegeBoard from "../../models/college/CollegeBoard.model.js";
+import CollegeStream from "../../models/college/CollegeStream.model.js";
+
+
 
 import { sequelize } from "../../config/database.config.js";
 
@@ -30,7 +36,10 @@ class SchoolService {
 
         const types = parseFilter(query.type);
         const affiliations = parseFilter(query.affiliation || query.university);
+        const boardIds = parseFilter(query.board_ids || query.board_id);
+        const streamIds = parseFilter(query.stream_ids || query.stream_id);
         const status = query.status;
+
 
         const offset = (page - 1) * limit;
 
@@ -83,6 +92,35 @@ class SchoolService {
                 whereCondition.id = { [Op.in]: [] };
             }
         }
+
+        if (boardIds.length > 0) {
+            const collegeBoards = await CollegeBoard.findAll({
+                where: { board_id: { [Op.in]: boardIds } },
+                attributes: ["college_id"],
+                raw: true,
+            });
+            const collegeIds = collegeBoards.map((cb) => cb.college_id);
+            if (whereCondition.id) {
+                whereCondition.id = { [Op.and]: [whereCondition.id, { [Op.in]: collegeIds }] };
+            } else {
+                whereCondition.id = { [Op.in]: collegeIds };
+            }
+        }
+
+        if (streamIds.length > 0) {
+            const collegeStreams = await CollegeStream.findAll({
+                where: { stream_id: { [Op.in]: streamIds } },
+                attributes: ["college_id"],
+                raw: true,
+            });
+            const collegeIds = collegeStreams.map((cs) => cs.college_id);
+            if (whereCondition.id) {
+                whereCondition.id = { [Op.and]: [whereCondition.id, { [Op.in]: collegeIds }] };
+            } else {
+                whereCondition.id = { [Op.in]: collegeIds };
+            }
+        }
+
 
 
         const include = [
@@ -214,8 +252,21 @@ class SchoolService {
                 {
                     model: University,
                     as: "universities",
-                    attributes: ["fullname", "slugs"],
+                    attributes: ["fullname", "slugs", "id"],
                 },
+                {
+                    model: Board,
+                    as: "boards",
+                    attributes: ["name", "id"],
+                    through: { attributes: [] },
+                },
+                {
+                    model: Stream,
+                    as: "streams",
+                    attributes: ["name", "id"],
+                    through: { attributes: [] },
+                },
+
 
                 {
                     model: UserModel,
@@ -296,6 +347,26 @@ class SchoolService {
 
         return universities;
     }
+
+    async listSchoolBoards() {
+        const boards = await Board.findAll({
+            attributes: ["id", "name"],
+            order: [["name", "ASC"]],
+        });
+
+        return boards;
+    }
+
+    async listSchoolStreams() {
+        const streams = await Stream.findAll({
+            attributes: ["id", "name"],
+            order: [["name", "ASC"]],
+        });
+
+        return streams;
+    }
+
 }
+
 
 export default new SchoolService();

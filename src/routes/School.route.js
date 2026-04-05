@@ -82,6 +82,9 @@ router.get(
  *         description: List of unique universities
  */
 router.get("/affiliations", SchoolController.listSchoolAffiliations);
+router.get("/boards", SchoolController.listSchoolBoards);
+router.get("/streams", SchoolController.listSchoolStreams);
+
 
 router.get(
     "/:slugs",

@@ -90,6 +90,16 @@ Program.init(
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     },
+    stream_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "streams",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
+    },
     status: {
       type: DataTypes.ENUM("draft", "published"),
       allowNull: false,

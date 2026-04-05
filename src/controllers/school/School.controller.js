@@ -63,18 +63,48 @@ class SchoolController {
     static async listSchoolAffiliations(req, res) {
         try {
             const universities = await schoolService.listSchoolAffiliations();
-            console.log(universities, "universitiesuniversities")
             return res.status(200).json({
                 message: "success",
                 items: universities,
             });
         } catch (error) {
-            console.error("Error in listSchoolUniversities:", error);
+            console.error("Error in listSchoolAffiliations:", error);
+            return res.status(500).json({
+                message: `Error: ${error.message}`,
+            });
+        }
+    }
+
+    static async listSchoolBoards(req, res) {
+        try {
+            const boards = await schoolService.listSchoolBoards();
+            return res.status(200).json({
+                message: "success",
+                items: boards,
+            });
+        } catch (error) {
+            console.error("Error in listSchoolBoards:", error);
+            return res.status(500).json({
+                message: `Error: ${error.message}`,
+            });
+        }
+    }
+
+    static async listSchoolStreams(req, res) {
+        try {
+            const streams = await schoolService.listSchoolStreams();
+            return res.status(200).json({
+                message: "success",
+                items: streams,
+            });
+        } catch (error) {
+            console.error("Error in listSchoolStreams:", error);
             return res.status(500).json({
                 message: `Error: ${error.message}`,
             });
         }
     }
 }
+
 
 export default SchoolController;

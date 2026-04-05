@@ -14,6 +14,8 @@ import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import UserModel from "../../models/users/User.model.js";
 import { University, UniversityProgram } from "../../models/university/University.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import Stream from "../../models/stream/Stream.model.js";
+
 
 class ProgramService {
 
@@ -30,7 +32,9 @@ class ProgramService {
       sortBy,
       sortOrder,
       status,
+      streamId,
     } = query;
+
 
     const whereConditions = { status: "published" };
     const universityInclude = {
@@ -68,6 +72,26 @@ class ProgramService {
     if (disciplineId) {
       whereConditions.discipline_id = disciplineId;
     }
+    const streamIdsRaw = query.stream_ids || query.stream_id;
+    if (streamIdsRaw) {
+      const streamIds = Array.isArray(streamIdsRaw) 
+        ? streamIdsRaw.map(Number) 
+        : String(streamIdsRaw).split(',').map(Number).filter(id => !isNaN(id));
+      
+      if (streamIds.length > 0) {
+        // Since it's a many-to-many relationship through stream_programs
+        include.push({
+          model: Stream,
+          as: "streams",
+          where: { id: { [Op.in]: streamIds } },
+          attributes: ["id", "name"],
+          through: { attributes: [] },
+          required: true,
+        });
+      }
+    }
+
+
 
     if (q) {
       whereConditions[Op.or] = [
@@ -129,6 +153,7 @@ class ProgramService {
       sortBy,
       sortOrder,
       status,
+      streamId,
     } = query;
 
     const whereConditions = {};
@@ -161,6 +186,18 @@ class ProgramService {
       universityInclude,
     ];
 
+    if (streamId) {
+      include.push({
+        model: Stream,
+        as: "streams",
+        where: { id: streamId },
+        attributes: ["id", "name"],
+        through: { attributes: [] },
+        required: true,
+      });
+    }
+
+
     if (levelId) {
       whereConditions.level_id = levelId;
     }
@@ -170,6 +207,8 @@ class ProgramService {
     if (status) {
       whereConditions.status = status;
     }
+
+
 
     if (q) {
       whereConditions[Op.or] = [
@@ -312,8 +351,10 @@ class ProgramService {
         syllabus,
         colleges,
         universities,
+        stream_id,
         status,
       } = payload;
+
 
       let programId = id;
 
@@ -354,7 +395,9 @@ class ProgramService {
             delivery_mode,
             careers,
             exam_id: exam_id || null,
+            stream_id: stream_id || null,
             status: status || "published",
+
           },
           { transaction }
         );
@@ -387,7 +430,9 @@ class ProgramService {
             delivery_mode,
             careers,
             exam_id: exam_id || null,
+            stream_id: stream_id || null,
             status: status || existingProgram.status,
+
           },
           { where: { id: programId }, transaction }
         );

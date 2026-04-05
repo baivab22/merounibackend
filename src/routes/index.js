@@ -144,6 +144,13 @@ router.use("/video", videoRoute);
 import degreeRoute from "./Degree.route.js";
 router.use("/degree", degreeRoute);
 
+import boardRoute from "./Board.route.js";
+router.use("/board", boardRoute);
+
+import streamRoute from "./Stream.route.js";
+router.use("/stream", streamRoute);
+
+
 import consultancyApplicationRoute from "./consultancy/ConsultancyApplication.route.js";
 router.use("/consultancy-application", consultancyApplicationRoute);
 
