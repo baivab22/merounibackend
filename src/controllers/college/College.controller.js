@@ -129,8 +129,8 @@ class CollegeController {
 
       return res.status(200).json({ item: college });
     } catch (error) {
-      console.log(error, "THank")
-      return res.status(500).json({ error: error.message });
+      const status = error.status || 500;
+      return res.status(status).json({ error: error.message });
     }
   }
 

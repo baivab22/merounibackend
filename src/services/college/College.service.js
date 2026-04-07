@@ -11,10 +11,13 @@ import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
-import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
+import CollegeBoard from "../../models/college/CollegeBoard.model.js";
+import CollegeStream from "../../models/college/CollegeStream.model.js";
 import Program from "../../models/program/Program.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import Level from "../../models/level/Level.model.js";
+import Board from "../../models/board/Board.model.js";
+import Stream from "../../models/stream/Stream.model.js";
 import { University } from "../../models/university/University.model.js";
 import UserModel from "../../models/users/User.model.js";
 
