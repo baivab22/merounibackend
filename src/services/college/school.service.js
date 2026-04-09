@@ -282,7 +282,15 @@ class SchoolService {
             throw error;
         }
 
-        return school;
+        const schoolData = school.get({ plain: true });
+        // Robust JSON parsing
+        if (typeof schoolData.faqs === 'string') {
+          try { schoolData.faqs = JSON.parse(schoolData.faqs); } catch (e) { schoolData.faqs = []; }
+        }
+        if (typeof schoolData.institute_level === 'string') {
+          try { schoolData.institute_level = JSON.parse(schoolData.institute_level); } catch (e) { schoolData.institute_level = []; }
+        }
+        return schoolData;
     }
 
     async updateSchoolOrder(schools) {

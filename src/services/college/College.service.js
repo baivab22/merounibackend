@@ -19,6 +19,7 @@ import Level from "../../models/level/Level.model.js";
 import Board from "../../models/board/Board.model.js";
 import Stream from "../../models/stream/Stream.model.js";
 import { University } from "../../models/university/University.model.js";
+import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
 import UserModel from "../../models/users/User.model.js";
 
 
@@ -825,7 +826,15 @@ class CollegeService {
       throw error;
     }
 
-    return college;
+    const collegeData = college.get({ plain: true });
+    // Robust JSON parsing
+    if (typeof collegeData.faqs === 'string') {
+      try { collegeData.faqs = JSON.parse(collegeData.faqs); } catch (e) { collegeData.faqs = []; }
+    }
+    if (typeof collegeData.institute_level === 'string') {
+      try { collegeData.institute_level = JSON.parse(collegeData.institute_level); } catch (e) { collegeData.institute_level = []; }
+    }
+    return collegeData;
   }
 
   async deleteCollege(id) {
@@ -926,7 +935,15 @@ class CollegeService {
       throw error;
     }
 
-    return college;
+    const collegeData = college.get({ plain: true });
+    // Robust JSON parsing
+    if (typeof collegeData.faqs === 'string') {
+      try { collegeData.faqs = JSON.parse(collegeData.faqs); } catch (e) { collegeData.faqs = []; }
+    }
+    if (typeof collegeData.institute_level === 'string') {
+      try { collegeData.institute_level = JSON.parse(collegeData.institute_level); } catch (e) { collegeData.institute_level = []; }
+    }
+    return collegeData;
   }
 
   async updateCollegeByInstitutionUser(user, payload) {
