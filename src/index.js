@@ -3,6 +3,18 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import envConfig from "./config/env.config.js";
+import { logger } from "./config/logger.config.js";
+
+// Capture process-level errors
+process.on("uncaughtException", (error) => {
+  logger.error(`Uncaught Exception: ${error.message}`);
+  logger.error(error.stack);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+});
 
 /**
  * import user defined components
@@ -94,8 +106,18 @@ app.get("/health", (req, res) => {
 import apiRouter from "./routes/index.js";
 app.use(version || "/api/v1", apiRouter);
 
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  logger.error(`${req.method} ${req.originalUrl} - ${err.message}`);
+  logger.error(err.stack);
+  res.status(err.status || 500).json({
+    message: err.message || "Internal Server Error",
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is Running at: ${PORT}`);
+  logger.info(`Server started and listening on port ${PORT}`);
 });
 
 process.on("SIGINT", async () => {

@@ -1,5 +1,6 @@
 import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+import path from "path";
 
 export const logger = createLogger({
   level: "info", // Default log level
@@ -13,7 +14,7 @@ export const logger = createLogger({
   transports: [
     new transports.Console(), // Log to the console
     new DailyRotateFile({
-      filename: "logs/app-%DATE%.log",
+      filename: path.join(process.cwd(), "logs", "app-%DATE%.log"),
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
       maxSize: "20m",
