@@ -9,6 +9,7 @@ import {
     collegeSlugParamSchema,
     updateSchoolOrderSchema,
     createOrUpdateCollegeSchema,
+    collegeIdParamSchema,
 } from "../validators/college/College.validator.js";
 import CollegeController from "../controllers/college/College.controller.js";
 
@@ -148,6 +149,39 @@ router.post(
     authorizeRole(["admin", "editor", "agent"]),
     requestValidator(createOrUpdateCollegeSchema, "body"),
     CollegeController.saveAsDraft
+);
+
+/**
+ * @swagger
+ * /school/{id}:
+ *   delete:
+ *     summary: Delete a school
+ *     tags: [Schools]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: School deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: School not found
+ */
+router.delete(
+    "/:id",
+    authenticateUser,
+    authorizeRole(["admin", "editor"]),
+    requestValidator(collegeIdParamSchema, "params"),
+    CollegeController.deleteCollege
 );
 
 export default router;
