@@ -150,18 +150,22 @@ class ExamService {
     });
 
     // Expand universities to maintain response consistency
+    const universityMap = new Map();
     const allUniversityIds = [...new Set(items.flatMap(exam => safeParseJSON(exam.affiliation)))];
+    
     if (allUniversityIds.length > 0) {
       const universities = await University.findAll({
         where: { id: allUniversityIds },
         attributes: ["id", "fullname", "logo"],
       });
-      const universityMap = new Map(universities.map(u => [u.id, u]));
-      items.forEach(exam => {
-        const expanded = safeParseJSON(exam.affiliation).map(id => universityMap.get(id)).filter(Boolean);
-        exam.setDataValue("affiliation", expanded);
-      });
+      universities.forEach(u => universityMap.set(u.id, u));
     }
+
+    items.forEach(exam => {
+      const parsed = safeParseJSON(exam.affiliation);
+      const expanded = parsed.map(id => universityMap.get(id)).filter(Boolean);
+      exam.setDataValue("affiliation", expanded);
+    });
 
     return {
       items,
@@ -274,18 +278,22 @@ class ExamService {
     });
 
     // Expand universities to maintain response consistency
+    const universityMap = new Map();
     const allUniversityIds = [...new Set(items.flatMap(exam => safeParseJSON(exam.affiliation)))];
+    
     if (allUniversityIds.length > 0) {
       const universities = await University.findAll({
         where: { id: allUniversityIds },
         attributes: ["id", "fullname", "logo"],
       });
-      const universityMap = new Map(universities.map(u => [u.id, u]));
-      items.forEach(exam => {
-        const expanded = safeParseJSON(exam.affiliation).map(id => universityMap.get(id)).filter(Boolean);
-        exam.setDataValue("affiliation", expanded);
-      });
+      universities.forEach(u => universityMap.set(u.id, u));
     }
+
+    items.forEach(exam => {
+      const parsed = safeParseJSON(exam.affiliation);
+      const expanded = parsed.map(id => universityMap.get(id)).filter(Boolean);
+      exam.setDataValue("affiliation", expanded);
+    });
 
     return {
       items,
@@ -330,19 +338,19 @@ class ExamService {
     }
 
     // Manually expand universities to maintain response consistency
-    const affiliation = safeParseJSON(exam.affiliation);
-    if (affiliation.length > 0) {
+    const affiliationIds = safeParseJSON(exam.affiliation);
+    let expanded = [];
+    if (affiliationIds.length > 0) {
       const universities = await University.findAll({
-        where: { id: affiliation },
+        where: { id: affiliationIds },
         attributes: ["id", "fullname", "logo"],
       });
-      // Sort to match the order in affiliation array if desired, or just return all
       const universityMap = new Map(universities.map(u => [u.id, u]));
-      const expanded = affiliation.map(id => universityMap.get(id)).filter(Boolean);
-      exam.setDataValue("affiliations", expanded);
-    } else {
-      exam.setDataValue("affiliations", []);
+      expanded = affiliationIds.map(id => universityMap.get(id)).filter(Boolean);
     }
+    
+    exam.setDataValue("affiliation", expanded);
+    exam.setDataValue("affiliations", expanded); // Maintain plural for backward compatibility if needed
 
     return exam;
   }
