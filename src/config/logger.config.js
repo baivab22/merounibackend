@@ -1,6 +1,13 @@
 import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import path from "path";
+import fs from "fs";
+
+// Ensure logs directory exists
+const logDir = path.join(process.cwd(), "logs");
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
 
 export const logger = createLogger({
   level: "info", // Default log level
@@ -14,7 +21,7 @@ export const logger = createLogger({
   transports: [
     new transports.Console(), // Log to the console
     new DailyRotateFile({
-      filename: path.join(process.cwd(), "logs", "app-%DATE%.log"),
+      filename: path.join(logDir, "app-%DATE%.log"),
       datePattern: "YYYY-MM-DD",
       zippedArchive: true,
       maxSize: "20m",
