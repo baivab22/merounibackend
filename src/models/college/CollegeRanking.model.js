@@ -22,7 +22,7 @@ CollegeRanking.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "colleges",
+        model: "colleges_schools",
         key: "id",
       },
     },

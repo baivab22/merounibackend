@@ -35,7 +35,7 @@ News.init(
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: "colleges",
+        model: "colleges_schools",
         key: "id",
       },
       onDelete: "SET NULL",

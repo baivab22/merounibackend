@@ -23,7 +23,7 @@ export const createScholarshipSchema = yup
     description: yup.string(),
     category: yup.number().integer().positive().optional(),
     eligibilityCriteria: yup.string(),
-    amount: yup.string().trim().required("Amount is required"),
+    amount: yup.string().trim().optional(),
     applicationDeadline: yup.string(),
     author: yup.number().integer().positive(),
     renewalCriteria: yup.string(),

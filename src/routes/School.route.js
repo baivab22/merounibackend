@@ -8,7 +8,9 @@ import {
     schoolPaginationSchema,
     collegeSlugParamSchema,
     updateSchoolOrderSchema,
+    createOrUpdateCollegeSchema,
 } from "../validators/college/College.validator.js";
+import CollegeController from "../controllers/college/College.controller.js";
 
 const router = express.Router();
 
@@ -96,6 +98,56 @@ router.patch(
     "/update-order",
     requestValidator(updateSchoolOrderSchema, "body"),
     SchoolController.updateSchoolOrder
+);
+
+/**
+ * @swagger
+ * /school:
+ *   post:
+ *     summary: Create or update a school
+ *     tags: [Schools]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *     responses:
+ *       201:
+ *         description: School created/updated successfully
+ */
+router.post(
+    "/",
+    authenticateUser,
+    authorizeRole(["admin", "editor", "agent"]),
+    requestValidator(createOrUpdateCollegeSchema, "body"),
+    CollegeController.createOrUpdateCollege
+);
+
+/**
+ * @swagger
+ * /school/save-as-draft:
+ *   post:
+ *     summary: Save a school as draft
+ *     tags: [Schools]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: School saved as draft
+ */
+router.post(
+    "/save-as-draft",
+    authenticateUser,
+    authorizeRole(["admin", "editor", "agent"]),
+    requestValidator(createOrUpdateCollegeSchema, "body"),
+    CollegeController.saveAsDraft
 );
 
 export default router;

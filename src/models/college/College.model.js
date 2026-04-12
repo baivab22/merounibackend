@@ -76,8 +76,8 @@ College.init(
   },
   {
     sequelize,
-    modelName: "colleges",
-    tableName: "colleges",
+    modelName: "colleges_schools",
+    tableName: "colleges_schools",
     timestamps: true,
     freezeTableName: true,
   }
