@@ -75,12 +75,17 @@ Course.init(
       type: DataTypes.ENUM("draft", "published", "archived"),
       defaultValue: "published",
     },
+    metaDescription: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: "meta_description",
+    },
   },
   {
     sequelize,
     modelName: "course",
     tableName: "courses",
-    timemps: true,
+    timestamps: true,
   }
 );
 

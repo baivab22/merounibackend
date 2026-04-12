@@ -73,6 +73,11 @@ College.init(
       allowNull: false,
       defaultValue: false,
     },
+    metaDescription: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: "meta_description",
+    },
   },
   {
     sequelize,
