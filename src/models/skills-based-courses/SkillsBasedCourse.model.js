@@ -78,6 +78,10 @@ SkillsBasedCourse.init(
             type: DataTypes.INTEGER,
             allowNull: true,
         },
+        status: {
+            type: DataTypes.ENUM("draft", "published", "archived"),
+            defaultValue: "published",
+        },
     },
     {
         sequelize,

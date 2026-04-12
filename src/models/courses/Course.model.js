@@ -71,6 +71,10 @@ Course.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      defaultValue: "published",
+    },
   },
   {
     sequelize,

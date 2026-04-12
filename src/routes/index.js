@@ -160,5 +160,8 @@ router.use("/database", databaseRoute);
 import activityLogRoute from "./ActivityLog.route.js";
 router.use("/activity-logs", activityLogRoute);
 
+import miscRoute from "./Misc.route.js";
+router.use("/misc", miscRoute);
+
 export default router;
 

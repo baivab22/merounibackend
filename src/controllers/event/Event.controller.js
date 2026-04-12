@@ -114,6 +114,19 @@ class EventController {
         .json({ message: "Server error", error: error.message });
     }
   }
+
+  static async updateEventOrder(req, res) {
+    try {
+      const result = await eventService.updateEventOrder(req.body.events);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error in updateEventOrder controller:", error);
+      const status = error.status || 500;
+      return res
+        .status(status)
+        .json({ error: status === 500 ? "Server error" : error.message });
+    }
+  }
 }
 
 export default EventController;

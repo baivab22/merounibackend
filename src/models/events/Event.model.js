@@ -70,6 +70,15 @@ Event.init(
       allowNull: false,
       field: "event_host",
     },
+    status: {
+      type: DataTypes.ENUM("draft", "published", "archived"),
+      defaultValue: "published",
+    },
+    order_no_for_website: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     sequelize,

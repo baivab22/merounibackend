@@ -247,4 +247,12 @@ router.delete(
   EventController.deleteEvent
 );
 
+// Update event order
+router.patch(
+  "/update-order",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  EventController.updateEventOrder
+);
+
 export default router;
