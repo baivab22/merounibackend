@@ -1,4 +1,5 @@
 import CollegeService from "../../services/college/College.service.js";
+import { logger } from "../../config/logger.config.js";
 
 const collegeService = new CollegeService();
 
@@ -30,7 +31,7 @@ class CollegeController {
         collegeId,
       });
     } catch (error) {
-      console.log(error, "THank")
+      logger.error(`Error in createOrUpdateCollege: ${error.message}`);
       return res
         .status(error.status || 500)
         .json({ error: error.message || "Server error" });
