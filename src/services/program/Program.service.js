@@ -33,6 +33,7 @@ class ProgramService {
       sortOrder,
       status,
       streamId,
+      degreeIds,
     } = query;
 
 
@@ -71,6 +72,14 @@ class ProgramService {
     }
     if (disciplineId) {
       whereConditions.discipline_id = disciplineId;
+    }
+    if (degreeIds) {
+      const degreeIdsList = Array.isArray(degreeIds)
+        ? degreeIds
+        : typeof degreeIds === "string"
+          ? degreeIds.split(",").map((id) => id.trim())
+          : [degreeIds];
+      whereConditions.degree_id = { [Op.in]: degreeIdsList };
     }
     const streamIdsRaw = query.stream_ids || query.stream_id;
     if (streamIdsRaw) {
@@ -154,6 +163,7 @@ class ProgramService {
       sortOrder,
       status,
       streamId,
+      degreeIds,
     } = query;
 
     const whereConditions = {};
@@ -206,6 +216,14 @@ class ProgramService {
     }
     if (status) {
       whereConditions.status = status;
+    }
+    if (degreeIds) {
+      const degreeIdsList = Array.isArray(degreeIds)
+        ? degreeIds
+        : typeof degreeIds === "string"
+          ? degreeIds.split(",").map((id) => id.trim())
+          : [degreeIds];
+      whereConditions.degree_id = { [Op.in]: degreeIdsList };
     }
 
 
