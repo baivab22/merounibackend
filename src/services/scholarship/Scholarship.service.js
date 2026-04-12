@@ -13,6 +13,7 @@ class ScholarshipService {
 
     const searchQuery = query.q || "";
     const categoryId = query.category;
+    const status = query.status;
     const activeOnly = query.activeOnly === "true";
     const sortBy = query.sortBy || "createdAt";
     const sortOrder = query.sortOrder || "DESC";
@@ -28,6 +29,10 @@ class ScholarshipService {
 
     if (categoryId) {
       whereCondition.category = categoryId;
+    }
+
+    if (status && status !== "all") {
+      whereCondition.status = status;
     }
 
     if (activeOnly) {

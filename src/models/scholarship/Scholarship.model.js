@@ -53,6 +53,15 @@ Scholarship.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("draft", "published"),
+      allowNull: false,
+      defaultValue: "published",
+    },
   },
   {
     sequelize,

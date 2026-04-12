@@ -9,6 +9,7 @@ export { idParamSchema };
 
 export const paginationSchema = basePaginationSchema.shape({
   category: yup.number().integer().positive().optional(),
+  status: yup.string().oneOf(["draft", "published"]).optional(),
 });
 
 export const scholarshipIdParamSchema = yup.object({
@@ -28,6 +29,8 @@ export const createScholarshipSchema = yup
     renewalCriteria: yup.string(),
     contactInfo: yup.string(),
     categoryId: yup.number().integer().positive(),
+    meta_description: yup.string().optional(),
+    status: yup.string().oneOf(["draft", "published"]).optional(),
     title: yup.string(), // Optional, for backward compatibility
   })
   .required();
@@ -46,6 +49,8 @@ export const updateScholarshipBodySchema = yup
     applicationDeadline: yup.string(),
     renewalCriteria: yup.string(),
     contactInfo: yup.string(),
+    meta_description: yup.string().optional(),
+    status: yup.string().oneOf(["draft", "published"]).optional(),
     title: yup.string(), // Optional, for backward compatibility
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
