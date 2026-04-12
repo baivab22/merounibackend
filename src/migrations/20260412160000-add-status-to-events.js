@@ -11,6 +11,21 @@ export async function up(queryInterface) {
       defaultValue: "published",
     });
   }
+
+  if (!tableDescription.meta_description) {
+    await queryInterface.addColumn("events", "meta_description", {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    });
+  }
+
+  if (!tableDescription.order_no_for_website) {
+    await queryInterface.addColumn("events", "order_no_for_website", {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    });
+  }
 }
 
 export async function down(queryInterface) {
@@ -18,5 +33,13 @@ export async function down(queryInterface) {
 
   if (tableDescription.status) {
     await queryInterface.removeColumn("events", "status");
+  }
+
+  if (tableDescription.meta_description) {
+    await queryInterface.removeColumn("events", "meta_description");
+  }
+
+  if (tableDescription.order_no_for_website) {
+    await queryInterface.removeColumn("events", "order_no_for_website");
   }
 }
