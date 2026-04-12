@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { safeParseJSON } from "../../utils/JsonHelper.js";
 
 import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
@@ -706,7 +707,7 @@ class CollegeService {
           try {
             const roles =
               typeof user.roles === "string"
-                ? JSON.parse(user.roles)
+                ? safeParseJSON(user.roles, {})
                 : user.roles;
             return roles?.institution === true && user.collegeId;
           } catch {
@@ -828,12 +829,8 @@ class CollegeService {
 
     const collegeData = college.get({ plain: true });
     // Robust JSON parsing
-    if (typeof collegeData.faqs === 'string') {
-      try { collegeData.faqs = JSON.parse(collegeData.faqs); } catch (e) { collegeData.faqs = []; }
-    }
-    if (typeof collegeData.institute_level === 'string') {
-      try { collegeData.institute_level = JSON.parse(collegeData.institute_level); } catch (e) { collegeData.institute_level = []; }
-    }
+    collegeData.faqs = safeParseJSON(collegeData.faqs);
+    collegeData.institute_level = safeParseJSON(collegeData.institute_level);
     return collegeData;
   }
 

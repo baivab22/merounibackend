@@ -11,6 +11,7 @@ import UserModel from "../../models/users/User.model.js";
 import Category from "../../models/category/Category.model.js";
 
 import { generateUniqueSlug } from "../../utils/SlugHelper.js"
+import { safeParseJSON } from "../../utils/JsonHelper.js";
 class ExamService {
   async listExams(query = {}) {
     const page = parseInt(query.page, 10) || 1;
@@ -149,7 +150,7 @@ class ExamService {
     });
 
     // Expand universities to maintain response consistency
-    const allUniversityIds = [...new Set(items.flatMap(exam => exam.affiliation || []))];
+    const allUniversityIds = [...new Set(items.flatMap(exam => safeParseJSON(exam.affiliation)))];
     if (allUniversityIds.length > 0) {
       const universities = await University.findAll({
         where: { id: allUniversityIds },
@@ -157,7 +158,7 @@ class ExamService {
       });
       const universityMap = new Map(universities.map(u => [u.id, u]));
       items.forEach(exam => {
-        const expanded = (exam.affiliation || []).map(id => universityMap.get(id)).filter(Boolean);
+        const expanded = safeParseJSON(exam.affiliation).map(id => universityMap.get(id)).filter(Boolean);
         exam.setDataValue("affiliation", expanded);
       });
     }
@@ -273,7 +274,7 @@ class ExamService {
     });
 
     // Expand universities to maintain response consistency
-    const allUniversityIds = [...new Set(items.flatMap(exam => exam.affiliation || []))];
+    const allUniversityIds = [...new Set(items.flatMap(exam => safeParseJSON(exam.affiliation)))];
     if (allUniversityIds.length > 0) {
       const universities = await University.findAll({
         where: { id: allUniversityIds },
@@ -281,7 +282,7 @@ class ExamService {
       });
       const universityMap = new Map(universities.map(u => [u.id, u]));
       items.forEach(exam => {
-        const expanded = (exam.affiliation || []).map(id => universityMap.get(id)).filter(Boolean);
+        const expanded = safeParseJSON(exam.affiliation).map(id => universityMap.get(id)).filter(Boolean);
         exam.setDataValue("affiliation", expanded);
       });
     }
@@ -329,14 +330,15 @@ class ExamService {
     }
 
     // Manually expand universities to maintain response consistency
-    if (exam.affiliation && Array.isArray(exam.affiliation) && exam.affiliation.length > 0) {
+    const affiliation = safeParseJSON(exam.affiliation);
+    if (affiliation.length > 0) {
       const universities = await University.findAll({
-        where: { id: exam.affiliation },
+        where: { id: affiliation },
         attributes: ["id", "fullname", "logo"],
       });
       // Sort to match the order in affiliation array if desired, or just return all
       const universityMap = new Map(universities.map(u => [u.id, u]));
-      const expanded = exam.affiliation.map(id => universityMap.get(id)).filter(Boolean);
+      const expanded = affiliation.map(id => universityMap.get(id)).filter(Boolean);
       exam.setDataValue("affiliations", expanded);
     } else {
       exam.setDataValue("affiliations", []);

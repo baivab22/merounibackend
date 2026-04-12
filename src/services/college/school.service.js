@@ -15,6 +15,7 @@ import Board from "../../models/board/Board.model.js";
 import Stream from "../../models/stream/Stream.model.js";
 import CollegeBoard from "../../models/college/CollegeBoard.model.js";
 import CollegeStream from "../../models/college/CollegeStream.model.js";
+import { safeParseJSON } from "../../utils/JsonHelper.js";
 
 
 
@@ -160,12 +161,8 @@ class SchoolService {
         const collegesWithAccounts = new Set(
             usersWithCollegeId
                 .filter((user) => {
-                    try {
-                        const roles = typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles;
-                        return roles?.institution === true && user.collegeId;
-                    } catch {
-                        return false;
-                    }
+                    const roles = safeParseJSON(user.roles, {});
+                    return roles?.institution === true && user.collegeId;
                 })
                 .map((user) => user.collegeId)
                 .filter(Boolean)
@@ -284,12 +281,8 @@ class SchoolService {
 
         const schoolData = school.get({ plain: true });
         // Robust JSON parsing
-        if (typeof schoolData.faqs === 'string') {
-          try { schoolData.faqs = JSON.parse(schoolData.faqs); } catch (e) { schoolData.faqs = []; }
-        }
-        if (typeof schoolData.institute_level === 'string') {
-          try { schoolData.institute_level = JSON.parse(schoolData.institute_level); } catch (e) { schoolData.institute_level = []; }
-        }
+        schoolData.faqs = safeParseJSON(schoolData.faqs);
+        schoolData.institute_level = safeParseJSON(schoolData.institute_level);
         return schoolData;
     }
 

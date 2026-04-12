@@ -32,14 +32,9 @@ Scholarship.init(
       },
       onDelete: "SET NULL",
     },
-    eligibilityCriteria: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
-    },
     amount: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     applicationDeadline: {
       type: DataTypes.DATE,
@@ -53,11 +48,6 @@ Scholarship.init(
         key: "id",
       },
       onDelete: "CASCADE",
-    },
-    renewalCriteria: {
-      type: DataTypes.JSON,
-      allowNull: false,
-      defaultValue: [],
     },
     contactInfo: {
       type: DataTypes.TEXT,
