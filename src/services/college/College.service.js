@@ -630,8 +630,8 @@ class CollegeService {
       offset,
       distinct: true,
       order: [
-        [sequelize.literal('`colleges_schools`.`order_no_for_website` IS NULL'), "ASC"],
-        [sequelize.col('colleges_schools.order_no_for_website'), "ASC"],
+        [sequelize.literal("`colleges_schools`.`order_no_for_website` IS NULL"), "ASC"],
+        [sequelize.col("colleges_schools.order_no_for_website"), "ASC"],
         ["id", sort],
       ],
       include: [
