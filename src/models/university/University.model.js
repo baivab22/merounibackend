@@ -3,6 +3,7 @@ import { sequelize } from "../../config/database.config.js";
 
 import Level from "../level/Level.model.js";
 import Program from "../program/Program.model.js";
+import Degree from "../degree/Degree.model.js";
 
 export const University = sequelize.define(
   "University",
@@ -91,7 +92,7 @@ export const University = sequelize.define(
   {
     tableName: "university",
     timestamps: true,
-  }
+  },
 );
 
 export const UniversityContact = sequelize.define(
@@ -130,7 +131,7 @@ export const UniversityContact = sequelize.define(
   {
     tableName: "university_contact",
     timestamps: false,
-  }
+  },
 );
 
 export const UniversityLevel = sequelize.define(
@@ -160,7 +161,7 @@ export const UniversityLevel = sequelize.define(
   {
     tableName: "university_levels",
     timestamps: false,
-  }
+  },
 );
 
 export const UniversityProgram = sequelize.define(
@@ -179,6 +180,9 @@ export const UniversityProgram = sequelize.define(
       },
       onDelete: "CASCADE",
     },
+    degree_id: {
+      type: DataTypes.INTEGER,
+    },
     program_id: {
       type: DataTypes.INTEGER,
       references: {
@@ -188,9 +192,9 @@ export const UniversityProgram = sequelize.define(
     },
   },
   {
-    tableName: "university_programs",
+    tableName: "university_degree_programs",
     timestamps: false,
-  }
+  },
 );
 
 export const UniversityMember = sequelize.define(
@@ -228,9 +232,8 @@ export const UniversityMember = sequelize.define(
   {
     tableName: "university_members",
     timestamps: false,
-  }
+  },
 );
-
 
 export const UniversityGallery = sequelize.define(
   "UniversityGallery",
@@ -255,7 +258,7 @@ export const UniversityGallery = sequelize.define(
   {
     tableName: "university_gallery",
     timestamps: false,
-  }
+  },
 );
 
 // Define Associations (Important!)
@@ -292,6 +295,14 @@ Program.hasMany(UniversityProgram, {
   as: "university_programs",
   foreignKey: "program_id",
 });
+UniversityProgram.belongsTo(Degree, {
+  as: "degree",
+  foreignKey: "degree_id",
+});
+Degree.hasMany(UniversityProgram, {
+  as: "university_programs",
+  foreignKey: "degree_id",
+});
 University.hasMany(UniversityMember, {
   as: "members",
   foreignKey: "university_id",
@@ -300,7 +311,6 @@ UniversityMember.belongsTo(University, {
   as: "university",
   foreignKey: "university_id",
 });
-
 
 University.hasMany(UniversityGallery, {
   as: "gallery",

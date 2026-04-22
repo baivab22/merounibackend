@@ -160,7 +160,6 @@ class UniversityService {
         meta_description,
         contact,
         levels,
-        programs,
         author_id,
         members,
         featured_image,
@@ -242,7 +241,6 @@ class UniversityService {
       // 🔹 Related data (NO guards)
       await this.upsertContact(university.id, contact, transaction);
       await this.syncLevels(university.id, levels, transaction);
-      await this.syncPrograms(university.id, programs, transaction);
       await this.syncMembers(university.id, members, transaction);
       await this.syncGallery(university.id, gallery, transaction);
 
@@ -340,36 +338,6 @@ class UniversityService {
       })),
       { transaction },
     );
-  }
-
-  async syncPrograms(universityId, programs, transaction) {
-    if (programs === undefined || programs === null) return;
-
-    if (!Array.isArray(programs)) return;
-
-    await UniversityProgram.destroy({
-      where: { university_id: universityId },
-      transaction,
-    });
-
-    if (programs.length > 0) {
-      const validPrograms = programs
-        .map((program_id) => {
-          const id = parseInt(program_id, 10);
-          return isNaN(id) ? null : id;
-        })
-        .filter((id) => id !== null && id > 0);
-
-      if (validPrograms.length > 0) {
-        await UniversityProgram.bulkCreate(
-          validPrograms.map((program_id) => ({
-            university_id: universityId,
-            program_id,
-          })),
-          { transaction },
-        );
-      }
-    }
   }
 
   async syncMembers(universityId, members, transaction) {

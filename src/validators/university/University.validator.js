@@ -48,7 +48,6 @@ export const createOrUpdateUniversitySchema = yup
       .nullable()
       .optional(),
     levels: yup.array().of(yup.number().integer().positive()).optional(),
-    programs: yup.array().of(yup.number().integer().positive()).optional(),
     members: yup.array().optional(),
     logo: yup.string().nullable().optional(),
     featured_image: yup.string().nullable().optional(),
