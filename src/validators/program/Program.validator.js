@@ -28,7 +28,7 @@ export const createOrUpdateProgramSchema = yup
     author: yup.number().integer().positive().optional(),
     level_id: yup.number().integer().positive().optional(),
 
-    degree_id: yup.number().integer().positive().nullable().optional(),
+    degree_ids: yup.array().of(yup.number().integer().positive()).optional(),
     duration: yup.string().optional(),
     credits: yup.number().integer().positive().optional(),
     language: yup.string().optional(),
@@ -119,7 +119,7 @@ export const saveAsDraftProgramSchema = yup
     code: yup.string().optional(),
     author: yup.number().integer().positive().optional(),
     level_id: yup.number().integer().positive().optional(),
-    degree_id: yup.number().integer().positive().nullable().optional(),
+    degree_ids: yup.array().of(yup.number().integer().positive()).optional(),
     duration: yup.string().optional(),
     credits: yup.number().integer().positive().optional(),
     language: yup.string().optional(),

@@ -1,4 +1,5 @@
 import Program from "./Program.model.js";
+import ProgramDegree from "./ProgramDegree.model.js";
 import ProgramSyllabus from "./ProgramSyllabus.model.js";
 import ProgramCollege from "./ProgramCollege.model.js";
 import Scholarship from "../scholarship/Scholarship.model.js";
@@ -21,9 +22,19 @@ import StreamProgram from "../stream/StreamProgram.model.js";
 Program.belongsTo(Level, { foreignKey: "level_id", as: "programlevel" });
 Level.hasMany(Program, { foreignKey: "level_id", as: "programs" });
 
-// Program belongs to Degree (optional)
-Program.belongsTo(Degree, { foreignKey: "degree_id", as: "programdegree" });
-Degree.hasMany(Program, { foreignKey: "degree_id", as: "programs" });
+// Program <-> Degree (many-to-many)
+Program.belongsToMany(Degree, {
+  through: ProgramDegree,
+  foreignKey: "program_id",
+  otherKey: "degree_id",
+  as: "degrees",
+});
+Degree.belongsToMany(Program, {
+  through: ProgramDegree,
+  foreignKey: "degree_id",
+  otherKey: "program_id",
+  as: "programs",
+});
 
 // Program belongs to Scholarship (optional)
 Program.belongsTo(Scholarship, {
@@ -109,4 +120,14 @@ Program.belongsToMany(Stream, {
 
 
 
-export { Program, Scholarship, Level, Degree, Exam, User, University, UniversityProgram };
+export {
+  Program,
+  ProgramDegree,
+  Scholarship,
+  Level,
+  Degree,
+  Exam,
+  User,
+  University,
+  UniversityProgram,
+};

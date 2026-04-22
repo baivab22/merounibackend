@@ -8,6 +8,7 @@ import Degree from "../../models/degree/Degree.model.js";
 import { Exam } from "../../models/exams/Exam.model.js";
 import Level from "../../models/level/Level.model.js";
 import Program from "../../models/program/Program.model.js";
+import ProgramDegree from "../../models/program/ProgramDegree.model.js";
 import ProgramCollege from "../../models/program/ProgramCollege.model.js";
 import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
@@ -56,14 +57,26 @@ class ProgramService {
       universityInclude.required = true;
     }
 
+    const degreeInclude = {
+      model: Degree,
+      as: "degrees",
+      attributes: ["id", "title", "short_name", "slug"],
+      through: { attributes: [] },
+      required: false,
+    };
+    if (degreeIds) {
+      const degreeIdsList = Array.isArray(degreeIds)
+        ? degreeIds
+        : typeof degreeIds === "string"
+          ? degreeIds.split(",").map((id) => id.trim())
+          : [degreeIds];
+      degreeInclude.where = { id: { [Op.in]: degreeIdsList } };
+      degreeInclude.required = true;
+    }
+
     const include = [
       { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
-      {
-        model: Degree,
-        as: "programdegree",
-        attributes: ["id", "title", "short_name", "slug"],
-        required: false,
-      },
+      degreeInclude,
       universityInclude,
     ];
 
@@ -72,14 +85,6 @@ class ProgramService {
     }
     if (disciplineId) {
       whereConditions.discipline_id = disciplineId;
-    }
-    if (degreeIds) {
-      const degreeIdsList = Array.isArray(degreeIds)
-        ? degreeIds
-        : typeof degreeIds === "string"
-          ? degreeIds.split(",").map((id) => id.trim())
-          : [degreeIds];
-      whereConditions.degree_id = { [Op.in]: degreeIdsList };
     }
     const streamIdsRaw = query.stream_ids || query.stream_id;
     if (streamIdsRaw) {
@@ -185,14 +190,26 @@ class ProgramService {
       universityInclude.required = true;
     }
 
+    const degreeInclude = {
+      model: Degree,
+      as: "degrees",
+      attributes: ["id", "title", "short_name", "slug"],
+      through: { attributes: [] },
+      required: false,
+    };
+    if (degreeIds) {
+      const degreeIdsList = Array.isArray(degreeIds)
+        ? degreeIds
+        : typeof degreeIds === "string"
+          ? degreeIds.split(",").map((id) => id.trim())
+          : [degreeIds];
+      degreeInclude.where = { id: { [Op.in]: degreeIdsList } };
+      degreeInclude.required = true;
+    }
+
     const include = [
       { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
-      {
-        model: Degree,
-        as: "programdegree",
-        attributes: ["id", "title", "short_name", "slug"],
-        required: false,
-      },
+      degreeInclude,
       universityInclude,
     ];
 
@@ -217,16 +234,6 @@ class ProgramService {
     if (status) {
       whereConditions.status = status;
     }
-    if (degreeIds) {
-      const degreeIdsList = Array.isArray(degreeIds)
-        ? degreeIds
-        : typeof degreeIds === "string"
-          ? degreeIds.split(",").map((id) => id.trim())
-          : [degreeIds];
-      whereConditions.degree_id = { [Op.in]: degreeIdsList };
-    }
-
-
 
     if (q) {
       whereConditions[Op.or] = [
@@ -300,8 +307,9 @@ class ProgramService {
         { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
         {
           model: Degree,
-          as: "programdegree",
+          as: "degrees",
           attributes: ["id", "title", "short_name", "slug"],
+          through: { attributes: [] },
           required: false,
         },
         {
@@ -355,7 +363,7 @@ class ProgramService {
         duration,
         credits,
         level_id,
-        degree_id,
+        degree_ids,
         language,
         eligibility_criteria,
         fee,
@@ -378,7 +386,7 @@ class ProgramService {
 
       await this.validateReferences({
         level_id,
-        degree_id,
+        degree_ids,
         scholarship_id,
         exam_id,
         author,
@@ -402,7 +410,6 @@ class ProgramService {
             duration,
             credits,
             level_id,
-            degree_id: degree_id || null,
             language,
             eligibility_criteria,
             fee,
@@ -437,7 +444,6 @@ class ProgramService {
             duration,
             credits,
             level_id,
-            degree_id: degree_id || null,
             language,
             eligibility_criteria,
             fee,
@@ -454,6 +460,10 @@ class ProgramService {
           },
           { where: { id: programId }, transaction }
         );
+      }
+
+      if (Array.isArray(degree_ids)) {
+        await this.syncProgramDegrees(programId, degree_ids, transaction);
       }
 
       if (Array.isArray(syllabus)) {
@@ -513,6 +523,25 @@ class ProgramService {
     }
   }
 
+  async syncProgramDegrees(programId, degreeIds, transaction) {
+    await ProgramDegree.destroy({
+      where: { program_id: programId },
+      transaction,
+    });
+    const valid = [
+      ...new Set(
+        degreeIds
+          .map((id) => parseInt(id, 10))
+          .filter((id) => !isNaN(id) && id > 0)
+      ),
+    ];
+    if (valid.length === 0) return;
+    await ProgramDegree.bulkCreate(
+      valid.map((degree_id) => ({ program_id: programId, degree_id })),
+      { transaction }
+    );
+  }
+
   async deleteProgram(id) {
     const deleted = await Program.destroy({ where: { id } });
     if (!deleted) {
@@ -524,7 +553,7 @@ class ProgramService {
 
   async validateReferences({
     level_id,
-    degree_id,
+    degree_ids,
     scholarship_id,
     exam_id,
     author,
@@ -544,12 +573,23 @@ class ProgramService {
     }
 
 
-    // Validate degree_id (optional)
-    if (degree_id) {
-      const degreeExists = await Degree.findByPk(Number(degree_id));
-      if (!degreeExists) {
+    if (Array.isArray(degree_ids) && degree_ids.length > 0) {
+      const ids = [
+        ...new Set(
+          degree_ids
+            .map((id) => parseInt(id, 10))
+            .filter((id) => !isNaN(id) && id > 0)
+        ),
+      ];
+      const found = await Degree.findAll({
+        where: { id: { [Op.in]: ids } },
+        attributes: ["id"],
+      });
+      if (found.length !== ids.length) {
+        const valid = new Set(found.map((d) => d.id));
+        const invalid = ids.filter((id) => !valid.has(id));
         const error = new Error(
-          `Invalid degree_id: ${degree_id}. Degree does not exist.`
+          `Invalid degree_ids: ${invalid.join(", ")}. Degrees do not exist.`
         );
         error.status = 400;
         throw error;

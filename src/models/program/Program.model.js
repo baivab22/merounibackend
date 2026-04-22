@@ -80,16 +80,6 @@ Program.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    degree_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: "degrees",
-        key: "id",
-      },
-      onDelete: "SET NULL",
-      onUpdate: "CASCADE",
-    },
     stream_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
