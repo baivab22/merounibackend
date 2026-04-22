@@ -1,4 +1,5 @@
 import DatabaseService from "../../services/database/Database.service.js";
+import { getClientIp } from "../../utils/clientIp.js";
 
 const databaseService = new DatabaseService();
 
@@ -22,7 +23,7 @@ class DatabaseController {
                     fileName: fileName,
                     downloadType: "sql_backup",
                     userId: req.user?.id || null,
-                    ipAddress: req.ip || req.connection.remoteAddress,
+                    ipAddress: getClientIp(req),
                     userAgent: req.headers["user-agent"],
                 });
             } catch (trackError) {

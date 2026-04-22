@@ -1,4 +1,5 @@
 import ActivityLogModel from "../models/activityLog/ActivityLog.model.js";
+import { getClientIp } from "../utils/clientIp.js";
 
 const activityTracker = (req, res, next) => {
   // We only track write ops
@@ -66,7 +67,7 @@ const activityTracker = (req, res, next) => {
             details = { action: `${action} on ${resource}` };
           }
 
-          const ip_address = req.ip || req.connection?.remoteAddress || null;
+          const ip_address = getClientIp(req);
 
           await ActivityLogModel.create({
             user_id: user.id,

@@ -25,6 +25,25 @@ import "./models/materials/MaterialHeart.model.js";
 
 const app = express();
 
+/**
+ * Behind nginx / load balancer / Cloudflare, the socket IP is the proxy (e.g. 127.0.0.1).
+ * Trust one hop by default in production, or set TRUST_PROXY to a hop count (e.g. 1, 2).
+ * Set TRUST_PROXY=0 to disable (local dev without a proxy).
+ */
+const rawTrust = process.env.TRUST_PROXY;
+let trustProxy = false;
+if (rawTrust === "true") {
+  trustProxy = true;
+} else if (rawTrust !== undefined && rawTrust !== "") {
+  const n = parseInt(rawTrust, 10);
+  if (!Number.isNaN(n) && n > 0) trustProxy = n;
+} else if (process.env.NODE_ENV === "production") {
+  trustProxy = 1;
+}
+if (trustProxy !== false) {
+  app.set("trust proxy", trustProxy);
+}
+
 const PORT = envConfig.PORT || 8888;
 const version = envConfig.VERSION;
 
