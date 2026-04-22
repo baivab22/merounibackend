@@ -160,6 +160,9 @@ router.use("/database", databaseRoute);
 import activityLogRoute from "./ActivityLog.route.js";
 router.use("/activity-logs", activityLogRoute);
 
+import searchTermRoute from "./SearchTerm.route.js";
+router.use("/search-terms", searchTermRoute);
+
 import miscRoute from "./Misc.route.js";
 router.use("/misc", miscRoute);
 
