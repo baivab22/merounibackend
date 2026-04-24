@@ -7,23 +7,21 @@ import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
-import CollegeProgram from "../../models/college/CollegeProgram.model.js";
+import CollegeOfferingProgram from "../../models/college/CollegeOfferingProgram.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
-import CollegeBoard from "../../models/college/CollegeBoard.model.js";
-import CollegeStream from "../../models/college/CollegeStream.model.js";
 import Program from "../../models/program/Program.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import Level from "../../models/level/Level.model.js";
 import Board from "../../models/board/Board.model.js";
 import Stream from "../../models/stream/Stream.model.js";
+import SchoolBoardStreamProgram from "../../models/college/SchoolBoardStreamProgram.model.js";
+import StreamProgram from "../../models/stream/StreamProgram.model.js";
 import { University } from "../../models/university/University.model.js";
 import CollegeUniversity from "../../models/college/CollegeUniversity.model.js";
 import UserModel from "../../models/users/User.model.js";
-
-
 
 class CollegeService {
   async updateReferableStatus(id, is_referable) {
@@ -72,9 +70,9 @@ class CollegeService {
         is_referable,
       } = payload;
 
-
-      console.log(programs, "programsprogramsprograms")
-      let collegeId = (id === "null" || id === "undefined" || id === "") ? null : id;
+      console.log(programs, "programsprogramsprograms");
+      let collegeId =
+        id === "null" || id === "undefined" || id === "" ? null : id;
       let existingCollege = null;
 
       if (collegeId) {
@@ -91,7 +89,6 @@ class CollegeService {
         throw error;
       }
 
-
       if (!collegeId) {
         const existingCollege = await College.findOne({
           where: { name: collegeName },
@@ -105,7 +102,9 @@ class CollegeService {
 
         const slugs = generateUniqueSlug(collegeName);
 
-        const maxOrder = await College.max('order_no_for_website', { transaction });
+        const maxOrder = await College.max("order_no_for_website", {
+          transaction,
+        });
         const nextOrder = (maxOrder || 0) + 1;
 
         const newCollege = await College.create(
@@ -129,7 +128,7 @@ class CollegeService {
             status: status || "published",
             is_referable: is_referable ?? false,
           },
-          { transaction }
+          { transaction },
         );
         collegeId = newCollege.id;
       } else {
@@ -147,7 +146,10 @@ class CollegeService {
           map_type,
           website_url,
           status: status || existingCollege.status,
-          is_referable: is_referable !== undefined ? is_referable : existingCollege.is_referable,
+          is_referable:
+            is_referable !== undefined
+              ? is_referable
+              : existingCollege.is_referable,
         };
 
         // Only update name and slugs if name has changed
@@ -167,13 +169,16 @@ class CollegeService {
       }
 
       if (faqs) {
-        await College.update({ faqs }, { where: { id: collegeId }, transaction });
+        await College.update(
+          { faqs },
+          { where: { id: collegeId }, transaction },
+        );
       }
 
       if (address) {
         await CollegeAddress.upsert(
           { college_id: collegeId, ...address },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -201,40 +206,114 @@ class CollegeService {
             college_id: collegeId,
             university_id: unId,
           }));
-          await CollegeUniversity.bulkCreate(universityRecords, { transaction });
+          await CollegeUniversity.bulkCreate(universityRecords, {
+            transaction,
+          });
         }
       }
 
-      if (Array.isArray(board_ids)) {
-        await CollegeBoard.destroy({
+      // Handle School Board Stream Program Associations
+      if (
+        Array.isArray(board_ids) ||
+        Array.isArray(stream_ids) ||
+        Array.isArray(programs)
+      ) {
+        await SchoolBoardStreamProgram.destroy({
           where: { college_id: collegeId },
           transaction,
         });
 
-        if (board_ids.length > 0) {
-          const boardRecords = board_ids.map((bId) => ({
-            college_id: collegeId,
-            board_id: bId,
-          }));
-          await CollegeBoard.bulkCreate(boardRecords, { transaction });
+        const records = [];
+        const processedProgramIds = new Set();
+        const processedStreamIds = new Set();
+        const processedBoardIds = new Set();
+
+        // 1. Process selected programs and their streams/boards
+        if (Array.isArray(programs) && programs.length > 0) {
+          // Find stream_id for each program
+          const streamPrograms = await StreamProgram.findAll({
+            where: { program_id: { [Op.in]: programs } },
+            transaction,
+          });
+
+          const programToStreamMap = {};
+          streamPrograms.forEach((sp) => {
+            programToStreamMap[sp.program_id] = sp.stream_id;
+          });
+
+          // Find board_id for each stream
+          const streamIdsFromPrograms = [
+            ...new Set(Object.values(programToStreamMap)),
+          ];
+          const streams = await Stream.findAll({
+            where: { id: { [Op.in]: streamIdsFromPrograms } },
+            transaction,
+          });
+
+          const streamToBoardMap = {};
+          streams.forEach((s) => {
+            streamToBoardMap[s.id] = s.board_id;
+          });
+
+          for (const pId of programs) {
+            const sId = programToStreamMap[pId];
+            const bId = sId ? streamToBoardMap[sId] : null;
+
+            if (bId) {
+              records.push({
+                college_id: collegeId,
+                board_id: bId,
+                stream_id: sId,
+                program_id: pId,
+              });
+              processedProgramIds.add(pId);
+              processedStreamIds.add(sId);
+              processedBoardIds.add(bId);
+            }
+          }
+        }
+
+        // 2. Process selected streams that don't have any selected programs
+        if (Array.isArray(stream_ids)) {
+          const streams = await Stream.findAll({
+            where: { id: { [Op.in]: stream_ids } },
+            transaction,
+          });
+
+          for (const s of streams) {
+            if (!processedStreamIds.has(s.id)) {
+              records.push({
+                college_id: collegeId,
+                board_id: s.board_id,
+                stream_id: s.id,
+                program_id: null,
+              });
+              processedStreamIds.add(s.id);
+              processedBoardIds.add(s.board_id);
+            }
+          }
+        }
+
+        // 3. Process selected boards that don't have any selected streams/programs
+        if (Array.isArray(board_ids)) {
+          for (const bId of board_ids) {
+            if (!processedBoardIds.has(bId)) {
+              records.push({
+                college_id: collegeId,
+                board_id: bId,
+                stream_id: null,
+                program_id: null,
+              });
+            }
+          }
+        }
+
+        if (records.length > 0) {
+          await SchoolBoardStreamProgram.bulkCreate(records, {
+            transaction,
+          });
         }
       }
-
-      if (Array.isArray(stream_ids)) {
-        await CollegeStream.destroy({
-          where: { college_id: collegeId },
-          transaction,
-        });
-
-        if (stream_ids.length > 0) {
-          const streamRecords = stream_ids.map((sId) => ({
-            college_id: collegeId,
-            stream_id: sId,
-          }));
-          await CollegeStream.bulkCreate(streamRecords, { transaction });
-        }
-      }
-
 
       if (Array.isArray(programs) && programs.length > 0) {
         const existingPrograms = await Program.findAll({
@@ -244,23 +323,23 @@ class CollegeService {
         });
 
         const existingProgramIds = existingPrograms.map(
-          (program) => program.id
+          (program) => program.id,
         );
         const invalidProgramIds = programs.filter(
-          (programId) => !existingProgramIds.includes(programId)
+          (programId) => !existingProgramIds.includes(programId),
         );
 
         if (invalidProgramIds.length > 0) {
           const error = new Error(
             `Invalid program IDs: ${invalidProgramIds.join(
-              ", "
-            )}. These program IDs do not exist in the programs table.`
+              ", ",
+            )}. These program IDs do not exist in the programs table.`,
           );
           error.status = 400;
           throw error;
         }
 
-        await CollegeProgram.destroy({
+        await CollegeOfferingProgram.destroy({
           where: { college_id: collegeId },
           transaction,
         });
@@ -269,7 +348,7 @@ class CollegeService {
           college_id: collegeId,
           program_id: programId,
         }));
-        await CollegeProgram.bulkCreate(programRecords, { transaction });
+        await CollegeOfferingProgram.bulkCreate(programRecords, { transaction });
       }
 
       if (Array.isArray(degrees)) {
@@ -283,7 +362,9 @@ class CollegeService {
             college_id: collegeId,
             degree_id: degreeId,
           }));
-          await CollegeOfferingDegrees.bulkCreate(degreeRecords, { transaction });
+          await CollegeOfferingDegrees.bulkCreate(degreeRecords, {
+            transaction,
+          });
         }
       }
 
@@ -332,8 +413,6 @@ class CollegeService {
         await CollegeMember.bulkCreate(memberRecords, { transaction });
       }
 
-
-
       await transaction.commit();
 
       return {
@@ -353,7 +432,8 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 24;
     const sort = query.sort === "desc" ? "DESC" : "ASC";
-    const programIdOrSlug = query.program_id || query.course_id || query.programId;
+    const programIdOrSlug =
+      query.program_id || query.course_id || query.programId;
     const { q, level_id, university_id } = query;
 
     const offset = (page - 1) * limit;
@@ -471,7 +551,7 @@ class CollegeService {
         order: [
           [sequelize.literal("order_no IS NULL"), "ASC"],
           ["order_no", "ASC"],
-          ["id", sort]
+          ["id", sort],
         ],
         include,
       });
@@ -482,7 +562,11 @@ class CollegeService {
       where: { id: { [Op.in]: programIdsToFetch } },
       attributes: ["id", "title", "slugs"],
       include: [
-        { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
+        {
+          model: Level,
+          as: "programlevel",
+          attributes: ["id", "title", "slugs"],
+        },
       ],
     });
 
@@ -512,7 +596,6 @@ class CollegeService {
     };
   }
 
-
   async getAdmissionById(id) {
     const admission = await CollegeAdmission.findByPk(id, {
       include: [
@@ -526,7 +609,6 @@ class CollegeService {
               as: "universities",
               attributes: ["fullname", "slugs"],
             },
-
           ],
         },
       ],
@@ -542,7 +624,11 @@ class CollegeService {
       where: { id: admission.program_id },
       attributes: ["id", "title", "slugs"],
       include: [
-        { model: Level, as: "programlevel", attributes: ["id", "title", "slugs"] },
+        {
+          model: Level,
+          as: "programlevel",
+          attributes: ["id", "title", "slugs"],
+        },
         // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
       ],
     });
@@ -560,15 +646,19 @@ class CollegeService {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 24;
     const sort = (query.sort || "asc").toUpperCase();
-    const status = query.status
-    const search = query.q
-    const isReferable = query.is_referable
+    const status = query.status;
+    const search = query.q;
+    const isReferable = query.is_referable;
 
     // Helper to parse potential array/string/comma-separated params
     const parseFilter = (val) => {
       if (!val) return [];
-      if (Array.isArray(val)) return val.map(v => String(v).trim());
-      if (typeof val === "string") return val.split(",").map(v => v.trim()).filter(Boolean);
+      if (Array.isArray(val)) return val.map((v) => String(v).trim());
+      if (typeof val === "string")
+        return val
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean);
       return [String(val).trim()];
     };
 
@@ -578,21 +668,30 @@ class CollegeService {
     const programIdsInput = parseFilter(query.program_ids || query.program_id);
     const universityIdsInput = parseFilter(query.university_ids);
 
-    const programIds = programIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
-    const programIdFilter = programIds.length > 0 ? { [Op.in]: programIds } : null;
+    const programIds = programIdsInput
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
+    const programIdFilter =
+      programIds.length > 0 ? { [Op.in]: programIds } : null;
 
-    const directDegreeIds = degreeIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
-    const degreeIdFilter = directDegreeIds.length > 0 ? { [Op.in]: directDegreeIds } : null;
+    const directDegreeIds = degreeIdsInput
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
+    const degreeIdFilter =
+      directDegreeIds.length > 0 ? { [Op.in]: directDegreeIds } : null;
 
-    const universityIds = universityIdsInput.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
-    const universityIdFilter = universityIds.length > 0 ? { [Op.in]: universityIds } : null;
+    const universityIds = universityIdsInput
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
+    const universityIdFilter =
+      universityIds.length > 0 ? { [Op.in]: universityIds } : null;
 
     const offset = (page - 1) * limit;
 
     const whereCondition = {
       [Op.and]: [
-        sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`)
-      ]
+        sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`),
+      ],
     };
     if (search) {
       whereCondition.name = {
@@ -611,10 +710,14 @@ class CollegeService {
       whereCondition.status = "published";
     }
 
-    if (isReferable === 'true' || isReferable === true || isReferable === 1 || isReferable === '1') {
+    if (
+      isReferable === "true" ||
+      isReferable === true ||
+      isReferable === 1 ||
+      isReferable === "1"
+    ) {
       whereCondition.is_referable = true;
     }
-
 
     const addressCondition = {};
     if (districts.length > 0) {
@@ -623,14 +726,18 @@ class CollegeService {
       };
     }
 
-
     const { count: totalCount, rows: items } = await College.findAndCountAll({
       where: whereCondition,
       limit,
       offset,
       distinct: true,
       order: [
-        [sequelize.literal("`colleges_schools`.`order_no_for_website` IS NULL"), "ASC"],
+        [
+          sequelize.literal(
+            "`colleges_schools`.`order_no_for_website` IS NULL",
+          ),
+          "ASC",
+        ],
         [sequelize.col("colleges_schools.order_no_for_website"), "ASC"],
         ["id", sort],
       ],
@@ -652,10 +759,17 @@ class CollegeService {
         {
           model: CollegeMember,
           as: "collegeMembers",
-          attributes: ["id", "name", "contact_number", "role", "description", "image_url"],
+          attributes: [
+            "id",
+            "name",
+            "contact_number",
+            "role",
+            "description",
+            "image_url",
+          ],
         },
         {
-          model: CollegeProgram,
+          model: CollegeOfferingProgram,
           as: "collegePrograms",
           include: [
             {
@@ -677,7 +791,7 @@ class CollegeService {
           attributes: ["id", "fullname", "slugs"],
           required: !!universityIdFilter,
           where: universityIdFilter ? { id: universityIdFilter } : undefined,
-          through: { attributes: [] }
+          through: { attributes: [] },
         },
         {
           model: Degree,
@@ -686,7 +800,7 @@ class CollegeService {
           through: { attributes: [] },
           required: !!degreeIdFilter,
           where: degreeIdFilter ? { id: degreeIdFilter } : undefined,
-        }
+        },
       ],
     });
 
@@ -715,7 +829,7 @@ class CollegeService {
           }
         })
         .map((user) => user.collegeId)
-        .filter(Boolean)
+        .filter(Boolean),
     );
 
     // Add has_account field to each college item
@@ -765,7 +879,7 @@ class CollegeService {
           as: "collegeGallery",
         },
         {
-          model: CollegeProgram,
+          model: CollegeOfferingProgram,
           as: "collegePrograms",
           include: [
             {
@@ -778,7 +892,14 @@ class CollegeService {
         {
           model: CollegeMember,
           as: "collegeMembers",
-          attributes: ["name", "contact_number", "role", "description", "image_url", "id"],
+          attributes: [
+            "name",
+            "contact_number",
+            "role",
+            "description",
+            "image_url",
+            "id",
+          ],
         },
         {
           model: CollegeAdmission,
@@ -795,16 +916,13 @@ class CollegeService {
           through: { attributes: [] },
         },
         {
-          model: Board,
-          as: "boards",
-          attributes: ["name", "id"],
-          through: { attributes: [] },
-        },
-        {
-          model: Stream,
-          as: "streams",
-          attributes: ["name", "id"],
-          through: { attributes: [] },
+          model: SchoolBoardStreamProgram,
+          as: "schoolBoardStreamPrograms",
+          include: [
+            { model: Board, as: "board", attributes: ["name", "id"] },
+            { model: Stream, as: "stream", attributes: ["name", "id"] },
+            { model: Program, as: "program", attributes: ["title", "id"] },
+          ],
         },
         {
           model: UserModel,
@@ -816,7 +934,7 @@ class CollegeService {
           model: Degree,
           as: "degrees",
           attributes: ["id", "title", "slug", "short_name"],
-          through: { attributes: [] }
+          through: { attributes: [] },
         },
       ],
     });
@@ -828,6 +946,39 @@ class CollegeService {
     }
 
     const collegeData = college.get({ plain: true });
+
+    // Map schoolBoardStreamPrograms back to flat boards and streams for frontend compatibility
+    const boardsMap = new Map();
+    const streamsMap = new Map();
+    const programsMap = new Map();
+
+    if (collegeData.schoolBoardStreamPrograms) {
+      collegeData.schoolBoardStreamPrograms.forEach((sbsp) => {
+        if (sbsp.board && !boardsMap.has(sbsp.board.id)) {
+          boardsMap.set(sbsp.board.id, sbsp.board);
+        }
+        if (sbsp.stream && !streamsMap.has(sbsp.stream.id)) {
+          streamsMap.set(sbsp.stream.id, sbsp.stream);
+        }
+        if (sbsp.program && !programsMap.has(sbsp.program.id)) {
+          programsMap.set(sbsp.program.id, sbsp.program);
+        }
+      });
+    }
+
+    collegeData.boards = Array.from(boardsMap.values());
+    collegeData.streams = Array.from(streamsMap.values());
+
+    // Merge programs if it's a school
+    const instituteLevel =
+      typeof collegeData.institute_level === "string"
+        ? safeParseJSON(collegeData.institute_level, [])
+        : collegeData.institute_level || [];
+
+    if (instituteLevel.includes("School")) {
+      collegeData.programs = Array.from(programsMap.values());
+    }
+
     // Robust JSON parsing
     collegeData.faqs = safeParseJSON(collegeData.faqs);
     collegeData.institute_level = safeParseJSON(collegeData.institute_level);
@@ -842,7 +993,37 @@ class CollegeService {
       throw error;
     }
 
+    const deletedOrderNo = college.order_no_for_website;
+    const instituteLevel = typeof college.institute_level === "string"
+      ? safeParseJSON(college.institute_level, [])
+      : college.institute_level || [];
+
+    const isSchool = instituteLevel.includes("School");
+
     await college.destroy();
+
+    // If the deleted college had an order number, adjust the rest
+    if (deletedOrderNo !== null && deletedOrderNo !== undefined) {
+      const whereCondition = {
+        order_no_for_website: { [Op.gt]: deletedOrderNo },
+      };
+
+      // Filter by same type (School or College) to keep sequences independent
+      if (isSchool) {
+        whereCondition[Op.and] = [
+          Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
+        ];
+      } else {
+        whereCondition[Op.and] = [
+          Sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`),
+        ];
+      }
+
+      await College.update(
+        { order_no_for_website: sequelize.literal("order_no_for_website - 1") },
+        { where: whereCondition }
+      );
+    }
   }
 
   async getCollegeByInstitutionUser(user) {
@@ -895,6 +1076,15 @@ class CollegeService {
           through: { attributes: [] },
         },
         {
+          model: SchoolBoardStreamProgram,
+          as: "schoolBoardStreamPrograms",
+          include: [
+            { model: Board, as: "board", attributes: ["name", "id"] },
+            { model: Stream, as: "stream", attributes: ["name", "id"] },
+            { model: Program, as: "program", attributes: ["title", "id"] },
+          ],
+        },
+        {
           model: CollegeMember,
           as: "collegeMembers",
           attributes: ["name", "contact_number", "role", "description"],
@@ -921,7 +1111,7 @@ class CollegeService {
           model: Degree,
           as: "degrees",
           attributes: ["id", "title", "slug"],
-          through: { attributes: [] }
+          through: { attributes: [] },
         },
       ],
     });
@@ -933,12 +1123,53 @@ class CollegeService {
     }
 
     const collegeData = college.get({ plain: true });
-    // Robust JSON parsing
-    if (typeof collegeData.faqs === 'string') {
-      try { collegeData.faqs = JSON.parse(collegeData.faqs); } catch (e) { collegeData.faqs = []; }
+
+    // Map schoolBoardStreamPrograms back to flat boards and streams for frontend compatibility
+    const boardsMap = new Map();
+    const streamsMap = new Map();
+    const programsMap = new Map();
+
+    if (collegeData.schoolBoardStreamPrograms) {
+      collegeData.schoolBoardStreamPrograms.forEach((sbsp) => {
+        if (sbsp.board && !boardsMap.has(sbsp.board.id)) {
+          boardsMap.set(sbsp.board.id, sbsp.board);
+        }
+        if (sbsp.stream && !streamsMap.has(sbsp.stream.id)) {
+          streamsMap.set(sbsp.stream.id, sbsp.stream);
+        }
+        if (sbsp.program && !programsMap.has(sbsp.program.id)) {
+          programsMap.set(sbsp.program.id, sbsp.program);
+        }
+      });
     }
-    if (typeof collegeData.institute_level === 'string') {
-      try { collegeData.institute_level = JSON.parse(collegeData.institute_level); } catch (e) { collegeData.institute_level = []; }
+
+    collegeData.boards = Array.from(boardsMap.values());
+    collegeData.streams = Array.from(streamsMap.values());
+
+    // Merge programs if it's a school
+    const instituteLevel =
+      typeof collegeData.institute_level === "string"
+        ? safeParseJSON(collegeData.institute_level, [])
+        : collegeData.institute_level || [];
+
+    if (instituteLevel.includes("School")) {
+      collegeData.programs = Array.from(programsMap.values());
+    }
+
+    // Robust JSON parsing
+    if (typeof collegeData.faqs === "string") {
+      try {
+        collegeData.faqs = JSON.parse(collegeData.faqs);
+      } catch (e) {
+        collegeData.faqs = [];
+      }
+    }
+    if (typeof collegeData.institute_level === "string") {
+      try {
+        collegeData.institute_level = JSON.parse(collegeData.institute_level);
+      } catch (e) {
+        collegeData.institute_level = [];
+      }
     }
     return collegeData;
   }
@@ -998,8 +1229,8 @@ class CollegeService {
       const updates = colleges.map((college) =>
         College.update(
           { order_no_for_website: college.order_no },
-          { where: { id: college.id }, transaction }
-        )
+          { where: { id: college.id }, transaction },
+        ),
       );
 
       await Promise.all(updates);
@@ -1028,7 +1259,8 @@ class CollegeService {
 
     let admission;
     let isNew = false;
-    const admissionId = (id === "null" || id === "undefined" || id === "") ? null : id;
+    const admissionId =
+      id === "null" || id === "undefined" || id === "" ? null : id;
 
     if (admissionId) {
       admission = await CollegeAdmission.findByPk(admissionId);
@@ -1078,7 +1310,7 @@ class CollegeService {
           {
             where: { id: order.id },
             transaction,
-          }
+          },
         );
       }
       await transaction.commit();
@@ -1094,28 +1326,42 @@ class CollegeService {
     const limit = parseInt(query.limit, 10) || 6;
     const offset = (page - 1) * limit;
 
-    const { count: totalCount, rows: colleges } = await College.findAndCountAll({
-      where: {
-        order_no_for_website: { [Op.ne]: null },
-        status: "published",
-      },
-      attributes: ["id", "name", "slugs", "college_logo", "featured_img", "order_no_for_website"],
-      include: [
-        {
-          model: Degree,
-          as: "degrees",
-          attributes: ["id", "title", "slug", "short_name"],
-          through: { attributes: [] },
+    const { count: totalCount, rows: colleges } = await College.findAndCountAll(
+      {
+        where: {
+          order_no_for_website: { [Op.ne]: null },
+          status: "published",
         },
-      ],
-      limit,
-      offset,
-      distinct: true,
-      order: [
-        [sequelize.literal('`colleges_schools`.`order_no_for_website` IS NULL'), "ASC"],
-        [sequelize.col('colleges_schools.order_no_for_website'), "ASC"],
-      ],
-    });
+        attributes: [
+          "id",
+          "name",
+          "slugs",
+          "college_logo",
+          "featured_img",
+          "order_no_for_website",
+        ],
+        include: [
+          {
+            model: Degree,
+            as: "degrees",
+            attributes: ["id", "title", "slug", "short_name"],
+            through: { attributes: [] },
+          },
+        ],
+        limit,
+        offset,
+        distinct: true,
+        order: [
+          [
+            sequelize.literal(
+              "`colleges_schools`.`order_no_for_website` IS NULL",
+            ),
+            "ASC",
+          ],
+          [sequelize.col("colleges_schools.order_no_for_website"), "ASC"],
+        ],
+      },
+    );
 
     return {
       items: colleges,

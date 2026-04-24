@@ -9,6 +9,7 @@ export const createCollegeRankingSchema = yup
     college_id: yup.number().integer().positive().required(),
     rank: yup.number().integer().positive().optional(),
     description: yup.string().nullable().optional(),
+    content: yup.string().nullable().optional(),
   })
   .required();
 
@@ -21,7 +22,7 @@ export const updateRankingOrderSchema = yup
         yup.object({
           id: yup.number().integer().positive().required(),
           rank: yup.number().integer().positive().required(),
-        })
+        }),
       )
       .min(1)
       .required(),
@@ -44,5 +45,6 @@ export const updateDegreeDescriptionSchema = yup
   .object({
     degree_id: yup.number().integer().positive().required(),
     description: yup.string().nullable().optional(),
+    content: yup.string().nullable().optional(),
   })
   .required();

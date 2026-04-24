@@ -3,9 +3,9 @@ import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
 import Program from "../program/Program.model.js";
 
-class CollegeProgram extends Model { }
+class CollegeOfferingProgram extends Model {}
 
-CollegeProgram.init(
+CollegeOfferingProgram.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     college_id: {
@@ -21,10 +21,12 @@ CollegeProgram.init(
       onDelete: "CASCADE",
     },
   },
-  { sequelize, modelName: "college_program", timestamps: false }
+  {
+    sequelize,
+    modelName: "college_offering_program",
+    tableName: "college_offering_programs",
+    timestamps: false,
+  },
 );
 
-
-
-
-export default CollegeProgram;
+export default CollegeOfferingProgram;

@@ -21,7 +21,7 @@ class CollegeRankingController {
   static async getRankingsByDegree(req, res) {
     try {
       const rankings = await collegeRankingService.getRankingsByDegree(
-        req.query.degree_id
+        req.query.degree_id,
       );
       return res.status(200).json({
         message: "success",
@@ -54,7 +54,7 @@ class CollegeRankingController {
     try {
       const rankings = await collegeRankingService.updateRankingOrder(
         req.body.degree_id,
-        req.body.rankings
+        req.body.rankings,
       );
       return res.status(200).json({
         message: "Ranking order updated",
@@ -97,7 +97,7 @@ class CollegeRankingController {
   static async updateDegreeOrder(req, res) {
     try {
       const result = await collegeRankingService.updateDegreeOrder(
-        req.body.degreeOrders
+        req.body.degreeOrders,
       );
       return res.status(200).json({
         message: "Degree order updated",
@@ -114,7 +114,8 @@ class CollegeRankingController {
     try {
       const result = await collegeRankingService.updateDegreeDescription(
         req.body.degree_id,
-        req.body.description
+        req.body.description,
+        req.body.content,
       );
       return res.status(200).json({
         message: "Degree description updated",

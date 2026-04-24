@@ -71,6 +71,7 @@ class CollegeRankingService {
           degree: ranking.degree,
           degreeListOrder: ranking.degree_list_order || 9999, // Default high order for degrees without order
           description: ranking.description || "",
+          content: ranking.content || "",
           rankings: [],
         };
       }
@@ -121,7 +122,7 @@ class CollegeRankingService {
   }
 
   async createRanking(data) {
-    const { degree_id, college_id, rank, description } = data;
+    const { degree_id, college_id, rank, description, content } = data;
 
     // Use transaction to prevent race conditions when multiple colleges are added quickly
     const transaction = await sequelize.transaction();
@@ -157,8 +158,7 @@ class CollegeRankingService {
       ) {
         // Get current max degree_list_order
         const maxDegreeOrder =
-          (await CollegeRanking.max("degree_list_order", { transaction })) ||
-          0;
+          (await CollegeRanking.max("degree_list_order", { transaction })) || 0;
         degreeListOrder = maxDegreeOrder + 1;
       } else {
         degreeListOrder = existingRankings[0].degree_list_order;
@@ -178,9 +178,10 @@ class CollegeRankingService {
           college_id,
           rank: newRank,
           description: description || existingRankings[0]?.description || null,
+          content: content || existingRankings[0]?.content || null,
           degree_list_order: degreeListOrder,
         },
-        { transaction }
+        { transaction },
       );
 
       // If this is the first ranking for the degree, update all existing rankings for this degree
@@ -190,7 +191,7 @@ class CollegeRankingService {
       ) {
         await CollegeRanking.update(
           { degree_list_order: degreeListOrder },
-          { where: { degree_id }, transaction }
+          { where: { degree_id }, transaction },
         );
       }
 
@@ -221,8 +222,8 @@ class CollegeRankingService {
     const updates = rankings.map((ranking) =>
       CollegeRanking.update(
         { rank: ranking.rank },
-        { where: { id: ranking.id } }
-      )
+        { where: { id: ranking.id } },
+      ),
     );
 
     await Promise.all(updates);
@@ -254,8 +255,8 @@ class CollegeRankingService {
       const updates = degreeOrders.map((do_obj) =>
         CollegeRanking.update(
           { degree_list_order: do_obj.degree_list_order },
-          { where: { degree_id: do_obj.degree_id }, transaction }
-        )
+          { where: { degree_id: do_obj.degree_id }, transaction },
+        ),
       );
 
       await Promise.all(updates);
@@ -268,11 +269,11 @@ class CollegeRankingService {
     }
   }
 
-  async updateDegreeDescription(degreeId, description) {
+  async updateDegreeDescription(degreeId, description, content) {
     // Update the description for all rankings that belong to this degree
     await CollegeRanking.update(
-      { description },
-      { where: { degree_id: degreeId } }
+      { description, content },
+      { where: { degree_id: degreeId } },
     );
     return { message: "Category description updated successfully" };
   }

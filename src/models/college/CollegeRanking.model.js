@@ -30,6 +30,10 @@ CollegeRanking.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     rank: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -60,7 +64,7 @@ CollegeRanking.init(
         fields: ["degree_list_order"],
       },
     ],
-  }
+  },
 );
 
 export default CollegeRanking;

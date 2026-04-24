@@ -1,7 +1,7 @@
 import Program from "./Program.model.js";
 import ProgramDegree from "./ProgramDegree.model.js";
 import ProgramSyllabus from "./ProgramSyllabus.model.js";
-import ProgramCollege from "./ProgramCollege.model.js";
+import CollegeOfferingProgram from "../college/CollegeOfferingProgram.model.js";
 import Scholarship from "../scholarship/Scholarship.model.js";
 import College from "../college/College.model.js";
 import Level from "../level/Level.model.js";
@@ -75,12 +75,12 @@ Course.hasMany(ProgramSyllabus, {
 
 // Assoociations for College Address
 Program.belongsToMany(CollegeAddress, {
-  through: ProgramCollege,
+  through: CollegeOfferingProgram,
   foreignKey: "program_id",
   as: "collegesAddress" // Alias for the association
 });
 CollegeAddress.belongsToMany(Program, {
-  through: ProgramCollege,
+  through: CollegeOfferingProgram,
   foreignKey: "college_id",
   as: "programs"
 });

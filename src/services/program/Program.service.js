@@ -9,7 +9,7 @@ import { Exam } from "../../models/exams/Exam.model.js";
 import Level from "../../models/level/Level.model.js";
 import Program from "../../models/program/Program.model.js";
 import ProgramDegree from "../../models/program/ProgramDegree.model.js";
-import ProgramCollege from "../../models/program/ProgramCollege.model.js";
+import CollegeOfferingProgram from "../../models/college/CollegeOfferingProgram.model.js";
 import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import UserModel from "../../models/users/User.model.js";
@@ -486,7 +486,7 @@ class ProgramService {
       }
 
       if (Array.isArray(colleges)) {
-        await ProgramCollege.destroy({
+        await CollegeOfferingProgram.destroy({
           where: { program_id: programId },
           transaction,
         });
@@ -496,7 +496,7 @@ class ProgramService {
           college_id: collegeId,
         }));
 
-        await ProgramCollege.bulkCreate(programCollegeData, { transaction });
+        await CollegeOfferingProgram.bulkCreate(programCollegeData, { transaction });
       }
 
       // Sync universities

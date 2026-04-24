@@ -43,7 +43,7 @@ class SchoolController {
             console.error("Error in getSchoolBySlug:", error);
             const status = error.status || 500;
             return res.status(status).json({
-                message: status === 500 ? "Server error" : error.message,
+                message: error.message,
             });
         }
     }

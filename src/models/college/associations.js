@@ -1,7 +1,7 @@
 import College from "./College.model.js";
 import CollegeAddress from "./CollegeAddress.model.js";
 import CollegeContact from "./CollegeContact.model.js";
-import CollegeProgram from "./CollegeProgram.model.js";
+import CollegeOfferingProgram from "./CollegeOfferingProgram.model.js";
 import CollegeMember from "./CollegeMember.model.js";
 import CollegeAdmission from "./CollegeAdmission.model.js";
 import CollegeGallery from "./CollegeGallery.model.js";
@@ -15,8 +15,7 @@ import CollegeOfferingDegrees from "./CollegeOfferingDegrees.model.js";
 import CollegeUniversity from "./CollegeUniversity.model.js";
 import Board from "../board/Board.model.js";
 import Stream from "../stream/Stream.model.js";
-import CollegeBoard from "./CollegeBoard.model.js";
-import CollegeStream from "./CollegeStream.model.js";
+import SchoolBoardStreamProgram from "./SchoolBoardStreamProgram.model.js";
 
 
 
@@ -35,28 +34,38 @@ University.belongsToMany(College, {
   as: "colleges",
 });
 
-// College Board Associations
-College.belongsToMany(Board, {
-  through: CollegeBoard,
+// School Board Stream Program Associations
+College.hasMany(SchoolBoardStreamProgram, {
   foreignKey: "college_id",
-  as: "boards",
+  as: "schoolBoardStreamPrograms",
 });
-Board.belongsToMany(College, {
-  through: CollegeBoard,
+SchoolBoardStreamProgram.belongsTo(College, {
+  foreignKey: "college_id",
+  as: "college",
+});
+SchoolBoardStreamProgram.belongsTo(Board, {
   foreignKey: "board_id",
-  as: "colleges",
+  as: "board",
 });
-
-// College Stream Associations
-College.belongsToMany(Stream, {
-  through: CollegeStream,
-  foreignKey: "college_id",
-  as: "streams",
-});
-Stream.belongsToMany(College, {
-  through: CollegeStream,
+SchoolBoardStreamProgram.belongsTo(Stream, {
   foreignKey: "stream_id",
-  as: "colleges",
+  as: "stream",
+});
+SchoolBoardStreamProgram.belongsTo(Program, {
+  foreignKey: "program_id",
+  as: "program",
+});
+Board.hasMany(SchoolBoardStreamProgram, {
+  foreignKey: "board_id",
+  as: "schoolBoardStreamPrograms",
+});
+Stream.hasMany(SchoolBoardStreamProgram, {
+  foreignKey: "stream_id",
+  as: "schoolBoardStreamPrograms",
+});
+Program.hasMany(SchoolBoardStreamProgram, {
+  foreignKey: "program_id",
+  as: "schoolBoardStreamPrograms",
 });
 
 
@@ -72,7 +81,7 @@ College.hasMany(CollegeContact, {
   foreignKey: "college_id",
   as: "collegeContacts",
 });
-College.hasMany(CollegeProgram, {
+College.hasMany(CollegeOfferingProgram, {
   foreignKey: "college_id",
   as: "collegePrograms",
 });
@@ -89,12 +98,12 @@ College.hasMany(CollegeAdmission, {
   as: "collegeAdmissions",
 });
 College.belongsToMany(Program, {
-  through: CollegeProgram,
+  through: CollegeOfferingProgram,
   foreignKey: "college_id",
   as: "programs",
 });
 Program.belongsToMany(College, {
-  through: CollegeProgram,
+  through: CollegeOfferingProgram,
   foreignKey: "program_id",
   as: "colleges",
 });
@@ -123,12 +132,12 @@ CollegeGallery.belongsTo(College, {
   as: "collegeGalleryCollege",
 });
 
-// CollegeProgram Associations
-CollegeProgram.belongsTo(College, {
+// CollegeOfferingProgram Associations
+CollegeOfferingProgram.belongsTo(College, {
   foreignKey: "college_id",
   as: "collegeProgramCollege",
 });
-CollegeProgram.belongsTo(Program, { foreignKey: "program_id", as: "program" });
+CollegeOfferingProgram.belongsTo(Program, { foreignKey: "program_id", as: "program" });
 
 // CollegeMember Associations
 CollegeMember.belongsTo(College, {
@@ -178,13 +187,12 @@ export {
   CollegeAddress,
   CollegeAdmission,
   CollegeContact,
-  CollegeProgram,
+  CollegeOfferingProgram,
   CollegeMember,
   CollegeFacility,
   CollegeRanking,
   CollegeUniversity,
-  CollegeBoard,
-  CollegeStream,
+  SchoolBoardStreamProgram,
   Program,
 
   University,
