@@ -8,9 +8,8 @@ class SearchTermCleanupCron {
    * Scheduled to run every day at midnight.
    */
   init() {
-    // Run every day at midnight: 0 0 * * *
-    // For testing/demonstration, you could use a more frequent interval
-    cron.schedule("0 0 * * *", () => {
+    // Run every 5 minutes: */5 * * * *
+    cron.schedule("*/5 * * * *", () => {
       console.log(
         "[SearchTermCleanup] Starting cleanup of foul search terms...",
       );
@@ -18,7 +17,7 @@ class SearchTermCleanupCron {
     });
 
     console.log(
-      "[SearchTermCleanup] Search term cleanup scheduled (Daily at midnight)",
+      "[SearchTermCleanup] Search term cleanup scheduled (Every 5 minutes)",
     );
   }
 
