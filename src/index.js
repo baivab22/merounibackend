@@ -4,7 +4,6 @@ import "dotenv/config";
 import express from "express";
 import envConfig from "./config/env.config.js";
 
-
 /**
  * import user defined components
  */
@@ -88,7 +87,7 @@ app.use(
   swaggerUi.setup(swaggerSpec, {
     customCss: ".swagger-ui .topbar { display: none }",
     customSiteTitle: "Mero Uni API Documentation",
-  })
+  }),
 );
 
 /**

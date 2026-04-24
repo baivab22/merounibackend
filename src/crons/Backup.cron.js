@@ -2,15 +2,15 @@ import fs from "fs";
 import path from "path";
 import AdmZip from "adm-zip";
 import cron from "node-cron";
-import DatabaseService from "./Database.service.js";
-import ConfigService from "../config/Config.service.js";
-import { sendMail } from "../../utils/Mail.util.js";
-import envConfig from "../../config/env.config.js";
+import DatabaseService from "../services/database/Database.service.js";
+import ConfigService from "../services/config/Config.service.js";
+import { sendMail } from "../utils/Mail.util.js";
+import envConfig from "../config/env.config.js";
 
 const databaseService = new DatabaseService();
 const configService = new ConfigService();
 
-class BackupService {
+class BackupCron {
     constructor() {
         this.backupJob = null;
     }
@@ -24,7 +24,7 @@ class BackupService {
             const interval = config?.value || "Weekly";
             this.scheduleBackup(interval);
         } catch (error) {
-            console.warn("[BackupService] Warning: No backup interval found in config. Defaulting to Weekly.");
+            console.warn("[BackupCron] Warning: No backup interval found in config. Defaulting to Weekly.");
             this.scheduleBackup("Weekly");
         }
     }
@@ -52,11 +52,11 @@ class BackupService {
         }
 
         this.backupJob = cron.schedule(cronTime, () => {
-            console.log(`[BackupService] Starting automated backup (Interval: ${interval})...`);
+            console.log(`[BackupCron] Starting automated backup (Interval: ${interval})...`);
             this.performBackup();
         });
 
-        console.log(`[BackupService] Backup scheduled with interval: ${interval} (${cronTime})`);
+        console.log(`[BackupCron] Backup scheduled with interval: ${interval} (${cronTime})`);
     }
 
     /**
@@ -76,17 +76,17 @@ class BackupService {
 
         try {
             // 1. Generate SQL Backup
-            console.log(`[BackupService] Generating SQL dump...`);
+            console.log(`[BackupCron] Generating SQL dump...`);
             await databaseService.generateBackupFile(sqlPath);
 
             // 2. Zip the backup
-            console.log(`[BackupService] Zipping backup...`);
+            console.log(`[BackupCron] Zipping backup...`);
             const zip = new AdmZip();
             zip.addLocalFile(sqlPath);
             zip.writeZip(zipPath);
 
             // 3. Email the backup
-            console.log(`[BackupService] Sending email to ${envConfig.MAIL_USER}...`);
+            console.log(`[BackupCron] Sending email to ${envConfig.MAIL_USER}...`);
             await sendMail(
                 envConfig.MAIL_USER,
                 "MeroUni Automated Database Backup",
@@ -102,13 +102,13 @@ class BackupService {
                 ]
             );
 
-            console.log(`[BackupService] Backup completed and emailed successfully.`);
+            console.log(`[BackupCron] Backup completed and emailed successfully.`);
 
             // 4. Cleanup
             fs.unlinkSync(sqlPath);
             fs.unlinkSync(zipPath);
         } catch (error) {
-            console.error(`[BackupService] Automated backup failed:`, error);
+            console.error(`[BackupCron] Automated backup failed:`, error);
         }
     }
 
@@ -122,4 +122,4 @@ class BackupService {
     }
 }
 
-export default new BackupService();
+export default new BackupCron();
