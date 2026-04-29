@@ -155,10 +155,15 @@ export const createOrUpdateCollegeSchema = yup
     college_broucher: yup.string().nullable().optional(),
     description: yup.string().nullable().optional(),
     content: yup.string().nullable().optional(),
-    faqs: yup.array().of(yup.object({
-      question: yup.string().nullable().optional(),
-      answer: yup.string().nullable().optional(),
-    })).optional(),
+    faqs: yup
+      .array()
+      .of(
+        yup.object({
+          question: yup.string().nullable().optional(),
+          answer: yup.string().nullable().optional(),
+        }),
+      )
+      .optional(),
     address: yup
       .object({
         country: yup.string().nullable().optional(),
@@ -179,7 +184,7 @@ export const createOrUpdateCollegeSchema = yup
           title: yup.string().nullable().optional(),
           description: yup.string().nullable().optional(),
           icon: yup.string().nullable().optional(),
-        })
+        }),
       )
       .optional(),
     members: yup
@@ -195,7 +200,7 @@ export const createOrUpdateCollegeSchema = yup
             .nullable()
             .optional(),
           description: yup.string().nullable().optional(),
-        })
+        }),
       )
       .optional(),
     admissions: yup
@@ -208,7 +213,7 @@ export const createOrUpdateCollegeSchema = yup
           admission_process: yup.string().nullable().optional(),
           fee_details: yup.string().nullable().optional(),
           description: yup.string().nullable().optional(),
-        })
+        }),
       )
       .optional(),
     images: yup
@@ -217,9 +222,12 @@ export const createOrUpdateCollegeSchema = yup
         yup.object({
           file_type: yup.string().nullable().optional(),
           url: yup.string().nullable().optional(),
-        })
+        }),
       )
       .optional(),
+    board_ids: yup.array().of(yup.number().integer().positive()).optional(),
+    stream_ids: yup.array().of(yup.number().integer().positive()).optional(),
+    is_referable: yup.boolean().optional(),
     status: yup
       .string()
       .oneOf(["draft", "published", "archived"])
@@ -228,20 +236,23 @@ export const createOrUpdateCollegeSchema = yup
   })
   .required();
 
-export const createOrUpdateAdmissionSchema = yup.object({
-  id: yup.number().integer().positive().optional(),
-  college_id: yup.number().integer().positive().required(),
-  program_id: yup.number().integer().positive().optional(),
-  course_id: yup.number().integer().positive().optional(),
-  eligibility_criteria: yup.string().nullable().optional(),
-  admission_process: yup.string().nullable().optional(),
-  fee_details: yup.string().nullable().optional(),
-  description: yup.string().nullable().optional(),
-}).test(
-  "at-least-one-id",
-  "Either program_id or course_id is required",
-  (value) => !!(value.program_id || value.course_id)
-).required();
+export const createOrUpdateAdmissionSchema = yup
+  .object({
+    id: yup.number().integer().positive().optional(),
+    college_id: yup.number().integer().positive().required(),
+    program_id: yup.number().integer().positive().optional(),
+    course_id: yup.number().integer().positive().optional(),
+    eligibility_criteria: yup.string().nullable().optional(),
+    admission_process: yup.string().nullable().optional(),
+    fee_details: yup.string().nullable().optional(),
+    description: yup.string().nullable().optional(),
+  })
+  .test(
+    "at-least-one-id",
+    "Either program_id or course_id is required",
+    (value) => !!(value.program_id || value.course_id),
+  )
+  .required();
 
 export const updateCollegeOrderSchema = yup
   .object({
@@ -251,7 +262,7 @@ export const updateCollegeOrderSchema = yup
         yup.object({
           id: yup.number().integer().positive().required(),
           order_no: yup.number().integer().min(0).required(),
-        })
+        }),
       )
       .min(1)
       .required(),
@@ -266,7 +277,7 @@ export const updateAdmissionOrderSchema = yup
         yup.object({
           id: yup.number().integer().positive().required(),
           order_no: yup.number().integer().min(0).required(),
-        })
+        }),
       )
       .min(1)
       .required(),
@@ -281,42 +292,39 @@ export const updateSchoolOrderSchema = yup
         yup.object({
           id: yup.number().integer().positive().required(),
           order_no: yup.number().integer().min(0).required(),
-        })
+        }),
       )
       .min(1)
       .required(),
   })
   .required();
 
-
-
-export const admissionPaginationSchema = yup
-  .object({
-    page: yup.number().integer().min(1).default(1),
-    limit: yup.number().integer().min(1).max(1000).default(1000),
-    sort: yup
-      .string()
-      .oneOf(["ASC", "DESC", "asc", "desc"])
-      .transform((value) => (value ? value.toUpperCase() : "ASC"))
-      .default("ASC"),
-    q: yup
-      .string()
-      .nullable()
-      .transform((value) => (value === "" ? null : value)),
-    program_id: yup
-      .string()
-      .nullable()
-      .transform((value) => (value === "" ? null : value)),
-    course_id: yup
-      .string()
-      .nullable()
-      .transform((value) => (value === "" ? null : value)),
-    level_id: yup
-      .string()
-      .nullable()
-      .transform((value) => (value === "" ? null : value)),
-    university_id: yup
-      .string()
-      .nullable()
-      .transform((value) => (value === "" ? null : value)),
-  });
+export const admissionPaginationSchema = yup.object({
+  page: yup.number().integer().min(1).default(1),
+  limit: yup.number().integer().min(1).max(1000).default(1000),
+  sort: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "ASC"))
+    .default("ASC"),
+  q: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  program_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  course_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  level_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  university_id: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value)),
+});

@@ -219,7 +219,7 @@ class CollegeService {
         Array.isArray(programs)
       ) {
         await SchoolBoardStreamProgram.destroy({
-          where: { college_id: collegeId },
+          where: { college_school_id: collegeId },
           transaction,
         });
 
@@ -261,7 +261,7 @@ class CollegeService {
 
             if (bId) {
               records.push({
-                college_id: collegeId,
+                college_school_id: collegeId,
                 board_id: bId,
                 stream_id: sId,
                 program_id: pId,
@@ -283,7 +283,7 @@ class CollegeService {
           for (const s of streams) {
             if (!processedStreamIds.has(s.id)) {
               records.push({
-                college_id: collegeId,
+                college_school_id: collegeId,
                 board_id: s.board_id,
                 stream_id: s.id,
                 program_id: null,
@@ -299,7 +299,7 @@ class CollegeService {
           for (const bId of board_ids) {
             if (!processedBoardIds.has(bId)) {
               records.push({
-                college_id: collegeId,
+                college_school_id: collegeId,
                 board_id: bId,
                 stream_id: null,
                 program_id: null,
@@ -348,7 +348,9 @@ class CollegeService {
           college_id: collegeId,
           program_id: programId,
         }));
-        await CollegeOfferingProgram.bulkCreate(programRecords, { transaction });
+        await CollegeOfferingProgram.bulkCreate(programRecords, {
+          transaction,
+        });
       }
 
       if (Array.isArray(degrees)) {
@@ -745,7 +747,7 @@ class CollegeService {
         {
           model: CollegeAddress,
           as: "collegeAddress",
-          attributes: ["country", "district", "city"],
+          attributes: ["country", "district", "city", "street", "postal_code"],
           where: Object.keys(addressCondition).length
             ? addressCondition
             : undefined,
@@ -994,9 +996,10 @@ class CollegeService {
     }
 
     const deletedOrderNo = college.order_no_for_website;
-    const instituteLevel = typeof college.institute_level === "string"
-      ? safeParseJSON(college.institute_level, [])
-      : college.institute_level || [];
+    const instituteLevel =
+      typeof college.institute_level === "string"
+        ? safeParseJSON(college.institute_level, [])
+        : college.institute_level || [];
 
     const isSchool = instituteLevel.includes("School");
 
@@ -1021,7 +1024,7 @@ class CollegeService {
 
       await College.update(
         { order_no_for_website: sequelize.literal("order_no_for_website - 1") },
-        { where: whereCondition }
+        { where: whereCondition },
       );
     }
   }
@@ -1331,6 +1334,9 @@ class CollegeService {
         where: {
           order_no_for_website: { [Op.ne]: null },
           status: "published",
+          [Op.and]: [
+            sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`),
+          ],
         },
         attributes: [
           "id",

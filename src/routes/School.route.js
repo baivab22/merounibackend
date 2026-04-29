@@ -1,15 +1,18 @@
 import express from "express";
 
 import SchoolController from "../controllers/school/School.controller.js";
-import { authenticateUser, optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
+import {
+  authenticateUser,
+  optionalAuthenticateUser,
+} from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-    schoolPaginationSchema,
-    collegeSlugParamSchema,
-    updateSchoolOrderSchema,
-    createOrUpdateCollegeSchema,
-    collegeIdParamSchema,
+  schoolPaginationSchema,
+  collegeSlugParamSchema,
+  updateSchoolOrderSchema,
+  createOrUpdateCollegeSchema,
+  collegeIdParamSchema,
 } from "../validators/college/College.validator.js";
 import CollegeController from "../controllers/college/College.controller.js";
 
@@ -50,10 +53,10 @@ const router = express.Router();
  *         description: List of schools
  */
 router.get(
-    "/",
-    optionalAuthenticateUser,
-    requestValidator(schoolPaginationSchema, "query"),
-    SchoolController.listSchools
+  "/",
+  optionalAuthenticateUser,
+  requestValidator(schoolPaginationSchema, "query"),
+  SchoolController.listSchools,
 );
 
 /**
@@ -88,17 +91,16 @@ router.get("/affiliations", SchoolController.listSchoolAffiliations);
 router.get("/boards", SchoolController.listSchoolBoards);
 router.get("/streams", SchoolController.listSchoolStreams);
 
-
 router.get(
-    "/:slugs",
-    requestValidator(collegeSlugParamSchema, "params"),
-    SchoolController.getSchoolBySlug
+  "/:slugs",
+  requestValidator(collegeSlugParamSchema, "params"),
+  SchoolController.getSchoolBySlug,
 );
 
 router.patch(
-    "/update-order",
-    requestValidator(updateSchoolOrderSchema, "body"),
-    SchoolController.updateSchoolOrder
+  "/update-order",
+  requestValidator(updateSchoolOrderSchema, "body"),
+  SchoolController.updateSchoolOrder,
 );
 
 /**
@@ -123,11 +125,11 @@ router.patch(
  *         description: School created/updated successfully
  */
 router.post(
-    "/",
-    authenticateUser,
-    authorizeRole(["admin", "editor", "agent"]),
-    requestValidator(createOrUpdateCollegeSchema, "body"),
-    CollegeController.createOrUpdateCollege
+  "/",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(createOrUpdateCollegeSchema, "body"),
+  SchoolController.createOrUpdateSchool,
 );
 
 /**
@@ -144,11 +146,11 @@ router.post(
  *         description: School saved as draft
  */
 router.post(
-    "/save-as-draft",
-    authenticateUser,
-    authorizeRole(["admin", "editor", "agent"]),
-    requestValidator(createOrUpdateCollegeSchema, "body"),
-    CollegeController.saveAsDraft
+  "/save-as-draft",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(createOrUpdateCollegeSchema, "body"),
+  SchoolController.saveAsDraft,
 );
 
 /**
@@ -177,11 +179,11 @@ router.post(
  *         description: School not found
  */
 router.delete(
-    "/:id",
-    authenticateUser,
-    authorizeRole(["admin", "editor"]),
-    requestValidator(collegeIdParamSchema, "params"),
-    CollegeController.deleteCollege
+  "/:id",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(collegeIdParamSchema, "params"),
+  CollegeController.deleteCollege,
 );
 
 export default router;

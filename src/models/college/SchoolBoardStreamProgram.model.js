@@ -15,7 +15,7 @@ SchoolBoardStreamProgram.init(
       primaryKey: true,
     },
     // i.e. school_id
-    college_id: {
+    college_school_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: College, key: "id" },
@@ -49,7 +49,7 @@ SchoolBoardStreamProgram.init(
       {
         name: "idx_school_board_stream_program_unique",
         unique: true,
-        fields: ["college_id", "board_id", "stream_id", "program_id"],
+        fields: ["college_school_id", "board_id", "stream_id", "program_id"],
       },
     ],
   },

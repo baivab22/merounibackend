@@ -13,13 +13,14 @@ import CollegeOfferingProgram from "../../models/college/CollegeOfferingProgram.
 import ProgramSyllabus from "../../models/program/ProgramSyllabus.model.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import UserModel from "../../models/users/User.model.js";
-import { University, UniversityProgram } from "../../models/university/University.model.js";
+import {
+  University,
+  UniversityProgram,
+} from "../../models/university/University.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 import Stream from "../../models/stream/Stream.model.js";
 
-
 class ProgramService {
-
   async listPrograms(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
@@ -37,12 +38,11 @@ class ProgramService {
       degreeIds,
     } = query;
 
-
     const whereConditions = { status: "published" };
     const universityInclude = {
       model: University,
       as: "universities",
-      attributes: ["id", "fullname"],
+      attributes: ["id", "fullname", "slugs"],
       through: { attributes: [] },
       required: false,
     };
@@ -75,7 +75,11 @@ class ProgramService {
     }
 
     const include = [
-      { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
+      {
+        model: Level,
+        as: "programlevel",
+        attributes: ["title", "slugs", "id"],
+      },
       degreeInclude,
       universityInclude,
     ];
@@ -88,10 +92,13 @@ class ProgramService {
     }
     const streamIdsRaw = query.stream_ids || query.stream_id;
     if (streamIdsRaw) {
-      const streamIds = Array.isArray(streamIdsRaw) 
-        ? streamIdsRaw.map(Number) 
-        : String(streamIdsRaw).split(',').map(Number).filter(id => !isNaN(id));
-      
+      const streamIds = Array.isArray(streamIdsRaw)
+        ? streamIdsRaw.map(Number)
+        : String(streamIdsRaw)
+            .split(",")
+            .map(Number)
+            .filter((id) => !isNaN(id));
+
       if (streamIds.length > 0) {
         // Since it's a many-to-many relationship through stream_programs
         include.push({
@@ -105,15 +112,12 @@ class ProgramService {
       }
     }
 
-
-
     if (q) {
       whereConditions[Op.or] = [
         { title: { [Op.like]: `%${q}%` } },
         { code: { [Op.like]: `%${q}%` } },
       ];
     }
-
 
     const validSortFields = [
       "title",
@@ -124,24 +128,20 @@ class ProgramService {
       "fee",
     ];
 
-    const sortField = validSortFields.includes(sortBy)
-      ? sortBy
-      : "createdAt";
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
 
     const order = [
       [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
     ];
 
-    const { count: totalCount, rows: items } =
-      await Program.findAndCountAll({
-        where: whereConditions,
-        include,
-        limit,
-        offset,
-        distinct: true,
-        order,
-      });
-
+    const { count: totalCount, rows: items } = await Program.findAndCountAll({
+      where: whereConditions,
+      include,
+      limit,
+      offset,
+      distinct: true,
+      order,
+    });
 
     return {
       items,
@@ -175,7 +175,7 @@ class ProgramService {
     const universityInclude = {
       model: University,
       as: "universities",
-      attributes: ["id", "fullname"],
+      attributes: ["id", "fullname", "slugs"],
       through: { attributes: [] },
       required: false,
     };
@@ -208,7 +208,11 @@ class ProgramService {
     }
 
     const include = [
-      { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
+      {
+        model: Level,
+        as: "programlevel",
+        attributes: ["title", "slugs", "id"],
+      },
       degreeInclude,
       universityInclude,
     ];
@@ -223,7 +227,6 @@ class ProgramService {
         required: true,
       });
     }
-
 
     if (levelId) {
       whereConditions.level_id = levelId;
@@ -251,23 +254,20 @@ class ProgramService {
       "fee",
     ];
 
-    const sortField = validSortFields.includes(sortBy)
-      ? sortBy
-      : "createdAt";
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
 
     const order = [
       [sortField, sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC"],
     ];
 
-    const { count: totalCount, rows: items } =
-      await Program.findAndCountAll({
-        where: whereConditions,
-        include,
-        limit,
-        offset,
-        distinct: true,
-        order,
-      });
+    const { count: totalCount, rows: items } = await Program.findAndCountAll({
+      where: whereConditions,
+      include,
+      limit,
+      offset,
+      distinct: true,
+      order,
+    });
 
     return {
       items,
@@ -280,17 +280,11 @@ class ProgramService {
     };
   }
 
-
   async getProgram(slugs) {
     const program = await Program.findOne({
       where: { slugs },
       attributes: {
-        exclude: [
-          "author",
-          "level_id",
-          "scholarship_id",
-          "exam_id",
-        ],
+        exclude: ["author", "level_id", "scholarship_id", "exam_id"],
       },
       include: [
         {
@@ -304,7 +298,11 @@ class ProgramService {
             },
           ],
         },
-        { model: Level, as: "programlevel", attributes: ["title", "slugs", "id"] },
+        {
+          model: Level,
+          as: "programlevel",
+          attributes: ["title", "slugs", "id"],
+        },
         {
           model: Degree,
           as: "degrees",
@@ -317,7 +315,11 @@ class ProgramService {
           as: "programscholarship",
           attributes: ["name", "slugs", "id"],
         },
-        { model: Exam, as: "programexam", attributes: ["title", "slugs", "id"] },
+        {
+          model: Exam,
+          as: "programexam",
+          attributes: ["title", "slugs", "id"],
+        },
         {
           model: UserModel,
           as: "programauthorDetails",
@@ -381,7 +383,6 @@ class ProgramService {
         status,
       } = payload;
 
-
       let programId = id;
 
       await this.validateReferences({
@@ -422,9 +423,8 @@ class ProgramService {
             exam_id: exam_id || null,
             stream_id: stream_id || null,
             status: status || "published",
-
           },
-          { transaction }
+          { transaction },
         );
 
         programId = newProgram.id;
@@ -456,9 +456,8 @@ class ProgramService {
             exam_id: exam_id || null,
             stream_id: stream_id || null,
             status: status || existingProgram.status,
-
           },
-          { where: { id: programId }, transaction }
+          { where: { id: programId }, transaction },
         );
       }
 
@@ -473,7 +472,7 @@ class ProgramService {
         });
 
         const syllabusData = syllabus
-          .filter(item => item.course_id)
+          .filter((item) => item.course_id)
           .map((item) => ({
             year: item.year,
             semester: item.semester,
@@ -496,7 +495,9 @@ class ProgramService {
           college_id: collegeId,
         }));
 
-        await CollegeOfferingProgram.bulkCreate(programCollegeData, { transaction });
+        await CollegeOfferingProgram.bulkCreate(programCollegeData, {
+          transaction,
+        });
       }
 
       // Sync universities
@@ -511,7 +512,9 @@ class ProgramService {
             program_id: programId,
             university_id: universityId,
           }));
-          await UniversityProgram.bulkCreate(universityProgramData, { transaction });
+          await UniversityProgram.bulkCreate(universityProgramData, {
+            transaction,
+          });
         }
       }
 
@@ -532,13 +535,13 @@ class ProgramService {
       ...new Set(
         degreeIds
           .map((id) => parseInt(id, 10))
-          .filter((id) => !isNaN(id) && id > 0)
+          .filter((id) => !isNaN(id) && id > 0),
       ),
     ];
     if (valid.length === 0) return;
     await ProgramDegree.bulkCreate(
       valid.map((degree_id) => ({ program_id: programId, degree_id })),
-      { transaction }
+      { transaction },
     );
   }
 
@@ -565,20 +568,19 @@ class ProgramService {
       if (!levelExists) {
         console.error(`Level with ID ${level_id} not found`);
         const error = new Error(
-          `Invalid level_id: ${level_id}. Level does not exist.`
+          `Invalid level_id: ${level_id}. Level does not exist.`,
         );
         error.status = 400;
         throw error;
       }
     }
 
-
     if (Array.isArray(degree_ids) && degree_ids.length > 0) {
       const ids = [
         ...new Set(
           degree_ids
             .map((id) => parseInt(id, 10))
-            .filter((id) => !isNaN(id) && id > 0)
+            .filter((id) => !isNaN(id) && id > 0),
         ),
       ];
       const found = await Degree.findAll({
@@ -589,7 +591,7 @@ class ProgramService {
         const valid = new Set(found.map((d) => d.id));
         const invalid = ids.filter((id) => !valid.has(id));
         const error = new Error(
-          `Invalid degree_ids: ${invalid.join(", ")}. Degrees do not exist.`
+          `Invalid degree_ids: ${invalid.join(", ")}. Degrees do not exist.`,
         );
         error.status = 400;
         throw error;
@@ -599,12 +601,12 @@ class ProgramService {
     // Validate scholarship_id (optional)
     if (scholarship_id) {
       const scholarshipExists = await Scholarship.findByPk(
-        Number(scholarship_id)
+        Number(scholarship_id),
       );
       if (!scholarshipExists) {
         console.error(`Scholarship with ID ${scholarship_id} not found`);
         const error = new Error(
-          `Invalid scholarship_id: ${scholarship_id}. Scholarship does not exist.`
+          `Invalid scholarship_id: ${scholarship_id}. Scholarship does not exist.`,
         );
         error.status = 400;
         throw error;
@@ -617,7 +619,7 @@ class ProgramService {
       if (!examExists) {
         console.error(`Exam with ID ${exam_id} not found`);
         const error = new Error(
-          `Invalid exam_id: ${exam_id}. Exam does not exist.`
+          `Invalid exam_id: ${exam_id}. Exam does not exist.`,
         );
         error.status = 400;
         throw error;
@@ -630,7 +632,7 @@ class ProgramService {
       if (!authorExists) {
         console.error(`User with ID ${author} not found`);
         const error = new Error(
-          `Invalid author ID: ${author}. User does not exist.`
+          `Invalid author ID: ${author}. User does not exist.`,
         );
         error.status = 400;
         throw error;
@@ -647,13 +649,12 @@ class ProgramService {
         const foundIds = found.map((u) => u.id);
         const invalid = universities.filter((uid) => !foundIds.includes(uid));
         const error = new Error(
-          `Invalid university IDs: ${invalid.join(", ")}. Universities do not exist.`
+          `Invalid university IDs: ${invalid.join(", ")}. Universities do not exist.`,
         );
         error.status = 400;
         throw error;
       }
     }
-
   }
 }
 

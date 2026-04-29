@@ -47,6 +47,7 @@ class SchoolController {
             });
         }
     }
+
     static async updateSchoolOrder(req, res) {
         try {
             const result = await schoolService.updateSchoolOrder(req.body.schools);
@@ -104,7 +105,41 @@ class SchoolController {
             });
         }
     }
-}
 
+    static async createOrUpdateSchool(req, res) {
+        try {
+            const { collegeId, isNew } = await schoolService.createOrUpdateSchool(req.body);
+            return res.status(200).json({
+                message: isNew ? "School created successfully!" : "School updated successfully!",
+                collegeId,
+            });
+        } catch (error) {
+            console.error("Error in createOrUpdateSchool:", error);
+            const status = error.status || 500;
+            return res.status(status).json({
+                message: error.message || "Server error",
+            });
+        }
+    }
+
+    static async saveAsDraft(req, res) {
+        try {
+            const { collegeId, isNew } = await schoolService.createOrUpdateSchool({
+                ...req.body,
+                status: "draft",
+            });
+            return res.status(200).json({
+                message: isNew ? "School saved as draft successfully!" : "School updated as draft successfully!",
+                collegeId,
+            });
+        } catch (error) {
+            console.error("Error in saveAsDraft:", error);
+            const status = error.status || 500;
+            return res.status(status).json({
+                message: error.message || "Server error",
+            });
+        }
+    }
+}
 
 export default SchoolController;

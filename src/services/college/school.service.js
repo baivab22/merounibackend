@@ -15,6 +15,9 @@ import Board from "../../models/board/Board.model.js";
 import Stream from "../../models/stream/Stream.model.js";
 import SchoolBoardStreamProgram from "../../models/college/SchoolBoardStreamProgram.model.js";
 import { safeParseJSON } from "../../utils/JsonHelper.js";
+import CollegeService from "./College.service.js";
+
+const collegeService = new CollegeService();
 
 import { sequelize } from "../../config/database.config.js";
 
@@ -97,10 +100,10 @@ class SchoolService {
     if (boardIds.length > 0) {
       const schoolBoardStreams = await SchoolBoardStreamProgram.findAll({
         where: { board_id: { [Op.in]: boardIds } },
-        attributes: ["college_id"],
+        attributes: ["college_school_id"],
         raw: true,
       });
-      const collegeIds = schoolBoardStreams.map((sbs) => sbs.college_id);
+      const collegeIds = schoolBoardStreams.map((sbs) => sbs.college_school_id);
       if (whereCondition.id) {
         whereCondition.id = {
           [Op.and]: [whereCondition.id, { [Op.in]: collegeIds }],
@@ -113,10 +116,10 @@ class SchoolService {
     if (streamIds.length > 0) {
       const schoolBoardStreams = await SchoolBoardStreamProgram.findAll({
         where: { stream_id: { [Op.in]: streamIds } },
-        attributes: ["college_id"],
+        attributes: ["college_school_id"],
         raw: true,
       });
-      const collegeIds = schoolBoardStreams.map((sbs) => sbs.college_id);
+      const collegeIds = schoolBoardStreams.map((sbs) => sbs.college_school_id);
       if (whereCondition.id) {
         whereCondition.id = {
           [Op.and]: [whereCondition.id, { [Op.in]: collegeIds }],
@@ -389,6 +392,10 @@ class SchoolService {
     });
 
     return streams;
+  }
+
+  async createOrUpdateSchool(payload) {
+    return collegeService.createOrUpdateCollege(payload);
   }
 }
 

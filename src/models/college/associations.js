@@ -17,8 +17,6 @@ import Board from "../board/Board.model.js";
 import Stream from "../stream/Stream.model.js";
 import SchoolBoardStreamProgram from "./SchoolBoardStreamProgram.model.js";
 
-
-
 // College Associations
 College.belongsTo(User, { foreignKey: "author_id", as: "authorDetails" });
 // One-to-many relationship (Backwards compatibility or main university if needed, but the user wants multiple)
@@ -36,11 +34,11 @@ University.belongsToMany(College, {
 
 // School Board Stream Program Associations
 College.hasMany(SchoolBoardStreamProgram, {
-  foreignKey: "college_id",
+  foreignKey: "college_school_id",
   as: "schoolBoardStreamPrograms",
 });
 SchoolBoardStreamProgram.belongsTo(College, {
-  foreignKey: "college_id",
+  foreignKey: "college_school_id",
   as: "college",
 });
 SchoolBoardStreamProgram.belongsTo(Board, {
@@ -67,7 +65,6 @@ Program.hasMany(SchoolBoardStreamProgram, {
   foreignKey: "program_id",
   as: "schoolBoardStreamPrograms",
 });
-
 
 College.hasOne(CollegeAddress, {
   foreignKey: "college_id",
@@ -137,7 +134,10 @@ CollegeOfferingProgram.belongsTo(College, {
   foreignKey: "college_id",
   as: "collegeProgramCollege",
 });
-CollegeOfferingProgram.belongsTo(Program, { foreignKey: "program_id", as: "program" });
+CollegeOfferingProgram.belongsTo(Program, {
+  foreignKey: "program_id",
+  as: "program",
+});
 
 // CollegeMember Associations
 CollegeMember.belongsTo(College, {
@@ -150,7 +150,10 @@ CollegeAdmission.belongsTo(College, {
   foreignKey: "college_id",
   as: "collegeAdmissionCollege",
 });
-CollegeAdmission.belongsTo(Program, { foreignKey: "program_id", as: "program" });
+CollegeAdmission.belongsTo(Program, {
+  foreignKey: "program_id",
+  as: "program",
+});
 
 // CollegeRanking Associations
 CollegeRanking.belongsTo(College, {
@@ -194,10 +197,8 @@ export {
   CollegeUniversity,
   SchoolBoardStreamProgram,
   Program,
-
   University,
   Board,
   Stream,
   User,
 };
-

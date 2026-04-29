@@ -32,7 +32,7 @@ Course.init(
       allowNull: true,
     },
     credits: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
     duration: {
