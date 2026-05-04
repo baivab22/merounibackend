@@ -838,10 +838,15 @@ class CollegeService {
       } catch {}
     });
 
-    // Add account field to each college item
+    // Add account field and map university/address to each college item
     const itemsWithAccountStatus = items.map((college) => {
       const collegeData = college.toJSON ? college.toJSON() : college;
       const account = collegeAccountMap.get(college.id);
+
+      // Map for frontend compatibility
+      collegeData.university = collegeData.universities?.[0] || null;
+      collegeData.address = collegeData.collegeAddress || null;
+
       return {
         ...collegeData,
         has_account: !!account,
@@ -1351,6 +1356,7 @@ class CollegeService {
           "college_logo",
           "featured_img",
           "order_no_for_website",
+          "institute_type",
         ],
         include: [
           {
@@ -1358,6 +1364,23 @@ class CollegeService {
             as: "degrees",
             attributes: ["id", "title", "slug", "short_name"],
             through: { attributes: [] },
+          },
+          {
+            model: University,
+            as: "universities",
+            attributes: ["id", "fullname", "slugs"],
+            through: { attributes: [] },
+          },
+          {
+            model: CollegeAddress,
+            as: "collegeAddress",
+            attributes: [
+              "country",
+              "district",
+              "city",
+              "street",
+              "postal_code",
+            ],
           },
         ],
         limit,
@@ -1375,8 +1398,16 @@ class CollegeService {
       },
     );
 
+    const items = colleges.map((college) => {
+      const collegeData = college.get({ plain: true });
+      // Map for frontend compatibility
+      collegeData.university = collegeData.universities?.[0] || null;
+      collegeData.address = collegeData.collegeAddress || null;
+      return collegeData;
+    });
+
     return {
-      items: colleges,
+      items,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
