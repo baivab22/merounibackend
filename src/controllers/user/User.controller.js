@@ -25,8 +25,9 @@ class UserController {
 
   static async listPendingAgents(req, res) {
     try {
-      const { items, pagination } =
-        await userService.listPendingAgents(req.query);
+      const { items, pagination } = await userService.listPendingAgents(
+        req.query,
+      );
       return res.status(200).json({
         message: "success",
         items,
@@ -44,7 +45,8 @@ class UserController {
 
   static async getUserProfile(req, res) {
     try {
-      const user = await userService.getUserProfile(req.query.id);
+      const userId = req.query.id || req.user.id;
+      const user = await userService.getUserProfile(userId);
       return res.status(200).json({
         message: "success",
         user,
@@ -107,13 +109,13 @@ class UserController {
     }
   }
 
-
-
   static async updateUserDetails(req, res) {
     try {
       await userService.updateUserDetails(req.user.id, req.body);
 
-      return res.status(200).json({ message: "User details updated successfully" });
+      return res
+        .status(200)
+        .json({ message: "User details updated successfully" });
     } catch (error) {
       console.error("Error updating user details:", error);
       const status = error.status || 500;
@@ -127,7 +129,7 @@ class UserController {
   static async listPendingAgentRole(req, res) {
     try {
       const { items, pagination } = await userService.listPendingAgentRole(
-        req.query
+        req.query,
       );
 
       return res.status(200).json({
@@ -239,11 +241,11 @@ class UserController {
       console.error("Error in changePassword:", error);
       const status = error.status || 500;
       return res.status(status).json({
-        message: status === 500 ? `Server Error: ${error.message}` : error.message,
+        message:
+          status === 500 ? `Server Error: ${error.message}` : error.message,
       });
     }
   }
-
 }
 
 export default UserController;

@@ -4,11 +4,11 @@ import UserModel from "../models/users/User.model.js";
 export const authenticateUser = async (req, res, next) => {
   try {
     let accessToken = req.cookies.token;
-    
+
     // Check Authorization header if cookie is missing (for Server Actions)
     if (!accessToken && req.headers.authorization) {
       const authHeader = req.headers.authorization;
-      if (authHeader.startsWith('Bearer ')) {
+      if (authHeader.startsWith("Bearer ")) {
         accessToken = authHeader.substring(7);
       }
     }
@@ -51,19 +51,18 @@ export const authenticateUser = async (req, res, next) => {
         {
           data: {
             id: user.id,
-            firstName: user.first_name,
-            middleName: user.middle_name,
-            lastName: user.last_name,
+            firstName: user.firstName,
+            middleName: user.middleName,
+            lastName: user.lastName,
             email: user.email,
-            phoneNo: user.phone_no,
-            roles: user.roles,
-            role: user.roles, // Keep 'role' for backward compatibility
-            collegeId: user.collegeId,
-            consultancyId: user.consultancyId,
+            phoneNo: user.phoneNo,
+            role: user.roles || {},
+            collegeId: user.collegeId || null,
+            consultancyId: user.consultancyId || null,
           },
         },
         ACCESS_TOKEN,
-        { expiresIn: ACCESS_TOKEN_EXPIRY }
+        { expiresIn: ACCESS_TOKEN_EXPIRY },
       );
 
       // 4. Set new access token in cookie AND header
@@ -78,15 +77,14 @@ export const authenticateUser = async (req, res, next) => {
       // Set req.user with fresh user data from database, including roles
       req.user = {
         id: user.id,
-        firstName: user.first_name,
-        middleName: user.middle_name,
-        lastName: user.last_name,
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
         email: user.email,
-        phoneNo: user.phone_no,
-        roles: user.roles,
-        role: user.roles, // Keep 'role' for backward compatibility
-        collegeId: user.collegeId,
-        consultancyId: user.consultancyId,
+        phoneNo: user.phoneNo,
+        role: user.roles || {},
+        collegeId: user.collegeId || null,
+        consultancyId: user.consultancyId || null,
       };
       return next();
     } catch (error) {
@@ -113,7 +111,7 @@ export const optionalAuthenticateUser = async (req, res, next) => {
     // Check Authorization header if cookie is missing
     if (!accessToken && req.headers.authorization) {
       const authHeader = req.headers.authorization;
-      if (authHeader.startsWith('Bearer ')) {
+      if (authHeader.startsWith("Bearer ")) {
         accessToken = authHeader.substring(7);
       }
     }
@@ -127,11 +125,9 @@ export const optionalAuthenticateUser = async (req, res, next) => {
       try {
         const decoded = jwt.verify(accessToken, ACCESS_TOKEN);
         userId = decoded.data?.id;
-      } catch (error) {
-      }
+      } catch (error) {}
     }
-    console.log(userId,"userIduserIduserId");
-    
+    console.log(userId, "userIduserIduserId");
 
     if (!userId && refreshToken) {
       try {
@@ -147,15 +143,14 @@ export const optionalAuthenticateUser = async (req, res, next) => {
       if (user) {
         req.user = {
           id: user.id,
-          firstName: user.first_name,
-          middleName: user.middle_name,
-          lastName: user.last_name,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
           email: user.email,
-          phoneNo: user.phone_no,
-          roles: user.roles,
-          role: user.roles, // Keep 'role' for backward compatibility
-          collegeId: user.collegeId,
-          consultancyId: user.consultancyId,
+          phoneNo: user.phoneNo,
+          role: user.roles || {},
+          collegeId: user.collegeId || null,
+          consultancyId: user.consultancyId || null,
         };
       }
     }

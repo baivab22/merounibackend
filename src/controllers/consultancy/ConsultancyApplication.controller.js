@@ -6,7 +6,10 @@ const applicationService = new ConsultancyApplicationService();
 class ConsultancyApplicationController {
   static async apply(req, res) {
     try {
-      const application = await applicationService.applyToConsultancy(req.body, req.user);
+      const application = await applicationService.applyToConsultancy(
+        req.body,
+        req.user,
+      );
       return res.status(201).json({
         message: "Application submitted successfully",
         application,
@@ -22,7 +25,10 @@ class ConsultancyApplicationController {
 
   static async agentApply(req, res) {
     try {
-      const application = await applicationService.agentApplyToConsultancy(req.body, req.user);
+      const application = await applicationService.agentApplyToConsultancy(
+        req.body,
+        req.user,
+      );
       return res.status(201).json({
         message: "Agent application submitted successfully",
         application,
@@ -40,7 +46,11 @@ class ConsultancyApplicationController {
     const userId = req.user.id;
     try {
       const { consultancyId } = req.params;
-      const result = await applicationService.checkIfStudentAppliedToConsultancy(consultancyId, userId);
+      const result =
+        await applicationService.checkIfStudentAppliedToConsultancy(
+          consultancyId,
+          userId,
+        );
       return res.status(200).json(result);
     } catch (error) {
       console.error(error);
@@ -53,7 +63,9 @@ class ConsultancyApplicationController {
 
   static async getUserApplications(req, res) {
     try {
-      const applications = await applicationService.getUserApplications(req.user);
+      const applications = await applicationService.getUserApplications(
+        req.user,
+      );
       return res.status(200).json(applications);
     } catch (error) {
       console.error(error);
@@ -66,7 +78,7 @@ class ConsultancyApplicationController {
 
   static async getConsultancyApplications(req, res) {
     try {
-      const userRoles = roleHelper(req.user?.roles);
+      const userRoles = roleHelper(req.user?.role);
       let consultancyId = req.params.consultancy_id;
 
       // If consultancy role, they can only see their own applications
@@ -78,7 +90,8 @@ class ConsultancyApplicationController {
         return res.status(403).json({ error: "Consultancy ID is required" });
       }
 
-      const applications = await applicationService.getConsultancyApplications(consultancyId);
+      const applications =
+        await applicationService.getConsultancyApplications(consultancyId);
       return res.status(200).json(applications);
     } catch (error) {
       console.error(error);
@@ -91,7 +104,9 @@ class ConsultancyApplicationController {
 
   static async getAllApplications(req, res) {
     try {
-      const applications = await applicationService.listAllApplications(req.query);
+      const applications = await applicationService.listAllApplications(
+        req.query,
+      );
       return res.status(200).json(applications);
     } catch (error) {
       console.error(error);
@@ -106,7 +121,12 @@ class ConsultancyApplicationController {
     try {
       const { id } = req.params;
       const { status, remarks } = req.body;
-      const application = await applicationService.updateStatus(id, status, remarks, req.user);
+      const application = await applicationService.updateStatus(
+        id,
+        status,
+        remarks,
+        req.user,
+      );
       return res.status(200).json({
         message: "Application status updated successfully",
         application,

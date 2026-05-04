@@ -813,33 +813,39 @@ class CollegeService {
       where: {
         collegeId: { [Op.in]: collegeIds },
       },
-      attributes: ["collegeId", "roles"],
+      attributes: [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNo",
+        "collegeId",
+        "roles",
+      ],
       raw: true,
     });
 
-    const collegesWithAccounts = new Set(
-      usersWithCollegeId
-        .filter((user) => {
-          try {
-            const roles =
-              typeof user.roles === "string"
-                ? safeParseJSON(user.roles, {})
-                : user.roles;
-            return roles?.institution === true && user.collegeId;
-          } catch {
-            return false;
-          }
-        })
-        .map((user) => user.collegeId)
-        .filter(Boolean),
-    );
+    const collegeAccountMap = new Map();
+    usersWithCollegeId.forEach((user) => {
+      try {
+        const roles =
+          typeof user.roles === "string"
+            ? safeParseJSON(user.roles, {})
+            : user.roles;
+        if (roles?.institution === true && user.collegeId) {
+          collegeAccountMap.set(user.collegeId, user);
+        }
+      } catch {}
+    });
 
-    // Add has_account field to each college item
+    // Add account field to each college item
     const itemsWithAccountStatus = items.map((college) => {
       const collegeData = college.toJSON ? college.toJSON() : college;
+      const account = collegeAccountMap.get(college.id);
       return {
         ...collegeData,
-        has_account: collegesWithAccounts.has(college.id),
+        has_account: !!account,
+        account: account || null,
       };
     });
 

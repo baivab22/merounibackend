@@ -46,7 +46,8 @@ class ConsultancyApplicationService {
     return await ConsultancyApplication.create({
       consultancy_id,
       student_id: user.id,
-      student_name: `${student.firstName} ${student.middleName || ""} ${student.lastName}`.trim(),
+      student_name:
+        `${student.firstName} ${student.middleName || ""} ${student.lastName}`.trim(),
       student_phone_no: student.phoneNo,
       student_email: student.email,
       student_description,
@@ -74,20 +75,28 @@ class ConsultancyApplicationService {
         const { consultancy_id, students } = payload;
 
         if (!consultancy_id) {
-          const error = new Error("Consultancy ID is required for each application batch");
+          const error = new Error(
+            "Consultancy ID is required for each application batch",
+          );
           error.status = 400;
           throw error;
         }
 
         if (!students || !Array.isArray(students) || students.length === 0) {
-          const error = new Error(`At least one student is required for consultancy ID ${consultancy_id}`);
+          const error = new Error(
+            `At least one student is required for consultancy ID ${consultancy_id}`,
+          );
           error.status = 400;
           throw error;
         }
 
         for (const studentData of students) {
-          const { student_email, student_description, student_name, student_phone_no } = studentData;
-
+          const {
+            student_email,
+            student_description,
+            student_name,
+            student_phone_no,
+          } = studentData;
 
           // 2. Check if already applied
           const existing = await ConsultancyApplication.findOne({
@@ -95,25 +104,32 @@ class ConsultancyApplicationService {
               consultancy_id,
               student_email,
             },
-            transaction: t
+            transaction: t,
           });
 
           if (existing) {
-            const error = new Error(`Student ${student_email} has already applied to consultancy ID ${consultancy_id}`);
+            const error = new Error(
+              `Student ${student_email} has already applied to consultancy ID ${consultancy_id}`,
+            );
             error.status = 400;
             throw error;
           }
 
           // 3. Create application
-          const application = await ConsultancyApplication.create({
-            consultancy_id,
-            agent_id: agent.id,
-            student_name: student_name || `${student.firstName} ${student.lastName}`.trim(),
-            student_phone_no: student_phone_no || student.phoneNo,
-            student_email: student_email,
-            student_description,
-            status: "IN_PROGRESS",
-          }, { transaction: t });
+          const application = await ConsultancyApplication.create(
+            {
+              consultancy_id,
+              agent_id: agent.id,
+              student_name:
+                student_name ||
+                `${student.firstName} ${student.lastName}`.trim(),
+              student_phone_no: student_phone_no || student.phoneNo,
+              student_email: student_email,
+              student_description,
+              status: "IN_PROGRESS",
+            },
+            { transaction: t },
+          );
 
           allResults.push(application);
         }
@@ -134,15 +150,15 @@ class ConsultancyApplicationService {
       return {
         hasApplied: true,
         applicationId: existing.id,
-      }
+      };
     }
     return {
       hasApplied: false,
-    }
+    };
   }
   async getUserApplications(user) {
     const whereCondition = {};
-    const userRoles = roleHelper(user?.roles || user?.role);
+    const userRoles = roleHelper(user?.role);
 
     if (userRoles?.agent) {
       whereCondition.agent_id = user.id;
@@ -181,7 +197,6 @@ class ConsultancyApplicationService {
       order: [["createdAt", "DESC"]],
     });
   }
-
 
   async listAllApplications(query) {
     const { page = 1, limit = 10, search, status, consultancy_id } = query;
@@ -239,10 +254,9 @@ class ConsultancyApplicationService {
     };
   }
 
-
   async updateStatus(id, status, remarks = null, user) {
     // Check if user has permission (consultancy owner or admin)
-    const userRoles = roleHelper(user?.roles || user?.role);
+    const userRoles = roleHelper(user?.role);
 
     const application = await ConsultancyApplication.findByPk(id);
     if (!application) {
@@ -282,7 +296,7 @@ class ConsultancyApplicationService {
   }
 
   async deleteApplication(id, user) {
-    const userRoles = roleHelper(user?.roles || user?.role);
+    const userRoles = roleHelper(user?.role);
 
     const application = await ConsultancyApplication.findByPk(id);
     if (!application) {

@@ -26,13 +26,13 @@ class UserService {
 
     // Filter by role if provided
     if (role) {
-      const rolesArray = role.split(',');
+      const rolesArray = role.split(",");
       if (rolesArray.length > 0) {
-        const roleConditions = rolesArray.map(r => 
+        const roleConditions = rolesArray.map((r) =>
           Sequelize.where(
             Sequelize.literal(`JSON_EXTRACT(roles, '$.${r.trim()}')`),
-            true
-          )
+            true,
+          ),
         );
         whereConditions.push({ [Op.or]: roleConditions });
       }
@@ -125,12 +125,12 @@ class UserService {
     }
 
     if (roleFilter) {
-      const rolesArray = roleFilter.split(',');
+      const rolesArray = roleFilter.split(",");
       if (rolesArray.length > 0) {
-        const roleConditions = rolesArray.map(r => 
+        const roleConditions = rolesArray.map((r) =>
           Sequelize.literal(
-            `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.${r.trim()}')) = 'true'`
-          )
+            `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.${r.trim()}')) = 'true'`,
+          ),
         );
         whereCondition[Op.and] = [{ [Op.or]: roleConditions }];
       }
@@ -212,7 +212,7 @@ class UserService {
     await user.update(updates);
   }
 
-    async updateUserDetails(userId, updates) {
+  async updateUserDetails(userId, updates) {
     if (!userId) {
       const error = new Error("User ID is required");
       error.status = 400;
@@ -226,28 +226,26 @@ class UserService {
       error.status = 404;
       throw error;
     }
-    const changedValues = {}
+    const changedValues = {};
     if (updates.firstName) {
-      changedValues.firstName = updates.firstName
+      changedValues.firstName = updates.firstName;
     }
     if (updates.middleName) {
-      changedValues.middleName = updates.middleName
+      changedValues.middleName = updates.middleName;
     }
     if (updates.lastName) {
-      changedValues.lastName = updates.lastName
+      changedValues.lastName = updates.lastName;
     }
     if (updates.phoneNo) {
-      changedValues.phoneNo = updates.phoneNo
+      changedValues.phoneNo = updates.phoneNo;
     }
-    changedValues.profileImageUrl = updates.profileImageUrl
-    
-    changedValues.cvUrl = updates.cvUrl
-    
+    changedValues.profileImageUrl = updates.profileImageUrl;
 
-      await UserModel.update(changedValues, { where: { id: userId } })
-      return true
+    changedValues.cvUrl = updates.cvUrl;
+
+    await UserModel.update(changedValues, { where: { id: userId } });
+    return true;
   }
-
 
   async listPendingAgentRole(query = {}) {
     const role = query.role || "agent";
@@ -327,7 +325,7 @@ class UserService {
 
     if (!loggedInUserRoles?.admin) {
       const error = new Error(
-        "Access denied. Only admins can review role requests."
+        "Access denied. Only admins can review role requests.",
       );
       error.status = 403;
       throw error;
@@ -382,17 +380,33 @@ class UserService {
       throw error;
     }
 
-    // Check if user with email already exists
-    const existingUser = await UserModel.findOne({ where: { email } });
-    if (existingUser) {
+    // Check if a user for this college already exists
+    const existingCollegeUser = await UserModel.findOne({
+      where: {
+        collegeId: collegeId,
+        roles: Sequelize.literal("JSON_EXTRACT(roles, '$.institution') = true"),
+      },
+    });
+
+    // Check if email is already used by ANOTHER user
+    const emailCondition = { email };
+    if (existingCollegeUser) {
+      emailCondition.id = { [Op.ne]: existingCollegeUser.id };
+    }
+    const emailInUse = await UserModel.findOne({ where: emailCondition });
+    if (emailInUse) {
       const error = new Error("User with this email already exists");
       error.status = 400;
       throw error;
     }
 
-    // Check if user with phone already exists
-    const existingPhone = await UserModel.findOne({ where: { phoneNo } });
-    if (existingPhone) {
+    // Check if phone is already used by ANOTHER user
+    const phoneCondition = { phoneNo };
+    if (existingCollegeUser) {
+      phoneCondition.id = { [Op.ne]: existingCollegeUser.id };
+    }
+    const phoneInUse = await UserModel.findOne({ where: phoneCondition });
+    if (phoneInUse) {
       const error = new Error("User with this phone number already exists");
       error.status = 400;
       throw error;
@@ -402,22 +416,35 @@ class UserService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user with institution role, created_by_admin flag, and college_id
-    const user = await UserModel.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      phoneNo,
-      roles: { institution: true },
-      createdByAdmin: true,
-      collegeId: collegeId || null,
-    });
-
-    return user;
+    if (existingCollegeUser) {
+      // Update existing user
+      await existingCollegeUser.update({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        phoneNo,
+        roles: { institution: true },
+        createdByAdmin: true,
+      });
+      return existingCollegeUser;
+    } else {
+      // Create new user
+      const user = await UserModel.create({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        phoneNo,
+        roles: { institution: true },
+        createdByAdmin: true,
+        collegeId: collegeId || null,
+      });
+      return user;
+    }
   }
 
-   async createConsultancyCredentials(payload) {
+  async createConsultancyCredentials(payload) {
     const { firstName, lastName, email, password, phoneNo, consultancyId } =
       payload;
 
@@ -427,17 +454,33 @@ class UserService {
       throw error;
     }
 
-    // Check if user with email already exists
-    const existingUser = await UserModel.findOne({ where: { email } });
-    if (existingUser) {
+    // Check if a user for this consultancy already exists
+    const existingConsultancyUser = await UserModel.findOne({
+      where: {
+        consultancyId: consultancyId,
+        roles: Sequelize.literal("JSON_EXTRACT(roles, '$.consultancy') = true"),
+      },
+    });
+
+    // Check if email is already used by ANOTHER user
+    const emailCondition = { email };
+    if (existingConsultancyUser) {
+      emailCondition.id = { [Op.ne]: existingConsultancyUser.id };
+    }
+    const emailInUse = await UserModel.findOne({ where: emailCondition });
+    if (emailInUse) {
       const error = new Error("User with this email already exists");
       error.status = 400;
       throw error;
     }
 
-    // Check if user with phone already exists
-    const existingPhone = await UserModel.findOne({ where: { phoneNo } });
-    if (existingPhone) {
+    // Check if phone is already used by ANOTHER user
+    const phoneCondition = { phoneNo };
+    if (existingConsultancyUser) {
+      phoneCondition.id = { [Op.ne]: existingConsultancyUser.id };
+    }
+    const phoneInUse = await UserModel.findOne({ where: phoneCondition });
+    if (phoneInUse) {
       const error = new Error("User with this phone number already exists");
       error.status = 400;
       throw error;
@@ -447,19 +490,32 @@ class UserService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user with consultancy role, created_by_admin flag, and consultancy_id
-    const user = await UserModel.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      phoneNo,
-      roles: { consultancy: true },
-      createdByAdmin: true,
-      consultancyId: consultancyId || null,
-    });
-
-    return user;
+    if (existingConsultancyUser) {
+      // Update existing user
+      await existingConsultancyUser.update({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        phoneNo,
+        roles: { consultancy: true }, // Ensure role is set
+        createdByAdmin: true,
+      });
+      return existingConsultancyUser;
+    } else {
+      // Create new user
+      const user = await UserModel.create({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        phoneNo,
+        roles: { consultancy: true },
+        createdByAdmin: true,
+        consultancyId: consultancyId || null,
+      });
+      return user;
+    }
   }
 }
 

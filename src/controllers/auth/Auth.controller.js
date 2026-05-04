@@ -18,8 +18,7 @@ const {
   ACCESS_TOKEN_EXPIRY = "7d",
 } = process.env;
 
-
-const FORGOT_PASSWORD_EXPIRY = 15
+const FORGOT_PASSWORD_EXPIRY = 15;
 const authService = new AuthService();
 
 class AuthController {
@@ -56,21 +55,21 @@ class AuthController {
       }
 
       const user = await authService.authenticateCredentials(email, password);
-      console.log(user,"useruseruseruseruseruser");
+      console.log(user, "useruseruseruseruseruser");
 
       const pendingRoles =
         typeof user.pendingRoles === "string"
           ? JSON.parse(user.pendingRoles)
           : user.pendingRoles || [];
       const roles =
-        typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles || {};
+        typeof user.roles === "string"
+          ? JSON.parse(user.roles)
+          : user.roles || {};
 
-      console.log(roles,pendingRoles, "rolesrolesroles");
+      console.log(roles, pendingRoles, "rolesrolesroles");
 
       const isAgentPending =
-        Array.isArray(pendingRoles) &&
-        pendingRoles.includes("agent")
-      
+        Array.isArray(pendingRoles) && pendingRoles.includes("agent");
 
       if (isAgentPending) {
         return res.status(403).json({
@@ -87,9 +86,9 @@ class AuthController {
           lastName: user.lastName,
           email: user.email,
           phoneNo: user.phoneNo,
-          role: user.roles,
-          collegeId: user.collegeId,
-          consultancyId: user.consultancyId,
+          role: user.roles || {},
+          collegeId: user.collegeId || null,
+          consultancyId: user.consultancyId || null,
         },
       };
 
@@ -150,7 +149,6 @@ class AuthController {
           .json({ message: "Expired OTP. Request a new one." });
       }
 
-
       return res
         .status(200)
         .json({ message: "OTP verified successfully. Role updated!" });
@@ -188,7 +186,7 @@ class AuthController {
         email,
         "Your New OTP Code",
         `Your new OTP is: ${newOtp}`,
-        `<p>Your new OTP is: <strong>${newOtp}</strong></p>`
+        `<p>Your new OTP is: <strong>${newOtp}</strong></p>`,
       );
 
       return res.status(200).json({ message: "New OTP sent successfully." });
@@ -236,7 +234,9 @@ class AuthController {
       }
 
       const otp = crypto.randomInt(100000, 1000000).toString();
-      const otpExpiresAt = new Date(Date.now() + FORGOT_PASSWORD_EXPIRY * 60 * 1000);
+      const otpExpiresAt = new Date(
+        Date.now() + FORGOT_PASSWORD_EXPIRY * 60 * 1000,
+      );
 
       console.log(`[AuthDebug] Generated OTP for ${email}: ${otp}`);
 
@@ -246,7 +246,7 @@ class AuthController {
         email,
         "Password Reset OTP",
         `Your OTP is: ${otp}`,
-        `<p>Your OTP is: <strong>${otp}</strong></p>`
+        `<p>Your OTP is: <strong>${otp}</strong></p>`,
       );
 
       return res.status(200).json({ message: "OTP sent to email" });
@@ -294,7 +294,7 @@ class AuthController {
 
       await authService.updateUser(
         { email },
-        { password: hashedPassword, otp: null, otpExpiresAt: null }
+        { password: hashedPassword, otp: null, otpExpiresAt: null },
       );
 
       return res

@@ -15,7 +15,7 @@ class ConsultancyService {
 
     const offset = (page - 1) * limit;
 
-    const whereCondition = {}
+    const whereCondition = {};
     if (search) {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
@@ -32,9 +32,13 @@ class ConsultancyService {
       whereCondition[Op.and] = whereCondition[Op.and] || [];
       whereCondition[Op.and].push(
         Sequelize.where(
-          Sequelize.fn('JSON_CONTAINS', Sequelize.col('destination'), JSON.stringify(query.destination)),
-          1
-        )
+          Sequelize.fn(
+            "JSON_CONTAINS",
+            Sequelize.col("destination"),
+            JSON.stringify(query.destination),
+          ),
+          1,
+        ),
       );
     }
 
@@ -51,8 +55,6 @@ class ConsultancyService {
       includeOptions[0].where = { id: query.courseId };
     }
 
-
-
     const { count: totalCount, rows: items } =
       await Consultancy.findAndCountAll({
         where: whereCondition,
@@ -68,40 +70,43 @@ class ConsultancyService {
       });
     const consultancyIds = items.map((consultancy) => consultancy.id);
 
-
     const usersWithConsultancyId = await UserModel.findAll({
       where: {
         consultancyId: { [Op.in]: consultancyIds },
       },
-      attributes: ["consultancyId", "roles"],
+      attributes: [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNo",
+        "consultancyId",
+        "roles",
+      ],
       raw: true,
     });
 
-    const consultanciesWithAccounts = new Set(
-      usersWithConsultancyId
-        .filter((user) => {
-          try {
-            const roles =
-              typeof user.roles === "string"
-                ? JSON.parse(user.roles)
-                : user.roles;
-            return roles?.consultancy === true && user.consultancyId;
-          } catch {
-            return false;
-          }
-        })
-        .map((user) => user.consultancyId)
-        .filter(Boolean)
-    );
+    const consultancyAccountMap = new Map();
+    usersWithConsultancyId.forEach((user) => {
+      try {
+        const roles =
+          typeof user.roles === "string" ? JSON.parse(user.roles) : user.roles;
+        if (roles?.consultancy === true && user.consultancyId) {
+          consultancyAccountMap.set(user.consultancyId, user);
+        }
+      } catch {}
+    });
 
-
-
-    // Add has_account field to each consultancy item
+    // Add account field to each consultancy item
     const itemsWithAccountStatus = items.map((consultancy) => {
-      const consultancyData = consultancy.toJSON ? consultancy.toJSON() : consultancy;
+      const consultancyData = consultancy.toJSON
+        ? consultancy.toJSON()
+        : consultancy;
+      const account = consultancyAccountMap.get(consultancy.id);
       return {
         ...consultancyData,
-        has_account: consultanciesWithAccounts.has(consultancy.id),
+        has_account: !!account,
+        account: account || null,
       };
     });
 
@@ -119,7 +124,6 @@ class ConsultancyService {
   async getMyConsultancy(userId) {
     const consultancyUser = await UserModel.findOne({
       where: { id: userId },
-
     });
 
     if (!consultancyUser) {
@@ -164,7 +168,6 @@ class ConsultancyService {
   }
 
   async createOrUpdateConsultancy(payload) {
-
     const {
       id,
       title,
@@ -184,7 +187,6 @@ class ConsultancyService {
       visibility,
       map_type,
     } = payload;
-
 
     // Validate title for create operation
     if (!id && !title) {
@@ -240,7 +242,11 @@ class ConsultancyService {
       if (title !== undefined) updateData.title = title;
       if (destination !== undefined) updateData.destination = destination;
       // Map address fields if provided
-      if (address !== undefined && typeof address === "object" && address !== null) {
+      if (
+        address !== undefined &&
+        typeof address === "object" &&
+        address !== null
+      ) {
         updateData.address = address;
         if (address.city) updateData.city = address.city;
         if (address.district) updateData.district = address.district;
@@ -262,7 +268,9 @@ class ConsultancyService {
           description === "" || description === null ? null : description;
       if (meta_description !== undefined)
         updateData.meta_description =
-          meta_description === "" || meta_description === null ? null : meta_description;
+          meta_description === "" || meta_description === null
+            ? null
+            : meta_description;
       if (contact !== undefined) updateData.contact = contact || [];
       // Handle website_url - empty string or null becomes null
       if (website_url !== undefined)
@@ -284,14 +292,15 @@ class ConsultancyService {
       if (map_type !== undefined) updateData.map_type = map_type;
 
       await consultancy.update(updateData);
-
     } else {
       // Extract individual address components for creation
       const city = address?.city || null;
       const district = address?.district || null;
       const street = address?.street || null;
       const country_field = address?.country || null;
-      const location_summary = [city, district, country_field].filter(Boolean).join(", ");
+      const location_summary = [city, district, country_field]
+        .filter(Boolean)
+        .join(", ");
 
       // For create, handle empty strings and undefined as null for optional fields
       consultancy = await Consultancy.create({
@@ -309,27 +318,27 @@ class ConsultancyService {
         map_type,
         description:
           description === "" ||
-            description === null ||
-            description === undefined
+          description === null ||
+          description === undefined
             ? null
             : description,
         meta_description:
           meta_description === "" ||
-            meta_description === null ||
-            meta_description === undefined
+          meta_description === null ||
+          meta_description === undefined
             ? null
             : meta_description,
         contact: contact || [],
         website_url:
           website_url === "" ||
-            website_url === null ||
-            website_url === undefined
+          website_url === null ||
+          website_url === undefined
             ? null
             : website_url,
         google_map_url:
           google_map_url === "" ||
-            google_map_url === null ||
-            google_map_url === undefined
+          google_map_url === null ||
+          google_map_url === undefined
             ? null
             : google_map_url,
         video_url:
@@ -374,8 +383,8 @@ class ConsultancyService {
       const updates = consultancies.map((c) =>
         Consultancy.update(
           { order_no_for_website: c.order_no },
-          { where: { id: c.id }, transaction }
-        )
+          { where: { id: c.id }, transaction },
+        ),
       );
 
       await Promise.all(updates);
@@ -395,7 +404,9 @@ class ConsultancyService {
       },
     });
 
-    const cities = [...new Set(consultancies.map((c) => c.city).filter(Boolean))];
+    const cities = [
+      ...new Set(consultancies.map((c) => c.city).filter(Boolean)),
+    ];
     const locations = [
       ...new Set(consultancies.map((c) => c.location).filter(Boolean)),
     ];
@@ -415,8 +426,7 @@ class ConsultancyService {
           if (Array.isArray(parsed)) {
             parsed.forEach((d) => destinations.add(d));
           }
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     });
 

@@ -3,12 +3,19 @@ import { paginationSchema, idQuerySchema } from "../common/common.validator.js";
 
 export { paginationSchema, idQuerySchema };
 
-export const getUserProfileQuerySchema = idQuerySchema;
+export const getUserProfileQuerySchema = yup.object({
+  id: yup.number().integer().positive().optional(),
+});
 
 export const exportUsersQuerySchema = paginationSchema;
 
 // Schema for listing users with role filter
 export const listUsersQuerySchema = paginationSchema.shape({
+  sort: yup
+    .string()
+    .oneOf(["ASC", "DESC", "asc", "desc"])
+    .transform((value) => (value ? value.toUpperCase() : "DESC"))
+    .default("DESC"),
   role: yup
     .string()
     .oneOf(["student", "editor", "admin", "agent", "institution"])
@@ -46,17 +53,14 @@ export const updateUserProfileBodySchema = yup
     return value && Object.keys(value).length > 0;
   });
 
-  export const updateUserDetailsBodySchema = yup
-  .object({
-    firstName: yup.string().trim().min(2),
-    middleName: yup.string().trim().nullable(),
-    lastName: yup.string().trim().min(2),
-    phoneNo: yup.string().trim(),
-    profileImageUrl: yup.string().url().nullable().optional(),
-    cvUrl: yup.string().url().nullable().optional(),
-  })
-
-
+export const updateUserDetailsBodySchema = yup.object({
+  firstName: yup.string().trim().min(2),
+  middleName: yup.string().trim().nullable(),
+  lastName: yup.string().trim().min(2),
+  phoneNo: yup.string().trim(),
+  profileImageUrl: yup.string().url().nullable().optional(),
+  cvUrl: yup.string().url().nullable().optional(),
+});
 
 export const applyForAgentRoleSchema = yup
   .object({

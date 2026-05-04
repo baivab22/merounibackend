@@ -41,9 +41,9 @@ class StreamController {
       return res.status(201).json({ message: "Stream created", item });
     } catch (error) {
       console.error("Error creating stream:", error);
-      const status = error.status || 500;
+      const status = error.status || (error.name === 'SequelizeUniqueConstraintError' ? 409 : 500);
       return res.status(status).json({
-        message: status === 500 ? "Server error" : error.message,
+        message: status === 500 ? "Server error" : (error.errors?.[0]?.message || error.message),
         error: error.message,
       });
     }
@@ -55,9 +55,9 @@ class StreamController {
       return res.status(200).json({ message: "Stream updated" });
     } catch (error) {
       console.error("Error updating stream:", error);
-      const status = error.status || 500;
+      const status = error.status || (error.name === 'SequelizeUniqueConstraintError' ? 409 : 500);
       return res.status(status).json({
-        message: status === 500 ? "Server error" : error.message,
+        message: status === 500 ? "Server error" : (error.errors?.[0]?.message || error.message),
         error: error.message,
       });
     }
