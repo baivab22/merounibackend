@@ -29,7 +29,6 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - title
  *               - banner_image
  *               - display_position
  *             properties:

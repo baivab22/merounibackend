@@ -3,6 +3,14 @@ import { Op } from "sequelize";
 import Banner from "../../models/banner/Banner.model.js";
 import College from "../../models/college/College.model.js";
 
+/** Empty string → null; trims whitespace. Undefined stays undefined (for partial updates). */
+function normalizeNullableString(value) {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  const trimmed = String(value).trim();
+  return trimmed === "" ? null : trimmed;
+}
+
 class BannerService {
   async createBanners(payload) {
     const {
@@ -26,10 +34,10 @@ class BannerService {
     }
 
     const newBanner = await Banner.create({
-      title,
+      title: normalizeNullableString(title) ?? null,
       college_id,
       banner_image,
-      website_url,
+      website_url: normalizeNullableString(website_url) ?? null,
       display_position,
       priority,
       date_of_expiry,
@@ -133,11 +141,15 @@ class BannerService {
     // }
 
     await banner.update({
-      title: title !== undefined ? title : banner.title,
+      title:
+        title !== undefined ? normalizeNullableString(title) : banner.title,
       college_id: college_id !== undefined ? college_id : banner.college_id,
       banner_image:
         banner_image !== undefined ? banner_image : banner.banner_image,
-      website_url: website_url !== undefined ? website_url : banner.website_url,
+      website_url:
+        website_url !== undefined
+          ? normalizeNullableString(website_url)
+          : banner.website_url,
       display_position:
         display_position !== undefined
           ? display_position

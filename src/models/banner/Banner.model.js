@@ -16,12 +16,12 @@ const Banner = sequelize.define(
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     website_url: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: "https://merouni.com",
+      defaultValue: null,
     },
     banner_image: {
       type: DataTypes.TEXT,
