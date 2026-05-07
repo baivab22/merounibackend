@@ -1,4 +1,4 @@
-import { QueryTypes, Op } from "sequelize";
+import { Op } from "sequelize";
 import slug from "slug";
 
 import { sequelize } from "../../config/database.config.js";
@@ -12,6 +12,50 @@ import {
 } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+
+const UNIVERSITY_CONTACT_SCALAR_FIELDS = [
+  "website_url",
+  "phone_number",
+  "email",
+  "faxes",
+  "poboxes",
+];
+
+function nonemptyScalar(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string" && value.trim() === "") return false;
+  return true;
+}
+
+/** Merge duplicate university_contact rows: newest row wins per field when truthy; otherwise fall back to older rows. */
+function mergeUniversityContactRows(rows) {
+  if (!rows?.length) return null;
+
+  const sorted = [...rows].sort((a, b) => {
+    const idA = typeof a.get === "function" ? a.get("id") : a.id;
+    const idB = typeof b.get === "function" ? b.get("id") : b.id;
+    return idB - idA;
+  });
+
+  const merged = {};
+  for (const field of UNIVERSITY_CONTACT_SCALAR_FIELDS) {
+    merged[field] = null;
+  }
+
+  for (const row of sorted) {
+    const plain =
+      typeof row.get === "function" ? row.get({ plain: true }) : row;
+    for (const field of UNIVERSITY_CONTACT_SCALAR_FIELDS) {
+      if (!nonemptyScalar(plain[field])) continue;
+      if (!nonemptyScalar(merged[field])) merged[field] = plain[field];
+    }
+  }
+
+  const hasAny = UNIVERSITY_CONTACT_SCALAR_FIELDS.some((field) =>
+    nonemptyScalar(merged[field]),
+  );
+  return hasAny ? merged : null;
+}
 
 class UniversityService {
   async listUniversities(query = {}, isAdmin = false) {
@@ -33,41 +77,70 @@ class UniversityService {
     if (type) {
       whereCondition.type_of_institute = type;
     }
-    
+
     // Default to 'published' for public listings, or use common query.status if provided (e.g. from dashboard)
     if (isAdmin) {
-      if (status && status !== 'all') {
+      if (status && status !== "all") {
         whereCondition.status = status;
       }
     } else {
       whereCondition.status = "published";
     }
 
-    const { count: totalCount, rows: items } = await University.findAndCountAll({
-      where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
-      limit,
-      offset,
-      order: [
-        ["order_no_for_website", "ASC"],
-        ["id", "DESC"],
-      ],
-    });
+    const { count: totalCount, rows: items } = await University.findAndCountAll(
+      {
+        where:
+          Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
+        limit,
+        offset,
+        order: [
+          ["order_no_for_website", "ASC"],
+          ["id", "DESC"],
+        ],
+      },
+    );
 
     // Fetch contacts for these universities separately to avoid row multiplication
     // and just take the latest contact for each
-    const universityIds = items.map(u => u.id);
-    const contacts = universityIds.length > 0 ? await UniversityContact.findAll({
-      where: { university_id: universityIds },
-      attributes: ["university_id", "website_url"],
-      order: [["id", "DESC"]]
-    }) : [];
+    const universityIds = items.map((u) => u.id);
+    const contacts =
+      universityIds.length > 0
+        ? await UniversityContact.findAll({
+            where: { university_id: { [Op.in]: universityIds } },
+            attributes: [
+              "id",
+              "university_id",
+              ...UNIVERSITY_CONTACT_SCALAR_FIELDS,
+            ],
+            order: [
+              ["university_id", "ASC"],
+              ["id", "DESC"],
+            ],
+          })
+        : [];
 
-    // Map contacts to universities (taking the first/latest one)
-    const itemsWithContact = items.map(university => {
-      const contact = contacts.find(c => c.university_id === university.id);
+    const rowsByUniversityId = contacts.reduce((acc, row) => {
+      const uid = row.university_id;
+      if (!acc[uid]) acc[uid] = [];
+      acc[uid].push(row);
+      return acc;
+    }, {});
+
+    const itemsWithContact = items.map((university) => {
+      const merged = mergeUniversityContactRows(
+        rowsByUniversityId[university.id] || [],
+      );
       return {
         ...university.toJSON(),
-        contact: contact ? { website_url: contact.website_url } : null
+        contact: merged
+          ? {
+              website_url: merged.website_url,
+              phone_number: merged.phone_number,
+              email: merged.email,
+              faxes: merged.faxes,
+              poboxes: merged.poboxes,
+            }
+          : null,
       };
     });
 
@@ -100,11 +173,6 @@ class UniversityService {
           ],
         },
         {
-          model: UniversityContact,
-          as: "contact",
-          required: false,
-        },
-        {
           model: UniversityLevel,
           as: "levels",
         },
@@ -126,12 +194,18 @@ class UniversityService {
       throw error;
     }
 
+    const contactRows = await UniversityContact.findAll({
+      where: { university_id: university.id },
+      order: [["id", "DESC"]],
+    });
+    const mergedContact = mergeUniversityContactRows(contactRows);
+
     // Convert to plain object to avoid Sequelize instance issues
     const universityData = university.get({ plain: true });
 
     return {
       ...universityData,
-      contact: universityData.contact || null,
+      contact: mergedContact,
       levels: (universityData.levels || []).map((level) => level.level_id),
       programs: universityData.university_programs || [],
       members: universityData.members || [],

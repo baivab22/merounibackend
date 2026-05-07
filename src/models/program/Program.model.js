@@ -37,7 +37,6 @@ Program.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-
     language: {
       type: DataTypes.STRING,
       allowNull: true,

@@ -30,7 +30,7 @@ export const createOrUpdateProgramSchema = yup
 
     degree_ids: yup.array().of(yup.number().integer().positive()).optional(),
     duration: yup.string().optional(),
-    credits: yup.number().integer().positive().optional(),
+    credits: yup.string().optional(),
     language: yup.string().optional(),
     eligibility_criteria: yup.string().optional(),
     fee: yup.string().optional(),
@@ -96,11 +96,11 @@ export const createOrUpdateProgramSchema = yup
               (value) => {
                 if (value === null || value === undefined) return true;
                 return Number.isInteger(value) && value > 0;
-              }
+              },
             )
             .optional(),
           is_elective: yup.boolean().optional(),
-        })
+        }),
       )
       .optional(),
     colleges: yup.array().of(yup.number().integer().positive()).optional(),
@@ -128,8 +128,14 @@ export const saveAsDraftProgramSchema = yup
     scholarship_id: yup.number().integer().positive().nullable().optional(),
     curriculum: yup.string().optional(),
     learning_outcomes: yup.string().optional(),
-    delivery_type: yup.string().oneOf(["Full-time", "Part-time", "Online", "Hybrid"]).optional(),
-    delivery_mode: yup.string().oneOf(["On-campus", "Remote", "Blended"]).optional(),
+    delivery_type: yup
+      .string()
+      .oneOf(["Full-time", "Part-time", "Online", "Hybrid"])
+      .optional(),
+    delivery_mode: yup
+      .string()
+      .oneOf(["On-campus", "Remote", "Blended"])
+      .optional(),
     careers: yup.string().optional(),
     exam_id: yup.number().integer().positive().nullable().optional(),
     status: yup.string().oneOf(["published", "draft"]).optional(),

@@ -6,7 +6,7 @@ import { University } from "../../models/university/University.model.js";
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
 import Blog from "../../models/blogs/Blog.model.js";
 import Material from "../../models/materials/Material.model.js";
-import { Sequelize, QueryTypes } from "sequelize";
+import { Sequelize, QueryTypes, Op } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
 class AnalyticsService {
@@ -24,12 +24,18 @@ class AnalyticsService {
       totalMaterials,
     ] = await Promise.all([
       UserModel.count(),
-      College.count(),
+      College.count({
+        where: {
+          [Op.and]: [
+            Sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`),
+          ],
+        },
+      }),
       Event.count(),
       Referral.count(),
       UserModel.count({
         where: Sequelize.literal(
-          `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.agent')) = 'true'`
+          `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.agent')) = 'true'`,
         ),
       }),
       University.count(),
@@ -75,7 +81,7 @@ class AnalyticsService {
       `,
       {
         type: QueryTypes.SELECT,
-      }
+      },
     );
 
     const currentYear = new Date().getFullYear();
@@ -91,7 +97,7 @@ class AnalyticsService {
 
     // Ensure selected years are valid
     selectedYears = selectedYears.filter((year) =>
-      availableYears.includes(year)
+      availableYears.includes(year),
     );
 
     // If no valid years selected, use current year (or first available year)
@@ -120,16 +126,25 @@ class AnalyticsService {
           {
             replacements: { year },
             type: QueryTypes.SELECT,
-          }
+          },
         );
         return { year, data };
-      })
+      }),
     );
 
     const monthMap = {
-      1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
-      5: "May", 6: "Jun", 7: "Jul", 8: "Aug",
-      9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec",
+      1: "Jan",
+      2: "Feb",
+      3: "Mar",
+      4: "Apr",
+      5: "May",
+      6: "Jun",
+      7: "Jul",
+      8: "Aug",
+      9: "Sep",
+      10: "Oct",
+      11: "Nov",
+      12: "Dec",
     };
 
     const enrollmentGrowth = Array.from({ length: 12 }, (_, i) => {
@@ -138,11 +153,23 @@ class AnalyticsService {
 
       enrollmentDataByYear.forEach(({ year, data }) => {
         const monthEntry = data.find((item) => item.month_num === monthNum);
-        monthData[`student_${year}`] = monthEntry ? parseInt(monthEntry.student || 0, 10) : 0;
-        monthData[`institution_${year}`] = monthEntry ? parseInt(monthEntry.institution || 0, 10) : 0;
-        monthData[`agent_${year}`] = monthEntry ? parseInt(monthEntry.agent || 0, 10) : 0;
-        monthData[`consultancy_${year}`] = monthEntry ? parseInt(monthEntry.consultancy || 0, 10) : 0;
-        monthData[`enrolled_${year}`] = (monthData[`student_${year}`] + monthData[`institution_${year}`] + monthData[`agent_${year}`] + monthData[`consultancy_${year}`]);
+        monthData[`student_${year}`] = monthEntry
+          ? parseInt(monthEntry.student || 0, 10)
+          : 0;
+        monthData[`institution_${year}`] = monthEntry
+          ? parseInt(monthEntry.institution || 0, 10)
+          : 0;
+        monthData[`agent_${year}`] = monthEntry
+          ? parseInt(monthEntry.agent || 0, 10)
+          : 0;
+        monthData[`consultancy_${year}`] = monthEntry
+          ? parseInt(monthEntry.consultancy || 0, 10)
+          : 0;
+        monthData[`enrolled_${year}`] =
+          monthData[`student_${year}`] +
+          monthData[`institution_${year}`] +
+          monthData[`agent_${year}`] +
+          monthData[`consultancy_${year}`];
       });
 
       return monthData;
@@ -150,7 +177,8 @@ class AnalyticsService {
 
     return {
       enrollmentGrowth,
-      availableYears: availableYears.length > 0 ? availableYears : [currentYear],
+      availableYears:
+        availableYears.length > 0 ? availableYears : [currentYear],
       selectedYears,
     };
   }
