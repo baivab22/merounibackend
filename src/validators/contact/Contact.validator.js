@@ -5,7 +5,10 @@ export { paginationSchema, idQuerySchema };
 
 export const listContactSchema = paginationSchema.shape({
   q: yup.string().optional(),
-  status: yup.string().oneOf(["unread", "in_progress", "resolved"]).optional(),
+  status: yup
+    .string()
+    .oneOf(["new", "unread", "in_progress", "resolved"])
+    .optional(),
 });
 
 export const createContactSchema = yup.object({
@@ -18,7 +21,7 @@ export const createContactSchema = yup.object({
 export const updateContactStatusSchema = yup.object({
   status: yup
     .string()
-    .oneOf(["unread", "in_progress", "resolved"])
+    .oneOf(["new", "unread", "in_progress", "resolved"])
     .required("Status is required"),
 });
 

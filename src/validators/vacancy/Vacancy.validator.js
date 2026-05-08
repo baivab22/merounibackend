@@ -12,6 +12,12 @@ export const paginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
+  status: yup
+    .string()
+    .oneOf(["published", "draft"])
+    .nullable()
+    .optional()
+    .transform((value) => (value === "" ? null : value)),
 });
 
 export const slugParamSchema = yup.object({
@@ -24,6 +30,7 @@ export const createVacancySchema = yup
     author_id: yup.number().integer().positive().required(),
     associated_organization_name: yup.string().trim().max(255).nullable(),
     featuredImage: yup.string().trim().nullable(),
+    pdf_file: yup.string().trim().nullable(),
     description: yup
       .string()
       .nullable()
@@ -32,6 +39,7 @@ export const createVacancySchema = yup
       .string()
       .nullable()
       .transform((value) => (value === "" ? null : value)),
+    status: yup.string().oneOf(["draft", "published"]).optional(),
   })
   .required();
 
@@ -45,6 +53,7 @@ export const updateVacancyBodySchema = yup
     author_id: yup.number().integer().positive(),
     associated_organization_name: yup.string().trim().max(255).nullable(),
     featuredImage: yup.string().trim(),
+    pdf_file: yup.string().trim().nullable(),
     description: yup
       .string()
       .nullable()
@@ -53,6 +62,7 @@ export const updateVacancyBodySchema = yup
       .string()
       .nullable()
       .transform((value) => (value === "" ? null : value)),
+    status: yup.string().oneOf(["draft", "published"]).optional(),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;

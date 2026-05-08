@@ -4,6 +4,15 @@ import {
   slugParamSchema,
 } from "../common/common.validator.js";
 
+export const newsListQuerySchema = paginationSchema.shape({
+  status: yup
+    .string()
+    .oneOf(["published", "draft", "archived"])
+    .nullable()
+    .optional()
+    .transform((value) => (value === "" ? undefined : value)),
+});
+
 export { paginationSchema, slugParamSchema };
 
 export const createNewsSchema = yup.object({
@@ -19,6 +28,7 @@ export const createNewsSchema = yup.object({
   description: yup.string().trim().nullable(),
   meta_description: yup.string().trim().nullable(),
   featured_image: yup.string().trim().required("Featured image is required"),
+  pdf_file: yup.string().trim().nullable().optional(),
   college_id: yup.number().integer().positive().nullable(),
   status: yup.string().oneOf(["draft", "published", "archived"]).default("draft"),
 });
@@ -35,6 +45,7 @@ export const updateNewsBodySchema = yup
     description: yup.string().trim().nullable(),
     meta_description: yup.string().trim().nullable(),
     featured_image: yup.string().trim(),
+    pdf_file: yup.string().trim().nullable().optional(),
     college_id: yup.number().integer().positive().nullable(),
     status: yup.string().oneOf(["draft", "published", "archived"]),
   })

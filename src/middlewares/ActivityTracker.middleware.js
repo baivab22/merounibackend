@@ -1,5 +1,6 @@
 import ActivityLogModel from "../models/activityLog/ActivityLog.model.js";
 import { getClientIp } from "../utils/clientIp.js";
+import { buildActivityLogDetails } from "../utils/activityLogDetails.js";
 
 const activityTracker = (req, res, next) => {
   // We only track write ops
@@ -15,7 +16,7 @@ const activityTracker = (req, res, next) => {
         // Must be authenticated and have admin/editor role
         const user = req.user;
         if (!user || !user.roles) return;
-        
+
         let rolesObj = user.roles;
         let isAdmin = false;
         let isEditor = false;
@@ -48,10 +49,10 @@ const activityTracker = (req, res, next) => {
           };
 
           const action = methodMap[req.method] || req.method;
-          
+
           const path = req.originalUrl.split("?")[0];
-          const pathParts = path.split("/").filter(p => p !== "");
-          
+          const pathParts = path.split("/").filter((p) => p !== "");
+
           let resource = "unknown";
           if (pathParts[0] === "api" && pathParts[1] === "v1" && pathParts[2]) {
             resource = pathParts[2];
@@ -59,13 +60,7 @@ const activityTracker = (req, res, next) => {
             resource = pathParts[pathParts.length - 1]; // fallback
           }
 
-          let details = null;
-          const targetId = req.params.id || req.body?.id || null;
-          if (targetId) {
-            details = { targetId };
-          } else {
-            details = { action: `${action} on ${resource}` };
-          }
+          const details = buildActivityLogDetails(req, resource, action);
 
           const ip_address = getClientIp(req);
 

@@ -31,6 +31,7 @@ export const createScholarshipSchema = yup
     categoryId: yup.number().integer().positive(),
     meta_description: yup.string().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    featured_image: yup.string().nullable().optional(),
     title: yup.string(), // Optional, for backward compatibility
   })
   .required();
@@ -44,6 +45,7 @@ export const updateScholarshipBodySchema = yup
     name: yup.string(),
     description: yup.string(),
     category: yup.number().integer().positive(),
+    categoryId: yup.number().integer().positive(),
     eligibilityCriteria: yup.string(),
     amount: yup.string().trim(),
     applicationDeadline: yup.string(),
@@ -51,6 +53,7 @@ export const updateScholarshipBodySchema = yup
     contactInfo: yup.string(),
     meta_description: yup.string().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    featured_image: yup.string().nullable().optional(),
     title: yup.string(), // Optional, for backward compatibility
   })
   .test("at-least-one", "At least one field must be provided", (value) => {

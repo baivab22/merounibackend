@@ -62,6 +62,10 @@ Scholarship.init(
       allowNull: false,
       defaultValue: "published",
     },
+    featured_image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize,

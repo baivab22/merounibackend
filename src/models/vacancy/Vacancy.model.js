@@ -47,6 +47,15 @@ VacancyModel.init(
       allowNull: true,
       field: "featured_image",
     },
+    pdf_file: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("draft", "published"),
+      allowNull: false,
+      defaultValue: "published",
+    },
   },
   {
     sequelize,

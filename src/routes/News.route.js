@@ -8,7 +8,7 @@ import {
   requestValidatorMultiple,
 } from "../middlewares/RequestValidator.middleware.js";
 import {
-  paginationSchema,
+  newsListQuerySchema,
   newsSlugParamSchema,
   newsIdParamSchema,
   createNewsSchema,
@@ -54,7 +54,7 @@ const route = express.Router();
  */
 route.get(
   "/",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(newsListQuerySchema, "query"),
   NewsController.listNews
 );
 
@@ -94,7 +94,7 @@ route.get(
  */
 route.get(
   "/admin/list",
-  requestValidator(paginationSchema, "query"),
+  requestValidator(newsListQuerySchema, "query"),
   NewsController.listNews
 );
 

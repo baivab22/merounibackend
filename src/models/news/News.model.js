@@ -53,6 +53,10 @@ News.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    pdf_file: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     author: {
       type: DataTypes.INTEGER,
       allowNull: false,

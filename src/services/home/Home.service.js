@@ -118,6 +118,7 @@ class HomeService {
 
       Degree.findAll({
         where: {
+          status: "published",
           [Op.or]: [
             { title: searchCondition },
             { short_name: searchCondition }

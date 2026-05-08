@@ -23,10 +23,19 @@ CollegeAdmission.init(
     description: {
       type: DataTypes.TEXT,
     },
+    pdf_file: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     order_no: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: null,
+    },
+    status: {
+      type: DataTypes.ENUM("draft", "published"),
+      allowNull: false,
+      defaultValue: "published",
     },
   },
   {

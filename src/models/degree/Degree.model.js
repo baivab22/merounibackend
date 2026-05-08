@@ -46,6 +46,11 @@ Degree.init(
             allowNull: true,
             defaultValue: null,
         },
+        status: {
+            type: DataTypes.ENUM("draft", "published"),
+            allowNull: false,
+            defaultValue: "published",
+        },
         createdAt: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,

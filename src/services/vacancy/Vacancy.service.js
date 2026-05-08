@@ -10,10 +10,15 @@ class VacancyService {
     const limit = parseInt(query.limit, 10) || 10;
     const sort = (query.sort || "desc").toUpperCase();
     const search = query.q || "";
+    const status = query.status;
 
     const offset = (page - 1) * limit;
 
     const whereCondition = {};
+
+    if (status && (status === "published" || status === "draft")) {
+      whereCondition.status = status;
+    }
 
     if (search) {
       whereCondition[Op.or] = [
@@ -74,8 +79,10 @@ class VacancyService {
       author_id,
       associated_organization_name,
       featuredImage,
+      pdf_file,
       description,
       content,
+      status,
     } = data;
     const slugs = generateUniqueSlug(title);
 
@@ -87,6 +94,8 @@ class VacancyService {
       description,
       content,
       featuredImage,
+      pdf_file: pdf_file || null,
+      status: status === "draft" ? "draft" : "published",
     });
   }
 
@@ -108,6 +117,13 @@ class VacancyService {
       description: data.description || vacancy.description,
       content: data.content || vacancy.content,
       featuredImage: data.featuredImage || vacancy.featuredImage,
+      pdf_file:
+        data.pdf_file !== undefined
+          ? data.pdf_file || null
+          : vacancy.pdf_file,
+      ...(data.status !== undefined && {
+        status: data.status === "draft" ? "draft" : "published",
+      }),
     });
 
     return vacancy;

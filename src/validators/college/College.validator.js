@@ -246,6 +246,8 @@ export const createOrUpdateAdmissionSchema = yup
     admission_process: yup.string().nullable().optional(),
     fee_details: yup.string().nullable().optional(),
     description: yup.string().nullable().optional(),
+    pdf_file: yup.string().nullable().optional(),
+    status: yup.string().oneOf(["draft", "published"]).optional(),
   })
   .test(
     "at-least-one-id",
@@ -326,5 +328,11 @@ export const admissionPaginationSchema = yup.object({
   university_id: yup
     .string()
     .nullable()
+    .transform((value) => (value === "" ? null : value)),
+  status: yup
+    .string()
+    .oneOf(["published", "draft"])
+    .nullable()
+    .optional()
     .transform((value) => (value === "" ? null : value)),
 });

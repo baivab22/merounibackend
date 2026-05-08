@@ -436,11 +436,14 @@ class CollegeService {
     const sort = query.sort === "desc" ? "DESC" : "ASC";
     const programIdOrSlug =
       query.program_id || query.course_id || query.programId;
-    const { q, level_id, university_id } = query;
+    const { q, level_id, university_id, status } = query;
 
     const offset = (page - 1) * limit;
 
     const whereCondition = {};
+    if (status && (status === "published" || status === "draft")) {
+      whereCondition.status = status;
+    }
     const include = [];
 
     // College and Affiliation (University) filter
@@ -1267,9 +1270,13 @@ class CollegeService {
       admission_process,
       fee_details,
       description,
+      pdf_file,
+      status,
     } = payload;
 
     const final_program_id = program_id || course_id;
+    const resolvedStatus =
+      status === "draft" || status === "published" ? status : null;
 
     let admission;
     let isNew = false;
@@ -1290,6 +1297,8 @@ class CollegeService {
         admission_process,
         fee_details,
         description,
+        pdf_file,
+        ...(resolvedStatus !== null ? { status: resolvedStatus } : {}),
       });
     } else {
       admission = await CollegeAdmission.create({
@@ -1299,6 +1308,8 @@ class CollegeService {
         admission_process,
         fee_details,
         description,
+        pdf_file,
+        status: resolvedStatus ?? "published",
       });
       isNew = true;
     }

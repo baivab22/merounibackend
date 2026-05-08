@@ -166,6 +166,9 @@ class ScholarshipService {
       createData.author = data.author;
     }
 
+    delete createData.categoryId;
+    delete createData.title;
+
     return Scholarship.create(createData);
   }
 
@@ -179,6 +182,9 @@ class ScholarshipService {
     if (data.author_id && !data.author) {
       updateData.author = data.author_id;
     }
+
+    delete updateData.categoryId;
+    delete updateData.title;
  
     // first check the title of db & comming name is same or not
     const scholarship = await Scholarship.findByPk(id);

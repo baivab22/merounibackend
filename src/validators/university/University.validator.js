@@ -54,6 +54,14 @@ export const createOrUpdateUniversitySchema = yup
     videos: yup.mixed().nullable().optional(),
     map: yup.string().required("Map is required"),
     gallery: yup.array().of(yup.string()).optional(),
+    status: yup
+      .string()
+      .transform((v) => {
+        if (v == null || v === "") return undefined;
+        return String(v).trim().toLowerCase();
+      })
+      .oneOf(["published", "draft", "archived"])
+      .optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && value.id) return true; // Update case

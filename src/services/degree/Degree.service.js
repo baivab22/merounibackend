@@ -15,6 +15,13 @@ class DegreeService {
         const { q } = query;
         const whereCondition = {};
 
+        const statusParam = query.status;
+        if (statusParam === "draft" || statusParam === "published") {
+            whereCondition.status = statusParam;
+        } else if (statusParam !== "all") {
+            whereCondition.status = "published";
+        }
+
         if (q) {
             whereCondition[Op.or] = [
                 { title: { [Op.like]: `%${q}%` } },
@@ -92,7 +99,7 @@ class DegreeService {
 
     async getDegreeBySlug(slug) {
         const degree = await Degree.findOne({
-            where: { slug },
+            where: { slug, status: "published" },
             include: [
                 {
                     model: College,
@@ -141,9 +148,15 @@ class DegreeService {
     }
 
     async createDegree(payload) {
-        const { title, ...rest } = payload;
+        const { title, status, ...rest } = payload;
         const degreeSlug = generateUniqueSlug(title);
-        return Degree.create({ ...rest, title, slug: degreeSlug });
+        const resolvedStatus = status === "draft" ? "draft" : "published";
+        return Degree.create({
+            ...rest,
+            title,
+            slug: degreeSlug,
+            status: resolvedStatus,
+        });
     }
 
     async updateDegree(id, payload) {
@@ -154,11 +167,18 @@ class DegreeService {
             throw error;
         }
 
-        const { title, ...rest } = payload;
+        const { title, status, ...rest } = payload;
         const updateData = { ...rest };
 
-        if (title && title !== degree.title) {
-            updateData.slug = generateUniqueSlug(title);
+        if (title !== undefined) {
+            updateData.title = title;
+            if (title !== degree.title) {
+                updateData.slug = generateUniqueSlug(title);
+            }
+        }
+
+        if (status !== undefined) {
+            updateData.status = status === "draft" ? "draft" : "published";
         }
 
         await degree.update(updateData);

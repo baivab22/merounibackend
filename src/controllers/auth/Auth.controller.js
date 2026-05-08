@@ -7,8 +7,10 @@ import {
   forgotPasswordHelper,
   resetPasswordHelper,
 } from "../../validators/authentication/Auth.validator.js";
+import ActivityLogModel from "../../models/activityLog/ActivityLog.model.js";
 import { sendMail } from "../../utils/Mail.util.js";
 import AuthService from "../../services/auth/Auth.service.js";
+import { getClientIp } from "../../utils/clientIp.js";
 
 const {
   ACCESS_TOKEN,
@@ -76,6 +78,31 @@ class AuthController {
           message:
             "Your agent application is pending approval. Please wait for admin approval before accessing the dashboard.",
         });
+      }
+
+      const isDashboardStaff =
+        roles?.admin === true ||
+        roles?.admin === "true" ||
+        roles?.editor === true ||
+        roles?.editor === "true";
+
+      if (isDashboardStaff) {
+        try {
+          await ActivityLogModel.create({
+            user_id: user.id,
+            action: "Login",
+            resource: "auth",
+            endpoint:
+              (req.originalUrl && req.originalUrl.split("?")[0]) || "/auth/login",
+            ip_address: getClientIp(req),
+            details: {
+              method: "password",
+              summary: "Dashboard sign-in",
+            },
+          });
+        } catch (logErr) {
+          console.error("Login activity log failed:", logErr);
+        }
       }
 
       const tokenPayload = {

@@ -63,10 +63,15 @@ class DisciplineService {
         }
 
         const degrees = await Degree.findAll({
-            where: Sequelize.where(
-                Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(Number(discipline.id))),
-                true
-            ),
+            where: {
+                [Op.and]: [
+                    Sequelize.where(
+                        Sequelize.fn('JSON_CONTAINS', Sequelize.col('disciplines'), JSON.stringify(Number(discipline.id))),
+                        true
+                    ),
+                    { status: "published" },
+                ],
+            },
             order: [["createdAt", "DESC"]],
         });
 

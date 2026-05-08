@@ -276,7 +276,9 @@ class UniversityService {
         university.featured_image = featured_image;
         university.videos = videos;
         university.map = map;
-        if (status) university.status = status;
+        if (status !== undefined && status !== null) {
+          university.status = status;
+        }
 
         if (university.fullname !== fullname) {
           university.slugs = generateUniqueSlug(fullname);
