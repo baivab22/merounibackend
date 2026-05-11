@@ -15,9 +15,8 @@ const activityTracker = (req, res, next) => {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         // Must be authenticated and have admin/editor role
         const user = req.user;
-        if (!user || !user.roles) return;
-
-        let rolesObj = user.roles;
+        const rolesObj = user?.roles || user?.role;
+        if (!user || !rolesObj) return;
         let isAdmin = false;
         let isEditor = false;
 
@@ -57,7 +56,12 @@ const activityTracker = (req, res, next) => {
           if (pathParts[0] === "api" && pathParts[1] === "v1" && pathParts[2]) {
             resource = pathParts[2];
           } else if (pathParts.length > 0) {
-            resource = pathParts[pathParts.length - 1]; // fallback
+            // Improved fallback: take the first relevant part of the path
+            if (pathParts[0] === "api") {
+              resource = pathParts[1] || "unknown";
+            } else {
+              resource = pathParts[0];
+            }
           }
 
           const details = buildActivityLogDetails(req, resource, action);

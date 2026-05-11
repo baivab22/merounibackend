@@ -27,10 +27,14 @@ export const createNewsSchema = yup.object({
   author: yup.number().integer().positive().required("Author is required"),
   description: yup.string().trim().nullable(),
   meta_description: yup.string().trim().nullable(),
-  featured_image: yup.string().trim().required("Featured image is required"),
+  featured_image: yup.string().trim().nullable().optional(),
   pdf_file: yup.string().trim().nullable().optional(),
   college_id: yup.number().integer().positive().nullable(),
-  status: yup.string().oneOf(["draft", "published", "archived"]).default("draft"),
+  status: yup
+    .string()
+    .oneOf(["draft", "published", "archived"])
+    .default("draft"),
+  slug: yup.string().trim().optional(),
 });
 
 export const updateNewsParamsSchema = yup.object({
@@ -48,6 +52,7 @@ export const updateNewsBodySchema = yup
     pdf_file: yup.string().trim().nullable().optional(),
     college_id: yup.number().integer().positive().nullable(),
     status: yup.string().oneOf(["draft", "published", "archived"]),
+    slug: yup.string().trim().optional(),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;

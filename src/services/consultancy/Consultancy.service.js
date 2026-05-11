@@ -1,6 +1,7 @@
 import { Op, Sequelize } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
-import slug from "slug";
+import slugify from "slug";
+import { getUniqueSlug } from "../../utils/SlugHelper.js";
 
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
 import Course from "../../models/courses/Course.model.js";
@@ -26,6 +27,10 @@ class ConsultancyService {
 
     if (query.district) {
       whereCondition.district = query.district;
+    }
+
+    if (query.status) {
+      whereCondition.status = query.status;
     }
 
     if (query.destination) {
@@ -145,9 +150,9 @@ class ConsultancyService {
     return consultancy;
   }
 
-  async getConsultancy(slugs) {
+  async getConsultancy(slug) {
     const consultancy = await Consultancy.findOne({
-      where: { slugs },
+      where: { slug },
       include: [
         {
           model: Course,
@@ -186,6 +191,7 @@ class ConsultancyService {
       status,
       visibility,
       map_type,
+      slug,
     } = payload;
 
     // Validate title for create operation
@@ -195,8 +201,8 @@ class ConsultancyService {
       throw error;
     }
 
-    // Generate slug only if title is provided
-    const slugs = title ? slug(title) : null;
+    // Generate unique slug
+    const finalSlug = await getUniqueSlug(Consultancy, title || "", id, slug);
 
     // Parse courses - handle string, array, or undefined/null
     let parsedCourses = [];
@@ -290,6 +296,7 @@ class ConsultancyService {
       if (status !== undefined) updateData.status = status;
       if (visibility !== undefined) updateData.visibility = visibility;
       if (map_type !== undefined) updateData.map_type = map_type;
+      if (finalSlug !== null) updateData.slug = finalSlug;
 
       await consultancy.update(updateData);
     } else {
@@ -305,7 +312,7 @@ class ConsultancyService {
       // For create, handle empty strings and undefined as null for optional fields
       consultancy = await Consultancy.create({
         title,
-        slugs,
+        slug: finalSlug,
         destination: destination || [],
         address: address || {},
         location: location_summary,

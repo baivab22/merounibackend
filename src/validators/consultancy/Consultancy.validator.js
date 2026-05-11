@@ -17,10 +17,11 @@ export const listConsultancyQuerySchema = paginationSchema.shape({
   city: yup.string().trim().optional(),
   district: yup.string().trim().optional(),
   destination: yup.string().trim().optional(),
+  status: yup.string().oneOf(["published", "draft", "Published", "Draft"]).optional(),
 });
 
 export const consultancySlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 // Create/Update Consultancy schema
@@ -62,13 +63,13 @@ export const createOrUpdateConsultancySchema = yup.object({
     }),
   location: yup.string().trim().nullable().optional(),
   featured_image: yup
-
     .string()
-    .url()
-    .when("id", {
-      is: (id) => !id, // Required for create
+    .url("Featured image must be a valid URL")
+    .nullable()
+    .when(["id", "status"], {
+      is: (id, status) => !id && status === "published",
       then: (schema) => schema.required("Featured image is required"),
-      otherwise: (schema) => schema.optional(),
+      otherwise: (schema) => schema.nullable().optional(),
     }),
   logo: yup
     .mixed()
@@ -120,7 +121,9 @@ export const createOrUpdateConsultancySchema = yup.object({
     ),
   map_type: yup
     .string()
-    .oneOf(["embed_map_url", "google_map_url"])
+    .nullable()
+    .transform((v) => (v === "" ? null : v))
+    .oneOf(["embed_map_url", "google_map_url", null])
     .optional()
     .default("google_map_url"),
   video_url: yup
@@ -146,6 +149,7 @@ export const createOrUpdateConsultancySchema = yup.object({
     .oneOf(["public", "private"])
     .optional()
     .default("public"),
+  slug: yup.string().nullable().optional(),
 });
 
 export const deleteConsultancyQuerySchema = idQuerySchema;
@@ -158,7 +162,7 @@ export const updateConsultancyOrderSchema = yup
         yup.object({
           id: yup.number().integer().positive().required(),
           order_no: yup.number().integer().min(0).required(),
-        })
+        }),
       )
       .min(1)
       .required(),
