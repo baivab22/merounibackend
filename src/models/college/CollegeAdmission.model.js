@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
 
-class CollegeAdmission extends Model { }
+class CollegeAdmission extends Model {}
 
 CollegeAdmission.init(
   {
@@ -37,6 +37,15 @@ CollegeAdmission.init(
       allowNull: false,
       defaultValue: "published",
     },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,
@@ -44,7 +53,7 @@ CollegeAdmission.init(
     tableName: "college_admissions",
     freezeTableName: true,
     timestamps: false,
-  }
+  },
 );
 
 export default CollegeAdmission;

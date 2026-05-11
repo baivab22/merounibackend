@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 
 import { sequelize } from "../../config/database.config.js";
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { generateUniqueSlug, getUniqueSlug } from "../../utils/SlugHelper.js";
 import Category from "../../models/category/Category.model.js";
 
 class CategoryService {
@@ -23,7 +23,7 @@ class CategoryService {
     if (query.parent_id) {
       whereCondition.parent_id = query.parent_id;
     } else {
-      whereCondition.parent_id = null
+      whereCondition.parent_id = null;
     }
 
     const { count: totalCount, rows: items } = await Category.findAndCountAll({
@@ -37,14 +37,14 @@ class CategoryService {
           model: Category,
           as: "subcategories",
           attributes: ["id", "title"],
-          required: false
+          required: false,
         },
-              ],
+      ],
     });
 
     let processedItems = items;
     if (query.depth === "1") {
-      processedItems = items.map(item => {
+      processedItems = items.map((item) => {
         const plain = item.get({ plain: true });
         delete plain.subcategories;
         return plain;
@@ -62,9 +62,9 @@ class CategoryService {
     };
   }
 
-  async getCategory(slugs) {
+  async getCategory(slug) {
     const category = await Category.findOne({
-      where: { slugs },
+      where: { slug },
       include: ["subcategories", "parent"],
     });
     if (!category) {
@@ -87,7 +87,7 @@ class CategoryService {
       ],
     });
 
-    return categories.map(cat => {
+    return categories.map((cat) => {
       const plain = cat.get({ plain: true });
       plain.materials_count = plain.materials ? plain.materials.length : 0;
       delete plain.materials;
@@ -98,7 +98,7 @@ class CategoryService {
   async createCategory(data, userId) {
     const { title, description, type, parent_id } = data;
 
-    // check if title alreay exist oor not 
+    // check if title alreay exist oor not
     const existingCategory = await Category.findOne({
       where: { title },
     });
@@ -110,7 +110,7 @@ class CategoryService {
 
     const category = await Category.create({
       title,
-      slugs: generateUniqueSlug(title),
+      slug: await getUniqueSlug(Category, title, null, data.slug),
       description,
       author: userId,
       type,
@@ -129,12 +129,17 @@ class CategoryService {
       throw error;
     }
 
-    const [updatedCount] = await Category.update(
-      { ...data },
-      {
-        where: { id: category_id },
-      }
+    const updateData = { ...data };
+    updateData.slug = await getUniqueSlug(
+      Category,
+      data.title || category.title,
+      category_id,
+      data.slug,
     );
+
+    const [updatedCount] = await Category.update(updateData, {
+      where: { id: category_id },
+    });
 
     if (updatedCount === 0) {
       const error = new Error("Category already up to date");

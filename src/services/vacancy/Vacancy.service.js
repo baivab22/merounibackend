@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 
 import VacancyModel from "../../models/vacancy/Vacancy.model.js";
 import UserModel from "../../models/users/User.model.js";
-import {generateUniqueSlug} from "../../utils/SlugHelper.js";
+import { generateUniqueSlug, getUniqueSlug } from "../../utils/SlugHelper.js";
 
 class VacancyService {
   async listVacancies(query = {}) {
@@ -53,9 +53,9 @@ class VacancyService {
     };
   }
 
-  async getVacancyBySlug(slugs) {
+  async getVacancyBySlug(slug) {
     const vacancy = await VacancyModel.findOne({
-      where: { slugs },
+      where: { slug },
       include: [
         {
           model: UserModel,
@@ -82,13 +82,14 @@ class VacancyService {
       pdf_file,
       description,
       content,
-      status,
+      slug,
+      meta_description,
     } = data;
-    const slugs = generateUniqueSlug(title);
+    const finalSlug = await getUniqueSlug(VacancyModel, title, null, slug);
 
     return VacancyModel.create({
       title,
-      slugs,
+      slug: finalSlug,
       author_id,
       associated_organization_name: associated_organization_name || null,
       description,
@@ -96,6 +97,7 @@ class VacancyService {
       featuredImage,
       pdf_file: pdf_file || null,
       status: status === "draft" ? "draft" : "published",
+      meta_description,
     });
   }
 
@@ -107,7 +109,7 @@ class VacancyService {
       throw error;
     }
 
-    await vacancy.update({
+    const updateData = {
       title: data.title || vacancy.title,
       author_id: data.author_id || vacancy.author_id,
       associated_organization_name:
@@ -118,13 +120,19 @@ class VacancyService {
       content: data.content || vacancy.content,
       featuredImage: data.featuredImage || vacancy.featuredImage,
       pdf_file:
-        data.pdf_file !== undefined
-          ? data.pdf_file || null
-          : vacancy.pdf_file,
+        data.pdf_file !== undefined ? data.pdf_file || null : vacancy.pdf_file,
       ...(data.status !== undefined && {
         status: data.status === "draft" ? "draft" : "published",
       }),
-    });
+      meta_description:
+        data.meta_description !== undefined
+          ? data.meta_description
+          : vacancy.meta_description,
+    };
+
+    updateData.slug = await getUniqueSlug(VacancyModel, data.title || vacancy.title, id, data.slug);
+
+    await vacancy.update(updateData);
 
     return vacancy;
   }

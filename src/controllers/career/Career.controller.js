@@ -44,7 +44,7 @@ class CareerController {
 
   static async getCareerBySlug(req, res) {
     try {
-      const careerPost = await careerService.getCareerBySlug(req.params.slugs, req.user?.id);
+      const careerPost = await careerService.getCareerBySlug(req.params.slug, req.user?.id);
 
       return res.status(200).json({
         message: "success",

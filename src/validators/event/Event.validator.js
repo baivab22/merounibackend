@@ -15,7 +15,7 @@ export const eventListAllQuerySchema = yup.object({
   sort: yup.string().optional().default("asc"),
 });
 export const eventSlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const deleteEventQuerySchema = yup.object({
@@ -47,6 +47,7 @@ export const createOrUpdateEventSchema = yup
       }),
     description: yup.string().trim().optional(),
     meta_description: yup.string().trim().optional(),
+    slug: yup.string().trim().optional(),
     content: yup
       .string()
       .trim()

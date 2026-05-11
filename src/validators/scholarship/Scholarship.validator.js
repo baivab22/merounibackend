@@ -31,6 +31,7 @@ export const createScholarshipSchema = yup
     categoryId: yup.number().integer().positive(),
     meta_description: yup.string().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
     featured_image: yup.string().nullable().optional(),
     title: yup.string(), // Optional, for backward compatibility
   })
@@ -53,6 +54,7 @@ export const updateScholarshipBodySchema = yup
     contactInfo: yup.string(),
     meta_description: yup.string().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
     featured_image: yup.string().nullable().optional(),
     title: yup.string(), // Optional, for backward compatibility
   })

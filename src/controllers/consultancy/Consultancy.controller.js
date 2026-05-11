@@ -43,7 +43,7 @@ class ConsultancyController {
   static async getConsultancy(req, res) {
     try {
       const consultancy = await consultancyService.getConsultancy(
-        req.params.slugs
+        req.params.slug
       );
       return res
         .status(200)

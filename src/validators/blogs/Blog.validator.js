@@ -26,6 +26,8 @@ export const createBlogSchema = yup.object({
     author: yup.number().optional(),
     status: yup.string().optional(),
     pdf_file: yup.string().optional(),
+    meta_description: yup.string().optional(),
+    slug: yup.string().optional(),
 });
 
 export const updateBlogQuerySchema = yup.object({
@@ -44,6 +46,8 @@ export const updateBlogBodySchema = yup
         author: yup.number(),
         status: yup.string(),
         pdf_file: yup.string(),
+        meta_description: yup.string(),
+        slug: yup.string(),
     })
     .test("at-least-one", "At least one field must be provided", (value) => {
         return value && Object.keys(value).length > 0;

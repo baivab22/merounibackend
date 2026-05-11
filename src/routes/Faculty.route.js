@@ -52,13 +52,13 @@ route.get(
 
 /**
  * @swagger
- * /faculty/{slugs}:
+ * /faculty/{slug}:
  *   get:
  *     summary: Get faculty by slug
  *     tags: [Faculties]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -69,7 +69,7 @@ route.get(
  *         description: Faculty not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(facultySlugParamSchema, "params"),
   FacultyController.getFaculty
 );

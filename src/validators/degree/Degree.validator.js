@@ -9,6 +9,8 @@ export const createDegreeSchema = yup.object({
     featured_image: yup.string().url("Must be a valid URL").nullable().optional(),
     disciplines: yup.array().nullable().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
 });
 
 export const updateDegreeSchema = yup.object({
@@ -19,6 +21,8 @@ export const updateDegreeSchema = yup.object({
     featured_image: yup.string().url("Must be a valid URL").nullable().optional(),
     disciplines: yup.array().nullable().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
 });
 
 export const updateDegreeOrderSchema = yup

@@ -17,10 +17,10 @@ export const University = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, // Enforce unique slugs
+      unique: true, // Enforce unique slug
     },
     country: {
       type: DataTypes.STRING,

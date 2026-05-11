@@ -8,7 +8,7 @@ import {
 export { paginationSchema, slugParamSchema, idQuerySchema };
 
 export const courseSlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 // Create/Update Course schema - adjust fields based on actual requirements
@@ -29,6 +29,8 @@ export const createOrUpdateCourseSchema = yup.object({
   authorId: yup.number().integer().positive().optional(),
   facultyId: yup.number().integer().positive().optional(),
   description: yup.string().trim().optional(),
+  slug: yup.string().trim().optional(),
+  meta_description: yup.string().trim().optional(),
   syllabus: yup.array().of(yup.string().trim()).optional(),
 });
 

@@ -1,5 +1,6 @@
 import { Op, literal } from "sequelize";
-import slug from "slug";
+import slugify from "slug";
+import { getUniqueSlug } from "../../utils/SlugHelper.js";
 import moment from "moment";
 
 import { sequelize } from "../../config/database.config.js";
@@ -25,29 +26,13 @@ class EventService {
         author_id,
         event_host,
         status,
+        slug,
+        customSlugs,
       } = payload;
 
       let eventId = id;
-      let slugs;
-
-      if (title) {
-        // Generate slug from title if title is provided
-        slugs = slug(title);
-      } else if (id) {
-        // For updates without title, keep existing slug
-        const existingEvent = await Event.findByPk(id, { transaction });
-        if (!existingEvent) {
-          const err = new Error("Event not found");
-          err.status = 404;
-          throw err;
-        }
-        slugs = existingEvent.slugs;
-      } else {
-        // For create, title is required
-        const err = new Error("Title is required to create an event");
-        err.status = 400;
-        throw err;
-      }
+      let finalSlug;
+      finalSlug = await getUniqueSlug(Event, title, id, customSlugs || slug);
 
       if (!eventId) {
         // Create new event - all required fields should be present
@@ -55,7 +40,7 @@ class EventService {
         const event = await Event.create(
           {
             title,
-            slugs,
+            slug: finalSlug,
             description,
             meta_description,
             content,
@@ -68,7 +53,7 @@ class EventService {
             status: status || "published",
             order_no_for_website: (maxOrder || 0) + 1,
           },
-          { transaction }
+          { transaction },
         );
         eventId = event.id;
       } else {
@@ -76,7 +61,8 @@ class EventService {
         const updateData = {};
         if (title !== undefined) updateData.title = title;
         if (description !== undefined) updateData.description = description;
-        if (meta_description !== undefined) updateData.meta_description = meta_description;
+        if (meta_description !== undefined)
+          updateData.meta_description = meta_description;
         if (content !== undefined) updateData.content = content;
         if (image !== undefined) updateData.image = image;
         if (is_featured !== undefined) updateData.is_featured = is_featured;
@@ -85,8 +71,9 @@ class EventService {
         if (author_id !== undefined) updateData.author_id = author_id;
         if (event_host !== undefined) updateData.event_host = event_host;
         if (status !== undefined) updateData.status = status;
-
-
+        if (finalSlug) {
+          updateData.slug = finalSlug;
+        }
 
         if (Object.keys(updateData).length > 0) {
           await Event.update(updateData, {
@@ -118,14 +105,14 @@ class EventService {
     await event.destroy();
   }
 
-  async getEvent(slugs) {
+  async getEvent(slug) {
     const item = await Event.findOne({
-      where: { slugs },
+      where: { slug },
       attributes: {
         exclude: ["category_id", "college_id", "author_id"],
       },
       include: [
-        { model: Category, as: "category", attributes: ["title", "slugs"] },
+        { model: Category, as: "category", attributes: ["title", "slug"] },
         {
           model: UserModel,
           as: "author",
@@ -134,7 +121,7 @@ class EventService {
         {
           model: College,
           as: "college",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slug"],
         },
       ],
     });
@@ -180,7 +167,7 @@ class EventService {
       whereCondition.category_id = categoryId;
     }
 
-    if (status && status !== 'all') {
+    if (status && status !== "all") {
       whereCondition.status = status;
     }
 
@@ -190,7 +177,11 @@ class EventService {
       limit,
       offset,
       include: [
-        { model: Category, as: "category", attributes: ["id", "title", "slugs"] },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "title", "slug"],
+        },
       ],
       order: [
         ["order_no_for_website", "ASC"],
@@ -234,7 +225,7 @@ class EventService {
       offset,
       order: [
         literal(
-          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`,
         ),
       ],
       subQuery: false,
@@ -257,8 +248,8 @@ class EventService {
     const offset = (page - 1) * limit;
 
     // Get start of current week (Monday) and end of current week (Sunday)
-    const startOfWeek = moment().startOf('week').format('YYYY-MM-DD');
-    const endOfWeek = moment().endOf('week').format('YYYY-MM-DD');
+    const startOfWeek = moment().startOf("week").format("YYYY-MM-DD");
+    const endOfWeek = moment().endOf("week").format("YYYY-MM-DD");
 
     const dateLiteral = literal(`
       STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
@@ -282,7 +273,7 @@ class EventService {
       offset,
       order: [
         literal(
-          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`,
         ),
       ],
       subQuery: false,
@@ -305,8 +296,14 @@ class EventService {
     const offset = (page - 1) * limit;
 
     // Get start of next month (first day) and end of next month (last day)
-    const startOfNextMonth = moment().add(1, 'month').startOf('month').format('YYYY-MM-DD');
-    const endOfNextMonth = moment().add(1, 'month').endOf('month').format('YYYY-MM-DD');
+    const startOfNextMonth = moment()
+      .add(1, "month")
+      .startOf("month")
+      .format("YYYY-MM-DD");
+    const endOfNextMonth = moment()
+      .add(1, "month")
+      .endOf("month")
+      .format("YYYY-MM-DD");
 
     const dateLiteral = literal(`
       STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') 
@@ -330,7 +327,7 @@ class EventService {
       offset,
       order: [
         literal(
-          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`
+          `STR_TO_DATE(JSON_UNQUOTE(JSON_EXTRACT(event_host, '$.start_date')), '%Y-%m-%d') ASC`,
         ),
       ],
       subQuery: false,
@@ -365,8 +362,8 @@ class EventService {
       const updates = events.map((event) =>
         Event.update(
           { order_no_for_website: event.order_no },
-          { where: { id: event.id }, transaction }
-        )
+          { where: { id: event.id }, transaction },
+        ),
       );
 
       await Promise.all(updates);

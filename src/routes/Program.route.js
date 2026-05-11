@@ -120,13 +120,13 @@ router.post(
 
 /**
  * @swagger
- * /program/{slugs}:
+ * /program/{slug}:
  *   get:
  *     summary: Get program by slug
  *     tags: [Programs]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -137,7 +137,7 @@ router.post(
  *         description: Program not found
  */
 router.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(programSlugParamSchema, "params"),
   ProgramController.getProgram
 );

@@ -172,7 +172,7 @@ class ConsultancyApplicationService {
         {
           model: Consultancy,
           as: "consultancy",
-          attributes: ["title", "slugs", "logo", "address", "contact"],
+          attributes: ["title", "slug", "logo", "address", "contact"],
         },
         {
           model: User,
@@ -230,7 +230,7 @@ class ConsultancyApplicationService {
           {
             model: Consultancy,
             as: "consultancy",
-            attributes: ["title", "slugs", "logo"],
+            attributes: ["title", "slug", "logo"],
           },
           {
             model: User,

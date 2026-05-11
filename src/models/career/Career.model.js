@@ -16,7 +16,7 @@ CareerModel.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -65,7 +65,7 @@ CareerModel.init(
     freezeTableName: true,
     underscored: false,
     timestamps: true,
-  }
+  },
 );
 import Category from "../category/Category.model.js";
 

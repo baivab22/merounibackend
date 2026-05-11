@@ -129,6 +129,6 @@ UserModel.init(
     freezeTableName: true,
     underscored: false,
     timestamps: true,
-  }
+  },
 );
 export default UserModel;

@@ -52,13 +52,13 @@ route.get(
 
 /**
  * @swagger
- * /vacancy/{slugs}:
+ * /vacancy/{slug}:
  *   get:
  *     summary: Get vacancy by slug
  *     tags: [Vacancies]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -69,7 +69,7 @@ route.get(
  *         description: Vacancy not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(slugParamSchema, "params"),
   VacancyController.getVacancyBySlug,
 );

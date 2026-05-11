@@ -75,7 +75,7 @@ class SchoolService {
           [Op.or]: [
             { id: { [Op.in]: affiliations.filter((a) => !isNaN(a)) } },
             { fullname: { [Op.in]: affiliations } },
-            { slugs: { [Op.in]: affiliations } },
+            { slug: { [Op.in]: affiliations } },
           ],
         },
         attributes: ["id"],
@@ -205,10 +205,9 @@ class SchoolService {
     };
   }
 
-  async getSchoolBySlug(slugs) {
+  async getSchoolBySlug(slug) {
     const school = await College.findOne({
-      where: {
-        slugs,
+      where: { slug,
         [Op.and]: [
           Sequelize.literal(`JSON_CONTAINS(institute_level, '"School"')`),
         ],
@@ -244,7 +243,7 @@ class SchoolService {
             {
               model: Program,
               as: "program",
-              attributes: ["id", "title", "slugs"],
+              attributes: ["id", "title", "slug"],
             },
           ],
         },
@@ -260,14 +259,14 @@ class SchoolService {
             {
               model: Program,
               as: "program",
-              attributes: ["title", "slugs"],
+              attributes: ["title", "slug"],
             },
           ],
         },
         {
           model: University,
           as: "universities",
-          attributes: ["fullname", "slugs", "id"],
+          attributes: ["fullname", "slug", "id"],
         },
         {
           model: SchoolBoardStreamProgram,
@@ -381,8 +380,8 @@ class SchoolService {
           through: { attributes: [] },
         },
       ],
-      attributes: ["id", "fullname", "slugs"],
-      group: ["University.id", "University.fullname", "University.slugs"],
+      attributes: ["id", "fullname", "slug"],
+      group: ["University.id", "University.fullname", "University.slug"],
       order: [["fullname", "ASC"]],
     });
 

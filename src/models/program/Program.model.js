@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Program extends Model { }
+class Program extends Model {}
 
 Program.init(
   {
@@ -15,7 +15,7 @@ Program.init(
       allowNull: true,
       unique: true,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: true,
       unique: true,
@@ -94,6 +94,10 @@ Program.init(
       allowNull: false,
       defaultValue: "published",
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,
@@ -101,7 +105,7 @@ Program.init(
     modelName: "programs",
     tableName: "programs",
     freezeTableName: true,
-  }
+  },
 );
 
 export default Program;

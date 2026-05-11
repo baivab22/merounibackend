@@ -1,13 +1,13 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class College extends Model { }
+class College extends Model {}
 
 College.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     name: { type: DataTypes.STRING, allowNull: false, unique: true },
-    slugs: { type: DataTypes.STRING, allowNull: false, unique: true },
+    slug: { type: DataTypes.STRING, allowNull: false, unique: true },
     institute_type: {
       type: DataTypes.ENUM("Public", "Private", "Community", "Technical"),
       allowNull: false,
@@ -85,7 +85,7 @@ College.init(
     tableName: "colleges_schools",
     timestamps: true,
     freezeTableName: true,
-  }
+  },
 );
 
 export default College;

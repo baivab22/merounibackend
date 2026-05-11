@@ -69,13 +69,13 @@ router.get("/:id", SkillsBasedCourseController.getCourseById);
 
 /**
  * @swagger
- * /skills-based-courses/slug/{slugs}:
+ * /skills-based-courses/slug/{slug}:
  *   get:
  *     summary: Get a skills based course by slug
  *     tags: [SkillsBasedCourses]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string

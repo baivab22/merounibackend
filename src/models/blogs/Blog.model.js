@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class Blog extends Model { }
+class Blog extends Model {}
 
 Blog.init(
   {
@@ -67,6 +67,10 @@ Blog.init(
     },
 
     pdf_file: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    meta_description: {
       type: DataTypes.TEXT,
       allowNull: true,
     },

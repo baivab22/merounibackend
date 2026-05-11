@@ -6,6 +6,8 @@ export const createDisciplineSchema = yup.object({
     featured_image: yup.string().trim().optional(),
     description: yup.string().trim().optional(),
     content: yup.string().trim().optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
 });
 
 // Update discipline order schema
@@ -30,4 +32,6 @@ export const updateDisciplineSchema = yup.object({
     featured_image: yup.string().trim().optional(),
     description: yup.string().trim().optional(),
     content: yup.string().trim().optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
 });

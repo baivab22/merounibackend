@@ -104,18 +104,18 @@ class DegreeService {
                 {
                     model: College,
                     as: "colleges",
-                    attributes: ["id", "name", "slugs", "college_logo", "order_no_for_website"],
+                    attributes: ["id", "name", "slug", "college_logo", "order_no_for_website"],
                     through: { attributes: [] }
                 },
                 {
                     model: Program,
                     as: "programs",
-                    attributes: ["id", "title", "slugs", "duration", "fee", "credits"],
+                    attributes: ["id", "title", "slug", "duration", "fee", "credits"],
                     include: [
                         {
                             model: College,
                             as: "colleges",
-                            attributes: ["id", "name", "slugs", "college_logo", "order_no_for_website"],
+                            attributes: ["id", "name", "slug", "college_logo", "order_no_for_website"],
                             through: { attributes: [] }
                         },
                         {
@@ -125,7 +125,7 @@ class DegreeService {
                                 {
                                     model: University,
                                     as: "university",
-                                    attributes: ["id", "fullname", "slugs"]
+                                    attributes: ["id", "fullname", "slug"]
                                 }
                             ]
                         }
@@ -154,8 +154,9 @@ class DegreeService {
         return Degree.create({
             ...rest,
             title,
-            slug: degreeSlug,
+            slug: payload.slug || degreeSlug,
             status: resolvedStatus,
+            meta_description: payload.meta_description,
         });
     }
 
@@ -172,13 +173,21 @@ class DegreeService {
 
         if (title !== undefined) {
             updateData.title = title;
-            if (title !== degree.title) {
+            if (!payload.slug && title !== degree.title) {
                 updateData.slug = generateUniqueSlug(title);
             }
         }
 
         if (status !== undefined) {
             updateData.status = status === "draft" ? "draft" : "published";
+        }
+
+        if (payload.slug) {
+            updateData.slug = payload.slug;
+        }
+
+        if (payload.meta_description !== undefined) {
+            updateData.meta_description = payload.meta_description;
         }
 
         await degree.update(updateData);

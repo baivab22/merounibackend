@@ -7,7 +7,7 @@ import {
 export { paginationSchema, slugParamSchema };
 
 export const categorySlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const categoryListQuerySchema = paginationSchema.shape({

@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import slug from "slug";
+import slugify from "slug";
 
 import { sequelize } from "../../config/database.config.js";
 import {
@@ -11,7 +11,7 @@ import {
   UniversityProgram,
 } from "../../models/university/University.model.js";
 import Program from "../../models/program/Program.model.js";
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { generateUniqueSlug, getUniqueSlug } from "../../utils/SlugHelper.js";
 
 const UNIVERSITY_CONTACT_SCALAR_FIELDS = [
   "website_url",
@@ -159,7 +159,7 @@ class UniversityService {
 
   async getUniversityProfile(slugParam) {
     const university = await University.findOne({
-      where: { slugs: slugParam },
+      where: { slug: slugParam },
       include: [
         {
           model: UniversityProgram,
@@ -168,7 +168,7 @@ class UniversityService {
             {
               model: Program,
               as: "program",
-              attributes: ["id", "title", "slugs"],
+              attributes: ["id", "title", "slug"],
             },
           ],
         },
@@ -240,8 +240,9 @@ class UniversityService {
         videos,
         map,
         gallery,
-        logo,
+        logo: logo_from_payload,
         status,
+        slug,
       } = payload;
 
       if (!fullname || fullname.trim() === "") {
@@ -272,7 +273,7 @@ class UniversityService {
         university.type_of_institute = type_of_institute;
         university.description = description;
         university.meta_description = meta_description;
-        university.logo = logo; // Update logo
+        university.logo = logo_from_payload; // Update logo
         university.featured_image = featured_image;
         university.videos = videos;
         university.map = map;
@@ -280,19 +281,23 @@ class UniversityService {
           university.status = status;
         }
 
-        if (university.fullname !== fullname) {
-          university.slugs = generateUniqueSlug(fullname);
-        }
+        // Ensure unique slug for update
+        university.slug = await getUniqueSlug(University, fullname, id, slug);
 
         await university.save({ transaction });
       } else {
         // 🔹 CREATE
-        const slugs = generateUniqueSlug(fullname);
+        const universitySlug = await getUniqueSlug(
+          University,
+          fullname,
+          null,
+          slug,
+        );
 
         university = await University.create(
           {
             fullname,
-            slugs,
+            slug: universitySlug,
             country,
             state,
             city,
@@ -303,7 +308,7 @@ class UniversityService {
             type_of_institute,
             description,
             meta_description,
-            logo,
+            logo: logo_from_payload,
             order_no_for_website: await this.getNextOrderNo(),
             featured_image,
             videos,

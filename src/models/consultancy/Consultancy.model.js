@@ -17,7 +17,7 @@ Consultancy.init(
       allowNull: false,
       unique: true,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: false,
     },

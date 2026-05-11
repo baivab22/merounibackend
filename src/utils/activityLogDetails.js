@@ -9,7 +9,7 @@ const BODY_LABEL_KEYS = [
   "name",
   "title",
   "slug",
-  "slugs",
+  "slug",
   "email",
   "firstName",
   "lastName",
@@ -35,7 +35,7 @@ const QUERY_ID_KEYS = [
   "course_id",
   "id",
   "slug",
-  "slugs",
+  "slug",
 ];
 
 function truncate(str, max) {
@@ -137,7 +137,7 @@ function humanSummary(details, resource, action) {
       details.fullname,
       details.fullName,
       details.slug,
-      details.slugs,
+      details.slug,
       details.code,
       details.email,
     ]);

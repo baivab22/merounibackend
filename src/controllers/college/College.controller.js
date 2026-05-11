@@ -21,7 +21,7 @@ class CollegeController {
   static async createOrUpdateCollege(req, res) {
     try {
       const { collegeId, isNew } = await collegeService.createOrUpdateCollege(
-        req.body
+        req.body,
       );
       return res.status(200).json({
         message: isNew
@@ -30,7 +30,7 @@ class CollegeController {
         collegeId,
       });
     } catch (error) {
-      console.log(error, "THank")
+      console.log(error, "THank");
       return res
         .status(error.status || 500)
         .json({ error: error.message || "Server error" });
@@ -59,7 +59,7 @@ class CollegeController {
   static async listAdmissions(req, res) {
     try {
       const { items, pagination } = await collegeService.listAdmissions(
-        req.query
+        req.query,
       );
 
       return res.status(200).json({
@@ -68,7 +68,7 @@ class CollegeController {
         pagination,
       });
     } catch (error) {
-      console.log(error, "THank")
+      console.log(error, "THank");
       const status = error.status || 500;
       return res.status(status).json({
         status,
@@ -99,7 +99,8 @@ class CollegeController {
       const roles = req.user?.roles || req.user?.role;
       if (roles) {
         try {
-          const userRoles = typeof roles === "string" ? JSON.parse(roles) : roles;
+          const userRoles =
+            typeof roles === "string" ? JSON.parse(roles) : roles;
           if (userRoles["admin"] || userRoles["editor"]) {
             isAdmin = true;
           }
@@ -108,10 +109,13 @@ class CollegeController {
         }
       }
 
-      const { items, pagination } = await collegeService.listColleges({
-        ...req.query,
-        ...req.body,
-      }, isAdmin);
+      const { items, pagination } = await collegeService.listColleges(
+        {
+          ...req.query,
+          ...req.body,
+        },
+        isAdmin,
+      );
 
       return res.status(200).json({
         message: "success",
@@ -125,7 +129,7 @@ class CollegeController {
 
   static async getCollegeBySlug(req, res) {
     try {
-      const college = await collegeService.getCollegeBySlug(req.params.slugs);
+      const college = await collegeService.getCollegeBySlug(req.params.slug);
 
       return res.status(200).json({ item: college });
     } catch (error) {
@@ -146,7 +150,7 @@ class CollegeController {
   static async getCollegeByInstitutionUser(req, res) {
     try {
       const college = await collegeService.getCollegeByInstitutionUser(
-        req.user
+        req.user,
       );
       return res.status(200).json({ item: college });
     } catch (error) {
@@ -187,7 +191,9 @@ class CollegeController {
 
   static async updateAdmissionOrder(req, res) {
     try {
-      const result = await collegeService.updateAdmissionOrder(req.body.admissions);
+      const result = await collegeService.updateAdmissionOrder(
+        req.body.admissions,
+      );
       return res.status(200).json(result);
     } catch (error) {
       const status = error.status || 500;
@@ -200,7 +206,7 @@ class CollegeController {
   static async createOrUpdateAdmission(req, res) {
     try {
       const { id, isNew } = await collegeService.createOrUpdateAdmission(
-        req.body
+        req.body,
       );
       return res.status(200).json({
         message: isNew
@@ -209,20 +215,24 @@ class CollegeController {
         id,
       });
     } catch (error) {
-      return res
-        .status(error.status || 500)
-        .json({ status: error.status || 500, message: error.message || "Server error" });
+      return res.status(error.status || 500).json({
+        status: error.status || 500,
+        message: error.message || "Server error",
+      });
     }
   }
 
   static async deleteAdmission(req, res) {
     try {
       await collegeService.deleteAdmission(req.params.id);
-      return res.status(200).json({ message: "Admission deleted successfully!" });
-    } catch (error) {
       return res
-        .status(error.status || 500)
-        .json({ status: error.status || 500, message: error.message || "Server error" });
+        .status(200)
+        .json({ message: "Admission deleted successfully!" });
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        status: error.status || 500,
+        message: error.message || "Server error",
+      });
     }
   }
 
@@ -241,7 +251,9 @@ class CollegeController {
 
   static async listProgramsByCollegeId(req, res) {
     try {
-      const programs = await collegeService.listProgramsByCollegeId(req.params.id);
+      const programs = await collegeService.listProgramsByCollegeId(
+        req.params.id,
+      );
       return res.status(200).json({
         message: "success",
         items: programs,

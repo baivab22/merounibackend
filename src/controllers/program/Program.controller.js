@@ -45,7 +45,7 @@ class ProgramController {
 
   static async getProgram(req, res) {
     try {
-      const program = await programService.getProgram(req.params.slugs);
+      const program = await programService.getProgram(req.params.slug);
       return res.status(200).json(program);
     } catch (error) {
       const status = error.status || 500;

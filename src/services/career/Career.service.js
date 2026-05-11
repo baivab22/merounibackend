@@ -34,7 +34,7 @@ class CareerService {
           {
             model: Category,
             as: "category",
-            attributes: ["id", "title", "slugs"],
+            attributes: ["id", "title", "slug"],
           },
         ],
         limit,
@@ -67,9 +67,9 @@ class CareerService {
     };
   }
 
-  async getCareerBySlug(slugs, userId = null) {
+  async getCareerBySlug(slug, userId = null) {
     const careerPost = await CareerModel.findOne({
-      where: { slugs },
+      where: { slug },
       attributes: {
         exclude: ["author_id"],
       },
@@ -109,11 +109,11 @@ class CareerService {
       content,
       status,
     } = data;
-    const slugs = generateUniqueSlug(title);
+    const slug = generateUniqueSlug(title);
 
     return CareerModel.create({
       title,
-      slugs,
+      slug,
       author_id,
       description,
       content,
@@ -139,7 +139,7 @@ class CareerService {
     };
 
     if (data.title && data.title !== career.title) {
-      updateData.slugs = generateUniqueSlug(data.title);
+      updateData.slug = generateUniqueSlug(data.title);
     }
 
     await career.update(updateData);
@@ -221,7 +221,7 @@ class CareerService {
           {
             model: CareerModel,
             as: "career",
-            attributes: ["id", "title", "slugs"],
+            attributes: ["id", "title", "slug"],
           },
           {
             model: UserModel,

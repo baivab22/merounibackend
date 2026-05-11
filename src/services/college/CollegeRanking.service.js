@@ -42,7 +42,7 @@ class CollegeRankingService {
         {
           model: College,
           as: "college",
-          attributes: ["id", "name", "slugs", "college_logo", "featured_img"],
+          attributes: ["id", "name", "slug", "college_logo", "featured_img"],
           include: [
             {
               model: CollegeAddress,
@@ -101,7 +101,7 @@ class CollegeRankingService {
         {
           model: College,
           as: "college",
-          attributes: ["id", "name", "slugs", "college_logo", "featured_img"],
+          attributes: ["id", "name", "slug", "college_logo", "featured_img"],
           include: [
             {
               model: CollegeAddress,

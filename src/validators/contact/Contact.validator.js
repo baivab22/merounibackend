@@ -26,7 +26,7 @@ export const updateContactStatusSchema = yup.object({
 });
 
 export const contactSlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const contactEmailQuerySchema = yup.object({

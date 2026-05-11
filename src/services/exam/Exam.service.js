@@ -1,16 +1,14 @@
-import slug from "slug";
+import slugify from "slug";
 import { Op } from "sequelize";
 
 import { sequelize } from "../../config/database.config.js";
-import {
-  Exam,
-} from "../../models/exams/Exam.model.js";
+import { Exam } from "../../models/exams/Exam.model.js";
 import Level from "../../models/level/Level.model.js";
 import { University } from "../../models/university/University.model.js";
 import UserModel from "../../models/users/User.model.js";
 import Category from "../../models/category/Category.model.js";
 
-import { generateUniqueSlug } from "../../utils/SlugHelper.js"
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
 import { safeParseJSON } from "../../utils/JsonHelper.js";
 class ExamService {
   async listExams(query = {}) {
@@ -81,7 +79,7 @@ class ExamService {
       if (!isNaN(discipline)) {
         facultyWhere.id = parseInt(discipline, 10);
       } else {
-        facultyWhere.slugs = discipline;
+        facultyWhere.slug = discipline;
       }
 
       include.push({
@@ -151,19 +149,23 @@ class ExamService {
 
     // Expand universities to maintain response consistency
     const universityMap = new Map();
-    const allUniversityIds = [...new Set(items.flatMap(exam => safeParseJSON(exam.affiliation)))];
-    
+    const allUniversityIds = [
+      ...new Set(items.flatMap((exam) => safeParseJSON(exam.affiliation))),
+    ];
+
     if (allUniversityIds.length > 0) {
       const universities = await University.findAll({
         where: { id: allUniversityIds },
         attributes: ["id", "fullname", "logo"],
       });
-      universities.forEach(u => universityMap.set(u.id, u));
+      universities.forEach((u) => universityMap.set(u.id, u));
     }
 
-    items.forEach(exam => {
+    items.forEach((exam) => {
       const parsed = safeParseJSON(exam.affiliation);
-      const expanded = parsed.map(id => universityMap.get(id)).filter(Boolean);
+      const expanded = parsed
+        .map((id) => universityMap.get(id))
+        .filter(Boolean);
       exam.setDataValue("affiliation", expanded);
     });
 
@@ -279,19 +281,23 @@ class ExamService {
 
     // Expand universities to maintain response consistency
     const universityMap = new Map();
-    const allUniversityIds = [...new Set(items.flatMap(exam => safeParseJSON(exam.affiliation)))];
-    
+    const allUniversityIds = [
+      ...new Set(items.flatMap((exam) => safeParseJSON(exam.affiliation))),
+    ];
+
     if (allUniversityIds.length > 0) {
       const universities = await University.findAll({
         where: { id: allUniversityIds },
         attributes: ["id", "fullname", "logo"],
       });
-      universities.forEach(u => universityMap.set(u.id, u));
+      universities.forEach((u) => universityMap.set(u.id, u));
     }
 
-    items.forEach(exam => {
+    items.forEach((exam) => {
       const parsed = safeParseJSON(exam.affiliation);
-      const expanded = parsed.map(id => universityMap.get(id)).filter(Boolean);
+      const expanded = parsed
+        .map((id) => universityMap.get(id))
+        .filter(Boolean);
       exam.setDataValue("affiliation", expanded);
     });
 
@@ -306,12 +312,12 @@ class ExamService {
     };
   }
 
-  async getExam(slugs) {
+  async getExam(slug) {
     const whereCondition = {};
-    if (!isNaN(slugs) && !isNaN(parseFloat(slugs))) {
-      whereCondition[Op.or] = [{ id: parseInt(slugs, 10) }, { slugs }];
+    if (!isNaN(slug) && !isNaN(parseFloat(slug))) {
+      whereCondition[Op.or] = [{ id: parseInt(slug, 10) }, { slug }];
     } else {
-      whereCondition.slugs = slugs;
+      whereCondition.slug = slug;
     }
 
     const exam = await Exam.findOne({
@@ -345,10 +351,12 @@ class ExamService {
         where: { id: affiliationIds },
         attributes: ["id", "fullname", "logo"],
       });
-      const universityMap = new Map(universities.map(u => [u.id, u]));
-      expanded = affiliationIds.map(id => universityMap.get(id)).filter(Boolean);
+      const universityMap = new Map(universities.map((u) => [u.id, u]));
+      expanded = affiliationIds
+        .map((id) => universityMap.get(id))
+        .filter(Boolean);
     }
-    
+
     exam.setDataValue("affiliation", expanded);
     exam.setDataValue("affiliations", expanded); // Maintain plural for backward compatibility if needed
 
@@ -356,7 +364,7 @@ class ExamService {
   }
 
   async createOrUpdateExam(payload) {
-    console.log(payload, "payloadpayload")
+    console.log(payload, "payloadpayload");
     const {
       id,
       title,
@@ -380,8 +388,9 @@ class ExamService {
       exam_date,
       opening_date,
       closing_date,
-      status,
+      status: status_from_payload,
       conducted_by,
+      slug,
     } = payload;
 
     const transaction = await sequelize.transaction();
@@ -409,7 +418,7 @@ class ExamService {
         exam_date,
         opening_date,
         closing_date,
-        status,
+        status: status_from_payload,
         conducted_by,
       };
 
@@ -421,14 +430,14 @@ class ExamService {
           throw error;
         }
         // Create
-        const slugs = generateUniqueSlug(title);
-        examData.slugs = slugs;
+        examData.slug = slug || (title ? generateUniqueSlug(title) : undefined);
         const exam = await Exam.create(examData, { transaction });
         examId = exam.id;
       } else {
-
-        if (examData.title !== title) {
-          examData.slugs = generateUniqueSlug(title);
+        if (slug) {
+          examData.slug = slug;
+        } else if (examData.title !== title) {
+          examData.slug = generateUniqueSlug(title);
         }
         await Exam.update(examData, { where: { id: examId }, transaction });
       }

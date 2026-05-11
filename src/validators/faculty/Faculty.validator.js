@@ -8,7 +8,7 @@ import {
 export { paginationSchema, slugParamSchema };
 
 export const facultySlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 // Create/Update Faculty schema - adjust based on actual requirements
@@ -17,6 +17,8 @@ export const createFacultySchema = yup.object({
   description: yup.string().trim().optional(),
   featured_image: yup.string().optional(),
   author: yup.number().integer().positive().required("Author is required"),
+  slug: yup.string().trim().optional(),
+  meta_description: yup.string().trim().optional(),
 });
 
 export const updateFacultyQuerySchema = yup.object({
@@ -28,6 +30,8 @@ export const updateFacultyBodySchema = yup
     title: yup.string().trim().min(1),
     description: yup.string().trim(),
     featured_image: yup.string(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;

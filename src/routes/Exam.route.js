@@ -170,13 +170,13 @@ router.post(
 
 /**
  * @swagger
- * /exam/{slugs}:
+ * /exam/{slug}:
  *   get:
  *     summary: Get exam by slug
  *     tags: [Exams]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -187,7 +187,7 @@ router.post(
  *         description: Exam not found
  */
 router.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(examSlugParamSchema, "params"),
   ExamController.getExam
 );

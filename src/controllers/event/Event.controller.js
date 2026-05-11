@@ -36,7 +36,7 @@ class EventController {
 
   static async getEvent(req, res) {
     try {
-      const item = await eventService.getEvent(req.params.slugs);
+      const item = await eventService.getEvent(req.params.slug);
 
       return res.status(200).json({ message: "Event retrieved", item });
     } catch (error) {

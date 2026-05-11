@@ -62,6 +62,7 @@ export const createOrUpdateUniversitySchema = yup
       })
       .oneOf(["published", "draft", "archived"])
       .optional(),
+    slug: yup.string().nullable().optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && value.id) return true; // Update case

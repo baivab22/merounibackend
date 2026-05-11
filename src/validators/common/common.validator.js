@@ -28,5 +28,5 @@ export const idQuerySchema = yup.object({
 // Slug param schema
 export const slugParamSchema = yup.object({
   slug: yup.string().trim().required(),
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });

@@ -61,13 +61,13 @@ router.get(
 
 /**
  * @swagger
- * /school/{slugs}:
+ * /school/{slug}:
  *   get:
  *     summary: Get school by slug
  *     tags: [Schools]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -92,7 +92,7 @@ router.get("/boards", SchoolController.listSchoolBoards);
 router.get("/streams", SchoolController.listSchoolStreams);
 
 router.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(collegeSlugParamSchema, "params"),
   SchoolController.getSchoolBySlug,
 );

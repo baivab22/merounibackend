@@ -82,10 +82,10 @@ class SkillsBasedCourseService {
 
     async createCourse(payload) {
         const { title, ...rest } = payload;
-        const slug = generateUniqueSlug(title);
+        const slug = payload.slug || generateUniqueSlug(title);
 
         
-        return SkillsBasedCourse.create({ ...rest, title, slug });
+        return SkillsBasedCourse.create({ ...rest, title, slug, meta_description: payload.meta_description });
     }
 
     async updateCourse(id, payload) {
@@ -101,7 +101,17 @@ class SkillsBasedCourseService {
 
         if (title && title !== course.title) {
             updateData.title = title;
-            updateData.slug = generateUniqueSlug(title);
+            if (!payload.slug) {
+                updateData.slug = generateUniqueSlug(title);
+            }
+        }
+
+        if (payload.slug) {
+            updateData.slug = payload.slug;
+        }
+
+        if (payload.meta_description !== undefined) {
+            updateData.meta_description = payload.meta_description;
         }
 
         await course.update(updateData);

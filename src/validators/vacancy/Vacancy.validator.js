@@ -21,7 +21,7 @@ export const paginationSchema = yup.object({
 });
 
 export const slugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const createVacancySchema = yup
@@ -40,6 +40,8 @@ export const createVacancySchema = yup
       .nullable()
       .transform((value) => (value === "" ? null : value)),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
   })
   .required();
 
@@ -63,6 +65,8 @@ export const updateVacancyBodySchema = yup
       .nullable()
       .transform((value) => (value === "" ? null : value)),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
   })
   .test("at-least-one", "At least one field must be provided", (value) => {
     return value && Object.keys(value).length > 0;

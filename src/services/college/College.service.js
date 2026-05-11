@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { generateUniqueSlug, getUniqueSlug } from "../../utils/SlugHelper.js";
 import { safeParseJSON } from "../../utils/JsonHelper.js";
 
 import { sequelize } from "../../config/database.config.js";
@@ -68,6 +68,9 @@ class CollegeService {
         stream_ids,
         status,
         is_referable,
+        slug,
+        meta_description,
+        metaDescription,
       } = payload;
 
       console.log(programs, "programsprogramsprograms");
@@ -100,7 +103,7 @@ class CollegeService {
           throw error;
         }
 
-        const slugs = generateUniqueSlug(collegeName);
+        const finalSlug = await getUniqueSlug(College, collegeName, null, slug);
 
         const maxOrder = await College.max("order_no_for_website", {
           transaction,
@@ -110,7 +113,7 @@ class CollegeService {
         const newCollege = await College.create(
           {
             name: collegeName,
-            slugs,
+            slug: finalSlug,
             institute_type,
             institute_level,
             author_id,
@@ -127,6 +130,8 @@ class CollegeService {
             order_no_for_website: nextOrder,
             status: status || "published",
             is_referable: is_referable ?? false,
+            slug: finalSlug,
+            metaDescription: metaDescription || meta_description,
           },
           { transaction },
         );
@@ -150,17 +155,16 @@ class CollegeService {
             is_referable !== undefined
               ? is_referable
               : existingCollege.is_referable,
+          metaDescription: metaDescription || meta_description,
         };
 
-        // Only update name and slugs if name has changed
-        if (name && existingCollege && name !== existingCollege.name) {
-          updateData.name = name;
-          updateData.slugs = generateUniqueSlug(name);
-        } else if (name && !existingCollege) {
-          // This case handles if collegeId was provided but not found in DB
-          updateData.name = name;
-          updateData.slugs = generateUniqueSlug(name);
-        }
+        // Ensure unique slug for update
+        updateData.slug = await getUniqueSlug(
+          College,
+          collegeName,
+          collegeId,
+          slug,
+        );
 
         await College.update(updateData, {
           where: { id: collegeId },
@@ -450,7 +454,7 @@ class CollegeService {
     const collegeInclude = {
       model: College,
       as: "collegeAdmissionCollege",
-      attributes: ["name", "slugs", "featured_img", "id"],
+      attributes: ["name", "slug", "featured_img", "id"],
       include: [],
     };
 
@@ -459,7 +463,7 @@ class CollegeService {
       if (!isNaN(university_id)) {
         universityWhere.id = parseInt(university_id, 10);
       } else {
-        universityWhere.slugs = university_id;
+        universityWhere.slug = university_id;
       }
       collegeInclude.include.push({
         model: University,
@@ -473,7 +477,7 @@ class CollegeService {
       collegeInclude.include.push({
         model: University,
         as: "universities",
-        attributes: ["fullname", "slugs", "id"],
+        attributes: ["fullname", "slug", "id"],
         through: { attributes: [] },
       });
     }
@@ -499,7 +503,7 @@ class CollegeService {
       if (level_id) {
         const levelWhere = {};
         if (!isNaN(level_id)) levelWhere.id = parseInt(level_id, 10);
-        else levelWhere.slugs = level_id;
+        else levelWhere.slug = level_id;
         programInclude.push({
           model: Level,
           as: "programlevel",
@@ -565,12 +569,12 @@ class CollegeService {
     const programIdsToFetch = rawItems.map((item) => item.program_id);
     const programs = await Program.findAll({
       where: { id: { [Op.in]: programIdsToFetch } },
-      attributes: ["id", "title", "slugs"],
+      attributes: ["id", "title", "slug"],
       include: [
         {
           model: Level,
           as: "programlevel",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
         },
       ],
     });
@@ -607,12 +611,12 @@ class CollegeService {
         {
           model: College,
           as: "collegeAdmissionCollege",
-          attributes: ["name", "slugs", "featured_img"],
+          attributes: ["name", "slug", "featured_img"],
           include: [
             {
               model: University,
               as: "universities",
-              attributes: ["fullname", "slugs"],
+              attributes: ["fullname", "slug"],
             },
           ],
         },
@@ -627,14 +631,14 @@ class CollegeService {
 
     const program = await Program.findOne({
       where: { id: admission.program_id },
-      attributes: ["id", "title", "slugs"],
+      attributes: ["id", "title", "slug"],
       include: [
         {
           model: Level,
           as: "programlevel",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
         },
-        // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slugs"] },
+        // { model: FacultyModel, as: "programfaculty", attributes: ["id", "title", "slug"] },
       ],
     });
 
@@ -780,7 +784,7 @@ class CollegeService {
             {
               model: Program,
               as: "program",
-              attributes: ["id", "title", "slugs"],
+              attributes: ["id", "title", "slug"],
             },
           ],
           required: !!programIdFilter,
@@ -793,7 +797,7 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-          attributes: ["id", "fullname", "slugs"],
+          attributes: ["id", "fullname", "slug"],
           required: !!universityIdFilter,
           where: universityIdFilter ? { id: universityIdFilter } : undefined,
           through: { attributes: [] },
@@ -868,9 +872,9 @@ class CollegeService {
     };
   }
 
-  async getCollegeBySlug(slugs) {
+  async getCollegeBySlug(slug) {
     const college = await College.findOne({
-      where: { slugs },
+      where: { slug },
       attributes: {
         exclude: ["author_id"],
       },
@@ -901,7 +905,7 @@ class CollegeService {
             {
               model: Program,
               as: "program",
-              attributes: ["id", "title", "slugs"],
+              attributes: ["id", "title", "slug"],
             },
           ],
         },
@@ -928,7 +932,7 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-          attributes: ["fullname", "slugs", "id"],
+          attributes: ["fullname", "slug", "id"],
           through: { attributes: [] },
         },
         {
@@ -1089,7 +1093,7 @@ class CollegeService {
         {
           model: Program,
           as: "programs",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
           through: { attributes: [] },
         },
         {
@@ -1117,7 +1121,7 @@ class CollegeService {
           model: University,
           as: "universities",
 
-          attributes: ["fullname", "slugs"],
+          attributes: ["fullname", "slug"],
         },
         {
           model: UserModel,
@@ -1272,6 +1276,8 @@ class CollegeService {
       description,
       pdf_file,
       status,
+      slug,
+      meta_description,
     } = payload;
 
     const final_program_id = program_id || course_id;
@@ -1298,6 +1304,11 @@ class CollegeService {
         fee_details,
         description,
         pdf_file,
+        slug: slug || admission.slug,
+        meta_description:
+          meta_description !== undefined
+            ? meta_description
+            : admission.meta_description,
         ...(resolvedStatus !== null ? { status: resolvedStatus } : {}),
       });
     } else {
@@ -1309,7 +1320,9 @@ class CollegeService {
         fee_details,
         description,
         pdf_file,
-        status: resolvedStatus ?? "published",
+        slug: slug,
+        meta_description,
+        status: resolvedStatus || "published",
       });
       isNew = true;
     }
@@ -1363,7 +1376,7 @@ class CollegeService {
         attributes: [
           "id",
           "name",
-          "slugs",
+          "slug",
           "college_logo",
           "featured_img",
           "order_no_for_website",
@@ -1379,7 +1392,7 @@ class CollegeService {
           {
             model: University,
             as: "universities",
-            attributes: ["id", "fullname", "slugs"],
+            attributes: ["id", "fullname", "slug"],
             through: { attributes: [] },
           },
           {
@@ -1434,7 +1447,7 @@ class CollegeService {
         {
           model: Program,
           as: "programs",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
           through: { attributes: [] },
         },
       ],

@@ -35,9 +35,9 @@ class LevelService {
     };
   }
 
-  async getLevel(slugs) {
+  async getLevel(slug) {
     const level = await Level.findOne({
-      where: { slugs },
+      where: { slug },
     });
     if (!level) {
       const error = new Error("Level not found");
@@ -48,9 +48,14 @@ class LevelService {
     return level;
   }
 
-  async createLevel({ title, author }) {
-    const slugs = slug(title);
-    return Level.create({ title, slugs, author });
+  async createLevel({ title, author, slug: customSlug, meta_description }) {
+    const generatedSlug = customSlug || slug(title);
+    return Level.create({
+      title,
+      slug: generatedSlug,
+      author,
+      meta_description,
+    });
   }
 
   async updateLevel(levelId, data) {
@@ -62,12 +67,14 @@ class LevelService {
       throw error;
     }
 
-    const [updatedCount] = await Level.update(
-      { ...data },
-      {
-        where: { id: levelId },
-      }
-    );
+    const updateData = { ...data };
+    if (data.slug) {
+      updateData.slug = data.slug;
+    }
+
+    const [updatedCount] = await Level.update(updateData, {
+      where: { id: levelId },
+    });
 
     if (updatedCount === 0) {
       const error = new Error("Level already up to date");

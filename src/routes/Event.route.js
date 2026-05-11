@@ -137,13 +137,13 @@ router.get(
 
 /**
  * @swagger
- * /event/{slugs}:
+ * /event/{slug}:
  *   get:
  *     summary: Get event by slug
  *     tags: [Events]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -154,7 +154,7 @@ router.get(
  *         description: Event not found
  */
 router.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(eventSlugParamSchema, "params"),
   EventController.getEvent
 );

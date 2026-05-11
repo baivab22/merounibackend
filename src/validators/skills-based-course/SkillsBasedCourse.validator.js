@@ -18,6 +18,8 @@ export const createSkillsBasedCourseSchema = yup.object({
     start_date: yup.date().optional(),
     class_days: yup.string().optional(),
     seats_available: yup.number().integer().min(0).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
 });
 
 // Update SkillsBasedCourse schema
@@ -38,4 +40,6 @@ export const updateSkillsBasedCourseSchema = yup.object({
     start_date: yup.date().optional(),
     class_days: yup.string().optional(),
     seats_available: yup.number().integer().min(0).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
 });

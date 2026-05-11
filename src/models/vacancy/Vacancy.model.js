@@ -2,7 +2,7 @@ import { Model, DataTypes } from "sequelize";
 
 import { sequelize } from "../../config/database.config.js";
 
-class VacancyModel extends Model { }
+class VacancyModel extends Model {}
 
 VacancyModel.init(
   {
@@ -16,7 +16,7 @@ VacancyModel.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: true,
       unique: true,
@@ -56,6 +56,10 @@ VacancyModel.init(
       allowNull: false,
       defaultValue: "published",
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,
@@ -64,7 +68,7 @@ VacancyModel.init(
     freezeTableName: true,
     underscored: false,
     timestamps: true,
-  }
+  },
 );
 
 export default VacancyModel;

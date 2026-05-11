@@ -187,7 +187,7 @@ class ReferralService {
         {
           model: College,
           as: "referralCollege",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slug"],
         },
         {
           model: Program,
@@ -231,7 +231,7 @@ class ReferralService {
         {
           model: College,
           as: "referralCollege",
-          attributes: ["name", "slugs", "college_logo"],
+          attributes: ["name", "slug", "college_logo"],
           include: [
             {
               model: CollegeAddress,
@@ -272,7 +272,7 @@ class ReferralService {
         {
           model: College,
           as: "referralCollege",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slug"],
         },
         {
           model: Program,
@@ -309,7 +309,7 @@ class ReferralService {
         {
           model: College,
           as: "referralCollege",
-          attributes: ["name", "slugs"],
+          attributes: ["name", "slug"],
         },
         {
           model: Program,

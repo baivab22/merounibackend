@@ -55,13 +55,13 @@ route.get(
 
 /**
  * @swagger
- * /contact-us/{slugs}:
+ * /contact-us/{slug}:
  *   get:
  *     summary: Get contact submission by email
  *     tags: [Contact]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         schema:
  *           type: string
  *       - in: query
@@ -77,7 +77,7 @@ route.get(
  *         description: Not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(contactEmailQuerySchema, "query"),
   ContactController.getContact
 );

@@ -53,8 +53,8 @@ class TagService {
   }
 
   async createTag({ title, author }) {
-    const slugs = slug(title);
-    return Tag.create({ title, slugs, author });
+    const generatedSlug = slug(title);
+    return Tag.create({ title, slug: generatedSlug, author });
   }
 
   async updateTag(tag_id, data) {

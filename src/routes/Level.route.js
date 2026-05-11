@@ -52,13 +52,13 @@ route.get(
 
 /**
  * @swagger
- * /level/{slugs}:
+ * /level/{slug}:
  *   get:
  *     summary: Get level by slug
  *     tags: [Levels]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -69,7 +69,7 @@ route.get(
  *         description: Level not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(levelSlugParamSchema, "params"),
   LevelController.getLevel
 );

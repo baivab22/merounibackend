@@ -17,7 +17,7 @@ Tag.init(
       allowNull: false,
       unique: true,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -37,7 +37,7 @@ Tag.init(
     modelName: "tags",
     freezeTableName: true,
     timestamps: true,
-  }
+  },
 );
 
 export default Tag;

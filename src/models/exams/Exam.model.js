@@ -28,7 +28,7 @@ Exam.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,

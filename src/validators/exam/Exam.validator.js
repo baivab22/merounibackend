@@ -8,7 +8,7 @@ import {
 export { paginationSchema, slugParamSchema, idParamSchema };
 
 export const examSlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const examIdParamSchema = yup.object({
@@ -22,10 +22,7 @@ export const listExamsSchema = paginationSchema.shape({
   isOpen: yup.boolean().optional(),
   examType: yup.string().optional(),
   isUpcoming: yup.boolean().optional(),
-  sortBy: yup
-    .string()
-    .oneOf(["title", "createdAt"])
-    .default("createdAt"),
+  sortBy: yup.string().oneOf(["title", "createdAt"]).default("createdAt"),
   sortOrder: yup
     .string()
     .oneOf(["ASC", "DESC", "asc", "desc"])
@@ -42,8 +39,11 @@ export const createOrUpdateExamSchema = yup
     description: yup.string().nullable().optional(),
     meta_description: yup.string().nullable().optional(),
     level_id: yup.number().integer().required("Level ID is required"),
-    category_id: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    category_id: yup
+      .number()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value,
+      )
       .nullable()
       .optional(),
     affiliation: yup
@@ -64,42 +64,71 @@ export const createOrUpdateExamSchema = yup
 
     // Flattened fields
     exam_type: yup.string().nullable().optional(),
-    full_marks: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    full_marks: yup
+      .number()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value,
+      )
       .nullable()
       .optional(),
-    pass_marks: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    pass_marks: yup
+      .number()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value,
+      )
       .nullable()
       .optional(),
-    questions_count: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    questions_count: yup
+      .number()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value,
+      )
       .nullable()
       .optional(),
     question_type: yup.string().nullable().optional(),
     duration: yup.string().nullable().optional(),
 
-    normal_fee: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    normal_fee: yup
+      .number()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value,
+      )
       .nullable()
       .optional(),
-    late_fee: yup.number()
-      .transform((value, originalValue) => originalValue === "" ? null : value)
+    late_fee: yup
+      .number()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value,
+      )
       .nullable()
       .optional(),
-    exam_date: yup.string()
-      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+    exam_date: yup
+      .string()
+      .transform((value) =>
+        value === "" || value === "Invalid date" ? null : value,
+      )
       .nullable()
       .optional(),
-    opening_date: yup.string()
-      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+    opening_date: yup
+      .string()
+      .transform((value) =>
+        value === "" || value === "Invalid date" ? null : value,
+      )
       .nullable()
       .optional(),
-    closing_date: yup.string()
-      .transform((value) => (value === "" || value === "Invalid date" ? null : value))
+    closing_date: yup
+      .string()
+      .transform((value) =>
+        value === "" || value === "Invalid date" ? null : value,
+      )
       .nullable()
       .optional(),
-    status: yup.string().oneOf(["published", "draft"]).default("published").optional(),
+    status: yup
+      .string()
+      .oneOf(["published", "draft"])
+      .default("published")
+      .optional(),
+    slug: yup.string().nullable().optional(),
   })
   .test("has-fields", "At least one field must be provided", (value) => {
     if (value && (value.title || value.id)) return true;

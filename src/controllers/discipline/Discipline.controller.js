@@ -34,7 +34,7 @@ class DisciplineController {
     static async getDisciplineBySlug(req, res) {
         try {
             const discipline = await disciplineService.getDisciplineBySlug(
-                req.params.slugs
+                req.params.slug
             );
             return res.status(200).json(discipline);
         } catch (error) {

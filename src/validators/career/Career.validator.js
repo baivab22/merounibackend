@@ -15,7 +15,7 @@ export const paginationSchema = yup.object({
 });
 
 export const slugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const createCareerSchema = yup

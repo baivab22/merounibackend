@@ -1,0 +1,16 @@
+import { sequelize } from "./src/config/database.config.js";
+
+async function check() {
+  try {
+    const [results] = await sequelize.query(
+      "SELECT id, name, slug FROM colleges_schools LIMIT 5",
+    );
+    console.log(JSON.stringify(results, null, 2));
+  } catch (e) {
+    console.error(e);
+  } finally {
+    process.exit();
+  }
+}
+
+check();

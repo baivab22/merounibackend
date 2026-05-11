@@ -23,7 +23,7 @@ class CategoryController {
 
   static async getCategory(req, res) {
     try {
-      const category = await categoryService.getCategory(req.params.slugs);
+      const category = await categoryService.getCategory(req.params.slug);
       return res.status(200).json({ message: "Category retrieved", category });
     } catch (error) {
       console.error("Error getting category:", error);

@@ -62,13 +62,13 @@ route.get(
 
 /**
  * @swagger
- * /course/{slugs}:
+ * /course/{slug}:
  *   get:
  *     summary: Get course by slug
  *     tags: [Courses]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -79,7 +79,7 @@ route.get(
  *         description: Course not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(courseSlugParamSchema, "params"),
   CourseController.getCourse
 );

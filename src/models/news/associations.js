@@ -1,7 +1,10 @@
+"use strict";
+
 import News from "./News.model.js";
 import Category from "../category/Category.model.js";
 import User from "../users/User.model.js";
 import College from "../college/College.model.js";
+import Consultancy from "../consultancy/Consultancy.model.js";
 
 // Define associations
 News.belongsTo(User, { foreignKey: "author", as: "newsAuthor" });
@@ -13,4 +16,13 @@ Category.hasMany(News, { foreignKey: "category", as: "news" });
 News.belongsTo(College, { foreignKey: "college_id", as: "newsCollege" });
 College.hasMany(News, { foreignKey: "college_id", as: "news" });
 
-export { News, Category, User, College };
+News.belongsTo(College, { foreignKey: "school_id", as: "newsSchool" });
+College.hasMany(News, { foreignKey: "school_id", as: "news_school" });
+
+News.belongsTo(Consultancy, {
+  foreignKey: "consultancy_id",
+  as: "newsConsultancy",
+});
+Consultancy.hasMany(News, { foreignKey: "consultancy_id", as: "news" });
+
+export { News, Category, User, College, Consultancy };

@@ -16,7 +16,7 @@ Faculty.init(
       allowNull: false,
       unique: true,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -45,7 +45,7 @@ Faculty.init(
     tableName: "faculty",
     freezeTableName: true,
     timestamps: true,
-  }
+  },
 );
 
 export default Faculty;

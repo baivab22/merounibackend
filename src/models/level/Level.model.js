@@ -17,7 +17,7 @@ Level.init(
       allowNull: false,
       unique: true,
     },
-    slugs: {
+    slug: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -31,13 +31,17 @@ Level.init(
       },
       onDelete: "CASCADE",
     },
+    meta_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,
     modelName: "levels",
     freezeTableName: true,
     timestamps: true,
-  }
+  },
 );
 
 export default Level;

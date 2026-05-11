@@ -21,7 +21,7 @@ class CourseController {
 
   static async getCourse(req, res) {
     try {
-      const course = await courseService.getCourse(req.params.slugs);
+      const course = await courseService.getCourse(req.params.slug);
       return res.status(200).json(course);
     } catch (error) {
       console.error("Error getting course by ID:", error);

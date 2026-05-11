@@ -99,7 +99,7 @@ class ScholarshipApplicationService {
             {
               model: Category,
               as: "scholarshipCategory",
-              attributes: ["id", "title", "slugs"],
+              attributes: ["id", "title", "slug"],
             },
           ],
         },
@@ -148,7 +148,7 @@ class ScholarshipApplicationService {
             {
               model: Category,
               as: "scholarshipCategory",
-              attributes: ["id", "title", "slugs"],
+              attributes: ["id", "title", "slug"],
             },
           ],
         },

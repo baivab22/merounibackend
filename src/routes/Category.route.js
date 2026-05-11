@@ -55,13 +55,13 @@ route.get(
 
 /**
  * @swagger
- * /category/{slugs}:
+ * /category/{slug}:
  *   get:
  *     summary: Get category by slug
  *     tags: [Categories]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -72,7 +72,7 @@ route.get(
  *         description: Category not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(categorySlugParamSchema, "params"),
   CategoryController.getCategory
 );

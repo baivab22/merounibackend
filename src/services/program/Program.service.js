@@ -17,7 +17,7 @@ import {
   University,
   UniversityProgram,
 } from "../../models/university/University.model.js";
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { generateUniqueSlug, getUniqueSlug } from "../../utils/SlugHelper.js";
 import Stream from "../../models/stream/Stream.model.js";
 
 class ProgramService {
@@ -42,7 +42,7 @@ class ProgramService {
     const universityInclude = {
       model: University,
       as: "universities",
-      attributes: ["id", "fullname", "slugs"],
+      attributes: ["id", "fullname", "slug"],
       through: { attributes: [] },
       required: false,
     };
@@ -78,7 +78,7 @@ class ProgramService {
       {
         model: Level,
         as: "programlevel",
-        attributes: ["title", "slugs", "id"],
+        attributes: ["title", "slug", "id"],
       },
       degreeInclude,
       universityInclude,
@@ -175,7 +175,7 @@ class ProgramService {
     const universityInclude = {
       model: University,
       as: "universities",
-      attributes: ["id", "fullname", "slugs"],
+      attributes: ["id", "fullname", "slug"],
       through: { attributes: [] },
       required: false,
     };
@@ -211,7 +211,7 @@ class ProgramService {
       {
         model: Level,
         as: "programlevel",
-        attributes: ["title", "slugs", "id"],
+        attributes: ["title", "slug", "id"],
       },
       degreeInclude,
       universityInclude,
@@ -280,9 +280,9 @@ class ProgramService {
     };
   }
 
-  async getProgram(slugs) {
+  async getProgram(slug) {
     const program = await Program.findOne({
-      where: { slugs },
+      where: { slug },
       attributes: {
         exclude: ["author", "level_id", "scholarship_id", "exam_id"],
       },
@@ -294,14 +294,14 @@ class ProgramService {
             {
               model: Course,
               as: "programCourse",
-              attributes: ["id", "title", "slugs", "description", "credits"],
+              attributes: ["id", "title", "slug", "description", "credits"],
             },
           ],
         },
         {
           model: Level,
           as: "programlevel",
-          attributes: ["title", "slugs", "id"],
+          attributes: ["title", "slug", "id"],
         },
         {
           model: Degree,
@@ -313,12 +313,12 @@ class ProgramService {
         {
           model: Scholarship,
           as: "programscholarship",
-          attributes: ["name", "slugs", "id"],
+          attributes: ["name", "slug", "id"],
         },
         {
           model: Exam,
           as: "programexam",
-          attributes: ["title", "slugs", "id"],
+          attributes: ["title", "slug", "id"],
         },
         {
           model: UserModel,
@@ -328,7 +328,7 @@ class ProgramService {
         {
           model: College,
           as: "colleges",
-          attributes: ["name", "slugs", "id"],
+          attributes: ["name", "slug", "id"],
         },
         {
           model: CollegeAddress,
@@ -338,7 +338,7 @@ class ProgramService {
         {
           model: University,
           as: "universities",
-          attributes: ["id", "fullname", "slugs", "logo"],
+          attributes: ["id", "fullname", "slug", "logo"],
           through: { attributes: [] },
         },
       ],
@@ -381,6 +381,8 @@ class ProgramService {
         universities,
         stream_id,
         status,
+        slug,
+        meta_description,
       } = payload;
 
       let programId = id;
@@ -406,7 +408,7 @@ class ProgramService {
           {
             title,
             code,
-            slugs: generateUniqueSlug(title),
+            slug: await getUniqueSlug(Program, title, null, slug),
             author,
             duration,
             credits,
@@ -456,6 +458,11 @@ class ProgramService {
             exam_id: exam_id || null,
             stream_id: stream_id || null,
             status: status || existingProgram.status,
+            slug: await getUniqueSlug(Program, title || existingProgram.title, programId, slug),
+            meta_description:
+              meta_description !== undefined
+                ? meta_description
+                : existingProgram.meta_description,
           },
           { where: { id: programId }, transaction },
         );

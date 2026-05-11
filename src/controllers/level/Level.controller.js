@@ -23,7 +23,7 @@ class LevelController {
 
   static async getLevel(req, res) {
     try {
-      const item = await levelService.getLevel(req.params.slugs);
+      const item = await levelService.getLevel(req.params.slug);
       return res.status(200).json({ message: "Level retrieved", item });
     } catch (error) {
       console.error("Error getting level:", error);

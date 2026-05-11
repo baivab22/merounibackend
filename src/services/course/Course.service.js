@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
-import slug from "slug";
+import slugify from "slug";
+import { getUniqueSlug } from "../../utils/SlugHelper.js";
 
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
@@ -67,7 +68,7 @@ class CourseService {
         where: {
           [Op.or]: [
             { title: { [Op.like]: `%${disciplineFilter}%` } },
-            { slugs: disciplineFilter },
+            { slug: disciplineFilter },
           ],
         },
       });
@@ -75,7 +76,7 @@ class CourseService {
       include.push({
         model: FacultyModel,
         as: "coursefaculty",
-        attributes: ["title", "slugs"],
+        attributes: ["title", "slug"],
       });
     }
 
@@ -120,9 +121,9 @@ class CourseService {
     };
   }
 
-  async getCourse(slugs) {
+  async getCourse(slug) {
     const course = await Course.findOne({
-      where: { slugs },
+      where: { slug },
       attributes: {
         exclude: ["authorId", "facultyId"],
       },
@@ -135,7 +136,7 @@ class CourseService {
         {
           model: FacultyModel,
           as: "coursefaculty",
-          attributes: ["title", "slugs"],
+          attributes: ["title", "slug"],
         },
       ],
     });
@@ -150,10 +151,7 @@ class CourseService {
   }
 
   async createOrUpdateCourse(payload) {
-    const { id, title, ...rest } = payload;
-
-    // Generate slug from title if provided, otherwise throw error
-    const slugs = title ? slug(title) : undefined;
+    const { id, title, slug, meta_description, ...rest } = payload;
 
     if (!id) {
       if (!title) {
@@ -161,7 +159,13 @@ class CourseService {
         error.status = 400;
         throw error;
       }
-      return Course.create({ ...rest, title, slugs });
+      const finalSlug = await getUniqueSlug(Course, title, null, slug);
+      return Course.create({
+        ...rest,
+        title,
+        slug: finalSlug,
+        metaDescription: meta_description || rest.metaDescription,
+      });
     }
 
     const course = await Course.findByPk(id);
@@ -171,10 +175,21 @@ class CourseService {
       throw error;
     }
 
-    // Only update title and slugs if provided
+    const finalSlug = await getUniqueSlug(
+      Course,
+      title || course.title,
+      id,
+      slug,
+    );
+
+    // Only update title and slug if provided
     const updateData = { ...rest };
     if (title) {
       updateData.title = title;
+    }
+    updateData.slug = finalSlug;
+    if (meta_description !== undefined) {
+      updateData.metaDescription = meta_description;
     }
 
     await Course.update(updateData, { where: { id } });

@@ -1,7 +1,10 @@
 import express from "express";
 
 import CollegeController from "../controllers/college/College.controller.js";
-import { authenticateUser, optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
+import {
+  authenticateUser,
+  optionalAuthenticateUser,
+} from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
@@ -12,11 +15,10 @@ import {
   createOrUpdateAdmissionSchema,
   createOrUpdateCollegeSchema,
   updateCollegeOrderSchema,
-  updateAdmissionOrderSchema
+  updateAdmissionOrderSchema,
 } from "../validators/college/College.validator.js";
 
 const router = express.Router();
-
 
 /**
  * @swagger
@@ -58,7 +60,7 @@ router.post(
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createOrUpdateCollegeSchema, "body"),
-  CollegeController.createOrUpdateCollege
+  CollegeController.createOrUpdateCollege,
 );
 
 /**
@@ -87,7 +89,7 @@ router.post(
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createOrUpdateCollegeSchema, "body"),
-  CollegeController.saveAsDraft
+  CollegeController.saveAsDraft,
 );
 
 /**
@@ -114,7 +116,7 @@ router.post(
 router.get(
   "/admission",
   requestValidator(admissionPaginationSchema, "query"),
-  CollegeController.listAdmissions
+  CollegeController.listAdmissions,
 );
 
 /**
@@ -135,10 +137,7 @@ router.get(
  *       404:
  *         description: Admission detail not found
  */
-router.get(
-  "/admission/:id",
-  CollegeController.getAdmissionById
-);
+router.get("/admission/:id", CollegeController.getAdmissionById);
 
 /**
  * @swagger
@@ -166,7 +165,7 @@ router.post(
   authenticateUser,
   authorizeRole(["admin", "editor", "agent"]),
   requestValidator(createOrUpdateAdmissionSchema, "body"),
-  CollegeController.createOrUpdateAdmission
+  CollegeController.createOrUpdateAdmission,
 );
 
 /**
@@ -209,7 +208,7 @@ router.patch(
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidator(updateAdmissionOrderSchema, "body"),
-  CollegeController.updateAdmissionOrder
+  CollegeController.updateAdmissionOrder,
 );
 
 /**
@@ -235,7 +234,7 @@ router.delete(
   "/admission/:id",
   authenticateUser,
   authorizeRole(["admin", "editor"]),
-  CollegeController.deleteAdmission
+  CollegeController.deleteAdmission,
 );
 
 /**
@@ -276,7 +275,7 @@ router.get(
   "/",
   optionalAuthenticateUser,
   requestValidator(collegePaginationSchema, "query"),
-  CollegeController.listColleges
+  CollegeController.listColleges,
 );
 
 /**
@@ -298,15 +297,14 @@ router.post(
   "/filter",
   optionalAuthenticateUser,
   requestValidator(collegePaginationSchema, "body"),
-  CollegeController.listColleges
+  CollegeController.listColleges,
 );
-
 
 /**
  * @swagger
  * /college/featured:
  *   get:
- *     summary: List featured colleges (with name, slugs, and programs)
+ *     summary: List featured colleges (with name, slug, and programs)
  *     tags: [Colleges]
  *     parameters:
  *       - in: query
@@ -328,18 +326,18 @@ router.post(
 router.get(
   "/featured",
   requestValidator(collegePaginationSchema, "query"),
-  CollegeController.getFeaturedColleges
+  CollegeController.getFeaturedColleges,
 );
 
 /**
  * @swagger
- * /college/{slugs}:
+ * /college/{slug}:
  *   get:
  *     summary: Get college by slug
  *     tags: [Colleges]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -350,9 +348,9 @@ router.get(
  *         description: College not found
  */
 router.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(collegeSlugParamSchema, "params"),
-  CollegeController.getCollegeBySlug
+  CollegeController.getCollegeBySlug,
 );
 
 /**
@@ -376,7 +374,7 @@ router.get(
 router.get(
   "/:id/programs",
   requestValidator(collegeIdParamSchema, "params"),
-  CollegeController.listProgramsByCollegeId
+  CollegeController.listProgramsByCollegeId,
 );
 
 /**
@@ -409,7 +407,7 @@ router.delete(
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidator(collegeIdParamSchema, "params"),
-  CollegeController.deleteCollege
+  CollegeController.deleteCollege,
 );
 
 /**
@@ -449,7 +447,7 @@ router.patch(
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidator(collegeIdParamSchema, "params"),
-  CollegeController.updateReferableStatus
+  CollegeController.updateReferableStatus,
 );
 
 /**
@@ -475,7 +473,7 @@ router.get(
   "/institution/my-college",
   authenticateUser,
   authorizeRole(["institution"]),
-  CollegeController.getCollegeByInstitutionUser
+  CollegeController.getCollegeByInstitutionUser,
 );
 
 /**
@@ -511,7 +509,7 @@ router.put(
   authenticateUser,
   authorizeRole(["institution"]),
   requestValidator(createOrUpdateCollegeSchema, "body"),
-  CollegeController.updateCollegeByInstitutionUser
+  CollegeController.updateCollegeByInstitutionUser,
 );
 
 /**
@@ -550,7 +548,7 @@ router.put(
   authenticateUser,
   authorizeRole(["admin", "editor"]),
   requestValidator(updateCollegeOrderSchema, "body"),
-  CollegeController.updateCollegeOrder
+  CollegeController.updateCollegeOrder,
 );
 
 export default router;

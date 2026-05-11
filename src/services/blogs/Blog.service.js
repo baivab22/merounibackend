@@ -4,7 +4,7 @@ import Blog from "../../models/blogs/Blog.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
 import Tag from "../../models/tags/Tag.model.js";
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { getUniqueSlug } from "../../utils/SlugHelper.js";
 
 class BlogService {
   async listBlogs(query = {}) {
@@ -39,7 +39,7 @@ class BlogService {
         {
           model: Category,
           as: "blogCategory",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
         },
         {
           model: UserModel,
@@ -53,30 +53,30 @@ class BlogService {
     const itemsWithTags = await Promise.all(
       items.map(async (blog) => {
         const blogData = blog.toJSON();
-        
+
         // Parse tags if they're stored as a JSON string
         let tagIds = blogData.tags;
-        if (typeof tagIds === 'string') {
+        if (typeof tagIds === "string") {
           try {
             tagIds = JSON.parse(tagIds);
           } catch (e) {
             tagIds = [];
           }
         }
-        
+
         // Fetch tag details if we have tag IDs
         if (tagIds && Array.isArray(tagIds) && tagIds.length > 0) {
           const tagDetails = await Tag.findAll({
             where: { id: tagIds },
             attributes: ["id", "title"],
           });
-          blogData.tags = tagDetails.map(tag => tag.toJSON());
+          blogData.tags = tagDetails.map((tag) => tag.toJSON());
         } else {
           blogData.tags = [];
         }
-        
+
         return blogData;
-      })
+      }),
     );
 
     return {
@@ -107,7 +107,7 @@ class BlogService {
         {
           model: Category,
           as: "blogCategory",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
         },
         {
           model: UserModel,
@@ -136,7 +136,7 @@ class BlogService {
         {
           model: Category,
           as: "blogCategory",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
         },
         {
           model: UserModel,
@@ -151,9 +151,10 @@ class BlogService {
   }
 
   async createBlog(data) {
+    const slug = await getUniqueSlug(Blog, data.title, null, data.slug);
     return Blog.create({
       ...data,
-      slug: generateUniqueSlug(data.title),
+      slug,
     });
   }
 
@@ -165,9 +166,12 @@ class BlogService {
       throw error;
     }
 
-    if (blog.title !== data.title) {
-      data.slug = generateUniqueSlug(data.title);
-    }
+    data.slug = await getUniqueSlug(
+      Blog,
+      data.title || blog.title,
+      id,
+      data.slug,
+    );
 
     const [updatedRows] = await Blog.update(
       {

@@ -8,7 +8,7 @@ import {
 export { paginationSchema, slugParamSchema, idParamSchema };
 
 export const programSlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const programIdParamSchema = yup.object({
@@ -35,6 +35,8 @@ export const createOrUpdateProgramSchema = yup
     eligibility_criteria: yup.string().optional(),
     fee: yup.string().optional(),
     status: yup.string().oneOf(["published", "draft"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
     scholarship_id: yup
       .number()
       .integer()
@@ -139,5 +141,7 @@ export const saveAsDraftProgramSchema = yup
     careers: yup.string().optional(),
     exam_id: yup.number().integer().positive().nullable().optional(),
     status: yup.string().oneOf(["published", "draft"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
   })
   .required();

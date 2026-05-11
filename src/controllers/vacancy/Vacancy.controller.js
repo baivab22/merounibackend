@@ -24,7 +24,7 @@ class VacancyController {
 
   static async getVacancyBySlug(req, res) {
     try {
-      const vacancy = await vacancyService.getVacancyBySlug(req.params.slugs);
+      const vacancy = await vacancyService.getVacancyBySlug(req.params.slug);
 
       return res.status(200).json({
         message: "success",

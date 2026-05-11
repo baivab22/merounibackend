@@ -150,13 +150,13 @@ route.get(
 
 /**
  * @swagger
- * /career/{slugs}:
+ * /career/{slug}:
  *   get:
  *     summary: Get career post by slug
  *     tags: [Careers]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -180,7 +180,7 @@ route.get(
  *         description: Server error
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   optionalAuthenticateUser,
   requestValidator(slugParamSchema, "params"),
   CareerController.getCareerBySlug

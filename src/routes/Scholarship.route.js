@@ -81,13 +81,13 @@ route.get(
 
 /**
  * @swagger
- * /scholarship/detail/{slugs}:
+ * /scholarship/detail/{slug}:
  *   get:
  *     summary: Get scholarship by slug
  *     tags: [Scholarships]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -98,7 +98,7 @@ route.get(
  *         description: Scholarship not found
  */
 route.get(
-  "/detail/:slugs",
+  "/detail/:slug",
   ScholarshipController.getScholarshipBySlug
 );
 

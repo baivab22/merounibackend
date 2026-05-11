@@ -40,6 +40,24 @@ News.init(
       },
       onDelete: "SET NULL",
     },
+    school_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "colleges_schools",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+    },
+    consultancy_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "consultancies",
+        key: "id",
+      },
+      onDelete: "SET NULL",
+    },
     category: {
       type: DataTypes.INTEGER,
       allowNull: true,

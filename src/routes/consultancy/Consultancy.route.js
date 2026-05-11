@@ -85,13 +85,13 @@ route.get(
 
 /**
  * @swagger
- * /consultancy/{slugs}:
+ * /consultancy/{slug}:
  *   get:
  *     summary: Get consultancy by slug
  *     tags: [Consultancy]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -102,7 +102,7 @@ route.get(
  *         description: Consultancy not found
  */
 route.get(
-  "/:slugs",
+  "/:slug",
   requestValidator(consultancySlugParamSchema, "params"),
   ConsultancyController.getConsultancy,
 );

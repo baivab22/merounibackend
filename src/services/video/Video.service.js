@@ -31,7 +31,7 @@ class VideoService {
                 {
                     model: Category,
                     as: "category",
-                    attributes: ["id", "title", "slugs"],
+                    attributes: ["id", "title", "slug"],
                 },
             ],
         });

@@ -21,7 +21,7 @@ class FacultyController {
 
   static async getFaculty(req, res) {
     try {
-      const faculty = await facultyService.getFaculty(req.params.slugs);
+      const faculty = await facultyService.getFaculty(req.params.slug);
       return res.status(200).json({ message: "Faculty retrieved", faculty });
     } catch (error) {
       console.error("Error getting Faculty by ID:", error);

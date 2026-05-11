@@ -118,7 +118,7 @@ export const schoolPaginationSchema = yup.object({
     .transform((value) => (value === "" ? null : value)),
 });
 export const collegeSlugParamSchema = yup.object({
-  slugs: yup.string().trim().required(),
+  slug: yup.string().trim().required(),
 });
 
 export const collegeIdParamSchema = yup.object({
@@ -233,6 +233,10 @@ export const createOrUpdateCollegeSchema = yup
       .oneOf(["draft", "published", "archived"])
       .optional()
       .default("published"),
+    slug: yup.string().nullable().optional(),
+    slug: yup.string().nullable().optional(),
+    metaDescription: yup.string().nullable().optional(),
+    meta_description: yup.string().nullable().optional(),
   })
   .required();
 
@@ -248,6 +252,8 @@ export const createOrUpdateAdmissionSchema = yup
     description: yup.string().nullable().optional(),
     pdf_file: yup.string().nullable().optional(),
     status: yup.string().oneOf(["draft", "published"]).optional(),
+    slug: yup.string().trim().optional(),
+    meta_description: yup.string().trim().optional(),
   })
   .test(
     "at-least-one-id",

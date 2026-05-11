@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import slug from "slug";
+import slugify from "slug";
 
 import Faculty from "../../models/faculty/Faculty.model.js";
 import UserModel from "../../models/users/User.model.js";
@@ -48,9 +48,9 @@ class FacultyService {
     };
   }
 
-  async getFaculty(slugs) {
+  async getFaculty(slug) {
     const faculty = await Faculty.findOne({
-      where: { slugs },
+      where: { slug },
     });
     if (!faculty) {
       const error = new Error("Faculty not found");
@@ -61,14 +61,14 @@ class FacultyService {
   }
 
   async createFaculty(data) {
-    const { title, description, featured_image, author } = data;
+    const { title, description, featured_image, author, slug } = data;
 
     // Generate slug from title (title is already validated by the validator)
-    const generatedSlug = slug(title);
+    const generatedSlug = slugify(title);
 
     await Faculty.create({
       title,
-      slugs: generatedSlug,
+      slug: slug || generatedSlug,
       description,
       author,
       featured_image,
@@ -84,8 +84,12 @@ class FacultyService {
       throw error;
     }
 
-    const [updatedCount] = await Faculty.update(
-      { ...data },
+    const updateData = { ...data };
+    if (data.slug) {
+      updateData.slug = data.slug;
+    }
+
+    const [updatedCount] = await Faculty.update(updateData,
       {
         where: { id: faculty_id },
       }

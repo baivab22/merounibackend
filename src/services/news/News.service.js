@@ -1,12 +1,11 @@
 import { Op } from "sequelize";
 
-
 import News from "../../models/news/News.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
 import CollegeModel from "../../models/college/College.model.js";
 
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { getUniqueSlug } from "../../utils/SlugHelper.js";
 class NewsService {
   async listNews(query = {}) {
     const page = parseInt(query.page, 10) || 1;
@@ -16,13 +15,11 @@ class NewsService {
     const search = query.q || "";
     const categoryId = query.category;
     const collegeId = query.college_id;
-    const status = query.status
+    const schoolId = query.school_id;
+    const consultancyId = query.consultancy_id;
+    const status = query.status;
 
-
-
-
-    const whereCondition = {
-    };
+    const whereCondition = {};
     if (status) {
       whereCondition.status = status;
     }
@@ -31,13 +28,20 @@ class NewsService {
       whereCondition.title = { [Op.like]: `%${search}%` };
     }
 
-
     if (categoryId) {
       whereCondition.category = categoryId;
     }
 
     if (collegeId) {
       whereCondition.college_id = collegeId;
+    }
+
+    if (schoolId) {
+      whereCondition.school_id = schoolId;
+    }
+
+    if (consultancyId) {
+      whereCondition.consultancy_id = consultancyId;
     }
 
     const { count: totalCount, rows: items } = await News.findAndCountAll({
@@ -94,6 +98,14 @@ class NewsService {
           model: CollegeModel,
           as: "newsCollege",
         },
+        {
+          model: CollegeModel,
+          as: "newsSchool",
+        },
+        {
+          model: News.associations.newsConsultancy.target,
+          as: "newsConsultancy",
+        },
       ],
     });
 
@@ -142,6 +154,14 @@ class NewsService {
           model: CollegeModel,
           as: "newsCollege",
         },
+        {
+          model: CollegeModel,
+          as: "newsSchool",
+        },
+        {
+          model: News.associations.newsConsultancy.target,
+          as: "newsConsultancy",
+        },
       ],
     });
 
@@ -155,14 +175,26 @@ class NewsService {
   }
 
   async createNews(data) {
-    const { title, author, author_id, category_id, college_id, ...rest } = data;
+    const {
+      title,
+      author,
+      author_id,
+      category_id,
+      college_id,
+      school_id,
+      consultancy_id,
+      ...rest
+    } = data;
+    const slug = await getUniqueSlug(News, title, null, data.slug);
     return News.create({
       ...rest,
       title,
       author: author || author_id,
       category: category_id || null,
       college_id: college_id || null,
-      slug: generateUniqueSlug(title),
+      school_id: school_id || null,
+      consultancy_id: consultancy_id || null,
+      slug,
     });
   }
 
@@ -174,12 +206,19 @@ class NewsService {
       throw error;
     }
 
-    const { title, author, author_id, category, category_id, college_id, ...rest } = data;
+    const {
+      title,
+      author,
+      author_id,
+      category,
+      category_id,
+      college_id,
+      school_id,
+      consultancy_id,
+      ...rest
+    } = data;
 
-    let slug = news.slug;
-    if (title && news.title !== title) {
-      slug = generateUniqueSlug(title);
-    }
+    const slug = await getUniqueSlug(News, title || news.title, id, data.slug);
     await News.update(
       {
         ...rest,
@@ -192,9 +231,12 @@ class NewsService {
               ? category_id
               : news.category,
         college_id: college_id !== undefined ? college_id : news.college_id,
+        school_id: school_id !== undefined ? school_id : news.school_id,
+        consultancy_id:
+          consultancy_id !== undefined ? consultancy_id : news.consultancy_id,
         slug,
       },
-      { where: { id } }
+      { where: { id } },
     );
 
     return News.findByPk(id, {
@@ -210,6 +252,14 @@ class NewsService {
         {
           model: CollegeModel,
           as: "newsCollege",
+        },
+        {
+          model: CollegeModel,
+          as: "newsSchool",
+        },
+        {
+          model: News.associations.newsConsultancy.target,
+          as: "newsConsultancy",
         },
       ],
     });

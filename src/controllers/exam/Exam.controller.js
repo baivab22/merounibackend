@@ -39,7 +39,7 @@ class ExamController {
 
   static async getExam(req, res) {
     try {
-      const item = await examService.getExam(req.params.slugs);
+      const item = await examService.getExam(req.params.slug);
       return res.status(200).json({ message: "Exam retrieved", item });
     } catch (error) {
       console.error("Error getting exam:", error);

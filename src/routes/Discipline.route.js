@@ -70,13 +70,13 @@ router.get("/:id", DisciplineController.getDisciplineById);
 
 /**
  * @swagger
- * /discipline/slug/{slugs}:
+ * /discipline/slug/{slug}:
  *   get:
  *     summary: Get a discipline by slug
  *     tags: [Discipline]
  *     parameters:
  *       - in: path
- *         name: slugs
+ *         name: slug
  *         required: true
  *         schema:
  *           type: string
@@ -88,7 +88,7 @@ router.get("/:id", DisciplineController.getDisciplineById);
  *       500:
  *         description: Server error
  */
-router.get("/slug/:slugs", DisciplineController.getDisciplineBySlug);
+router.get("/slug/:slug", DisciplineController.getDisciplineBySlug);
 
 router.patch(
     "/update-order",

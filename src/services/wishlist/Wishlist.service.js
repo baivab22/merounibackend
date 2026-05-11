@@ -20,12 +20,12 @@ class WishlistService {
         {
           model: College,
           as: "college",
-          attributes: ["id", "name", "slugs", "description", "college_logo"],
+          attributes: ["id", "name", "slug", "description", "college_logo"],
         },
         {
           model: Consultancy,
           as: "consultancy",
-          attributes: ["id", "title", "slugs", "description", "logo", "address", "featured_image", "pinned"],
+          attributes: ["id", "title", "slug", "description", "logo", "address", "featured_image", "pinned"],
         },
       ],
     });

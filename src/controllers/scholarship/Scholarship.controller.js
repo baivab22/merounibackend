@@ -41,7 +41,7 @@ class ScholarshipController {
   static async getScholarshipBySlug(req, res) {
     try {
       const scholarship = await scholarshipService.getScholarshipBySlug(
-        req.params.slugs
+        req.params.slug
       );
       return res
         .status(200)

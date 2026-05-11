@@ -3,7 +3,7 @@ import { Op } from "sequelize";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { generateUniqueSlug, getUniqueSlug } from "../../utils/SlugHelper.js";
 
 class ScholarshipService {
   async listScholarships(query = {}) {
@@ -63,7 +63,7 @@ class ScholarshipService {
           {
             model: Category,
             as: "scholarshipCategory",
-            attributes: ["id", "title", "slugs"],
+            attributes: ["id", "title", "slug"],
             required: false,
           },
           {
@@ -92,7 +92,7 @@ class ScholarshipService {
         {
           model: Category,
           as: "scholarshipCategory",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
           required: false,
         },
         {
@@ -111,14 +111,14 @@ class ScholarshipService {
     return scholarship;
   }
 
-  async getScholarshipBySlug(slugs) {
+  async getScholarshipBySlug(slug) {
     const scholarship = await Scholarship.findOne({
-      where: { slugs },
+      where: { slug },
       include: [
         {
           model: Category,
           as: "scholarshipCategory",
-          attributes: ["id", "title", "slugs"],
+          attributes: ["id", "title", "slug"],
           required: false,
         },
         {
@@ -155,7 +155,7 @@ class ScholarshipService {
 
     const createData = {
       ...data,
-      slugs: generateUniqueSlug(titleOrName),
+      slug: await getUniqueSlug(Scholarship, titleOrName, null, data.slug),
     };
 
     // Ensure category_id from API is mapped to category if needed
@@ -194,9 +194,7 @@ class ScholarshipService {
       throw error;
     }
 
-    if (scholarship.name !== data.name) {
-      updateData.slugs = generateUniqueSlug(data.name);
-    }
+    updateData.slug = await getUniqueSlug(Scholarship, data.name || scholarship.name, id, data.slug);
     const [updatedRows] = await Scholarship.update(updateData, {
       where: { id },
     });

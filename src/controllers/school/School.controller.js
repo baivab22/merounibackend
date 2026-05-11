@@ -33,7 +33,7 @@ class SchoolController {
 
     static async getSchoolBySlug(req, res) {
         try {
-            const school = await schoolService.getSchoolBySlug(req.params.slugs);
+            const school = await schoolService.getSchoolBySlug(req.params.slug);
 
             return res.status(200).json({
                 message: "success",
