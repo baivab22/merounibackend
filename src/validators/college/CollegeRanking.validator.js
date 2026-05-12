@@ -46,5 +46,6 @@ export const updateDegreeDescriptionSchema = yup
     degree_id: yup.number().integer().positive().required(),
     description: yup.string().nullable().optional(),
     content: yup.string().nullable().optional(),
+    slug: yup.string().nullable().optional(),
   })
   .required();

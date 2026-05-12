@@ -6,6 +6,7 @@ import CollegeMember from "./CollegeMember.model.js";
 import CollegeAdmission from "./CollegeAdmission.model.js";
 import CollegeGallery from "./CollegeGallery.model.js";
 import CollegeRanking from "./CollegeRanking.model.js";
+import CollegeRankingParent from "./CollegeRankingParent.model.js";
 import { University } from "../university/University.model.js";
 import Program from "../program/Program.model.js";
 import User from "../users/User.model.js";
@@ -173,6 +174,16 @@ Degree.hasMany(CollegeRanking, {
   as: "degreeRankings",
 });
 
+// CollegeRankingParent Associations
+CollegeRankingParent.belongsTo(Degree, {
+  foreignKey: "degree_id",
+  as: "degree",
+});
+Degree.hasOne(CollegeRankingParent, {
+  foreignKey: "degree_id",
+  as: "rankingParent",
+});
+
 // College Degree Many-to-Many
 College.belongsToMany(Degree, {
   through: CollegeOfferingDegrees,
@@ -201,4 +212,5 @@ export {
   Board,
   Stream,
   User,
+  CollegeRankingParent,
 };

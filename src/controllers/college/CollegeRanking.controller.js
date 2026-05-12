@@ -116,6 +116,7 @@ class CollegeRankingController {
         req.body.degree_id,
         req.body.description,
         req.body.content,
+        req.body.slug,
       );
       return res.status(200).json({
         message: "Degree description updated",

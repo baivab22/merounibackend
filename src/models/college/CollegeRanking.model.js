@@ -26,23 +26,10 @@ CollegeRanking.init(
         key: "id",
       },
     },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    content: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     rank: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 1,
-    },
-    degree_list_order: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      defaultValue: null,
     },
   },
   {
@@ -59,9 +46,6 @@ CollegeRanking.init(
       },
       {
         fields: ["degree_id", "rank"],
-      },
-      {
-        fields: ["degree_list_order"],
       },
     ],
   },
