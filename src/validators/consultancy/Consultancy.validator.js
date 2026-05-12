@@ -17,7 +17,10 @@ export const listConsultancyQuerySchema = paginationSchema.shape({
   city: yup.string().trim().optional(),
   district: yup.string().trim().optional(),
   destination: yup.string().trim().optional(),
-  status: yup.string().oneOf(["published", "draft", "Published", "Draft"]).optional(),
+  status: yup
+    .string()
+    .oneOf(["published", "draft", "Published", "Draft"])
+    .optional(),
 });
 
 export const consultancySlugParamSchema = yup.object({
