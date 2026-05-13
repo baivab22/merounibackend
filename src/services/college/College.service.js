@@ -73,7 +73,6 @@ class CollegeService {
         metaDescription,
       } = payload;
 
-      console.log(programs, "programsprogramsprograms");
       let collegeId =
         id === "null" || id === "undefined" || id === "" ? null : id;
       let existingCollege = null;
@@ -699,7 +698,11 @@ class CollegeService {
 
     const offset = (page - 1) * limit;
 
-    const whereCondition = {};
+    const whereCondition = {
+      [Op.and]: [
+        sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`),
+      ],
+    };
     if (search) {
       whereCondition.name = {
         [Op.like]: `%${search}%`,

@@ -10,6 +10,7 @@ export { idParamSchema };
 export const paginationSchema = basePaginationSchema.shape({
   category: yup.number().integer().positive().optional(),
   status: yup.string().oneOf(["draft", "published"]).optional(),
+  activeOnly: yup.string().oneOf(["true", "false"]).optional(),
 });
 
 export const scholarshipIdParamSchema = yup.object({

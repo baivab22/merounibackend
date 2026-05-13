@@ -150,7 +150,6 @@ router.use("/board", boardRoute);
 import streamRoute from "./Stream.route.js";
 router.use("/stream", streamRoute);
 
-
 import consultancyApplicationRoute from "./consultancy/ConsultancyApplication.route.js";
 router.use("/consultancy-application", consultancyApplicationRoute);
 
@@ -165,6 +164,6 @@ router.use("/search-terms", searchTermRoute);
 
 import miscRoute from "./Misc.route.js";
 router.use("/misc", miscRoute);
+router.use("/location", miscRoute);
 
 export default router;
-

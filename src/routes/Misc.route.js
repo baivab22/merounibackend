@@ -1,5 +1,5 @@
-import express from 'express';
-import MiscController from '../controllers/misc/Misc.controller.js';
+import express from "express";
+import MiscController from "../controllers/misc/Misc.controller.js";
 
 const router = express.Router();
 
@@ -13,18 +13,11 @@ const router = express.Router();
  *       200:
  *         description: Success
  */
-router.get('/getCountryList', MiscController.getCountryList);
+router.get("/getCountryList", MiscController.getCountryList);
+router.get("/countries", MiscController.getCountryList);
 
-/**
- * @swagger
- * /misc/getNepalDistrictList:
- *   get:
- *     summary: Get a list of all districts in Nepal
- *     tags: [Misc]
- *     responses:
- *       200:
- *         description: Success
- */
-router.get('/getNepalDistrictList', MiscController.getNepalDistrictList);
+router.get("/getNepalDistrictList", MiscController.getNepalDistrictList);
+router.get("/districts", MiscController.getNepalDistrictList);
+router.get("/cities", MiscController.getNepalCityList);
 
 export default router;
