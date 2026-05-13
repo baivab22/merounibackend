@@ -11,7 +11,7 @@ import { University } from "../../models/university/University.model.js";
 import News from "../../models/news/News.model.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import Consultancy from "../../models/consultancy/Consultancy.model.js";
-import SkillsBasedCourse from "../../models/skills-based-courses/SkillsBasedCourse.model.js";
+import ShortTermCourse from "../../models/short-term-courses/ShortTermCourse.model.js";
 import Video from "../../models/video/Video.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 
@@ -104,11 +104,11 @@ class HomeService {
         order: [['createdAt', 'DESC']]
       }).then(items => items.map(i => ({ ...i.toJSON(), type: 'consultancy' }))),
 
-      SkillsBasedCourse.findAll({
+      ShortTermCourse.findAll({
         where: { title: searchCondition },
         attributes: [['id', 'id'], ['title', 'title'], ['slug', 'slug'], ['thumbnail_image', 'image'], ['createdAt', 'createdAt']],
         order: [['createdAt', 'DESC']]
-      }).then(items => items.map(i => ({ ...i.toJSON(), type: 'skill_course' }))),
+      }).then(items => items.map(i => ({ ...i.toJSON(), type: 'short_term_course' }))),
 
       Video.findAll({
         where: { title: searchCondition },

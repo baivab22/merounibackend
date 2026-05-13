@@ -1,0 +1,137 @@
+import { Op } from "sequelize";
+import ShortTermCourse from "../../models/short-term-courses/ShortTermCourse.model.js";
+import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+
+class ShortTermCourseService {
+  async listCourses(query = {}) {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const { q, status, location, duration, type, price } = query;
+    const whereCondition = {};
+
+    if (q) {
+      whereCondition.title = { [Op.like]: `%${q}%` };
+    }
+
+    if (status) {
+      whereCondition.status = status;
+    }
+
+    if (location) {
+      whereCondition.location = { [Op.like]: `%${location}%` };
+    }
+
+    if (duration) {
+      whereCondition.duration = duration;
+    }
+
+    if (type) {
+      whereCondition.course_type = type;
+    }
+
+    if (price) {
+      whereCondition.price = price;
+    }
+
+    const { count: totalCount, rows: items } =
+      await ShortTermCourse.findAndCountAll({
+        where: whereCondition,
+        limit,
+        offset,
+        order: [["createdAt", "DESC"]],
+      });
+
+    return {
+      items,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        limit,
+        totalCount,
+      },
+    };
+  }
+
+  async getCourseById(id) {
+    const course = await ShortTermCourse.findByPk(id);
+
+    if (!course) {
+      const error = new Error("Short Term Course not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return course;
+  }
+
+  async getCourseBySlug(slug) {
+    const course = await ShortTermCourse.findOne({
+      where: { slug },
+    });
+
+    if (!course) {
+      const error = new Error("Short Term Course not found");
+      error.status = 404;
+      throw error;
+    }
+
+    return course;
+  }
+
+  async createCourse(payload) {
+    const { title, ...rest } = payload;
+    const slug = payload.slug || generateUniqueSlug(title);
+
+    return ShortTermCourse.create({
+      ...rest,
+      title,
+      slug,
+      meta_description: payload.meta_description,
+    });
+  }
+
+  async updateCourse(id, payload) {
+    const course = await ShortTermCourse.findByPk(id);
+    if (!course) {
+      const error = new Error("Short Term Course not found");
+      error.status = 404;
+      throw error;
+    }
+
+    const { title, ...rest } = payload;
+    const updateData = { ...rest };
+
+    if (title && title !== course.title) {
+      updateData.title = title;
+      if (!payload.slug) {
+        updateData.slug = generateUniqueSlug(title);
+      }
+    }
+
+    if (payload.slug) {
+      updateData.slug = payload.slug;
+    }
+
+    if (payload.meta_description !== undefined) {
+      updateData.meta_description = payload.meta_description;
+    }
+
+    await course.update(updateData);
+    return course;
+  }
+
+  async deleteCourse(id) {
+    const deletedRows = await ShortTermCourse.destroy({
+      where: { id },
+    });
+    if (deletedRows === 0) {
+      const error = new Error("Short Term Course not found");
+      error.status = 404;
+      throw error;
+    }
+  }
+}
+
+export default ShortTermCourseService;

@@ -3,7 +3,7 @@ import CollegeAddress from "./CollegeAddress.model.js";
 import CollegeContact from "./CollegeContact.model.js";
 import CollegeOfferingProgram from "./CollegeOfferingProgram.model.js";
 import CollegeMember from "./CollegeMember.model.js";
-import CollegeAdmission from "./CollegeAdmission.model.js";
+import Admission from "./Admission.model.js";
 import CollegeGallery from "./CollegeGallery.model.js";
 import CollegeRanking from "./CollegeRanking.model.js";
 import CollegeRankingParent from "./CollegeRankingParent.model.js";
@@ -91,8 +91,8 @@ College.hasMany(CollegeGallery, {
   foreignKey: "college_id",
   as: "collegeGallery",
 });
-College.hasMany(CollegeAdmission, {
-  foreignKey: "college_id",
+College.hasMany(Admission, {
+  foreignKey: "school_college_id",
   as: "collegeAdmissions",
 });
 College.belongsToMany(Program, {
@@ -146,12 +146,12 @@ CollegeMember.belongsTo(College, {
   as: "collegeMemberCollege",
 });
 
-// CollegeAdmission Associations
-CollegeAdmission.belongsTo(College, {
-  foreignKey: "college_id",
+// Admission Associations
+Admission.belongsTo(College, {
+  foreignKey: "school_college_id",
   as: "collegeAdmissionCollege",
 });
-CollegeAdmission.belongsTo(Program, {
+Admission.belongsTo(Program, {
   foreignKey: "program_id",
   as: "program",
 });
@@ -199,7 +199,7 @@ Degree.belongsToMany(College, {
 export {
   College,
   CollegeAddress,
-  CollegeAdmission,
+  Admission,
   CollegeContact,
   CollegeOfferingProgram,
   CollegeMember,

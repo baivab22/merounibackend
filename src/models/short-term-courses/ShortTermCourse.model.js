@@ -1,9 +1,9 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 
-class SkillsBasedCourse extends Model {}
+class ShortTermCourse extends Model {}
 
-SkillsBasedCourse.init(
+ShortTermCourse.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -89,10 +89,10 @@ SkillsBasedCourse.init(
   },
   {
     sequelize,
-    modelName: "SkillsBasedCourse",
-    tableName: "skills_based_courses",
+    modelName: "ShortTermCourse",
+    tableName: "short_term_courses",
     timestamps: true,
   },
 );
 
-export default SkillsBasedCourse;
+export default ShortTermCourse;

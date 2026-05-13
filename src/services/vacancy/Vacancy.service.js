@@ -84,6 +84,7 @@ class VacancyService {
       content,
       slug,
       meta_description,
+      status,
     } = data;
     const finalSlug = await getUniqueSlug(VacancyModel, title, null, slug);
 
@@ -130,7 +131,12 @@ class VacancyService {
           : vacancy.meta_description,
     };
 
-    updateData.slug = await getUniqueSlug(VacancyModel, data.title || vacancy.title, id, data.slug);
+    updateData.slug = await getUniqueSlug(
+      VacancyModel,
+      data.title || vacancy.title,
+      id,
+      data.slug,
+    );
 
     await vacancy.update(updateData);
 

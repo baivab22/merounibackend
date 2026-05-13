@@ -4,7 +4,7 @@ import CollegeAddress from "../../models/college/CollegeAddress.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
 import CollegeOfferingProgram from "../../models/college/CollegeOfferingProgram.model.js";
 import CollegeMember from "../../models/college/CollegeMember.model.js";
-import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
+import Admission from "../../models/college/Admission.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import { University } from "../../models/university/University.model.js";
@@ -253,7 +253,7 @@ class SchoolService {
           attributes: ["name", "contact_number", "role", "description"],
         },
         {
-          model: CollegeAdmission,
+          model: Admission,
           as: "collegeAdmissions",
           include: [
             {

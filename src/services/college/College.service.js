@@ -5,7 +5,7 @@ import { safeParseJSON } from "../../utils/JsonHelper.js";
 import { sequelize } from "../../config/database.config.js";
 import College from "../../models/college/College.model.js";
 import CollegeAddress from "../../models/college/CollegeAddress.model.js";
-import CollegeAdmission from "../../models/college/CollegeAdmission.model.js";
+import Admission from "../../models/college/Admission.model.js";
 import CollegeContact from "../../models/college/CollegeContact.model.js";
 import CollegeOfferingProgram from "../../models/college/CollegeOfferingProgram.model.js";
 import CollegeFacility from "../../models/college/CollegeFacility.model.js";
@@ -531,7 +531,9 @@ class CollegeService {
 
       const orConditions = [];
       if (matchingCollegeIds.length > 0) {
-        orConditions.push({ college_id: { [Op.in]: matchingCollegeIds } });
+        orConditions.push({
+          school_college_id: { [Op.in]: matchingCollegeIds },
+        });
       }
       if (filteredProgramIds?.length) {
         orConditions.push({ program_id: { [Op.in]: filteredProgramIds } });
@@ -552,7 +554,7 @@ class CollegeService {
     }
 
     const { count: totalCount, rows: rawItems } =
-      await CollegeAdmission.findAndCountAll({
+      await Admission.findAndCountAll({
         where: whereCondition,
         limit,
         offset,
@@ -590,7 +592,7 @@ class CollegeService {
       // Maintain consistency
       itemData.course_id = item.program_id;
       delete itemData.program_id;
-      delete itemData.college_id;
+      delete itemData.school_college_id;
       return itemData;
     });
 
@@ -606,7 +608,7 @@ class CollegeService {
   }
 
   async getAdmissionById(id) {
-    const admission = await CollegeAdmission.findByPk(id, {
+    const admission = await Admission.findByPk(id, {
       include: [
         {
           model: College,
@@ -646,7 +648,7 @@ class CollegeService {
     admissionData.program = program;
     admissionData.course_id = admission.program_id;
     delete admissionData.program_id;
-    delete admissionData.college_id;
+    delete admissionData.school_college_id;
 
     return admissionData;
   }
@@ -697,11 +699,7 @@ class CollegeService {
 
     const offset = (page - 1) * limit;
 
-    const whereCondition = {
-      [Op.and]: [
-        sequelize.literal(`NOT JSON_CONTAINS(institute_level, '"School"')`),
-      ],
-    };
+    const whereCondition = {};
     if (search) {
       whereCondition.name = {
         [Op.like]: `%${search}%`,
@@ -922,10 +920,10 @@ class CollegeService {
           ],
         },
         {
-          model: CollegeAdmission,
+          model: Admission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "program_id"],
+            exclude: ["id", "school_college_id", "program_id"],
           },
         },
 
@@ -1111,10 +1109,10 @@ class CollegeService {
           attributes: ["name", "contact_number", "role", "description"],
         },
         {
-          model: CollegeAdmission,
+          model: Admission,
           as: "collegeAdmissions",
           attributes: {
-            exclude: ["id", "college_id", "program_id"],
+            exclude: ["id", "school_college_id", "program_id"],
           },
         },
         {
@@ -1267,7 +1265,7 @@ class CollegeService {
   async createOrUpdateAdmission(payload) {
     const {
       id,
-      college_id,
+      school_college_id,
       program_id,
       course_id,
       eligibility_criteria,
@@ -1290,14 +1288,14 @@ class CollegeService {
       id === "null" || id === "undefined" || id === "" ? null : id;
 
     if (admissionId) {
-      admission = await CollegeAdmission.findByPk(admissionId);
+      admission = await Admission.findByPk(admissionId);
       if (!admission) {
         const error = new Error("Admission detail not found");
         error.status = 404;
         throw error;
       }
       await admission.update({
-        college_id,
+        school_college_id,
         program_id: final_program_id,
         eligibility_criteria,
         admission_process,
@@ -1312,8 +1310,8 @@ class CollegeService {
         ...(resolvedStatus !== null ? { status: resolvedStatus } : {}),
       });
     } else {
-      admission = await CollegeAdmission.create({
-        college_id,
+      admission = await Admission.create({
+        school_college_id,
         program_id: final_program_id,
         eligibility_criteria,
         admission_process,
@@ -1331,7 +1329,7 @@ class CollegeService {
   }
 
   async deleteAdmission(id) {
-    const admission = await CollegeAdmission.findByPk(id);
+    const admission = await Admission.findByPk(id);
     if (!admission) {
       const error = new Error("Admission detail not found");
       error.status = 404;
@@ -1343,7 +1341,7 @@ class CollegeService {
     const transaction = await sequelize.transaction();
     try {
       for (const order of orders) {
-        await CollegeAdmission.update(
+        await Admission.update(
           { order_no: order.order_no },
           {
             where: { id: order.id },

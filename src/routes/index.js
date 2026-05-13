@@ -132,8 +132,8 @@ router.use("/analytics", analyticsRoute);
 import configRoute from "./Config.route.js";
 router.use("/config", configRoute);
 
-import skillsBasedCourseRoute from "./SkillsBasedCourse.route.js";
-router.use("/skills-based-courses", skillsBasedCourseRoute);
+import shortTermCourseRoute from "./ShortTermCourse.route.js";
+router.use("/short-term-courses", shortTermCourseRoute);
 
 import disciplineRoute from "./Discipline.route.js";
 router.use("/discipline", disciplineRoute);

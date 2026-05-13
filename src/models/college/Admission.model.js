@@ -2,12 +2,12 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import College from "./College.model.js";
 
-class CollegeAdmission extends Model {}
+class Admission extends Model {}
 
-CollegeAdmission.init(
+Admission.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    college_id: {
+    school_college_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: College, key: "id" },
@@ -49,11 +49,11 @@ CollegeAdmission.init(
   },
   {
     sequelize,
-    modelName: "CollegeAdmission",
-    tableName: "college_admissions",
+    modelName: "Admission",
+    tableName: "admissions",
     freezeTableName: true,
     timestamps: false,
   },
 );
 
-export default CollegeAdmission;
+export default Admission;

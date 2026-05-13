@@ -1,26 +1,26 @@
 import express from "express";
-import SkillsBasedCourseController from "../controllers/skills-based-course/SkillsBasedCourse.controller.js";
+import ShortTermCourseController from "../controllers/short-term-course/ShortTermCourse.controller.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
-    createSkillsBasedCourseSchema,
-    updateSkillsBasedCourseSchema
-} from "../validators/skills-based-course/SkillsBasedCourse.validator.js";
+    createShortTermCourseSchema,
+    updateShortTermCourseSchema
+} from "../validators/short-term-course/ShortTermCourse.validator.js";
 
 const router = express.Router();
 
 /**
  * @swagger
  * tags:
- *   name: SkillsBasedCourses
- *   description: Skills Based Course management
+ *   name: ShortTermCourses
+ *   description: Short Term Course management
  */
 
 /**
  * @swagger
- * /skills-based-courses:
+ * /short-term-courses:
  *   get:
- *     summary: List all skills based courses
- *     tags: [SkillsBasedCourses]
+ *     summary: List all short term courses
+ *     tags: [ShortTermCourses]
  *     parameters:
  *       - in: query
  *         name: q
@@ -39,18 +39,18 @@ const router = express.Router();
  *         description: Items per page
  *     responses:
  *       200:
- *         description: List of skills based courses
+ *         description: List of short term courses
  *       500:
  *         description: Server error
  */
-router.get("/", SkillsBasedCourseController.listCourses);
+router.get("/", ShortTermCourseController.listCourses);
 
 /**
  * @swagger
- * /skills-based-courses/{id}:
+ * /short-term-courses/{id}:
  *   get:
- *     summary: Get a skills based course by ID
- *     tags: [SkillsBasedCourses]
+ *     summary: Get a short term course by ID
+ *     tags: [ShortTermCourses]
  *     parameters:
  *       - in: path
  *         name: id
@@ -59,20 +59,20 @@ router.get("/", SkillsBasedCourseController.listCourses);
  *           type: integer
  *     responses:
  *       200:
- *         description: Skills based course details
+ *         description: Short term course details
  *       404:
  *         description: Course not found
  *       500:
  *         description: Server error
  */
-router.get("/:id", SkillsBasedCourseController.getCourseById);
+router.get("/:id", ShortTermCourseController.getCourseById);
 
 /**
  * @swagger
- * /skills-based-courses/slug/{slug}:
+ * /short-term-courses/slug/{slug}:
  *   get:
- *     summary: Get a skills based course by slug
- *     tags: [SkillsBasedCourses]
+ *     summary: Get a short term course by slug
+ *     tags: [ShortTermCourses]
  *     parameters:
  *       - in: path
  *         name: slug
@@ -81,20 +81,20 @@ router.get("/:id", SkillsBasedCourseController.getCourseById);
  *           type: string
  *     responses:
  *       200:
- *         description: Skills based course details
+ *         description: Short term course details
  *       404:
  *         description: Course not found
  *       500:
  *         description: Server error
  */
-router.get("/slug/:slug", SkillsBasedCourseController.getCourseBySlug);
+router.get("/slug/:slug", ShortTermCourseController.getCourseBySlug);
 
 /**
  * @swagger
- * /skills-based-courses:
+ * /short-term-courses:
  *   post:
- *     summary: Create a skills based course
- *     tags: [SkillsBasedCourses]
+ *     summary: Create a short term course
+ *     tags: [ShortTermCourses]
  *     requestBody:
  *       required: true
  *       content:
@@ -125,16 +125,16 @@ router.get("/slug/:slug", SkillsBasedCourseController.getCourseBySlug);
  */
 router.post(
     "/",
-    requestValidator(createSkillsBasedCourseSchema, "body"),
-    SkillsBasedCourseController.createCourse
+    requestValidator(createShortTermCourseSchema, "body"),
+    ShortTermCourseController.createCourse
 );
 
 /**
  * @swagger
- * /skills-based-courses/{id}:
+ * /short-term-courses/{id}:
  *   put:
- *     summary: Update a skills based course
- *     tags: [SkillsBasedCourses]
+ *     summary: Update a short term course
+ *     tags: [ShortTermCourses]
  *     parameters:
  *       - in: path
  *         name: id
@@ -171,16 +171,16 @@ router.post(
  */
 router.put(
     "/:id",
-    requestValidator(updateSkillsBasedCourseSchema, "body"),
-    SkillsBasedCourseController.updateCourse
+    requestValidator(updateShortTermCourseSchema, "body"),
+    ShortTermCourseController.updateCourse
 );
 
 /**
  * @swagger
- * /skills-based-courses/{id}:
+ * /short-term-courses/{id}:
  *   delete:
- *     summary: Delete a skills based course
- *     tags: [SkillsBasedCourses]
+ *     summary: Delete a short term course
+ *     tags: [ShortTermCourses]
  *     parameters:
  *       - in: path
  *         name: id
@@ -193,6 +193,6 @@ router.put(
  *       500:
  *         description: Server error
  */
-router.delete("/:id", SkillsBasedCourseController.deleteCourse);
+router.delete("/:id", ShortTermCourseController.deleteCourse);
 
 export default router;
