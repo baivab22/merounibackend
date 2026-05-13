@@ -138,7 +138,7 @@ class CollegeRankingService {
   }
 
   async createRanking(data) {
-    const { degree_id, college_id, rank } = data;
+    const { degree_id, college_id, rank, slug } = data;
 
     // Use transaction to prevent race conditions when multiple colleges are added quickly
     const transaction = await sequelize.transaction();
@@ -162,9 +162,13 @@ class CollegeRankingService {
       // Ensure degree has a degree_list_order (set if doesn't exist) in Parent
       const [parent, created] = await CollegeRankingParent.findOrCreate({
         where: { degree_id },
-        defaults: { degree_list_order: null },
+        defaults: { degree_list_order: null, slug: slug || null },
         transaction,
       });
+
+      if (!created && slug && !parent.slug) {
+        await parent.update({ slug }, { transaction });
+      }
 
       let degreeListOrder = parent.degree_list_order;
       if (degreeListOrder === null) {
