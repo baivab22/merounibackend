@@ -33,8 +33,18 @@ export const requestValidator =
         `[RequestValidator] Validation error for ${property}:`,
         error.errors || error.message
       );
+      const fieldErrors =
+        error.inner?.map((e) => ({
+          field: e.path,
+          message: e.message,
+        })) || [];
+      const message = error.errors?.length
+        ? error.errors.join(", ")
+        : error.message;
       return res.status(400).json({
-        message: error.errors ? error.errors.join(", ") : error.message,
+        status: 400,
+        message,
+        errors: fieldErrors,
       });
     }
   };
@@ -53,8 +63,18 @@ export const requestValidatorMultiple = (schemas) => async (req, res, next) => {
 
     return next();
   } catch (error) {
+    const fieldErrors =
+      error.inner?.map((e) => ({
+        field: e.path,
+        message: e.message,
+      })) || [];
+    const message = error.errors?.length
+      ? error.errors.join(", ")
+      : error.message;
     return res.status(400).json({
-      message: error.errors ? error.errors.join(", ") : error.message,
+      status: 400,
+      message,
+      errors: fieldErrors,
     });
   }
 };
