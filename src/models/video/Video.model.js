@@ -32,6 +32,10 @@ Video.init(
             type: DataTypes.TEXT,
             allowNull: true,
         },
+        meta_description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
         category_id: {
             type: DataTypes.INTEGER,
             allowNull: true,

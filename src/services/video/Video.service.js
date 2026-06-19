@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 import Video from "../../models/video/Video.model.js";
 import Category from "../../models/category/Category.model.js";
 
-import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import { getUniqueSlug } from "../../utils/SlugHelper.js";
 
 
 class VideoService {
@@ -11,11 +11,15 @@ class VideoService {
         const limit = parseInt(query.limit, 10) || 10;
         const offset = (page - 1) * limit;
 
-        const { q, category_id } = query;
+        const { q, category_id, slug } = query;
         const whereCondition = {};
 
         if (q) {
             whereCondition.title = { [Op.like]: `%${q}%` };
+        }
+
+        if (slug) {
+            whereCondition.slug = slug;
         }
 
         if (category_id) {
@@ -60,7 +64,16 @@ class VideoService {
     }
 
     async getVideoBySlug(slug) {
-        const video = await Video.findOne({ where: { slug } });
+        const video = await Video.findOne({
+            where: { slug },
+            include: [
+                {
+                    model: Category,
+                    as: "category",
+                    attributes: ["id", "title", "slug"],
+                },
+            ],
+        });
 
         if (!video) {
             const error = new Error("Video not found");
@@ -72,10 +85,10 @@ class VideoService {
     }
 
     async createVideo(payload) {
-        const { title, ...rest } = payload;
+        const { title, slug: manualSlug, ...rest } = payload;
 
-        const slug = generateUniqueSlug(title);
-        return Video.create({ ...rest, title, slug });
+        const uniqueSlug = await getUniqueSlug(Video, title, null, manualSlug);
+        return Video.create({ ...rest, title, slug: uniqueSlug });
     }
 
     async updateVideo(id, payload) {
@@ -86,7 +99,21 @@ class VideoService {
             throw error;
         }
 
-        await video.update(payload);
+        const { title, slug: manualSlug, ...rest } = payload;
+        const updateData = { ...rest };
+
+        if (title !== undefined) {
+            updateData.title = title;
+        }
+
+        updateData.slug = await getUniqueSlug(
+            Video,
+            title || video.title,
+            id,
+            manualSlug !== undefined ? manualSlug : video.slug,
+        );
+
+        await video.update(updateData);
         return video;
     }
 

@@ -47,28 +47,6 @@ router.get("/", VideoController.listVideos);
 
 /**
  * @swagger
- * /video/{id}:
- *   get:
- *     summary: Get a video by ID
- *     tags: [Video]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Video details
- *       404:
- *         description: Video not found
- *       500:
- *         description: Server error
- */
-router.get("/:id", VideoController.getVideoById);
-
-/**
- * @swagger
  * /video/slug/{slug}:
  *   get:
  *     summary: Get a video by Slug
@@ -88,6 +66,28 @@ router.get("/:id", VideoController.getVideoById);
  *         description: Server error
  */
 router.get("/slug/:slug", VideoController.getVideoBySlug);
+
+/**
+ * @swagger
+ * /video/{id}:
+ *   get:
+ *     summary: Get a video by ID
+ *     tags: [Video]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Video details
+ *       404:
+ *         description: Video not found
+ *       500:
+ *         description: Server error
+ */
+router.get("/:id", VideoController.getVideoById);
 
 /**
  * @swagger
