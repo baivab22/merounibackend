@@ -14,6 +14,7 @@ import {
   updateScholarshipQuerySchema,
   updateScholarshipBodySchema,
   deleteScholarshipQuerySchema,
+  updateScholarshipOrderSchema,
 } from "../validators/scholarship/Scholarship.validator.js";
 
 const route = express.Router();
@@ -73,6 +74,14 @@ route.get(
  *       404:
  *         description: Scholarship not found
  */
+route.patch(
+  "/update-order",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(updateScholarshipOrderSchema, "body"),
+  ScholarshipController.updateScholarshipOrder,
+);
+
 route.get(
   "/:id",
   requestValidator(scholarshipIdParamSchema, "params"),

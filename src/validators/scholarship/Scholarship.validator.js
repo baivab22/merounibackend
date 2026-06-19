@@ -66,3 +66,18 @@ export const updateScholarshipBodySchema = yup
 export const deleteScholarshipQuerySchema = yup.object({
   scholarship_id: yup.number().integer().positive().required(),
 });
+
+export const updateScholarshipOrderSchema = yup
+  .object({
+    scholarships: yup
+      .array()
+      .of(
+        yup.object({
+          id: yup.number().integer().positive().required(),
+          order_no: yup.number().integer().min(0).required(),
+        }),
+      )
+      .min(1)
+      .required(),
+  })
+  .required();

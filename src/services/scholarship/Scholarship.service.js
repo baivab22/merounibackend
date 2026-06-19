@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 
+import { sequelize } from "../../config/database.config.js";
 import Scholarship from "../../models/scholarship/Scholarship.model.js";
 import Category from "../../models/category/Category.model.js";
 import UserModel from "../../models/users/User.model.js";
@@ -48,9 +49,14 @@ class ScholarshipService {
       "name",
     ];
     const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
-    const order = [
-      [sortField, sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC"],
-    ];
+    const order =
+      sortBy && sortBy !== "createdAt"
+        ? [[sortField, sortOrder.toUpperCase() === "ASC" ? "ASC" : "DESC"]]
+        : [
+            [sequelize.literal("order_no_for_website IS NULL"), "ASC"],
+            ["order_no_for_website", "ASC"],
+            ["id", "DESC"],
+          ];
 
     const { count: totalCount, rows: scholarships } =
       await Scholarship.findAndCountAll({
@@ -169,6 +175,9 @@ class ScholarshipService {
     delete createData.categoryId;
     delete createData.title;
 
+    const maxOrder = await Scholarship.max("order_no_for_website");
+    createData.order_no_for_website = (maxOrder || 0) + 1;
+
     return Scholarship.create(createData);
   }
 
@@ -215,6 +224,38 @@ class ScholarshipService {
     if (deletedRows === 0) {
       const error = new Error("Scholarship not found");
       error.status = 404;
+      throw error;
+    }
+  }
+
+  async updateScholarshipOrder(scholarships) {
+    const transaction = await sequelize.transaction();
+    try {
+      const scholarshipIds = scholarships.map((s) => s.id);
+      const existing = await Scholarship.findAll({
+        where: { id: { [Op.in]: scholarshipIds } },
+        transaction,
+      });
+
+      if (existing.length !== scholarshipIds.length) {
+        const error = new Error("Invalid scholarship IDs");
+        error.status = 400;
+        throw error;
+      }
+
+      const updates = scholarships.map((scholarship) =>
+        Scholarship.update(
+          { order_no_for_website: scholarship.order_no },
+          { where: { id: scholarship.id }, transaction },
+        ),
+      );
+
+      await Promise.all(updates);
+      await transaction.commit();
+
+      return { message: "Scholarship order updated successfully" };
+    } catch (error) {
+      await transaction.rollback();
       throw error;
     }
   }

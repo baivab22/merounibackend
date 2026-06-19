@@ -66,6 +66,11 @@ Scholarship.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    order_no_for_website: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     sequelize,

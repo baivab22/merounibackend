@@ -108,6 +108,22 @@ class ScholarshipController {
       });
     }
   }
+
+  static async updateScholarshipOrder(req, res) {
+    try {
+      const result = await scholarshipService.updateScholarshipOrder(
+        req.body.scholarships,
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error updating scholarship order:", error);
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default ScholarshipController;
