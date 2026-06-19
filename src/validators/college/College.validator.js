@@ -116,6 +116,12 @@ export const schoolPaginationSchema = yup.object({
     .string()
     .nullable()
     .transform((value) => (value === "" ? null : value)),
+  status: yup
+    .string()
+    .oneOf(["draft", "published", "archived", "all"])
+    .nullable()
+    .optional()
+    .transform((value) => (value === "" || value === "all" ? null : value)),
 });
 export const collegeSlugParamSchema = yup.object({
   slug: yup.string().trim().required(),
@@ -240,25 +246,70 @@ export const createOrUpdateCollegeSchema = yup
   })
   .required();
 
+const toOptionalPositiveInt = (value, originalValue) => {
+  if (
+    originalValue === "" ||
+    originalValue === null ||
+    originalValue === undefined
+  ) {
+    return undefined;
+  }
+  const parsed = Number(originalValue);
+  return Number.isNaN(parsed) ? originalValue : parsed;
+};
+
 export const createOrUpdateAdmissionSchema = yup
   .object({
-    id: yup.number().integer().positive().optional(),
-    school_college_id: yup.number().integer().positive().required(),
-    program_id: yup.number().integer().positive().optional(),
-    course_id: yup.number().integer().positive().optional(),
+    id: yup
+      .number()
+      .transform(toOptionalPositiveInt)
+      .integer()
+      .positive()
+      .optional(),
+    school_college_id: yup
+      .number()
+      .transform((value, originalValue) => {
+        if (
+          originalValue === "" ||
+          originalValue === null ||
+          originalValue === undefined
+        ) {
+          return undefined;
+        }
+        const parsed = Number(originalValue);
+        return Number.isNaN(parsed) ? originalValue : parsed;
+      })
+      .integer()
+      .positive("Target school/college is required")
+      .required("Target school/college is required"),
+    program_id: yup
+      .number()
+      .transform(toOptionalPositiveInt)
+      .integer()
+      .positive("Academic program must be a valid ID")
+      .optional(),
+    course_id: yup
+      .number()
+      .transform(toOptionalPositiveInt)
+      .integer()
+      .positive()
+      .optional(),
     eligibility_criteria: yup.string().nullable().optional(),
     admission_process: yup.string().nullable().optional(),
     fee_details: yup.string().nullable().optional(),
     description: yup.string().nullable().optional(),
     pdf_file: yup.string().nullable().optional(),
-    status: yup.string().oneOf(["draft", "published"]).optional(),
+    status: yup
+      .string()
+      .oneOf(["draft", "published"], "Status must be draft or published")
+      .optional(),
     slug: yup.string().trim().optional(),
     meta_description: yup.string().trim().optional(),
   })
   .test(
     "at-least-one-id",
-    "Either program_id or course_id is required",
-    (value) => !!(value.program_id || value.course_id),
+    "Academic program is required",
+    (value) => !!(value?.program_id || value?.course_id),
   )
   .required();
 
@@ -306,6 +357,14 @@ export const updateSchoolOrderSchema = yup
       .required(),
   })
   .required();
+
+export const institutionsForAdmissionQuerySchema = yup.object({
+  q: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .optional(),
+});
 
 export const admissionPaginationSchema = yup.object({
   page: yup.number().integer().min(1).default(1),

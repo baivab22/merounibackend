@@ -873,6 +873,35 @@ class CollegeService {
     };
   }
 
+  /** All schools/colleges from colleges_schools for admission targeting (excludes drafts). */
+  async listInstitutionsForAdmission(query = {}) {
+    const search = (query.q || "").trim();
+    const whereCondition = {
+      status: { [Op.ne]: "draft" },
+    };
+
+    if (search) {
+      whereCondition.name = { [Op.like]: `%${search}%` };
+    }
+
+    const items = await College.findAll({
+      where: whereCondition,
+      attributes: [
+        "id",
+        "name",
+        "slug",
+        "college_logo",
+        "featured_img",
+        "institute_level",
+        "status",
+        "institute_type",
+      ],
+      order: [["name", "ASC"]],
+    });
+
+    return items.map((row) => (row.toJSON ? row.toJSON() : row));
+  }
+
   async getCollegeBySlug(slug) {
     const college = await College.findOne({
       where: { slug },
@@ -1121,8 +1150,8 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-
-          attributes: ["fullname", "slug"],
+          attributes: ["id", "fullname", "slug"],
+          through: { attributes: [] },
         },
         {
           model: UserModel,
@@ -1281,9 +1310,22 @@ class CollegeService {
       meta_description,
     } = payload;
 
-    const final_program_id = program_id || course_id;
+    const parsedSchoolCollegeId = parseInt(school_college_id, 10);
+    const final_program_id = parseInt(program_id || course_id, 10);
     const resolvedStatus =
       status === "draft" || status === "published" ? status : null;
+
+    if (!parsedSchoolCollegeId || Number.isNaN(parsedSchoolCollegeId)) {
+      const error = new Error("Target school/college is required");
+      error.status = 400;
+      throw error;
+    }
+
+    if (!final_program_id || Number.isNaN(final_program_id)) {
+      const error = new Error("Academic program is required");
+      error.status = 400;
+      throw error;
+    }
 
     let admission;
     let isNew = false;
@@ -1298,7 +1340,7 @@ class CollegeService {
         throw error;
       }
       await admission.update({
-        school_college_id,
+        school_college_id: parsedSchoolCollegeId,
         program_id: final_program_id,
         eligibility_criteria,
         admission_process,
@@ -1314,7 +1356,7 @@ class CollegeService {
       });
     } else {
       admission = await Admission.create({
-        school_college_id,
+        school_college_id: parsedSchoolCollegeId,
         program_id: final_program_id,
         eligibility_criteria,
         admission_process,

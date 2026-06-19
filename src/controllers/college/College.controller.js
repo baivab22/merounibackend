@@ -1,4 +1,5 @@
 import CollegeService from "../../services/college/College.service.js";
+import { formatServiceError } from "../../utils/formatServiceError.js";
 
 const collegeService = new CollegeService();
 
@@ -53,6 +54,23 @@ class CollegeController {
       return res
         .status(error.status || 500)
         .json({ error: error.message || "Server error" });
+    }
+  }
+
+  static async listInstitutionsForAdmission(req, res) {
+    try {
+      const items = await collegeService.listInstitutionsForAdmission(
+        req.query,
+      );
+      return res.status(200).json({
+        message: "success",
+        items,
+      });
+    } catch (error) {
+      return res.status(error.status || 500).json({
+        message: error.message || "Server error",
+        error: error.message,
+      });
     }
   }
 
@@ -215,10 +233,8 @@ class CollegeController {
         id,
       });
     } catch (error) {
-      return res.status(error.status || 500).json({
-        status: error.status || 500,
-        message: error.message || "Server error",
-      });
+      const formatted = formatServiceError(error);
+      return res.status(formatted.status).json(formatted);
     }
   }
 

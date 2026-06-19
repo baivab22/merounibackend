@@ -9,6 +9,7 @@ import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
 import {
   admissionPaginationSchema,
+  institutionsForAdmissionQuerySchema,
   collegeIdParamSchema,
   collegePaginationSchema,
   collegeSlugParamSchema,
@@ -113,6 +114,14 @@ router.post(
  *       200:
  *         description: List of admissions
  */
+router.get(
+  "/institutions-for-admission",
+  authenticateUser,
+  authorizeRole(["admin", "editor", "agent"]),
+  requestValidator(institutionsForAdmissionQuerySchema, "query"),
+  CollegeController.listInstitutionsForAdmission,
+);
+
 router.get(
   "/admission",
   requestValidator(admissionPaginationSchema, "query"),
