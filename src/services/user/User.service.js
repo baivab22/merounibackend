@@ -108,37 +108,43 @@ class UserService {
     const endDate = query.end_date;
     const roleFilter = query.role;
 
-    const whereCondition = {};
+    const whereConditions = [];
 
     if (startDate || endDate) {
-      whereCondition.createdAt = {};
+      const createdAtFilter = {};
       if (startDate) {
         const startOfDay = new Date(startDate);
         startOfDay.setHours(0, 0, 0, 0);
-        whereCondition.createdAt[Op.gte] = startOfDay;
+        createdAtFilter[Op.gte] = startOfDay;
       }
       if (endDate) {
         const endOfDay = new Date(endDate);
         endOfDay.setHours(23, 59, 59, 999);
-        whereCondition.createdAt[Op.lte] = endOfDay;
+        createdAtFilter[Op.lte] = endOfDay;
       }
+      whereConditions.push({ createdAt: createdAtFilter });
     }
 
     if (roleFilter) {
       const rolesArray = roleFilter.split(",");
       if (rolesArray.length > 0) {
         const roleConditions = rolesArray.map((r) =>
-          Sequelize.literal(
-            `JSON_UNQUOTE(JSON_EXTRACT(roles, '$.${r.trim()}')) = 'true'`,
+          Sequelize.where(
+            Sequelize.literal(`JSON_EXTRACT(roles, '$.${r.trim()}')`),
+            true,
           ),
         );
-        whereCondition[Op.and] = [{ [Op.or]: roleConditions }];
+        whereConditions.push({ [Op.or]: roleConditions });
       }
     }
+
+    const whereCondition =
+      whereConditions.length > 0 ? { [Op.and]: whereConditions } : {};
 
     const users = await UserModel.findAll({
       where: whereCondition,
       limit,
+      order: [["createdAt", "DESC"]],
       attributes: [
         "firstName",
         "middleName",

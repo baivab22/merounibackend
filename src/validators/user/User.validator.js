@@ -7,7 +7,28 @@ export const getUserProfileQuerySchema = yup.object({
   id: yup.number().integer().positive().optional(),
 });
 
-export const exportUsersQuerySchema = paginationSchema;
+export const exportUsersQuerySchema = paginationSchema.shape({
+  start_date: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? undefined : value))
+    .optional(),
+  end_date: yup
+    .string()
+    .nullable()
+    .transform((value) => (value === "" ? undefined : value))
+    .optional(),
+  role: yup
+    .string()
+    .nullable()
+    .transform((value) => {
+      if (!value || value === "" || value.toLowerCase() === "all") {
+        return undefined;
+      }
+      return value.toLowerCase();
+    })
+    .optional(),
+});
 
 // Schema for listing users with role filter
 export const listUsersQuerySchema = paginationSchema.shape({
@@ -18,7 +39,14 @@ export const listUsersQuerySchema = paginationSchema.shape({
     .default("DESC"),
   role: yup
     .string()
-    .oneOf(["student", "editor", "admin", "agent", "institution"])
+    .oneOf([
+      "student",
+      "editor",
+      "admin",
+      "agent",
+      "institution",
+      "consultancy",
+    ])
     .optional(),
 });
 
@@ -44,6 +72,7 @@ export const updateUserProfileBodySchema = yup
       editor: yup.boolean(),
       student: yup.boolean(),
       institution: yup.boolean(),
+      consultancy: yup.boolean(),
     }),
     pendingRoles: yup.mixed(), // optional, handled in service
     profileImageUrl: yup.string().url().nullable().optional(),

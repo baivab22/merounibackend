@@ -93,6 +93,8 @@ route.get(
  */
 route.get(
   "/export",
+  authenticateUser,
+  authorizeRole(["admin"]),
   requestValidator(exportUsersQuerySchema, "query"),
   UserController.exportUsers
 );
