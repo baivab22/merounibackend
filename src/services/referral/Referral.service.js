@@ -8,12 +8,44 @@ import Referral from "../../models/referral/Referral.model.js";
 import UserModel from "../../models/users/User.model.js";
 import { roleHelper } from "../../utils/RoleHelper.js";
 import Program from "../../models/program/Program.model.js";
+import CollegeOfferingProgram from "../../models/college/CollegeOfferingProgram.model.js";
 
 class ReferralService {
+  programInclude() {
+    return {
+      model: CollegeOfferingProgram,
+      as: "collegeOfferingProgram",
+      required: false,
+      attributes: ["id", "college_id", "program_id"],
+      include: [
+        {
+          model: Program,
+          as: "program",
+          required: false,
+          attributes: ["id", "title", "slug", "code"],
+        },
+      ],
+    };
+  }
+
+  formatReferralWithProgram(referral) {
+    const json = referral?.toJSON ? referral.toJSON() : referral;
+    const program = json.collegeOfferingProgram?.program ?? null;
+    return {
+      ...json,
+      program,
+      course: program,
+    };
+  }
+
+  formatReferralsWithProgram(referrals) {
+    return referrals.map((referral) => this.formatReferralWithProgram(referral));
+  }
+
   async createReferredApplication(payload, user) {
     const applications = Array.isArray(payload) ? payload : [payload];
 
-    // Extract agent_id from the authenticated user
+    // Extract referring agent from the authenticated user
     if (!user || !user.id) {
       const error = new Error("Authentication required");
       error.status = 401;
@@ -27,8 +59,18 @@ class ReferralService {
       throw error;
     }
 
-    const agent_id = userRoles?.agent ? user.id : null;
+    const referring_agent_id = userRoles?.agent ? user.id : null;
     const consultancy_id = userRoles?.consultancy ? user.id : null;
+    const referring_consultancy_id =
+      userRoles?.consultancy && user.consultancyId ? user.consultancyId : null;
+
+    if (userRoles?.consultancy && !referring_consultancy_id) {
+      const error = new Error(
+        "Consultancy profile is not linked to your account. Please contact support.",
+      );
+      error.status = 400;
+      throw error;
+    }
 
     for (const application of applications) {
       const { college_id, students = [] } = application;
@@ -49,8 +91,9 @@ class ReferralService {
       for (const student of students) {
         await Referral.create({
           college_id,
-          agent_id,
+          referring_agent_id,
           consultancy_id,
+          referring_consultancy_id,
           application_type: "referred",
           student_name: student.student_name,
           student_phone_no: student.student_phone_no,
@@ -64,11 +107,11 @@ class ReferralService {
   }
 
 
-  async checkIfAlreadyAppliedForCollage(college_id, student_id) {
+  async checkIfAlreadyAppliedForCollage(college_id, studentId) {
     const existing = await Referral.findOne({
       where: {
         college_id,
-        student_id,
+        applying_student_id: studentId,
         application_type: "self",
       },
     });
@@ -83,13 +126,13 @@ class ReferralService {
     }
   }
 
-  async createSelfApplication(payload, student_id) {
+  async createSelfApplication(payload, studentId) {
     const { referral_type, college_id, program_id, description } =
       payload;
 
     const user = await UserModel.findOne({
       where: {
-        id: student_id,
+        id: studentId,
       },
     });
 
@@ -103,7 +146,7 @@ class ReferralService {
     const existing = await Referral.findOne({
       where: {
         college_id,
-        student_id,
+        applying_student_id: studentId,
         program_id,
         application_type: "self",
       },
@@ -119,7 +162,7 @@ class ReferralService {
 
     return Referral.create({
       college_id,
-      student_id: student_id,
+      applying_student_id: studentId,
       student_name: `${user.firstName} ${user.middleName || ""} ${user.lastName || ""
         }`.trim(),
       student_phone_no: user.phoneNo,
@@ -149,9 +192,13 @@ class ReferralService {
 
     if (!userRoles?.admin && !userRoles?.editor) {
       if (userRoles?.agent) {
-        whereCondition.agent_id = user.id;
+        whereCondition.referring_agent_id = user.id;
       } else if (userRoles?.consultancy) {
-        whereCondition.consultancy_id = user.id;
+        if (user.consultancyId) {
+          whereCondition.referring_consultancy_id = user.consultancyId;
+        } else {
+          whereCondition.consultancy_id = user.id;
+        }
       }
     }
 
@@ -189,11 +236,7 @@ class ReferralService {
           as: "referralCollege",
           attributes: ["name", "slug"],
         },
-        {
-          model: Program,
-          as: "program",
-          attributes: ["id", "title"],
-        },
+        this.programInclude(),
       ],
       limit: limitNum,
       offset: offset,
@@ -201,7 +244,7 @@ class ReferralService {
     });
 
     return {
-      items: referrals,
+      items: this.formatReferralsWithProgram(referrals),
       pagination: {
         total: count,
         page: pageNum,
@@ -217,12 +260,16 @@ class ReferralService {
     const userRoles = roleHelper(user?.role);
 
     if (userRoles?.agent) {
-      whereCondition.agent_id = user.id;
+      whereCondition.referring_agent_id = user.id;
     } else if (userRoles?.consultancy) {
-      whereCondition.consultancy_id = user.id;
+      if (user.consultancyId) {
+        whereCondition.referring_consultancy_id = user.consultancyId;
+      } else {
+        whereCondition.consultancy_id = user.id;
+      }
     } else if (user?.id) {
       // student or other authenticated user
-      whereCondition.student_id = user.id;
+      whereCondition.applying_student_id = user.id;
     }
 
     return Referral.findAll({
@@ -247,13 +294,9 @@ class ReferralService {
             },
           ],
         },
-        {
-          model: Program,
-          as: "program",
-          attributes: ["id", "title"],
-        },
+        this.programInclude(),
       ],
-    });
+    }).then((referrals) => this.formatReferralsWithProgram(referrals));
   }
 
   async getApplicationsByType(type) {
@@ -274,14 +317,10 @@ class ReferralService {
           as: "referralCollege",
           attributes: ["name", "slug"],
         },
-        {
-          model: Program,
-          as: "program",
-          attributes: ["id", "title"],
-        },
+        this.programInclude(),
       ],
       order: [["createdAt", "DESC"]],
-    });
+    }).then((referrals) => this.formatReferralsWithProgram(referrals));
   }
 
   async getInstitutionApplications(user) {
@@ -303,7 +342,7 @@ class ReferralService {
       throw error;
     }
 
-    return Referral.findAll({
+    const referrals = await Referral.findAll({
       where: { college_id: collegeId },
       include: [
         {
@@ -311,14 +350,12 @@ class ReferralService {
           as: "referralCollege",
           attributes: ["name", "slug"],
         },
-        {
-          model: Program,
-          as: "program",
-          attributes: ["id", "title"],
-        },
+        this.programInclude(),
       ],
       order: [["createdAt", "DESC"]],
     });
+
+    return this.formatReferralsWithProgram(referrals);
   }
 
   async getCollegeApplicationsByType(college_id, type) {
@@ -386,7 +423,7 @@ class ReferralService {
       const userRoles = roleHelper(user?.role);
       // If user is a student (not admin/editor/agent/consultancy), they can only delete their own referrals
       if (!userRoles?.admin && !userRoles?.editor && !userRoles?.agent && !userRoles?.consultancy) {
-        if (referral.student_id !== user.id) {
+        if (referral.applying_student_id !== user.id) {
           const error = new Error("You can only delete your own applications");
           error.status = 403;
           throw error;
@@ -408,16 +445,16 @@ class ReferralService {
       ? parseFloat(referralPointConfig.value) || 10
       : 10;
 
-    // Use raw query to count referrals grouped by agent_id
+    // Use raw query to count referrals grouped by referring_agent_id
     const agentStats = await sequelize.query(
       `
       SELECT 
-        r.agent_id,
+        r.referring_agent_id,
         COUNT(r.id) as referral_count
       FROM referral r
-      WHERE r.agent_id IS NOT NULL 
+      WHERE r.referring_agent_id IS NOT NULL 
         AND r.application_type = 'referred'
-      GROUP BY r.agent_id
+      GROUP BY r.referring_agent_id
       ORDER BY referral_count DESC
       LIMIT :limit
       `,
@@ -428,7 +465,7 @@ class ReferralService {
     );
 
     // Get agent IDs and fetch user details
-    const agentIds = agentStats.map((stat) => stat.agent_id);
+    const agentIds = agentStats.map((stat) => stat.referring_agent_id);
     const agents = await UserModel.findAll({
       where: { id: { [Op.in]: agentIds } },
       attributes: ["id", "firstName", "lastName", "email"],
@@ -441,10 +478,10 @@ class ReferralService {
     const topAgents = agentStats.map((stat) => {
       const referralCount = parseInt(stat.referral_count || 0);
       const totalScore = referralCount * referralPoint;
-      const agent = agentMap.get(stat.agent_id);
+      const agent = agentMap.get(stat.referring_agent_id);
 
       return {
-        agent_id: stat.agent_id,
+        referring_agent_id: stat.referring_agent_id,
         agent: agent
           ? {
             id: agent.id,

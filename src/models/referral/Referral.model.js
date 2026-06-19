@@ -1,8 +1,9 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../config/database.config.js";
 import College from "../college/College.model.js";
+import Consultancy from "../consultancy/Consultancy.model.js";
 import User from "../users/User.model.js";
-import Program from "../program/Program.model.js";
+import CollegeOfferingProgram from "../college/CollegeOfferingProgram.model.js";
 
 class Referral extends Model { }
 
@@ -21,7 +22,7 @@ Referral.init(
         key: "id",
       },
     },
-    agent_id: {
+    referring_agent_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -37,12 +38,20 @@ Referral.init(
         key: "id",
       },
     },
+    referring_consultancy_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "consultancies",
+        key: "id",
+      },
+    },
     application_type: {
       type: DataTypes.ENUM("self", "referred"),
       allowNull: false,
     },
     // New flatten fields so we don't need a separate ReferralStudent model
-    student_id: {
+    applying_student_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -69,11 +78,12 @@ Referral.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    // FK to college_offering_programs.id (selected program for this college)
     program_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
-        model: Program,
+        model: "college_offering_programs",
         key: "id",
       },
     },
@@ -102,7 +112,7 @@ Referral.belongsTo(College, {
 });
 
 Referral.belongsTo(User, {
-  foreignKey: "agent_id",
+  foreignKey: "referring_agent_id",
   as: "referralAgent",
 });
 
@@ -111,9 +121,19 @@ Referral.belongsTo(User, {
   as: "referralConsultancy",
 });
 
-Referral.belongsTo(Program, {
+Referral.belongsTo(Consultancy, {
+  foreignKey: "referring_consultancy_id",
+  as: "referringConsultancy",
+});
+
+Referral.belongsTo(User, {
+  foreignKey: "applying_student_id",
+  as: "applyingStudent",
+});
+
+Referral.belongsTo(CollegeOfferingProgram, {
   foreignKey: "program_id",
-  as: "program",
+  as: "collegeOfferingProgram",
 });
 
 export default Referral;
