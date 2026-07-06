@@ -17,7 +17,15 @@ class MiscController {
 
   async getNepalDistrictList(req, res) {
     try {
-      res.status(200).json({ success: true, data: NEPAL_DISTRICTS });
+      const { q } = req.query;
+      let districts = NEPAL_DISTRICTS;
+      if (q) {
+        const search = q.toLowerCase();
+        districts = NEPAL_DISTRICTS.filter((d) =>
+          d.toLowerCase().includes(search)
+        );
+      }
+      res.status(200).json({ success: true, data: districts });
     } catch (error) {
       res
         .status(500)
