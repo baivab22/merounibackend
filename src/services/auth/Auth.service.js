@@ -15,6 +15,8 @@ class AuthService {
         password,
         role = "student",
         agent_experience,
+        education_level,
+        further_education_plan,
         roles,
         created_by_admin,
       } = payload;
@@ -77,6 +79,14 @@ class AuthService {
 
       if (role === "agent" && agent_experience) {
         createData.agentExperience = agent_experience;
+      }
+
+      if (education_level) {
+        createData.educationLevel = education_level;
+      }
+
+      if (further_education_plan) {
+        createData.furtherEducationPlan = further_education_plan;
       }
 
       const user = await UserModel.create(createData, { transaction });

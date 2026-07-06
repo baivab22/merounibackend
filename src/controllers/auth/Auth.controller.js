@@ -116,6 +116,8 @@ class AuthController {
           role: user.roles || {},
           collegeId: user.collegeId || null,
           consultancyId: user.consultancyId || null,
+          educationLevel: user.educationLevel || null,
+          furtherEducationPlan: user.furtherEducationPlan || null,
         },
       };
 

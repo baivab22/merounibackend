@@ -38,6 +38,11 @@ export const registerSchema = yup.object({
     then: (schema) => schema.required("Please tell us about yourself and your experiences"),
     otherwise: (schema) => schema.optional(),
   }),
+  education_level: yup
+    .string()
+    .oneOf(["upto_class_10", "plus_two_running", "plus_two_graduate", "bachelors", "masters"])
+    .optional(),
+  further_education_plan: yup.string().optional(),
   roles: yup
     .string()
     .oneOf(["admin", "editor", "student", "agent", "institution"])

@@ -95,6 +95,16 @@ UserModel.init(
       allowNull: true,
       field: "agent_experience",
     },
+    educationLevel: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "education_level",
+    },
+    furtherEducationPlan: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: "further_education_plan",
+    },
     createdByAdmin: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
