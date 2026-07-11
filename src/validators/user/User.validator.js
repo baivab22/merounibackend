@@ -28,6 +28,10 @@ export const exportUsersQuerySchema = paginationSchema.shape({
       return value.toLowerCase();
     })
     .optional(),
+  education_level: yup
+    .string()
+    .nullable()
+    .optional(),
 });
 
 // Schema for listing users with role filter
@@ -39,14 +43,9 @@ export const listUsersQuerySchema = paginationSchema.shape({
     .default("DESC"),
   role: yup
     .string()
-    .oneOf([
-      "student",
-      "editor",
-      "admin",
-      "agent",
-      "institution",
-      "consultancy",
-    ])
+    .optional(),
+  education_level: yup
+    .string()
     .optional(),
 });
 

@@ -16,13 +16,7 @@ CollegeMember.init(
     name: { type: DataTypes.STRING, allowNull: true },
     contact_number: { type: DataTypes.STRING },
     role: {
-      type: DataTypes.ENUM(
-        "Principal",
-        "Professor",
-        "Lecturer",
-        "Admin",
-        "Staff"
-      ),
+      type: DataTypes.STRING,
       allowNull: true,
     },
     description: { type: DataTypes.TEXT },

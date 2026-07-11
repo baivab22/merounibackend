@@ -38,6 +38,16 @@ class UserService {
       }
     }
 
+    // Filter by education level if provided
+    if (query.education_level) {
+      const levels = query.education_level.split(",").map((l) => l.trim()).filter(Boolean);
+      if (levels.length > 0) {
+        whereConditions.push({
+          educationLevel: { [Op.in]: levels },
+        });
+      }
+    }
+
     const whereCondition =
       whereConditions.length > 0 ? { [Op.and]: whereConditions } : {};
 
@@ -107,6 +117,7 @@ class UserService {
     const startDate = query.start_date;
     const endDate = query.end_date;
     const roleFilter = query.role;
+    const educationLevelFilter = query.education_level;
 
     const whereConditions = [];
 
@@ -138,6 +149,15 @@ class UserService {
       }
     }
 
+    if (educationLevelFilter) {
+      const levels = educationLevelFilter.split(",").map((l) => l.trim()).filter(Boolean);
+      if (levels.length > 0) {
+        whereConditions.push({
+          educationLevel: { [Op.in]: levels },
+        });
+      }
+    }
+
     const whereCondition =
       whereConditions.length > 0 ? { [Op.and]: whereConditions } : {};
 
@@ -151,6 +171,8 @@ class UserService {
         "lastName",
         "email",
         "phoneNo",
+        "educationLevel",
+        "furtherEducationPlan",
         [Sequelize.fn("DATE", Sequelize.col("createdAt")), "createdAt"],
       ],
     });
@@ -161,6 +183,8 @@ class UserService {
       { label: "Last Name", value: "lastName" },
       { label: "E-mail", value: "email" },
       { label: "Phone No.", value: "phoneNo" },
+      { label: "Education Level", value: "educationLevel" },
+      { label: "Future Plan", value: "furtherEducationPlan" },
       { label: "Registered Date", value: "createdAt" },
     ];
 

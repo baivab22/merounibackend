@@ -200,11 +200,7 @@ export const createOrUpdateCollegeSchema = yup
           name: yup.string().nullable().optional(),
           contact_number: yup.string().nullable().optional(),
           image_url: yup.string().nullable().optional(),
-          role: yup
-            .string()
-            .oneOf(["Principal", "Professor", "Lecturer", "Admin", "Staff"])
-            .nullable()
-            .optional(),
+          role: yup.string().trim().nullable().optional(),
           description: yup.string().nullable().optional(),
         }),
       )
