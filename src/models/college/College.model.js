@@ -78,6 +78,18 @@ College.init(
       allowNull: true,
       field: "meta_description",
     },
+    fee_structure: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    placement: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    scholarship: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,

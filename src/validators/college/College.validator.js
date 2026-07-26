@@ -182,7 +182,20 @@ export const createOrUpdateCollegeSchema = yup
       .optional(),
     contacts: yup.array().of(yup.string().nullable()).optional(),
     degrees: yup.array().of(yup.number().integer().positive()).optional(),
-    programs: yup.array().of(yup.number().integer().positive()).optional(),
+    programs: yup
+      .array()
+      .of(
+        yup.mixed().test(
+          'is-valid-program',
+          'Program must be a positive integer or an object with program_id',
+          (value) => {
+            if (typeof value === 'number' && Number.isInteger(value) && value > 0) return true;
+            if (typeof value === 'object' && value !== null && (value.program_id || value.id)) return true;
+            return false;
+          },
+        ),
+      )
+      .optional(),
     facilities: yup
       .array()
       .of(
@@ -239,6 +252,9 @@ export const createOrUpdateCollegeSchema = yup
     slug: yup.string().nullable().optional(),
     metaDescription: yup.string().nullable().optional(),
     meta_description: yup.string().nullable().optional(),
+    fee_structure: yup.string().nullable().optional(),
+    placement: yup.string().nullable().optional(),
+    scholarship: yup.string().nullable().optional(),
   })
   .required();
 

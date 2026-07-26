@@ -20,6 +20,18 @@ CollegeOfferingProgram.init(
       references: { model: Program, key: "id" },
       onDelete: "CASCADE",
     },
+    fee: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    placement: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    scholarship: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,

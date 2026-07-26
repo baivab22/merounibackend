@@ -71,6 +71,9 @@ class CollegeService {
         slug,
         meta_description,
         metaDescription,
+        fee_structure,
+        placement,
+        scholarship,
       } = payload;
 
       let collegeId =
@@ -131,6 +134,9 @@ class CollegeService {
             is_referable: is_referable ?? false,
             slug: finalSlug,
             metaDescription: metaDescription || meta_description,
+            fee_structure,
+            placement,
+            scholarship,
           },
           { transaction },
         );
@@ -155,6 +161,9 @@ class CollegeService {
               ? is_referable
               : existingCollege.is_referable,
           metaDescription: metaDescription || meta_description,
+          fee_structure,
+          placement,
+          scholarship,
         };
 
         // Ensure unique slug for update
@@ -319,8 +328,24 @@ class CollegeService {
       }
 
       if (Array.isArray(programs) && programs.length > 0) {
+        const normalizedPrograms = programs.map((p) => {
+          if (typeof p === "object" && p !== null) {
+            return {
+              program_id: p.program_id || p.id,
+              fee: p.fee || null,
+              placement: p.placement || null,
+              scholarship: p.scholarship || null,
+            };
+          }
+          return { program_id: p, fee: null, placement: null, scholarship: null };
+        });
+
+        const programIds = normalizedPrograms
+          .map((p) => p.program_id)
+          .filter(Boolean);
+
         const existingPrograms = await Program.findAll({
-          where: { id: { [Op.in]: programs } },
+          where: { id: { [Op.in]: programIds } },
           attributes: ["id"],
           transaction,
         });
@@ -328,7 +353,7 @@ class CollegeService {
         const existingProgramIds = existingPrograms.map(
           (program) => program.id,
         );
-        const invalidProgramIds = programs.filter(
+        const invalidProgramIds = programIds.filter(
           (programId) => !existingProgramIds.includes(programId),
         );
 
@@ -347,9 +372,12 @@ class CollegeService {
           transaction,
         });
 
-        const programRecords = programs.map((programId) => ({
+        const programRecords = normalizedPrograms.map((p) => ({
           college_id: collegeId,
-          program_id: programId,
+          program_id: p.program_id,
+          fee: p.fee,
+          placement: p.placement,
+          scholarship: p.scholarship,
         }));
         await CollegeOfferingProgram.bulkCreate(programRecords, {
           transaction,
@@ -931,6 +959,7 @@ class CollegeService {
         {
           model: CollegeOfferingProgram,
           as: "collegePrograms",
+          attributes: ["id", "fee", "placement", "scholarship"],
           include: [
             {
               model: Program,
