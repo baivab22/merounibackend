@@ -143,6 +143,7 @@ class CollegeService {
         collegeId = newCollege.id;
       } else {
         const updateData = {
+          name: collegeName,
           institute_type,
           institute_level,
           author_id,
