@@ -202,4 +202,18 @@ route.patch(
   ConsultancyController.updateConsultancyOrder,
 );
 
+route.patch(
+  "/:id/verified",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  ConsultancyController.updateVerifiedStatus,
+);
+
+route.patch(
+  "/:id/referable",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  ConsultancyController.updateReferableStatus,
+);
+
 export default route;

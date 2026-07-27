@@ -36,6 +36,18 @@ class CollegeService {
     return college;
   }
 
+  async updateVerifiedStatus(id, is_verified) {
+    const college = await College.findByPk(id);
+    if (!college) {
+      const error = new Error("College not found");
+      error.status = 404;
+      throw error;
+    }
+
+    await college.update({ is_verified });
+    return college;
+  }
+
   async createOrUpdateCollege(payload) {
     const transaction = await sequelize.transaction();
 
@@ -68,6 +80,7 @@ class CollegeService {
         stream_ids,
         status,
         is_referable,
+        is_verified,
         slug,
         meta_description,
         metaDescription,
@@ -132,6 +145,7 @@ class CollegeService {
             order_no_for_website: nextOrder,
             status: status || "published",
             is_referable: is_referable ?? false,
+            is_verified: is_verified ?? false,
             slug: finalSlug,
             metaDescription: metaDescription || meta_description,
             fee_structure,
@@ -161,6 +175,10 @@ class CollegeService {
             is_referable !== undefined
               ? is_referable
               : existingCollege.is_referable,
+          is_verified:
+            is_verified !== undefined
+              ? is_verified
+              : existingCollege.is_verified,
           metaDescription: metaDescription || meta_description,
           fee_structure,
           placement,

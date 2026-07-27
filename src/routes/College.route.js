@@ -459,6 +459,14 @@ router.patch(
   CollegeController.updateReferableStatus,
 );
 
+router.patch(
+  "/:id/verified",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidator(collegeIdParamSchema, "params"),
+  CollegeController.updateVerifiedStatus,
+);
+
 /**
  * @swagger
  * /college/institution/my-college:

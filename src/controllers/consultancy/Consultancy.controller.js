@@ -100,6 +100,38 @@ class ConsultancyController {
     }
   }
 
+  static async updateVerifiedStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { is_verified } = req.body;
+      await consultancyService.updateVerifiedStatus(id, is_verified);
+      return res.status(200).json({
+        message: "Verified status updated successfully!",
+      });
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+      });
+    }
+  }
+
+  static async updateReferableStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { is_referable } = req.body;
+      await consultancyService.updateReferableStatus(id, is_referable);
+      return res.status(200).json({
+        message: "Referable status updated successfully!",
+      });
+    } catch (error) {
+      const status = error.status || 500;
+      return res.status(status).json({
+        message: status === 500 ? "Server error" : error.message,
+      });
+    }
+  }
+
   static async listUniqueLocationsAndDestinations(req, res) {
     try {
       const data = await consultancyService.getUniqueLocationsAndDestinations();

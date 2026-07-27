@@ -19,6 +19,21 @@ class CollegeController {
     }
   }
 
+  static async updateVerifiedStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { is_verified } = req.body;
+      await collegeService.updateVerifiedStatus(id, is_verified);
+      return res.status(200).json({
+        message: "Verified status updated successfully!",
+      });
+    } catch (error) {
+      return res
+        .status(error.status || 500)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+
   static async createOrUpdateCollege(req, res) {
     try {
       const { collegeId, isNew } = await collegeService.createOrUpdateCollege(

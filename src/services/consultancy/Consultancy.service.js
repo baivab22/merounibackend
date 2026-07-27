@@ -33,6 +33,16 @@ class ConsultancyService {
       whereCondition.status = query.status;
     }
 
+    const isReferable = query.is_referable;
+    if (
+      isReferable === "true" ||
+      isReferable === true ||
+      isReferable === 1 ||
+      isReferable === "1"
+    ) {
+      whereCondition.is_referable = true;
+    }
+
     if (query.destination) {
       whereCondition[Op.and] = whereCondition[Op.and] || [];
       whereCondition[Op.and].push(
@@ -192,6 +202,8 @@ class ConsultancyService {
       visibility,
       map_type,
       slug,
+      is_verified,
+      is_referable,
     } = payload;
 
     // Validate title for create operation
@@ -296,6 +308,8 @@ class ConsultancyService {
       if (status !== undefined) updateData.status = status;
       if (visibility !== undefined) updateData.visibility = visibility;
       if (map_type !== undefined) updateData.map_type = map_type;
+      if (is_verified !== undefined) updateData.is_verified = is_verified;
+      if (is_referable !== undefined) updateData.is_referable = is_referable;
       if (finalSlug !== null) updateData.slug = finalSlug;
 
       await consultancy.update(updateData);
@@ -355,6 +369,8 @@ class ConsultancyService {
         pinned: pinned !== undefined ? pinned : 0,
         status: status || "published",
         visibility: visibility || "public",
+        is_verified: is_verified ?? false,
+        is_referable: is_referable ?? false,
       });
     }
 
@@ -372,6 +388,30 @@ class ConsultancyService {
     }
 
     await consultancy.destroy();
+  }
+
+  async updateVerifiedStatus(id, is_verified) {
+    const consultancy = await Consultancy.findByPk(id);
+    if (!consultancy) {
+      const error = new Error("Consultancy not found");
+      error.status = 404;
+      throw error;
+    }
+
+    await consultancy.update({ is_verified });
+    return consultancy;
+  }
+
+  async updateReferableStatus(id, is_referable) {
+    const consultancy = await Consultancy.findByPk(id);
+    if (!consultancy) {
+      const error = new Error("Consultancy not found");
+      error.status = 404;
+      throw error;
+    }
+
+    await consultancy.update({ is_referable });
+    return consultancy;
   }
 
   async updateConsultancyOrder(consultancies) {

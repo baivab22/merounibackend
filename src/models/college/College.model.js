@@ -73,6 +73,11 @@ College.init(
       allowNull: false,
       defaultValue: false,
     },
+    is_verified: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     metaDescription: {
       type: DataTypes.TEXT,
       allowNull: true,
