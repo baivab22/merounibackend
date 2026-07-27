@@ -1472,6 +1472,7 @@ class CollegeService {
           "featured_img",
           "order_no_for_website",
           "institute_type",
+          "is_verified",
         ],
         include: [
           {
