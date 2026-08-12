@@ -10,6 +10,9 @@ router.use(activityTracker);
 import contactRoute from "./Contact.route.js";
 router.use("/contact-us", contactRoute);
 
+import careerGuidanceRoute from "./CareerGuidance.route.js";
+router.use("/career-guidance", careerGuidanceRoute);
+
 import newsletterRoute from "./Newsletter.route.js";
 router.use("/newsletter", newsletterRoute);
 

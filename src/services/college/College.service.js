@@ -523,7 +523,7 @@ class CollegeService {
       collegeInclude.include.push({
         model: University,
         as: "universities",
-        attributes: ["fullname", "slug", "id"],
+        attributes: ["fullname", "slug", "id", "qs_ranking", "the_ranking"],
         through: { attributes: [] },
       });
     }
@@ -664,7 +664,7 @@ class CollegeService {
             {
               model: University,
               as: "universities",
-              attributes: ["fullname", "slug"],
+              attributes: ["fullname", "slug", "qs_ranking", "the_ranking"],
             },
           ],
         },
@@ -845,7 +845,7 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-          attributes: ["id", "fullname", "slug"],
+          attributes: ["id", "fullname", "slug", "qs_ranking", "the_ranking"],
           required: !!universityIdFilter,
           where: universityIdFilter ? { id: universityIdFilter } : undefined,
           through: { attributes: [] },
@@ -1010,7 +1010,7 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-          attributes: ["fullname", "slug", "id"],
+          attributes: ["fullname", "slug", "id", "qs_ranking", "the_ranking"],
           through: { attributes: [] },
         },
         {
@@ -1198,7 +1198,7 @@ class CollegeService {
         {
           model: University,
           as: "universities",
-          attributes: ["id", "fullname", "slug"],
+          attributes: ["id", "fullname", "slug", "qs_ranking", "the_ranking"],
           through: { attributes: [] },
         },
         {
@@ -1484,7 +1484,7 @@ class CollegeService {
           {
             model: University,
             as: "universities",
-            attributes: ["id", "fullname", "slug"],
+            attributes: ["id", "fullname", "slug", "qs_ranking", "the_ranking"],
             through: { attributes: [] },
           },
           {

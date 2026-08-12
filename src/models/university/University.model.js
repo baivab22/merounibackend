@@ -44,6 +44,14 @@ export const University = sequelize.define(
     type_of_institute: {
       type: DataTypes.ENUM("Public", "Private"),
     },
+    qs_ranking: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    the_ranking: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     // This is for the order of the university in the website
     order_no_for_website: {
       type: DataTypes.INTEGER,

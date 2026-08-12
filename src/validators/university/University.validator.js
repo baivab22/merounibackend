@@ -30,6 +30,18 @@ export const createOrUpdateUniversitySchema = yup
       .nullable()
       .optional(),
     type_of_institute: yup.string().oneOf(["Public", "Private"]).optional(),
+    qs_ranking: yup
+      .number()
+      .integer("QS ranking must be a whole number")
+      .positive("QS ranking must be a positive number")
+      .nullable()
+      .optional(),
+    the_ranking: yup
+      .number()
+      .integer("THE ranking must be a whole number")
+      .positive("THE ranking must be a positive number")
+      .nullable()
+      .optional(),
     description: yup.string().nullable().optional(),
     meta_description: yup.string().nullable().optional(),
     author_id: yup.number().integer().positive().optional(),

@@ -230,6 +230,8 @@ class UniversityService {
         postal_code,
         date_of_establish,
         type_of_institute,
+        qs_ranking,
+        the_ranking,
         description,
         meta_description,
         contact,
@@ -271,6 +273,8 @@ class UniversityService {
         university.author_id = author_id;
         university.date_of_establish = date_of_establish;
         university.type_of_institute = type_of_institute;
+        university.qs_ranking = qs_ranking;
+        university.the_ranking = the_ranking;
         university.description = description;
         university.meta_description = meta_description;
         university.logo = logo_from_payload; // Update logo
@@ -306,6 +310,8 @@ class UniversityService {
             author_id,
             date_of_establish,
             type_of_institute,
+            qs_ranking,
+            the_ranking,
             description,
             meta_description,
             logo: logo_from_payload,
