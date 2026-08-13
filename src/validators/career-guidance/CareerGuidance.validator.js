@@ -16,4 +16,5 @@ export const createCareerGuidanceSchema = yup.object({
 
 export const updateCareerGuidanceStatusSchema = yup.object({
   status: yup.string().trim().required("Status is required"),
+  comment: yup.string().trim().nullable().optional(),
 });

@@ -34,8 +34,8 @@ class CareerGuidanceController {
   static async updateStatus(req, res) {
     try {
       const { id } = req.query;
-      const { status } = req.body;
-      const data = await careerGuidanceService.updateStatus(id, status);
+      const { status, comment } = req.body;
+      const data = await careerGuidanceService.updateStatus(id, { status, comment });
       return res.status(200).json({
         message: "Status updated",
         data,

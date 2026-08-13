@@ -47,7 +47,7 @@ class CareerGuidanceService {
     return CareerGuidance.create(data);
   }
 
-  async updateStatus(id, status) {
+  async updateStatus(id, { status, comment }) {
     const submission = await CareerGuidance.findByPk(id);
     if (!submission) {
       const error = new Error("Submission not found");
@@ -55,6 +55,9 @@ class CareerGuidanceService {
       throw error;
     }
     submission.status = status;
+    if (comment !== undefined) {
+      submission.comment = comment;
+    }
     await submission.save();
     return submission;
   }

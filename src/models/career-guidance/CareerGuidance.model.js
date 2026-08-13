@@ -32,6 +32,10 @@ CareerGuidance.init(
       allowNull: false,
       defaultValue: "new",
     },
+    comment: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,
