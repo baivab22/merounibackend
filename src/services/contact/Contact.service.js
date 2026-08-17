@@ -18,6 +18,7 @@ class ContactService {
       where[Op.or] = [
         { fullname: { [Op.like]: `%${q}%` } },
         { email: { [Op.like]: `%${q}%` } },
+        { phone: { [Op.like]: `%${q}%` } },
         { subject: { [Op.like]: `%${q}%` } },
         { message: { [Op.like]: `%${q}%` } },
       ];

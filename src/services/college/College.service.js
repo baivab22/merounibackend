@@ -12,6 +12,7 @@ import CollegeFacility from "../../models/college/CollegeFacility.model.js";
 import CollegeGallery from "../../models/college/CollegeGallery.model.js";
 import CollegeMember from "../../models/college/CollegeMember.model.js";
 import CollegeOfferingDegrees from "../../models/college/CollegeOfferingDegrees.model.js";
+import CollegeRanking from "../../models/college/CollegeRanking.model.js";
 import Program from "../../models/program/Program.model.js";
 import Degree from "../../models/degree/Degree.model.js";
 import Level from "../../models/level/Level.model.js";
@@ -1033,6 +1034,18 @@ class CollegeService {
           as: "degrees",
           attributes: ["id", "title", "slug", "short_name"],
           through: { attributes: [] },
+        },
+        {
+          model: CollegeRanking,
+          as: "collegeRankings",
+          attributes: ["id", "rank", "degree_id"],
+          include: [
+            {
+              model: Degree,
+              as: "degree",
+              attributes: ["id", "title", "slug", "short_name"],
+            },
+          ],
         },
       ],
     });

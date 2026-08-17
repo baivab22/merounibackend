@@ -21,6 +21,10 @@ ContactUs.init(
       allowNull: false,
       unique: true,
     },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     subject: {
       type: DataTypes.STRING,
       allowNull: false,

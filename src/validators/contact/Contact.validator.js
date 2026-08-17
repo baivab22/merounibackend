@@ -14,6 +14,7 @@ export const listContactSchema = paginationSchema.shape({
 export const createContactSchema = yup.object({
   fullname: yup.string().required("Fullname is required"),
   email: yup.string().email().required("Email is required"),
+  phone: yup.string().trim().required("Mobile number is required"),
   subject: yup.string().required("Subject is required"),
   message: yup.string().optional(),
 });

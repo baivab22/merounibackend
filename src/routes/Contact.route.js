@@ -95,22 +95,27 @@ route.get(
  *           schema:
  *             type: object
  *             required:
- *               - name
+ *               - fullname
  *               - email
- *               - message
+ *               - phone
+ *               - subject
  *             properties:
- *               name:
+ *               fullname:
  *                 type: string
  *                 example: John Doe
  *               email:
  *                 type: string
  *                 format: email
  *                 example: john@example.com
+ *               phone:
+ *                 type: string
+ *                 example: 9841234567
+ *               subject:
+ *                 type: string
+ *                 example: Admission Inquiry
  *               message:
  *                 type: string
  *                 example: I have a question about...
- *               phone:
- *                 type: string
  *     responses:
  *       201:
  *         description: Contact submission created successfully
