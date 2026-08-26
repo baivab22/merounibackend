@@ -23,7 +23,17 @@ export const createReferredApplicationSchema = yup
               .string()
               .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
               .required(),
-            student_email: yup.string().email().required(),
+            student_email: yup
+              .string()
+              .email()
+              .nullable()
+              .optional()
+              .transform((value, originalValue) => {
+                if (originalValue === '' || originalValue === null || originalValue === undefined) {
+                  return null;
+                }
+                return value;
+              }),
             student_description: yup.string().optional(),
           })
         )
