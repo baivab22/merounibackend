@@ -45,7 +45,6 @@ class ReferralService {
   async createReferredApplication(payload, user) {
     const applications = Array.isArray(payload) ? payload : [payload];
 
-    // Extract referring agent from the authenticated user
     if (!user || !user.id) {
       const error = new Error("Authentication required");
       error.status = 401;
@@ -72,6 +71,8 @@ class ReferralService {
       throw error;
     }
 
+    // Collect all referral records to create
+    const referralRecords = [];
     for (const application of applications) {
       const { college_id, students = [] } = application;
 
@@ -87,9 +88,8 @@ class ReferralService {
         throw error;
       }
 
-      // Create one referral per student
       for (const student of students) {
-        await Referral.create({
+        referralRecords.push({
           college_id,
           referring_agent_id,
           consultancy_id,
@@ -97,13 +97,73 @@ class ReferralService {
           application_type: "referred",
           student_name: student.student_name,
           student_phone_no: student.student_phone_no,
-          student_email: student.student_email,
+          student_email: student.student_email || null,
           student_description: student.student_description,
           program_id: student.program_id || null,
           status: "IN_PROGRESS",
         });
       }
     }
+
+    if (referralRecords.length === 0) {
+      const error = new Error("No valid referrals to create");
+      error.status = 400;
+      throw error;
+    }
+
+    // Check for existing duplicate referrals (same agent + student phone + college)
+    const collegeIds = [...new Set(referralRecords.map((r) => r.college_id))];
+    const studentPhones = [
+      ...new Set(referralRecords.map((r) => r.student_phone_no)),
+    ];
+
+    const whereCondition = {
+      college_id: { [Op.in]: collegeIds },
+      student_phone_no: { [Op.in]: studentPhones },
+      application_type: "referred",
+    };
+
+    if (referring_agent_id) {
+      whereCondition.referring_agent_id = referring_agent_id;
+    } else if (referring_consultancy_id) {
+      whereCondition.referring_consultancy_id = referring_consultancy_id;
+    }
+
+    const existingReferrals = await Referral.findAll({
+      where: whereCondition,
+      attributes: ["college_id", "student_phone_no"],
+    });
+
+    const existingSet = new Set(
+      existingReferrals.map((r) => `${r.college_id}-${r.student_phone_no}`)
+    );
+
+    // Filter out duplicates
+    const newRecords = referralRecords.filter(
+      (r) => !existingSet.has(`${r.college_id}-${r.student_phone_no}`)
+    );
+
+    const skippedCount = referralRecords.length - newRecords.length;
+
+    if (newRecords.length === 0) {
+      const error = new Error(
+        `All ${skippedCount} referral(s) already exist for these students at the selected colleges`
+      );
+      error.status = 409;
+      throw error;
+    }
+
+    // Bulk create for performance
+    const created = await Referral.bulkCreate(newRecords);
+
+    return {
+      created: created.length,
+      skipped: skippedCount,
+      message:
+        skippedCount > 0
+          ? `${created.length} referral(s) created, ${skippedCount} duplicate(s) skipped`
+          : `${created.length} referral(s) created successfully`,
+    };
   }
 
 
@@ -254,7 +314,7 @@ class ReferralService {
     };
   }
 
-  async getUserReferrals(user) {
+  async getUserReferrals(user, query = {}) {
     const whereCondition = {};
 
     const userRoles = roleHelper(user?.role);
@@ -272,7 +332,27 @@ class ReferralService {
       whereCondition.applying_student_id = user.id;
     }
 
-    return Referral.findAll({
+    // Optional status filter
+    if (query.status && ["IN_PROGRESS", "ACCEPTED", "REJECTED"].includes(query.status)) {
+      whereCondition.status = query.status;
+    }
+
+    // Optional search by student name, phone, email, or college name
+    if (query.q) {
+      const searchTerm = `%${query.q}%`;
+      whereCondition[Op.or] = [
+        { student_name: { [Op.iLike]: searchTerm } },
+        { student_phone_no: { [Op.iLike]: searchTerm } },
+        { student_email: { [Op.iLike]: searchTerm } },
+      ];
+    }
+
+    // Optional pagination
+    const limit = parseInt(query.limit, 10) || null;
+    const page = parseInt(query.page, 10) || 1;
+    const offset = limit ? (page - 1) * limit : null;
+
+    const queryOptions = {
       where: whereCondition,
       include: [
         {
@@ -296,7 +376,29 @@ class ReferralService {
         },
         this.programInclude(),
       ],
-    }).then((referrals) => this.formatReferralsWithProgram(referrals));
+      order: [["createdAt", "DESC"]],
+    };
+
+    // If pagination is requested, use findAndCountAll
+    if (limit) {
+      queryOptions.limit = limit;
+      queryOptions.offset = offset;
+
+      const { count, rows: referrals } = await Referral.findAndCountAll(queryOptions);
+      return {
+        items: this.formatReferralsWithProgram(referrals),
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      };
+    }
+
+    // No pagination - return all (backward compatible)
+    const referrals = await Referral.findAll(queryOptions);
+    return this.formatReferralsWithProgram(referrals);
   }
 
   async getApplicationsByType(type) {

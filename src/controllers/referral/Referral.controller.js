@@ -5,11 +5,15 @@ const referralService = new ReferralService();
 class ReferralController {
   static async createReferredApplication(req, res) {
     try {
-      await referralService.createReferredApplication(req.body, req.user);
+      const result = await referralService.createReferredApplication(req.body, req.user);
 
       return res
         .status(201)
-        .json({ message: "Referred application submitted successfully" });
+        .json({
+          message: result.message,
+          created: result.created,
+          skipped: result.skipped,
+        });
     } catch (error) {
       console.error("Error details:", error);
       const status = error.status || 500;
@@ -39,11 +43,15 @@ class ReferralController {
 
   static async agentApply(req, res) {
     try {
-      await referralService.createReferredApplication(req.body, req.user);
+      const result = await referralService.createReferredApplication(req.body, req.user);
 
       return res
         .status(201)
-        .json({ message: "Agent application submitted successfully" });
+        .json({
+          message: result.message,
+          created: result.created,
+          skipped: result.skipped,
+        });
     } catch (error) {
       console.error("Error details:", error);
       const status = error.status || 500;
@@ -91,7 +99,7 @@ class ReferralController {
           error: "Authentication required",
         });
       }
-      const referrals = await referralService.getUserReferrals(req.user);
+      const referrals = await referralService.getUserReferrals(req.user, req.query);
       return res.status(200).json(referrals);
     } catch (error) {
       console.error(error);
