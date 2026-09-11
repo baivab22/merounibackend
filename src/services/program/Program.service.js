@@ -397,13 +397,6 @@ class ProgramService {
       });
 
       if (!programId) {
-        const existingProgram = await Program.findOne({ where: { title } });
-        if (existingProgram) {
-          const error = new Error("Program title already exists");
-          error.status = 400;
-          throw error;
-        }
-
         const newProgram = await Program.create(
           {
             title,
