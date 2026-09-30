@@ -169,4 +169,7 @@ import miscRoute from "./Misc.route.js";
 router.use("/misc", miscRoute);
 router.use("/location", miscRoute);
 
+import studentMembershipRoute from "./StudentMembership.route.js";
+router.use("/student-member", studentMembershipRoute);
+
 export default router;
