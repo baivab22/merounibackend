@@ -1,5 +1,6 @@
 import express from "express";
 import StudentMembershipController from "../controllers/student-membership/StudentMembership.controller.js";
+import MembershipOptionController from "../controllers/student-membership/MembershipOption.controller.js";
 import { authenticateUser } from "../middlewares/Auth.middleware.js";
 import { authorizeRole } from "../middlewares/AuthorizeRole.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
@@ -10,9 +11,51 @@ import {
   updateMembershipSchema,
   updateMembershipStatusSchema,
   idParamSchema,
+  optionListQuerySchema,
+  optionParamSchema,
+  createOptionSchema,
+  updateOptionSchema,
 } from "../validators/student-membership/StudentMembership.validator.js";
 
 const route = express.Router();
+
+route.get(
+  "/options",
+  MembershipOptionController.getPublicOptions
+);
+
+route.get(
+  "/options/admin",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(optionListQuerySchema, "query"),
+  MembershipOptionController.getAdminOptions
+);
+
+route.post(
+  "/options/admin",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(createOptionSchema, "body"),
+  MembershipOptionController.createOption
+);
+
+route.put(
+  "/options/admin/:id",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(optionParamSchema, "params"),
+  requestValidator(updateOptionSchema, "body"),
+  MembershipOptionController.updateOption
+);
+
+route.delete(
+  "/options/admin/:id",
+  authenticateUser,
+  authorizeRole(["admin"]),
+  requestValidator(optionParamSchema, "params"),
+  MembershipOptionController.deleteOption
+);
 
 /**
  * @swagger

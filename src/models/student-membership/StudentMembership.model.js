@@ -45,7 +45,7 @@ StudentMembership.init(
       allowNull: true,
     },
     membership_type: {
-      type: DataTypes.ENUM("PLUS2", "BACHELORS", "GRADUATE"),
+      type: DataTypes.STRING(80),
       allowNull: false,
     },
     career_field: {

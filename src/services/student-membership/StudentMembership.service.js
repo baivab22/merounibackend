@@ -1,7 +1,7 @@
 import StudentMembership from "../../models/student-membership/StudentMembership.model.js";
+import MembershipOption from "../../models/student-membership/MembershipOption.model.js";
 import UserModel from "../../models/users/User.model.js";
 import {
-  MEMBERSHIP_TYPES,
   MEMBERSHIP_STATUSES,
   REFERENCE_PATTERN,
 } from "../../validators/student-membership/StudentMembership.validator.js";
@@ -17,6 +17,29 @@ const serializeTrainings = (trainings) => {
     ...new Set(trainings.map((t) => (typeof t === "string" ? t.trim() : "")).filter(Boolean)),
   ];
   return cleaned.length ? JSON.stringify(cleaned) : null;
+};
+
+const assertActiveOption = async (type, slug, label) => {
+  if (!slug) return;
+  const option = await MembershipOption.findOne({
+    where: { type, slug, is_active: true },
+    attributes: ["id"],
+  });
+  if (!option) {
+    const error = new Error(`Invalid ${label}`);
+    error.status = 400;
+    throw error;
+  }
+};
+
+const validateSelectedOptions = async (payload) => {
+  await assertActiveOption("LEVEL", payload.membership_type, "membership level");
+  if (payload.career_field && payload.career_field !== "unsure") {
+    await assertActiveOption("CAREER_FIELD", payload.career_field, "career field");
+  }
+  if (payload.payment_method) {
+    await assertActiveOption("PAYMENT_METHOD", payload.payment_method, "payment method");
+  }
 };
 
 // Ambiguous glyphs (0/O, 1/I) are dropped so a reference read aloud over the
@@ -90,6 +113,8 @@ class StudentMembershipService {
       throw error;
     }
 
+    await validateSelectedOptions(payload);
+
     // Prevent duplicate pending/active application for the same plan
     const existing = await StudentMembership.findOne({
       where: {
@@ -128,6 +153,8 @@ class StudentMembershipService {
   }
 
   async applyForMembershipAsGuest(payload) {
+    await validateSelectedOptions(payload);
+
     const membership = await StudentMembership.create({
       reference_id: await resolveReferenceId(payload.reference_id),
       student_name: payload.student_name,
@@ -282,11 +309,6 @@ class StudentMembershipService {
     }
 
     if (payload.membership_type) {
-      if (!MEMBERSHIP_TYPES.includes(payload.membership_type)) {
-        const error = new Error("Invalid membership type");
-        error.status = 400;
-        throw error;
-      }
       membership.membership_type = payload.membership_type;
     }
 
