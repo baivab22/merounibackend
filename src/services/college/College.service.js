@@ -784,83 +784,108 @@ class CollegeService {
       };
     }
 
-    const { count: totalCount, rows: items } = await College.findAndCountAll({
-      where: whereCondition,
-      limit,
-      offset,
-      distinct: true,
-      order: [
-        [
-          sequelize.literal(
-            "`colleges_schools`.`order_no_for_website` IS NULL",
-          ),
-          "ASC",
-        ],
-        [sequelize.col("colleges_schools.order_no_for_website"), "ASC"],
-        ["id", sort],
+    // The list endpoint only needs summary data. Loading every has-many
+    // association here creates a cartesian product and repeats large
+    // TEXT/JSON columns for every joined row. The detail endpoint
+    // (getCollegeBySlug) remains the place for the full college payload.
+    const include = [
+      {
+        model: CollegeAddress,
+        as: "collegeAddress",
+        attributes: ["country", "district", "city", "street", "postal_code"],
+        where: Object.keys(addressCondition).length
+          ? addressCondition
+          : undefined,
+        required: Object.keys(addressCondition).length > 0,
+      },
+      {
+        model: University,
+        as: "universities",
+        attributes: ["id", "fullname", "slug", "qs_ranking", "the_ranking"],
+        required: !!universityIdFilter,
+        where: universityIdFilter ? { id: universityIdFilter } : undefined,
+        through: { attributes: [] },
+      },
+      {
+        model: Degree,
+        as: "degrees",
+        attributes: ["id", "title", "slug", "short_name"],
+        through: { attributes: [] },
+        required: !!degreeIdFilter,
+        where: degreeIdFilter ? { id: degreeIdFilter } : undefined,
+      },
+    ];
+
+    // Program filtering still needs the join, but the list response does not
+    // need the program rows themselves.
+    if (programIdFilter) {
+      include.push({
+        model: CollegeOfferingProgram,
+        as: "collegePrograms",
+        attributes: [],
+        required: true,
+        where: { program_id: programIdFilter },
+      });
+    }
+
+    const listAttributes = {
+      exclude: [
+        "content",
+        "faqs",
+        "fee_structure",
+        "placement",
+        "scholarship",
+        "metaDescription",
       ],
-      include: [
-        {
-          model: CollegeAddress,
-          as: "collegeAddress",
-          attributes: ["country", "district", "city", "street", "postal_code"],
-          where: Object.keys(addressCondition).length
-            ? addressCondition
-            : undefined,
-          required: Object.keys(addressCondition).length > 0,
-        },
-        {
-          model: CollegeFacility,
-          as: "facilities",
-          attributes: ["id", "title", "description", "icon"],
-        },
-        {
-          model: CollegeMember,
-          as: "collegeMembers",
-          attributes: [
-            "id",
-            "name",
-            "contact_number",
-            "role",
-            "description",
-            "image_url",
-          ],
-        },
-        {
-          model: CollegeOfferingProgram,
-          as: "collegePrograms",
-          include: [
-            {
-              model: Program,
-              as: "program",
-              attributes: ["id", "title", "slug"],
-            },
-          ],
-          required: !!programIdFilter,
-          where: programIdFilter ? { program_id: programIdFilter } : undefined,
-        },
-        {
-          model: CollegeGallery,
-          as: "collegeGallery",
-        },
-        {
-          model: University,
-          as: "universities",
-          attributes: ["id", "fullname", "slug", "qs_ranking", "the_ranking"],
-          required: !!universityIdFilter,
-          where: universityIdFilter ? { id: universityIdFilter } : undefined,
-          through: { attributes: [] },
-        },
-        {
-          model: Degree,
-          as: "degrees",
-          attributes: ["id", "title", "slug", "short_name"],
-          through: { attributes: [] },
-          required: !!degreeIdFilter,
-          where: degreeIdFilter ? { id: degreeIdFilter } : undefined,
-        },
+    };
+
+    const order = [
+      [
+        sequelize.literal(
+          "`colleges_schools`.`order_no_for_website` IS NULL",
+        ),
+        "ASC",
       ],
-    });
+      [sequelize.col("colleges_schools.order_no_for_website"), "ASC"],
+      ["id", sort],
+    ];
+
+    const needsJoinCount =
+      Object.keys(addressCondition).length > 0 ||
+      !!programIdFilter ||
+      !!universityIdFilter ||
+      !!degreeIdFilter;
+
+    let totalCount;
+    let items;
+
+    if (needsJoinCount) {
+      const result = await College.findAndCountAll({
+        where: whereCondition,
+        attributes: listAttributes,
+        limit,
+        offset,
+        distinct: true,
+        order,
+        include,
+      });
+      totalCount = result.count;
+      items = result.rows;
+    } else {
+      const [count, rows] = await Promise.all([
+        College.count({ where: whereCondition }),
+        College.findAll({
+          where: whereCondition,
+          attributes: listAttributes,
+          limit,
+          offset,
+          order,
+          include,
+        }),
+      ]);
+      totalCount = count;
+      items = rows;
+    }
 
     // Check if each college has a user account (institution user)
     const collegeIds = items.map((college) => college.id);
