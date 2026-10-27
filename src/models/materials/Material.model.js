@@ -47,6 +47,13 @@ Material.init(
       allowNull: false,
       defaultValue: 0,
     },
+    // Premium materials are locked to active (APPROVED) members. Non-members can
+    // still see the material listed, but its file URL is withheld by the service.
+    is_premium: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,

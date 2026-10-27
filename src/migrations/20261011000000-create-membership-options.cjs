@@ -57,6 +57,7 @@ const rows = [
     label: "Information Technology",
     description: "Delivered with partner colleges",
     metadata: JSON.stringify({
+      associated_levels: ["PLUS2", "BACHELORS", "GRADUATE"],
       trainings: [
         { title: "Web Development Fundamentals", description: "HTML, CSS, JS basics" },
         { title: "Python Programming", description: "Core programming for beginners" },
@@ -75,6 +76,7 @@ const rows = [
     label: "Hospitality Management",
     description: "Delivered with partner hospitality colleges",
     metadata: JSON.stringify({
+      associated_levels: ["PLUS2", "BACHELORS", "GRADUATE"],
       trainings: [
         { title: "Front Office & Guest Services", description: "Reception & guest handling skills" },
         { title: "Food & Beverage Operations", description: "F&B service fundamentals" },
@@ -93,6 +95,7 @@ const rows = [
     label: "Business & Management",
     description: "Delivered with partner business colleges",
     metadata: JSON.stringify({
+      associated_levels: ["PLUS2", "BACHELORS", "GRADUATE"],
       trainings: [
         { title: "Business Fundamentals", description: "Core concepts for any business path" },
         { title: "Digital Marketing for Business", description: "Practical marketing for small business" },

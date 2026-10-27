@@ -372,7 +372,9 @@ route.put(
  *                 type: string
  *     responses:
  *       200:
- *         description: Membership status updated
+ *         description: >-
+ *           Membership status updated. When the status transitions to APPROVED,
+ *           the member is emailed a confirmation with a PDF invoice attached.
  *       404:
  *         description: Membership not found
  */

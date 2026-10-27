@@ -6,31 +6,71 @@ import Material from "../../models/materials/Material.model.js";
 import MaterialCategoryOrder from "../../models/materials/MaterialCategoryOrder.model.js";
 
 import MaterialHeart from "../../models/materials/MaterialHeart.model.js";
+import StudentMembership from "../../models/student-membership/StudentMembership.model.js";
+
+// Accepts the JSON booleans sent by the dashboard as well as form-style values
+// ("true"/"false"/"on"/1/0) so a checkbox can never accidentally mark a
+// material as premium just because the string "false" is truthy.
+const toBoolean = (value, fallback = false) => {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  return ["true", "1", "yes", "on"].includes(String(value).trim().toLowerCase());
+};
 
 class MaterialService {
-  _formatMaterial(material, userId = null) {
+  // Resolves what the caller may download. Staff (admins/editors) always keep
+  // full access so they can manage the library; students unlock premium files
+  // only while they hold an APPROVED (verified) membership.
+  async _resolveAccess({ userId = null, isStaff = false } = {}) {
+    if (isStaff) {
+      return { userId, hasPremiumAccess: true };
+    }
+
+    if (!userId) {
+      return { userId: null, hasPremiumAccess: false };
+    }
+
+    const membership = await StudentMembership.findOne({
+      where: { student_id: userId, status: "APPROVED" },
+      attributes: ["id"],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return { userId, hasPremiumAccess: Boolean(membership) };
+  }
+
+  _formatMaterial(material, access = {}) {
     const plain = material instanceof Material ? material.get({ plain: true }) : material;
-    
+
     // Calculate heart count and user status if relations are included
     const hearts_count = plain.hearts ? plain.hearts.length : (plain.hearts_count || 0);
-    const is_hearted = userId ? (plain.hearts ? plain.hearts.some(h => h.user_id === userId) : !!plain.is_hearted) : false;
+    const is_hearted = access.userId ? (plain.hearts ? plain.hearts.some(h => h.user_id === access.userId) : !!plain.is_hearted) : false;
+
+    const is_premium = Boolean(plain.is_premium);
+    // Premium files are only handed to approved members (or staff). Everyone else
+    // gets the metadata but no file URL, plus a lock flag so the UI can prompt
+    // them to become a member.
+    const canAccessFile = !is_premium || Boolean(access.hasPremiumAccess);
 
     return {
       title: plain.title,
       id: plain.id,
       position: plain.position || 0,
       parent_id: plain.category_id,
-      file_url: plain.file_url,
+      file_url: canAccessFile ? plain.file_url : null,
       createdAt: plain.createdAt,
       description: plain.description,
       hearts_count,
       is_hearted,
+      is_premium,
+      is_locked: is_premium && !canAccessFile,
     };
   }
 
   async listMaterialsNested(query = {}) {
     const searchQuery = query.q || query.search || "";
-    const userId = query.userId;
+    const access = await this._resolveAccess({ userId: query.userId, isStaff: query.isStaff });
     const materialWhere = searchQuery ? { title: { [Op.like]: `%${searchQuery}%` } } : {};
 
     const materials = await Material.findAll({
@@ -67,7 +107,7 @@ class MaterialService {
     materials.forEach((material) => {
       const catId = material.category_id;
       if (catId && categoryMap[catId]) {
-        const formatted = this._formatMaterial(material, userId);
+        const formatted = this._formatMaterial(material, access);
         categoryMap[catId].materials.push(formatted);
         categoryMap[catId].materials_count += 1;
         categoryMap[catId].hearts_count += formatted.hearts_count || 0;
@@ -117,6 +157,8 @@ class MaterialService {
     if (categoryId === "unlisted") whereCondition.category_id = null;
     else if (categoryId) whereCondition.category_id = categoryId;
 
+    const access = await this._resolveAccess({ userId: query.userId, isStaff: query.isStaff });
+
     const { count: totalCount, rows: materials } = await Material.findAndCountAll({
       where: whereCondition,
       limit,
@@ -135,12 +177,12 @@ class MaterialService {
     });
 
     return {
-      materials: materials?.map((m) => this._formatMaterial(m, query.userId)),
+      materials: materials?.map((m) => this._formatMaterial(m, access)),
       pagination: { currentPage: page, totalPages: Math.ceil(totalCount / limit), limit, totalCount },
     };
   }
 
-  async listByTopic(topicId, userId = null) {
+  async listByTopic(topicId, options = {}) {
     const materials = await Material.findAll({
       where: { category_id: topicId },
       include: [
@@ -153,17 +195,19 @@ class MaterialService {
       ],
       order: [["position", "ASC"], ["createdAt", "DESC"]],
     });
-    return materials.map((m) => this._formatMaterial(m, userId));
+    const access = await this._resolveAccess(options);
+    return materials.map((m) => this._formatMaterial(m, access));
   }
 
-  async getMaterial(id) {
+  async getMaterial(id, options = {}) {
     const material = await Material.findByPk(id);
     if (!material) throw Object.assign(new Error("Material not found"), { status: 404 });
-    return this._formatMaterial(material);
+    const access = await this._resolveAccess(options);
+    return this._formatMaterial(material, access);
   }
 
   async createMaterial(data) {
-    const { title, category_id, file_url, author, description } = data;
+    const { title, category_id, file_url, author, description, is_premium } = data;
     if (!author) throw Object.assign(new Error("Author is required"), { status: 400 });
 
     const material = await Material.create({
@@ -172,8 +216,9 @@ class MaterialService {
       file_url,
       author,
       description,
+      is_premium: toBoolean(is_premium, false),
     });
-    return this.getMaterial(material.id);
+    return this.getMaterial(material.id, { isStaff: true });
   }
 
   async updateMaterial(id, data) {
@@ -181,14 +226,16 @@ class MaterialService {
     if (!material) throw Object.assign(new Error("Material not found"), { status: 404 });
 
     const updateData = {};
-    const allowedFields = ['title', 'description', 'file_url', 'category_id'];
+    const allowedFields = ['title', 'description', 'file_url', 'category_id', 'is_premium'];
 
     allowedFields.forEach(field => {
-      if (data[field] !== undefined) updateData[field] = data[field];
+      if (data[field] !== undefined) {
+        updateData[field] = field === 'is_premium' ? toBoolean(data[field], false) : data[field];
+      }
     });
 
     await material.update(updateData);
-    return this.getMaterial(id);
+    return this.getMaterial(id, { isStaff: true });
   }
 
   async deleteMaterial(id) {

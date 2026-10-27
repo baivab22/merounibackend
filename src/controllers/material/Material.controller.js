@@ -2,11 +2,28 @@ import MaterialService from "../../services/material/Material.service.js";
 
 const materialService = new MaterialService();
 
+// Admins/editors manage the library and must always see the underlying files,
+// even for premium materials. Regular students only unlock premium files while
+// they hold an APPROVED membership (resolved inside the service).
+const resolveViewer = (req) => {
+  const userId = req.user?.id || null;
+  let role = req.user?.role ?? req.user?.roles ?? {};
+  if (typeof role === "string") {
+    try {
+      role = JSON.parse(role);
+    } catch {
+      role = {};
+    }
+  }
+  const isStaff = Boolean(role?.admin || role?.editor);
+  return { userId, isStaff };
+};
+
 class MaterialController {
   static async listMaterials(req, res) {
     try {
-      const userId = req.user?.id;
-      const materials = await materialService.listMaterialsNested({ ...req.query, userId });
+      const access = resolveViewer(req);
+      const materials = await materialService.listMaterialsNested({ ...req.query, ...access });
       return res.status(200).json({
         message: "Materials retrieved successfully",
         data: materials,
@@ -21,8 +38,8 @@ class MaterialController {
 
   static async listMaterialsFlat(req, res) {
     try {
-      const userId = req.user?.id;
-      const { materials, pagination } = await materialService.listMaterialsFlat({ ...req.query, userId });
+      const access = resolveViewer(req);
+      const { materials, pagination } = await materialService.listMaterialsFlat({ ...req.query, ...access });
       return res.status(200).json({
         message: "Materials flat list retrieved successfully",
         data: materials,
@@ -38,8 +55,8 @@ class MaterialController {
 
   static async listMaterialsByTopic(req, res) {
     try {
-      const userId = req.user?.id;
-      const materials = await materialService.listByTopic(req.params.topicId, userId);
+      const access = resolveViewer(req);
+      const materials = await materialService.listByTopic(req.params.topicId, access);
       return res.status(200).json({
         message: "Topic materials retrieved successfully",
         data: materials,
@@ -54,7 +71,8 @@ class MaterialController {
 
   static async getMaterial(req, res) {
     try {
-      const material = await materialService.getMaterial(req.params.id);
+      const access = resolveViewer(req);
+      const material = await materialService.getMaterial(req.params.id, access);
       return res.status(200).json({
         message: "Material retrieved successfully",
         data: material,
@@ -105,8 +123,26 @@ class MaterialController {
     } catch (error) {
       console.error("Error updating material:", error);
       return res
-        .status(500)
-        .json({ message: "Server error", error: error.message });
+        .status(error.status || 500)
+        .json({ message: error.status ? error.message : "Server error", error: error.message });
+    }
+  }
+
+  // RESTful variant used by the dashboard: PUT /materials/:id
+  static async updateMaterialById(req, res) {
+    try {
+      const updatedMaterial = await materialService.updateMaterial(
+        req.params.id,
+        req.body
+      );
+      return res
+        .status(200)
+        .json({ message: "Material updated successfully", data: updatedMaterial });
+    } catch (error) {
+      console.error("Error updating material:", error);
+      return res
+        .status(error.status || 500)
+        .json({ message: error.status ? error.message : "Server error", error: error.message });
     }
   }
 
@@ -116,9 +152,9 @@ class MaterialController {
       return res.status(200).json({ message: "Material deleted successfully" });
     } catch (error) {
       console.error("Error deleting material:", error);
-      return res``
-        .status(500)
-        .json({ message: "Server error", error: error.message });
+      return res
+        .status(error.status || 500)
+        .json({ message: error.status ? error.message : "Server error", error: error.message });
     }
   }
 

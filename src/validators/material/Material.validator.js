@@ -46,6 +46,7 @@ export const createMaterialSchema = yup
     category_id: yup.number().integer().positive().nullable().optional(),
     file_url: yup.string().trim().url("File URL must be a valid URL").optional(),
     description: yup.string().trim().nullable().optional(),
+    is_premium: yup.boolean().default(false).optional(),
   })
   .required();
 
@@ -57,6 +58,7 @@ export const updateMaterialBodySchema = yup
     category_id: yup.number().integer().positive().nullable().optional(),
     file_url: yup.string().trim().url("File URL must be a valid URL").optional(),
     description: yup.string().trim().nullable().optional(),
+    is_premium: yup.boolean().optional(),
   })
   .test("at-least-one", "At least one field must be provided for update", (value) => {
     // Only count keys that are actually present (not just undefined)

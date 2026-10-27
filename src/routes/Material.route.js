@@ -155,6 +155,9 @@ route.get(
  *                 type: string
  *               category_id:
  *                 type: integer
+ *               is_premium:
+ *                 type: boolean
+ *                 description: When true the file is only downloadable by approved members
  *               tags:
  *                 type: array
  *                 items:
@@ -202,6 +205,9 @@ route.post(
  *                 type: string
  *               category_id:
  *                 type: integer
+ *               is_premium:
+ *                 type: boolean
+ *                 description: When true the file is only downloadable by approved members
  *               tags:
  *                 type: array
  *                 items:
@@ -325,6 +331,55 @@ route.put(
   authorizeRole(["admin", "editor"]),
   requestValidator(updateMaterialOrderSchema, "body"),
   MaterialController.updateMaterialOrder
+);
+
+/**
+ * @swagger
+ * /material/{id}:
+ *   put:
+ *     summary: Update a material by id
+ *     description: Toggle premium access and edit a single material.
+ *     tags: [Materials]
+ *     security:
+ *       - bearerAuth: []
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               file_url:
+ *                 type: string
+ *               category_id:
+ *                 type: integer
+ *               is_premium:
+ *                 type: boolean
+ *                 description: When true the file is only downloadable by approved members
+ *     responses:
+ *       200:
+ *         description: Material updated successfully
+ */
+route.put(
+  "/:id",
+  authenticateUser,
+  authorizeRole(["admin", "editor"]),
+  requestValidatorMultiple([
+    { schema: materialIdParamSchema, property: "params" },
+    { schema: updateMaterialBodySchema, property: "body" },
+  ]),
+  MaterialController.updateMaterialById
 );
 
 /**

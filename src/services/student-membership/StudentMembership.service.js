@@ -42,6 +42,41 @@ const validateSelectedOptions = async (payload) => {
   }
 };
 
+// The membership row stores slugs (e.g. "BACHELORS", "it", "esewa"), but the
+// invoice and approval email should show the admin-authored labels. Resolve
+// them here and fall back to the slug when an option has since been removed.
+const resolveInvoiceMeta = async (membership) => {
+  const slugs = [
+    membership.membership_type,
+    membership.career_field,
+    membership.payment_method,
+  ].filter(Boolean);
+
+  if (!slugs.length) return { labels: {} };
+
+  const options = await MembershipOption.findAll({
+    where: { slug: { [Op.in]: slugs } },
+    attributes: ["slug", "label", "type", "metadata"],
+  });
+
+  const labels = {};
+  let levelFee = null;
+
+  options.forEach((option) => {
+    labels[option.slug] = option.label;
+
+    if (option.type === "LEVEL" && option.slug === membership.membership_type) {
+      try {
+        levelFee = JSON.parse(option.metadata || "{}").fee || null;
+      } catch {
+        levelFee = null;
+      }
+    }
+  });
+
+  return { labels, levelFee };
+};
+
 // Ambiguous glyphs (0/O, 1/I) are dropped so a reference read aloud over the
 // phone by a member paying at a bank counter can be transcribed correctly.
 const REFERENCE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -155,7 +190,17 @@ class StudentMembershipService {
   async applyForMembershipAsGuest(payload) {
     await validateSelectedOptions(payload);
 
+    // If the guest already has an account, link the application to it now so an
+    // approved membership immediately unlocks member-only materials after login.
+    const existingUser = payload.student_email
+      ? await UserModel.findOne({
+          where: { email: payload.student_email },
+          attributes: ["id"],
+        })
+      : null;
+
     const membership = await StudentMembership.create({
+      student_id: existingUser?.id || null,
       reference_id: await resolveReferenceId(payload.reference_id),
       student_name: payload.student_name,
       student_email: payload.student_email,
@@ -348,6 +393,17 @@ class StudentMembershipService {
     membership.status = status;
 
     if (status === "APPROVED") {
+      // Guest applications are not tied to an account at submission time. Link
+      // them on approval when possible so the verified member can download
+      // premium materials right away.
+      if (!membership.student_id && membership.student_email) {
+        const linkedStudent = await UserModel.findOne({
+          where: { email: membership.student_email },
+          attributes: ["id"],
+        });
+        if (linkedStudent) membership.student_id = linkedStudent.id;
+      }
+
       if (startDate) {
         membership.start_date = new Date(startDate);
       }
@@ -366,11 +422,23 @@ class StudentMembershipService {
     await membership.save();
 
     // This transition means the admin matched the member's offline payment
-    // against their reference, so notify them. Mail failures must not undo a
-    // verified payment — log and move on.
+    // against their reference, so notify them and attach the PDF invoice.
+    // Mail failures must not undo a verified payment — log and move on.
     if (status === "APPROVED" && !wasApproved) {
+      let meta = {};
       try {
-        await sendMembershipApprovedEmail(membership);
+        meta = await resolveInvoiceMeta(membership);
+      } catch (metaError) {
+        // A label lookup failure should never block the confirmation email;
+        // the email/invoice fall back to the stored slugs.
+        console.warn(
+          `[MembershipMail] Could not resolve labels for ${membership.reference_id}:`,
+          metaError.message
+        );
+      }
+
+      try {
+        await sendMembershipApprovedEmail(membership, meta);
       } catch (mailError) {
         console.error(
           `[MembershipMail] Approval email failed for ${membership.reference_id}:`,

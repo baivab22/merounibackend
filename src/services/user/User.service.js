@@ -3,6 +3,7 @@ import { Op, Sequelize } from "sequelize";
 import { Parser } from "json2csv";
 
 import UserModel from "../../models/users/User.model.js";
+import StudentMembership from "../../models/student-membership/StudentMembership.model.js";
 import { roleHelper } from "../../utils/RoleHelper.js";
 
 class UserService {
@@ -109,7 +110,27 @@ class UserService {
       throw error;
     }
 
-    return user;
+    // A member is anyone who currently holds an APPROVED membership. The profile
+    // uses this to render the verified badge, and the materials library uses the
+    // same rule to unlock premium downloads.
+    const membership = await StudentMembership.findOne({
+      where: { student_id: userId, status: "APPROVED" },
+      attributes: ["id", "membership_type", "start_date", "end_date"],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const profile = user.get({ plain: true });
+    profile.isMember = Boolean(membership);
+    profile.membership = membership
+      ? {
+          id: membership.id,
+          membership_type: membership.membership_type,
+          start_date: membership.start_date,
+          end_date: membership.end_date,
+        }
+      : null;
+
+    return profile;
   }
 
   async exportUsers(query = {}) {

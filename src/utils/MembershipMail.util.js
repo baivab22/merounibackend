@@ -1,4 +1,8 @@
 import { sendMail } from "./Mail.util.js";
+import {
+  buildMembershipInvoicePdf,
+  getMembershipInvoiceNumber,
+} from "./MembershipInvoice.util.js";
 
 // Members' names, institutions and training titles are free text that lands in
 // an HTML email, so every interpolated value has to be escaped.
@@ -44,11 +48,24 @@ const parseTrainings = (raw) => {
   }
 };
 
-const buildEmailHtml = ({ memberName, referenceId, levelLabel, fieldLabel, trainings, startDate, endDate }) => {
+const buildEmailHtml = ({
+  memberName,
+  referenceId,
+  levelLabel,
+  fieldLabel,
+  paymentLabel,
+  invoiceNumber,
+  invoiceAttached,
+  trainings,
+  startDate,
+  endDate,
+}) => {
   const details = [
     ["Reference", referenceId, true],
+    invoiceNumber ? ["Invoice", invoiceNumber] : null,
     ["Membership level", levelLabel],
     ["Career field", fieldLabel],
+    paymentLabel ? ["Payment method", paymentLabel] : null,
     startDate ? ["Valid from", startDate] : null,
     endDate ? ["Valid until", endDate] : null,
   ].filter(Boolean);
@@ -73,6 +90,16 @@ const buildEmailHtml = ({ memberName, referenceId, levelLabel, fieldLabel, train
       </div>`
     : "";
 
+  const invoiceBlock = invoiceAttached
+    ? `<div style="margin:24px 0 0;padding:14px 16px;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:12px;">
+        <p style="margin:0;color:#15803d;font-size:14px;line-height:1.6;">
+          <strong>Your PDF invoice is attached</strong>${
+            invoiceNumber ? ` (${escapeHtml(invoiceNumber)})` : ""
+          } to this email. Keep it for your records.
+        </p>
+      </div>`
+    : "";
+
   return `<div style="margin:0;padding:24px 0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
       <div style="padding:28px 32px 8px;">
@@ -88,6 +115,7 @@ const buildEmailHtml = ({ memberName, referenceId, levelLabel, fieldLabel, train
           ${detailRows}
         </table>
         ${trainingBlock}
+        ${invoiceBlock}
         <p style="margin:24px 0 0;color:#475569;font-size:14px;line-height:1.65;">
           Keep your reference <strong style="color:#0f172a;">${escapeHtml(referenceId)}</strong> handy — quote it in any future
           correspondence about this membership.
@@ -111,6 +139,9 @@ const buildEmailText = ({
   referenceId,
   levelLabel,
   fieldLabel,
+  paymentLabel,
+  invoiceNumber,
+  invoiceAttached,
   trainings,
   startDate,
   endDate,
@@ -122,9 +153,12 @@ const buildEmailText = ({
     `We have received and verified your membership payment. Your membership is now active.`,
     ``,
     `Reference: ${referenceId}`,
-    `Membership level: ${levelLabel}`,
-    `Career field: ${fieldLabel}`,
   ];
+
+  if (invoiceNumber) lines.push(`Invoice: ${invoiceNumber}`);
+  lines.push(`Membership level: ${levelLabel}`);
+  lines.push(`Career field: ${fieldLabel}`);
+  if (paymentLabel) lines.push(`Payment method: ${paymentLabel}`);
 
   if (startDate) lines.push(`Valid from: ${startDate}`);
   if (endDate) lines.push(`Valid until: ${endDate}`);
@@ -132,6 +166,13 @@ const buildEmailText = ({
   if (trainings.length) {
     lines.push(``, `Your trainings:`);
     trainings.forEach((t) => lines.push(`  - ${t}`));
+  }
+
+  if (invoiceAttached) {
+    lines.push(
+      ``,
+      `Your PDF invoice is attached to this email. Keep it for your records.`
+    );
   }
 
   lines.push(
@@ -149,7 +190,7 @@ const buildEmailText = ({
 const resolveRecipient = (membership) =>
   membership.student_email || membership.student?.email || null;
 
-export const sendMembershipApprovedEmail = async (membership) => {
+export const sendMembershipApprovedEmail = async (membership, meta = {}) => {
   const recipient = resolveRecipient(membership);
   if (!recipient) {
     console.warn(
@@ -158,20 +199,55 @@ export const sendMembershipApprovedEmail = async (membership) => {
     return { skipped: true };
   }
 
+  const labels = meta.labels || {};
+
   const context = {
     memberName: membership.student_name || "there",
     referenceId: membership.reference_id || `#${membership.id}`,
-    levelLabel: LEVEL_LABELS[membership.membership_type] || membership.membership_type,
-    fieldLabel: FIELD_LABELS[membership.career_field] || membership.career_field || "—",
+    levelLabel:
+      labels[membership.membership_type] ||
+      LEVEL_LABELS[membership.membership_type] ||
+      membership.membership_type,
+    fieldLabel:
+      labels[membership.career_field] ||
+      FIELD_LABELS[membership.career_field] ||
+      membership.career_field ||
+      "—",
+    paymentLabel: membership.payment_method
+      ? labels[membership.payment_method] || membership.payment_method
+      : null,
+    invoiceNumber: getMembershipInvoiceNumber(membership),
     trainings: parseTrainings(membership.selected_trainings),
     startDate: formatDate(membership.start_date),
     endDate: formatDate(membership.end_date),
   };
 
+  // The invoice is a bonus on top of the confirmation email, so a rendering
+  // failure must never stop the member from being notified.
+  let attachments = [];
+  try {
+    const invoicePdf = await buildMembershipInvoicePdf(membership, meta);
+    attachments = [
+      {
+        filename: `${context.invoiceNumber}.pdf`,
+        content: invoicePdf,
+        contentType: "application/pdf",
+      },
+    ];
+    context.invoiceAttached = true;
+  } catch (invoiceError) {
+    context.invoiceAttached = false;
+    console.error(
+      `[MembershipMail] Invoice generation failed for ${context.referenceId}:`,
+      invoiceError.message
+    );
+  }
+
   return sendMail(
     recipient,
     `Your MeroUni membership is active — ${context.referenceId}`,
     buildEmailText(context),
-    buildEmailHtml(context)
+    buildEmailHtml(context),
+    attachments
   );
 };
