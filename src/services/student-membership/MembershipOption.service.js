@@ -30,6 +30,86 @@ const serializeMetadata = (metadata) => {
   return JSON.stringify(metadata);
 };
 
+const PAYMENT_METADATA_TEXT_FIELDS = [
+  "qr_code_url",
+  "account_name",
+  "account_number",
+  "bank_name",
+  "branch_name",
+  "account_instructions",
+  "account_details",
+];
+
+// Older payment methods may have been saved with slightly different keys.
+// Normalise those to the canonical shape the member form understands.
+const PAYMENT_METADATA_ALIASES = {
+  qr_code_url: ["qr_code", "qr_url"],
+  account_name: ["account_holder_name", "account_holder"],
+  account_number: ["account_no", "account"],
+  bank_name: ["bank", "wallet_name"],
+  account_details: ["bank_details"],
+};
+
+// Payment methods can be created through the dashboard or directly through the
+// API. Keep the stored shape predictable: trim values and derive the display
+// mode when the caller did not provide a valid one, so the member form always
+// knows whether to render a QR code, bank details, or both.
+const normalizePaymentMetadata = (metadata) => {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return metadata;
+  }
+
+  const next = { ...metadata };
+
+  Object.entries(PAYMENT_METADATA_ALIASES).forEach(([canonical, aliases]) => {
+    if (next[canonical]) return;
+    const alias = aliases.find((key) => next[key]);
+    if (alias) next[canonical] = next[alias];
+  });
+
+  PAYMENT_METADATA_TEXT_FIELDS.forEach((key) => {
+    if (typeof next[key] === "string") {
+      const trimmed = next[key].trim();
+      if (trimmed) next[key] = trimmed;
+      else delete next[key];
+    }
+  });
+
+  const hasQr = Boolean(next.qr_code_url);
+  const hasAccount = Boolean(
+    next.account_name ||
+      next.account_number ||
+      next.bank_name ||
+      next.branch_name ||
+      next.account_instructions ||
+      next.account_details
+  );
+
+  if (!["QR", "ACCOUNT", "BOTH"].includes(next.payment_mode)) {
+    next.payment_mode = hasQr && hasAccount
+      ? "BOTH"
+      : hasQr
+        ? "QR"
+        : hasAccount
+          ? "ACCOUNT"
+          : "BOTH";
+  }
+
+  return next;
+};
+
+const prepareMetadata = (type, metadata) => {
+  if (metadata === undefined) return undefined;
+  if (type !== "PAYMENT_METHOD") return metadata;
+
+  const parsed = typeof metadata === "string" ? parseMetadata(metadata) : metadata;
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return metadata;
+  }
+
+  return normalizePaymentMetadata(parsed);
+};
+
 class MembershipOptionService {
   async getGroupedOptions({ admin = false } = {}) {
     const where = admin ? {} : { is_active: true };
@@ -89,7 +169,9 @@ class MembershipOptionService {
       slug: payload.slug,
       label: payload.label,
       description: payload.description || null,
-      metadata: serializeMetadata(payload.metadata),
+      metadata: serializeMetadata(
+        prepareMetadata(payload.type, payload.metadata)
+      ),
       sort_order: payload.sort_order ?? 0,
       is_active: payload.is_active ?? true,
     });
@@ -112,7 +194,9 @@ class MembershipOptionService {
     );
 
     if (payload.metadata !== undefined) {
-      option.metadata = serializeMetadata(payload.metadata);
+      option.metadata = serializeMetadata(
+        prepareMetadata(payload.type ?? option.type, payload.metadata)
+      );
     }
 
     await option.save();

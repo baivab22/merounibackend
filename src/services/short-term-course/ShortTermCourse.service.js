@@ -1,8 +1,47 @@
 import { Op } from "sequelize";
 import ShortTermCourse from "../../models/short-term-courses/ShortTermCourse.model.js";
 import { generateUniqueSlug } from "../../utils/SlugHelper.js";
+import StudentMembership from "../../models/student-membership/StudentMembership.model.js";
+
+const toBoolean = (value, fallback = false) => {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  return ["true", "1", "yes", "on"].includes(String(value).trim().toLowerCase());
+};
 
 class ShortTermCourseService {
+  async _resolveAccess({ userId = null, isStaff = false } = {}) {
+    if (isStaff) {
+      return { userId, hasPremiumAccess: true };
+    }
+
+    if (!userId) {
+      return { userId: null, hasPremiumAccess: false };
+    }
+
+    const membership = await StudentMembership.findOne({
+      where: { student_id: userId, status: "APPROVED" },
+      attributes: ["id"],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return { userId, hasPremiumAccess: Boolean(membership) };
+  }
+
+  _formatCourse(course, access = {}) {
+    const plain = course instanceof ShortTermCourse ? course.get({ plain: true }) : course;
+    const is_premium = Boolean(plain.is_premium);
+    const canAccess = !is_premium || Boolean(access.hasPremiumAccess);
+
+    return {
+      ...plain,
+      is_premium,
+      is_locked: is_premium && !canAccess,
+      has_access: canAccess,
+    };
+  }
+
   async listCourses(query = {}) {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 10;
@@ -35,6 +74,11 @@ class ShortTermCourseService {
       whereCondition.price = price;
     }
 
+    const access = await this._resolveAccess({
+      userId: query.userId,
+      isStaff: query.isStaff,
+    });
+
     const { count: totalCount, rows: items } =
       await ShortTermCourse.findAndCountAll({
         where: whereCondition,
@@ -44,7 +88,7 @@ class ShortTermCourseService {
       });
 
     return {
-      items,
+      items: items.map((item) => this._formatCourse(item, access)),
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalCount / limit),
@@ -54,7 +98,8 @@ class ShortTermCourseService {
     };
   }
 
-  async getCourseById(id) {
+  async getCourseById(id, options = {}) {
+    const access = await this._resolveAccess(options);
     const course = await ShortTermCourse.findByPk(id);
 
     if (!course) {
@@ -63,10 +108,16 @@ class ShortTermCourseService {
       throw error;
     }
 
-    return course;
+    const formatted = this._formatCourse(course, access);
+    if (formatted.is_premium && !access.hasPremiumAccess) {
+      return formatted;
+    }
+
+    return formatted;
   }
 
-  async getCourseBySlug(slug) {
+  async getCourseBySlug(slug, options = {}) {
+    const access = await this._resolveAccess(options);
     const course = await ShortTermCourse.findOne({
       where: { slug },
     });
@@ -77,7 +128,12 @@ class ShortTermCourseService {
       throw error;
     }
 
-    return course;
+    const formatted = this._formatCourse(course, access);
+    if (formatted.is_premium && !access.hasPremiumAccess) {
+      return formatted;
+    }
+
+    return formatted;
   }
 
   async createCourse(payload) {
@@ -89,6 +145,7 @@ class ShortTermCourseService {
       title,
       slug,
       meta_description: payload.meta_description,
+      is_premium: toBoolean(rest.is_premium, false),
     });
   }
 
@@ -116,6 +173,10 @@ class ShortTermCourseService {
 
     if (payload.meta_description !== undefined) {
       updateData.meta_description = payload.meta_description;
+    }
+
+    if (rest.is_premium !== undefined) {
+      updateData.is_premium = toBoolean(rest.is_premium, false);
     }
 
     await course.update(updateData);

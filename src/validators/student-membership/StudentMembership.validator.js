@@ -84,10 +84,12 @@ export const applyForMembershipSchema = yup
       .trim()
       .max(80, "Membership type is too long")
       .required("Membership type is required"),
-    payment_proof_url: nullableString().max(
-      2048,
-      "Payment proof URL is too long"
-    ),
+    payment_proof_url: yup
+      .string()
+      .trim()
+      .max(2048, "Payment proof URL is too long")
+      .required("Payment proof is required")
+      .url("Payment proof must be a valid URL"),
     remarks: nullableString().max(2000, "Remarks is too long"),
   })
   .concat(membershipFieldsSchema)
@@ -111,10 +113,12 @@ export const guestApplyForMembershipSchema = yup.object({
     .trim()
     .max(80, "Membership type is too long")
     .required("Membership type is required"),
-  payment_proof_url: nullableString().max(
-    2048,
-    "Payment proof URL is too long"
-  ),
+  payment_proof_url: yup
+    .string()
+    .trim()
+    .max(2048, "Payment proof URL is too long")
+    .required("Payment proof is required")
+    .url("Payment proof must be a valid URL"),
   remarks: nullableString().max(2000, "Remarks is too long"),
 }).concat(membershipFieldsSchema);
 

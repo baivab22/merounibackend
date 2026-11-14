@@ -59,6 +59,9 @@ const buildEmailHtml = ({
   trainings,
   startDate,
   endDate,
+  heading,
+  intro,
+  invoiceTone = "success",
 }) => {
   const details = [
     ["Reference", referenceId, true],
@@ -90,9 +93,14 @@ const buildEmailHtml = ({
       </div>`
     : "";
 
+  const invoicePalette =
+    invoiceTone === "pending"
+      ? { bg: "#fffbeb", border: "#fde68a", color: "#b45309" }
+      : { bg: "#ecfdf5", border: "#bbf7d0", color: "#15803d" };
+
   const invoiceBlock = invoiceAttached
-    ? `<div style="margin:24px 0 0;padding:14px 16px;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:12px;">
-        <p style="margin:0;color:#15803d;font-size:14px;line-height:1.6;">
+    ? `<div style="margin:24px 0 0;padding:14px 16px;background:${invoicePalette.bg};border:1px solid ${invoicePalette.border};border-radius:12px;">
+        <p style="margin:0;color:${invoicePalette.color};font-size:14px;line-height:1.6;">
           <strong>Your PDF invoice is attached</strong>${
             invoiceNumber ? ` (${escapeHtml(invoiceNumber)})` : ""
           } to this email. Keep it for your records.
@@ -104,10 +112,9 @@ const buildEmailHtml = ({
     <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
       <div style="padding:28px 32px 8px;">
         <p style="margin:0 0 4px;color:#387cae;font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">MeroUni Membership</p>
-        <h1 style="margin:0 0 12px;color:#0f172a;font-size:24px;line-height:1.25;">Your payment is verified</h1>
+        <h1 style="margin:0 0 12px;color:#0f172a;font-size:24px;line-height:1.25;">${escapeHtml(heading)}</h1>
         <p style="margin:0;color:#475569;font-size:15px;line-height:1.65;">
-          Hi ${escapeHtml(memberName)}, we have received and verified your membership payment.
-          Your membership is now active.
+          Hi ${escapeHtml(memberName)}, ${escapeHtml(intro)}
         </p>
       </div>
       <div style="padding:20px 32px 28px;">
@@ -145,12 +152,14 @@ const buildEmailText = ({
   trainings,
   startDate,
   endDate,
+  heading,
+  intro,
 }) => {
   const lines = [
-    `Your MeroUni membership payment is verified`,
+    heading,
     ``,
     `Hi ${memberName},`,
-    `We have received and verified your membership payment. Your membership is now active.`,
+    intro,
     ``,
     `Reference: ${referenceId}`,
   ];
@@ -190,18 +199,10 @@ const buildEmailText = ({
 const resolveRecipient = (membership) =>
   membership.student_email || membership.student?.email || null;
 
-export const sendMembershipApprovedEmail = async (membership, meta = {}) => {
-  const recipient = resolveRecipient(membership);
-  if (!recipient) {
-    console.warn(
-      `[MembershipMail] No email on membership ${membership.reference_id || membership.id} — approval email skipped`
-    );
-    return { skipped: true };
-  }
-
+const buildMailContext = (membership, meta = {}) => {
   const labels = meta.labels || {};
 
-  const context = {
+  return {
     memberName: membership.student_name || "there",
     referenceId: membership.reference_id || `#${membership.id}`,
     levelLabel:
@@ -221,12 +222,37 @@ export const sendMembershipApprovedEmail = async (membership, meta = {}) => {
     startDate: formatDate(membership.start_date),
     endDate: formatDate(membership.end_date),
   };
+};
 
-  // The invoice is a bonus on top of the confirmation email, so a rendering
-  // failure must never stop the member from being notified.
+// Shared by the "application received" receipt and the "payment verified"
+// confirmation. The PDF invoice is a bonus on top of the notification, so a
+// rendering failure must never stop the member from being emailed.
+const sendMembershipEmail = async (
+  membership,
+  meta = {},
+  { invoiceStatus, heading, intro, subject, invoiceTone = "success" } = {}
+) => {
+  const recipient = resolveRecipient(membership);
+  if (!recipient) {
+    console.warn(
+      `[MembershipMail] No email on membership ${membership.reference_id || membership.id} — email skipped`
+    );
+    return { skipped: true };
+  }
+
+  const context = {
+    ...buildMailContext(membership, meta),
+    heading,
+    intro,
+    invoiceTone,
+  };
+
   let attachments = [];
   try {
-    const invoicePdf = await buildMembershipInvoicePdf(membership, meta);
+    const invoicePdf = await buildMembershipInvoicePdf(membership, {
+      ...meta,
+      status: invoiceStatus,
+    });
     attachments = [
       {
         filename: `${context.invoiceNumber}.pdf`,
@@ -245,9 +271,33 @@ export const sendMembershipApprovedEmail = async (membership, meta = {}) => {
 
   return sendMail(
     recipient,
-    `Your MeroUni membership is active — ${context.referenceId}`,
+    subject(context),
     buildEmailText(context),
     buildEmailHtml(context),
     attachments
   );
 };
+
+// Sent when the member submits their application and payment proof. They get
+// an invoice immediately so the payment is on record while an admin verifies it.
+export const sendMembershipApplicationEmail = (membership, meta = {}) =>
+  sendMembershipEmail(membership, meta, {
+    invoiceStatus: "PENDING",
+    heading: "Your application is in",
+    intro:
+      "we have received your MeroUni membership application and payment proof. Our team will verify the payment and activate your membership shortly. Your invoice is attached for your records.",
+    subject: (ctx) =>
+      `MeroUni membership application received — ${ctx.referenceId}`,
+    invoiceTone: "pending",
+  });
+
+// Sent when an admin matches the member's payment and approves the membership.
+export const sendMembershipApprovedEmail = (membership, meta = {}) =>
+  sendMembershipEmail(membership, meta, {
+    invoiceStatus: "APPROVED",
+    heading: "Your payment is verified",
+    intro:
+      "we have received and verified your membership payment. Your membership is now active.",
+    subject: (ctx) => `Your MeroUni membership is active — ${ctx.referenceId}`,
+    invoiceTone: "success",
+  });

@@ -23,6 +23,7 @@ export const createShortTermCourseSchema = yup.object({
   seats_available: yup.number().integer().min(0).optional(),
   slug: yup.string().trim().optional(),
   meta_description: yup.string().trim().optional(),
+  is_premium: yup.boolean().optional(),
 });
 
 // Update ShortTermCourse schema
@@ -45,4 +46,5 @@ export const updateShortTermCourseSchema = yup.object({
   seats_available: yup.number().integer().min(0).optional(),
   slug: yup.string().trim().optional(),
   meta_description: yup.string().trim().optional(),
+  is_premium: yup.boolean().optional(),
 });

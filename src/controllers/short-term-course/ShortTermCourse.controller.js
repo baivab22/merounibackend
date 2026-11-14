@@ -2,11 +2,26 @@ import ShortTermCourseService from "../../services/short-term-course/ShortTermCo
 
 const shortTermCourseService = new ShortTermCourseService();
 
+const resolveViewer = (req) => {
+    const userId = req.user?.id || null;
+    let role = req.user?.role ?? req.user?.roles ?? {};
+    if (typeof role === "string") {
+        try {
+            role = JSON.parse(role);
+        } catch {
+            role = {};
+        }
+    }
+    const isStaff = Boolean(role?.admin || role?.editor);
+    return { userId, isStaff };
+};
+
 class ShortTermCourseController {
     static async listCourses(req, res) {
         try {
+            const access = resolveViewer(req);
             const { items, pagination } = await shortTermCourseService.listCourses(
-                req.query
+                { ...req.query, ...access }
             );
             return res.status(200).json({
                 message: "Short Term Courses retrieved",
@@ -23,8 +38,10 @@ class ShortTermCourseController {
 
     static async getCourseById(req, res) {
         try {
+            const access = resolveViewer(req);
             const course = await shortTermCourseService.getCourseById(
-                req.params.id
+                req.params.id,
+                access
             );
             return res.status(200).json(course);
         } catch (error) {
@@ -35,8 +52,10 @@ class ShortTermCourseController {
 
     static async getCourseBySlug(req, res) {
         try {
+            const access = resolveViewer(req);
             const course = await shortTermCourseService.getCourseBySlug(
-                req.params.slug
+                req.params.slug,
+                access
             );
             return res.status(200).json(course);
         } catch (error) {

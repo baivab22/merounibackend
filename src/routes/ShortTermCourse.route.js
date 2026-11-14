@@ -1,6 +1,7 @@
 import express from "express";
 import ShortTermCourseController from "../controllers/short-term-course/ShortTermCourse.controller.js";
 import { requestValidator } from "../middlewares/RequestValidator.middleware.js";
+import { optionalAuthenticateUser } from "../middlewares/Auth.middleware.js";
 import {
     createShortTermCourseSchema,
     updateShortTermCourseSchema
@@ -43,7 +44,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get("/", ShortTermCourseController.listCourses);
+router.get("/", optionalAuthenticateUser, ShortTermCourseController.listCourses);
 
 /**
  * @swagger
@@ -65,7 +66,7 @@ router.get("/", ShortTermCourseController.listCourses);
  *       500:
  *         description: Server error
  */
-router.get("/:id", ShortTermCourseController.getCourseById);
+router.get("/:id", optionalAuthenticateUser, ShortTermCourseController.getCourseById);
 
 /**
  * @swagger
@@ -87,7 +88,7 @@ router.get("/:id", ShortTermCourseController.getCourseById);
  *       500:
  *         description: Server error
  */
-router.get("/slug/:slug", ShortTermCourseController.getCourseBySlug);
+router.get("/slug/:slug", optionalAuthenticateUser, ShortTermCourseController.getCourseBySlug);
 
 /**
  * @swagger

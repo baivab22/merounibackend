@@ -5,7 +5,7 @@ import {
   MEMBERSHIP_STATUSES,
   REFERENCE_PATTERN,
 } from "../../validators/student-membership/StudentMembership.validator.js";
-import { sendMembershipApprovedEmail } from "../../utils/MembershipMail.util.js";
+import { sendMembershipApprovedEmail, sendMembershipApplicationEmail } from "../../utils/MembershipMail.util.js";
 import crypto from "crypto";
 import { Op } from "sequelize";
 
@@ -75,6 +75,22 @@ const resolveInvoiceMeta = async (membership) => {
   });
 
   return { labels, levelFee };
+};
+
+// Sends the application receipt with a PDF invoice as soon as the member
+// submits the form. The payment is not verified yet, so the invoice is marked
+// pending and the admin approval email later replaces it with the verified one.
+// Notification failures must never fail the application itself.
+const notifyApplicationReceived = async (membership) => {
+  try {
+    const meta = await resolveInvoiceMeta(membership);
+    await sendMembershipApplicationEmail(membership, meta);
+  } catch (mailError) {
+    console.error(
+      `[MembershipMail] Application receipt failed for ${membership.reference_id}:`,
+      mailError.message
+    );
+  }
 };
 
 // Ambiguous glyphs (0/O, 1/I) are dropped so a reference read aloud over the
@@ -184,6 +200,8 @@ class StudentMembershipService {
       remarks: payload.remarks || null,
     });
 
+    await notifyApplicationReceived(membership);
+
     return membership;
   }
 
@@ -215,6 +233,8 @@ class StudentMembershipService {
       payment_proof_url: payload.payment_proof_url || null,
       remarks: payload.remarks || null,
     });
+
+    await notifyApplicationReceived(membership);
 
     return membership;
   }

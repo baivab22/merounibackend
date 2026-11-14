@@ -86,6 +86,11 @@ ShortTermCourse.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    is_premium: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     sequelize,

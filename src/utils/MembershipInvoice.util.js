@@ -12,6 +12,8 @@ const SOFT = "#f8fafc";
 const LINE = "#e2e8f0";
 const GREEN = "#15803d";
 const GREEN_BG = "#ecfdf5";
+const AMBER = "#b45309";
+const AMBER_BG = "#fffbeb";
 
 const PAGE_MARGIN = 50;
 
@@ -80,8 +82,25 @@ export const getMembershipInvoiceNumber = (membership = {}) => {
   return `MU-INV-${year}-${id}`;
 };
 
+const STATUS_LABELS = {
+  PENDING: "Payment pending verification",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  EXPIRED: "Expired",
+};
+
 const buildInvoiceContext = (membership = {}, meta = {}) => {
   const labels = meta.labels || {};
+
+  // An invoice is issued as soon as the member submits their application so
+  // they have a record of the payment they made. It is re-issued with a
+  // "verified" badge once an admin confirms the payment. `meta.status` lets
+  // the caller override the row status when the PDF is generated before the
+  // final database state is written.
+  const status = String(meta.status || membership.status || "APPROVED")
+    .trim()
+    .toUpperCase();
+  const isVerified = status === "APPROVED";
 
   const levelSlug = membership.membership_type || "";
   const levelLabel =
@@ -114,6 +133,9 @@ const buildInvoiceContext = (membership = {}, meta = {}) => {
   return {
     invoiceNumber: getMembershipInvoiceNumber(membership),
     issuedDate,
+    status,
+    statusLabel: STATUS_LABELS[status] || status,
+    isVerified,
     referenceId: membership.reference_id || `#${membership.id}`,
     applicationId: membership.id != null ? String(membership.id) : "-",
     memberName: membership.student_name || membership.student?.firstName || "MeroUni Member",
@@ -170,9 +192,9 @@ const renderInvoice = (doc, ctx) => {
   doc.font("Helvetica").fontSize(9).fillColor(MUTED);
   doc.text("merouni.com  |  Student Membership", left, headerY + 28);
 
-  drawPill(doc, left, headerY + 46, "PAYMENT VERIFIED", {
-    bg: GREEN_BG,
-    color: GREEN,
+  drawPill(doc, left, headerY + 46, ctx.isVerified ? "PAYMENT VERIFIED" : "PAYMENT PENDING", {
+    bg: ctx.isVerified ? GREEN_BG : AMBER_BG,
+    color: ctx.isVerified ? GREEN : AMBER,
   });
 
   doc.font("Helvetica-Bold").fontSize(24).fillColor(INK);
@@ -226,7 +248,7 @@ const renderInvoice = (doc, ctx) => {
     [`Payment method: ${ctx.paymentLabel}`],
     [`Payment reference: ${ctx.referenceId}`],
     [`Application ID: ${ctx.applicationId}`],
-    ["Status: APPROVED"],
+    [`Status: ${ctx.statusLabel}`],
   ]);
 
   y = Math.max(leftEnd, rightEnd) + 16;
@@ -338,15 +360,20 @@ const renderInvoice = (doc, ctx) => {
   });
   y += 24;
 
-  // Amount paid strip.
+  // Amount strip. Pending applications show the amount due; verified payments
+  // show the amount that has been received in full.
   const paidHeight = 30;
-  doc.roundedRect(left + contentWidth - 260, y, 260, paidHeight, 8).fill(GREEN_BG);
-  doc.font("Helvetica-Bold").fontSize(10).fillColor(GREEN);
-  doc.text("Amount paid", left + contentWidth - 248, y + 10);
+  const amountAccent = ctx.isVerified ? GREEN : AMBER;
+  const amountAccentBg = ctx.isVerified ? GREEN_BG : AMBER_BG;
+  doc
+    .roundedRect(left + contentWidth - 260, y, 260, paidHeight, 8)
+    .fill(amountAccentBg);
+  doc.font("Helvetica-Bold").fontSize(10).fillColor(amountAccent);
+  doc.text(ctx.isVerified ? "Amount paid" : "Amount due", left + contentWidth - 248, y + 10);
   doc
     .font("Helvetica-Bold")
     .fontSize(11)
-    .fillColor(GREEN)
+    .fillColor(amountAccent)
     .text(sanitize(ctx.fee), left, y + 10, {
       width: contentWidth - 12,
       align: "right",
@@ -355,10 +382,17 @@ const renderInvoice = (doc, ctx) => {
   y += paidHeight + 10;
 
   doc.font("Helvetica").fontSize(9.5).fillColor(MUTED);
-  doc.text("Balance due: 0", left, y, {
-    width: contentWidth,
-    align: "right",
-  });
+  doc.text(
+    ctx.isVerified
+      ? "Balance due: 0"
+      : `Balance due: ${sanitize(ctx.fee)} (awaiting payment verification)`,
+    left,
+    y,
+    {
+      width: contentWidth,
+      align: "right",
+    }
+  );
 
   y += 22;
 
@@ -390,7 +424,9 @@ const renderInvoice = (doc, ctx) => {
   hr(doc, left, footerY, right);
   doc.font("Helvetica").fontSize(9).fillColor(MUTED);
   doc.text(
-    "Thank you for joining MeroUni. This invoice confirms your membership payment has been verified and your membership is active.",
+    ctx.isVerified
+      ? "Thank you for joining MeroUni. This invoice confirms your membership payment has been verified and your membership is active."
+      : "Thank you for joining MeroUni. This invoice records the payment you submitted. Your membership will be activated once our team verifies the payment.",
     left,
     footerY + 12,
     { width: contentWidth }
