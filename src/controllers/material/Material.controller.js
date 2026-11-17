@@ -56,7 +56,9 @@ class MaterialController {
   static async listMaterialsByTopic(req, res) {
     try {
       const access = resolveViewer(req);
-      const materials = await materialService.listByTopic(req.params.topicId, access);
+      const options = { ...access };
+      if (req.query.is_premium !== undefined) options.is_premium = req.query.is_premium;
+      const materials = await materialService.listByTopic(req.params.topicId, options);
       return res.status(200).json({
         message: "Topic materials retrieved successfully",
         data: materials,

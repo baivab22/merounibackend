@@ -18,6 +18,15 @@ const toBoolean = (value, fallback = false) => {
   return ["true", "1", "yes", "on"].includes(String(value).trim().toLowerCase());
 };
 
+// Free/Premium is a property of the material itself, not of its chapter/file or
+// of the category it belongs to. Every materials query applies the same filter
+// to the `materials.is_premium` column so all endpoints behave identically.
+const applyMaterialPremiumFilter = (where, value) => {
+  if (value === undefined || value === null || value === "") return where;
+  where.is_premium = toBoolean(value, false);
+  return where;
+};
+
 class MaterialService {
   // Resolves what the caller may download. Staff (admins/editors) always keep
   // full access so they can manage the library; students unlock premium files
@@ -72,6 +81,7 @@ class MaterialService {
     const searchQuery = query.q || query.search || "";
     const access = await this._resolveAccess({ userId: query.userId, isStaff: query.isStaff });
     const materialWhere = searchQuery ? { title: { [Op.like]: `%${searchQuery}%` } } : {};
+    applyMaterialPremiumFilter(materialWhere, query.is_premium);
 
     const materials = await Material.findAll({
       where: materialWhere,
@@ -156,6 +166,7 @@ class MaterialService {
     if (searchQuery) whereCondition.title = { [Op.like]: `%${searchQuery}%` };
     if (categoryId === "unlisted") whereCondition.category_id = null;
     else if (categoryId) whereCondition.category_id = categoryId;
+    applyMaterialPremiumFilter(whereCondition, query.is_premium);
 
     const access = await this._resolveAccess({ userId: query.userId, isStaff: query.isStaff });
 
@@ -183,8 +194,10 @@ class MaterialService {
   }
 
   async listByTopic(topicId, options = {}) {
+    const where = { category_id: topicId };
+    applyMaterialPremiumFilter(where, options.is_premium);
     const materials = await Material.findAll({
-      where: { category_id: topicId },
+      where,
       include: [
         { 
           model: MaterialHeart, 

@@ -24,6 +24,18 @@ export const materialCategoryQuerySchema = yup.object({
     .transform((value) => (value === "" ? null : value))
     .optional(),
   search: yup.string().optional(),
+  // Kept in the schema so requestValidator's stripUnknown does not remove the
+  // Free/Premium filter before it reaches the material service.
+  is_premium: yup
+    .boolean()
+    .transform((value, originalValue) => {
+      if (typeof originalValue === "boolean") return originalValue;
+      if (originalValue === undefined || originalValue === null || originalValue === "") {
+        return undefined;
+      }
+      return ["true", "1", "yes", "on"].includes(String(originalValue).trim().toLowerCase());
+    })
+    .optional(),
   category_id: yup
     .mixed()
     .nullable()
