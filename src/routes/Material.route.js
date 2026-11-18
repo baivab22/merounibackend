@@ -121,6 +121,33 @@ route.get(
  *       200:
  *         description: Material details
  */
+/**
+ * @swagger
+ * /materials/{id}/file:
+ *   get:
+ *     summary: Open/download a material (403 for locked premium materials)
+ *     tags: [Materials]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       302:
+ *         description: Redirect to the material file
+ *       403:
+ *         description: Verified membership required
+ *       404:
+ *         description: Material or file not found
+ */
+route.get(
+  "/:id/file",
+  optionalAuthenticateUser,
+  requestValidator(materialIdParamSchema, "params"),
+  MaterialController.openMaterial
+);
+
 route.get(
   "/:id",
   optionalAuthenticateUser,

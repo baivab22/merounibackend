@@ -124,7 +124,7 @@ class MaterialService {
       }
     });
 
-    const tree = [];
+    let tree = [];
     Object.values(categoryMap).forEach((node) => {
       if (!node.parent_id) {
         tree.push(node);
@@ -137,6 +137,30 @@ class MaterialService {
         }
       }
     });
+
+    // Free/Premium is a filtered view. Drop classes (and their subjects) that
+    // have no materials for the selected tab, so e.g. a class with 0 premium
+    // materials is never listed under the Premium filter.
+    const isFilteredView =
+      query.is_premium !== undefined &&
+      query.is_premium !== null &&
+      query.is_premium !== "";
+
+    if (isFilteredView) {
+      const subtreeHasMaterials = (node) =>
+        (node.materials?.length || 0) > 0 ||
+        (node.subcategories || []).some(subtreeHasMaterials);
+
+      const pruneEmptyNodes = (nodes) =>
+        nodes
+          .map((node) => {
+            node.subcategories = pruneEmptyNodes(node.subcategories || []);
+            return node;
+          })
+          .filter(subtreeHasMaterials);
+
+      tree = pruneEmptyNodes(tree);
+    }
 
     const polishNode = (node) => {
       let totalHearts = node.hearts_count || 0;
@@ -217,6 +241,41 @@ class MaterialService {
     if (!material) throw Object.assign(new Error("Material not found"), { status: 404 });
     const access = await this._resolveAccess(options);
     return this._formatMaterial(material, access);
+  }
+
+  // Server-side gate used when a viewer actually tries to open/download a file.
+  // Hiding `file_url` from list responses only protects the UI; this method is
+  // the authoritative check and must be used by the endpoint that serves the
+  // file so anonymous/non-member requests are rejected even if a URL leaks.
+  async resolveFileAccess(id, options = {}) {
+    const material = await Material.findByPk(id, {
+      attributes: ["id", "title", "file_url", "is_premium"],
+    });
+
+    if (!material) {
+      throw Object.assign(new Error("Material not found"), { status: 404 });
+    }
+
+    const access = await this._resolveAccess(options);
+    const isPremium = Boolean(material.is_premium);
+    const canAccessFile = !isPremium || Boolean(access.hasPremiumAccess);
+
+    if (!canAccessFile) {
+      throw Object.assign(
+        new Error("This material is available to verified members only"),
+        { status: 403 }
+      );
+    }
+
+    if (!material.file_url) {
+      throw Object.assign(new Error("File not available"), { status: 404 });
+    }
+
+    return {
+      id: material.id,
+      title: material.title,
+      file_url: material.file_url,
+    };
   }
 
   async createMaterial(data) {

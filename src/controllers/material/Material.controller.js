@@ -87,6 +87,29 @@ class MaterialController {
     }
   }
 
+  // Open/download entry point. Every click goes through here so the membership
+  // check happens on the server at request time, not just in the browser.
+  static async openMaterial(req, res) {
+    try {
+      const access = resolveViewer(req);
+      const { file_url } = await materialService.resolveFileAccess(
+        req.params.id,
+        access
+      );
+
+      res.set("Cache-Control", "no-store");
+      return res.redirect(302, file_url);
+    } catch (error) {
+      const status = error.status || 500;
+      if (status === 403 || status === 404) {
+        res.set("Cache-Control", "no-store");
+        return res.status(status).json({ message: error.message });
+      }
+      console.error("Error opening material:", error);
+      return res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
+
   static async createMaterial(req, res) {
     try {
       const authorId = req.user?.id;

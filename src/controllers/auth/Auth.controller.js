@@ -229,11 +229,19 @@ class AuthController {
 
   static async logoutUser(req, res) {
     try {
-      res.clearCookie("token", {
+      // The login endpoint sets this cookie on the shared `.merouni.com` domain.
+      // A clear without the same domain only removes a host-only cookie and
+      // leaves the real session alive, so clear both variants.
+      const cookieOptions = {
         httpOnly: true,
         secure: NODE_ENV === "production",
-        sameSite: "lax",
-      });
+        sameSite: NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+      };
+      res.clearCookie("token", cookieOptions);
+      if (NODE_ENV === "production") {
+        res.clearCookie("token", { ...cookieOptions, domain: ".merouni.com" });
+      }
 
       res.setHeader("x-refresh-token", "");
 
